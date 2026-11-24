@@ -5,7 +5,7 @@
  * `app/api/leads/weekly/route.ts`. Pure: no KV, no mail.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "../booking/rules";
+import { TZ } from "@/lib/time-zone";
 import type { MasterEntry } from "./activity-log";
 import { balance, isSettled, usdTrim } from "./invoice";
 import type { Lead, LeadEvent } from "./leads";

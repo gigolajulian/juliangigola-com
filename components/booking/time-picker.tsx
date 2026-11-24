@@ -4,7 +4,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { clock, DAYS, fromIso, MONTHS, type StepsSkin } from "@/components/booking/time-picker-parts";
 import { usePicker, type CardCtx, type Props } from "@/components/booking/use-picker";
-import { BookSteps } from "@/components/booking/time-picker-steps";
+import { BookSteps, stepsCopy, useStepsLayout } from "@/components/booking/time-picker-steps";
 import { EditorialCard } from "@/components/booking/time-picker-editorial";
 import { JgLoad } from "@/components/splash/jg-load";
 
@@ -12,13 +12,15 @@ export type { StepsSkin };
 
 export function TimePicker(props: Props) {
   const c = usePicker(props);
+  const steps = useStepsLayout(c);
   const { fallback } = props;
-  const { title, className, skin, length, days, state, held, unhold, pick, v3paid, v3steps, v3sub } = c;
+  const { title, className, skin, length, days, state, held, unhold, pick } = c;
+  const { v3paid, v3steps, v3sub } = stepsCopy(c.paid, c.slug);
   /* J and G fill while the times load (jg-load.tsx) and let go of the picker themselves. */
   const jg = <JgLoad done={state === "ready" && !!days} onDone={unhold} className="f-wait min-h-[16rem] w-full" />;
   /* While the times load the bar is already there, held off: it popped in
      a second after the page on a short screen, where it is the thing at the
-     foot of the view (MAC, iPhone Duo folded, 2026-11-08). */
+     foot of the view (MAC, iPhone Duo folded). */
   const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
   // in the div `BookSteps` puts the shell in, so the shell stays one element as the times come
   const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => <div className="contents">{skin!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : skin!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar })}</div>;
@@ -28,7 +30,7 @@ export function TimePicker(props: Props) {
   const [mounted, setMounted] = React.useState(false);
   // eslint-disable-next-line react-hooks/set-state-in-effect
   React.useEffect(() => setMounted(true), []);
-  // the same shell the held picker draws (steps, sub, J and G), so nothing moves when it mounts (CLS 0.107 at 1440, audit 2026-11-21)
+  // the same shell the held picker draws (steps, sub, J and G), so nothing moves when it mounts (CLS 0.107 at 1440, audit)
   if (!mounted) return skin ? v3plain(jg, heldBar) : <div aria-label={title} className={className} />;
   if (state === "fallback") return skin ? v3plain(fallback) : <>{fallback}</>;
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
@@ -62,6 +64,6 @@ export function TimePicker(props: Props) {
      times, booking and deposit as the cards below; only the look is new. */
   /* Called, not mounted: as an element it was a new component in the shell's
      place, and the shell remounted when the first time came. It has no hooks. */
-  if (skin) return BookSteps({ c: { ...ctx, skin } });
+  if (skin) return BookSteps({ c: { ...ctx, skin }, l: steps });
   return <EditorialCard c={ctx} />;
 }

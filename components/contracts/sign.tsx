@@ -10,7 +10,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { isEmail } from "@/lib/proofs/proof-model";
+import { isEmail } from "@/lib/utils";
 import { isFullName, type PublicContract } from "@/lib/contracts/contract";
 import { SignPad } from "@/components/contracts/sign-pad";
 import { postJson } from "@/lib/http";

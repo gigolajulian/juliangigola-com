@@ -3,9 +3,8 @@ import { shareOg } from "@/lib/og/share";
 import { BookPicker, type Bookable } from "@/components/booking/book-picker";
 import { SessionBook } from "@/components/booking/book";
 import { sessionEvent, pageForSession } from "@/lib/booking/service-pages";
-import { isSession } from "@/lib/booking/catalog";
 import { wallOf } from "@/lib/work/work";
-import { SESSION_TYPES, formatPrice } from "@/lib/booking/sessions";
+import { formatPrice, isSession, SESSION_TYPES } from "@/lib/booking/catalog";
 
 export const metadata: Metadata = {
   title: "Book a session",

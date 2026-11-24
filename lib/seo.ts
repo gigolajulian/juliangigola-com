@@ -16,11 +16,11 @@
  *
  * Nothing here is a visible change: the headings and copy on the pages are
  * untouched. Every claim is one the site already makes somewhere: the
- * prices come from `content/site.json` through `sessions.ts`, so setting a
+ * prices come from `content/site.json` through `lib/booking/catalog.ts`, so setting a
  * price in /admin updates the description and the structured data with it.
  */
 
-import { SESSION_TYPES, formatPrice } from "./booking/sessions";
+import { SESSION_TYPES, formatPrice } from "./booking/catalog";
 import { pageForSession } from "./booking/service-pages";
 
 export const SITE = "https://juliangigola.com";

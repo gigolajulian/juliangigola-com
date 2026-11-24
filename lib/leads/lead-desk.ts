@@ -1,43 +1,14 @@
 /**
  * The lead desk's non-UI half (components/leads/desk.tsx and its
- * screens): the admin fetch, the list filters and the
+ * screens): the desk fetch, the list filters and the
  * small formatters. Browser only: the fetch reads the key from localStorage.
  */
 import { errorText } from "@/lib/utils";
-import { credentials, KEY_STORE } from "@/lib/admin/admin-github";
-import { TZ } from "@/lib/booking/rules";
+import { adminCall, AdminError } from "@/lib/admin/admin-call";
+import { TZ } from "@/lib/time-zone";
 import { isLate, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 
 export type Filter = "today" | "traffic" | "seo" | "site" | "device" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
-
-/** The admin key if one was pasted, else the /admin GitHub token. */
-export const authed = () => credentials(window.localStorage.getItem(KEY_STORE) ?? "");
-
-/** A failed admin request, with the status the route answered. */
-export class AdminError extends Error {
-  constructor(message: string, readonly status: number) {
-    super(message);
-  }
-}
-
-/**
- * One authed JSON request to an admin route. `fail` is what a failure says
- * when the route gave no error of its own. A failed answer that is not JSON
- * (an HTML 502) reads as {}, so the status still shows; a 2xx that is not
- * JSON throws, since there is nothing to hand back.
- */
-export async function adminCall<T = Record<string, unknown>>(path: string, init: RequestInit = {}, fail?: string): Promise<T> {
-  const res = await fetch(path, { ...init, headers: { ...authed(), "content-type": "application/json", ...init.headers }, cache: "no-store" });
-  const text = await res.text().catch(() => "");
-  let out: (T & { error?: string }) | undefined;
-  try {
-    out = JSON.parse(text);
-  } catch {
-    if (res.ok) throw new AdminError(fail ?? "The route did not answer with JSON.", res.status);
-  }
-  if (!res.ok) throw new AdminError(out?.error ?? fail ?? `Request failed (${res.status})`, res.status);
-  return out as T;
-}
 
 /** The desk's three layouts, by window width. */
 export type Size = "phone" | "mid" | "wide";

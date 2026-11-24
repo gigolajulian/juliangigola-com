@@ -2,6 +2,7 @@ import * as React from "react";
 import { takesDeposit } from "@/lib/booking/paid";
 import type { SlotsAnswer } from "@/lib/booking/slots";
 import { AHEAD, iso, KEEP, recent, recentKey } from "@/components/booking/time-picker-parts";
+import { getJson } from "@/lib/http";
 
 /* The picker's open times and its event, fetched from `/api/slots`
    (`use-picker.tsx` loads them once it mounts). */
@@ -24,13 +25,16 @@ export function useSlots(username: string, slug: string, tz: string) {
       // 8 seconds the fallback takes over, as for any other failure.
       const signal = AbortSignal.timeout?.(8000);
       const hit = recent.get(key);
-      // The event and its times in one (`app/api/slots`).
-      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : fetch(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}${fresh ? "&fresh" : ""}`, { signal })
-        .then((r) => r.json() as Promise<SlotsAnswer>);
+      // The event and its times in one (`app/api/slots`); a failed answer is a failure like no answer.
+      const got = !fresh && hit && Date.now() - hit.at < KEEP ? hit.got : getJson<SlotsAnswer>(`/api/slots?slug=${slug}&start=${iso(from)}&end=${iso(to)}&timeZone=${encodeURIComponent(tz)}${fresh ? "&fresh" : ""}`, { signal })
+        .then((r) => {
+          if (!r.ok) throw new Error(r.error ?? "no times");
+          return r.data;
+        });
       if (got !== hit?.got) recent.set(key, { at: Date.now(), got });
       const slots = await got;
-      // A failure answers { error }, with no times.
-      if (!slots.slots) throw new Error("no times");
+      // An answer with no times (or no body) is a failure too.
+      if (!slots?.slots) throw new Error("no times");
       // A paid event's deposit is taken here (deposit-step.tsx) where the
       // build has Stripe's key; without it, the fallback.
       // Paid by the site's list (lib/booking/paid.ts).

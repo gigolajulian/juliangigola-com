@@ -197,7 +197,7 @@ const fromAdded = (p: AddedProject): Project => {
  * the new slug is its identity everywhere downstream: the overrides, the
  * running order, the indexes, the route. The editor writes those maps
  * under the new slug when it publishes a rename (`remapSlugs` in
- * `admin-editor.tsx`), so a renamed project is one project and not two
+ * `components/admin/editor/editor.tsx`), so a renamed project is one project and not two
  * halves of one. The original is kept as `origin` for the redirect.
  */
 const reslug = (project: Project): Project => {

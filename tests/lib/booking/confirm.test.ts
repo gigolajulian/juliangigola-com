@@ -1,0 +1,150 @@
+import { describe, expect, it } from "vitest";
+import { FakeEmail } from "../../backend/fakes";
+import { cancelledSubject, confirmMail, confirmOf, sendCancelled, sendConfirm, timeRange, type Confirm } from "@/lib/booking/confirm";
+import { depositPaid, type BookingRecord } from "@/lib/booking/engine";
+import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
+
+/* The client's "You're in." mail and the cancel note (`lib/booking/confirm.ts`),
+   signed with Julian's one signature (`lib/email/email-signature.ts`). */
+
+const base: Confirm = {
+  name: "Ana Lee",
+  email: "ana@example.com",
+  session: "Portraits",
+  start: "2026-11-21T18:00:00Z",
+  end: "2026-11-21T19:00:00Z",
+  uid: "abcdef1234567890",
+  manage: { reschedule: "https://juliangigola.com/booking/t?do=reschedule", cancel: "https://juliangigola.com/booking/t?do=cancel" },
+};
+
+describe("timeRange", () => {
+  it("writes Julian's time with the range spelled out", () => {
+    expect(timeRange(base.start, base.end)).toBe("Sat, Nov 21, 10:00 to 11:00 AM PST");
+    expect(timeRange(base.start)).toBe("Sat, Nov 21, 10:00 AM PST");
+  });
+});
+
+describe("confirmMail", () => {
+  it("subjects and leads a booking, with the length and a short booking ref", () => {
+    const m = confirmMail(base);
+    expect(m.subject).toBe("Booked: Portraits, Sat, Nov 21, 10:00 to 11:00 AM PST");
+    expect(m.text).toContain("You're in.");
+    expect(m.text).toContain("Thanks, Ana.");
+    expect(m.text).toContain("When: Sat, Nov 21, 10:00 to 11:00 AM PST, 60 minutes");
+    expect(m.text).toContain("Booking: abcdef12");
+    expect(m.text).toContain("https://juliangigola.com/booking/t?do=reschedule");
+    expect(m.attachments.map((a) => a.contentId)).toEqual(["name-w", "name-ink"]);
+  });
+
+  it("escapes what the client typed", () => {
+    const m = confirmMail({ ...base, where: "<script>x</script>" });
+    expect(m.html).not.toContain("<script>x");
+    expect(m.html).toContain("&#60;script&#62;");
+  });
+
+  it("leaves the links out while the site's own have no secret", () => {
+    const m = confirmMail({ ...base, manage: null });
+    expect(m.text).not.toContain("Reschedule:");
+    expect(m.html).not.toContain(">Reschedule<");
+  });
+
+  it("writes the heads-up: the early refund's deadline, 48 hours before the time it is judged by", () => {
+    const deposit = { ref: "pi_1234567890abc", at: "2026-11-01T18:00:00Z" };
+    const fee = confirmMail({ ...base, kind: "headsup", deposit: { ...deposit, fee: 10 } });
+    expect(fee.subject).toMatch(/^Coming up: Portraits, /);
+    // The session is Sat, Nov 21, 10:00 AM PST: the deadline is Thu, Nov 19, 10:00 AM.
+    expect(fee.text).toContain("Until Thu, Nov 19, 10:00 AM PST you can cancel for 90% back.");
+    expect(confirmMail({ ...base, kind: "headsup", deposit }).text).toContain("you can cancel for a full refund.");
+    // Moved out from an earlier first time: judged by that one.
+    expect(confirmMail({ ...base, kind: "headsup", firstStart: "2026-11-20T18:00:00Z", deposit }).text).toContain("Until Wed, Nov 18, 10:00 AM PST");
+  });
+
+  it("writes the reminder and the deposit receipt", () => {
+    const m = confirmMail({ ...base, kind: "reminder", deposit: { ref: "pi_1234567890abc", at: "2026-11-01T18:00:00Z", card: "Visa 4242" } });
+    expect(m.subject).toBe("Tomorrow: Portraits, 10:00 AM");
+    expect(m.text).toContain("See you tomorrow.");
+    expect(m.text).toContain("Ref: pi_12345678");
+    expect(m.text).toContain("under 24 hours now");
+  });
+
+  it("carries Julian's signature in both parts and its dark rules", () => {
+    const m = confirmMail(base);
+    expect(m.html).toContain(SIG_HTML);
+    expect(m.html).toContain(SIG_DARK);
+    expect(m.text.endsWith(SIG_TEXT)).toBe(true);
+    expect(SIG_TEXT).toContain("hello@juliangigola.com");
+  });
+});
+
+describe("sendConfirm", () => {
+  it("sends nothing without a mailer or an address", async () => {
+    expect(await sendConfirm(undefined, base)).toBe(null);
+    expect(await sendConfirm(new FakeEmail() as never, { ...base, email: "" })).toBe(null);
+  });
+
+  it("sends from book@ to the client", async () => {
+    const mail = new FakeEmail();
+    expect(await sendConfirm(mail as never, base)).toBe(confirmMail(base).subject);
+    expect(mail.sent[0]).toMatchObject({ to: { email: "ana@example.com" }, from: { email: "book@juliangigola.com" }, replyTo: "hello@juliangigola.com" });
+  });
+
+  it("retries without the inline logo, linking it instead", async () => {
+    const sent: Record<string, unknown>[] = [];
+    const mailer = {
+      send: async (m: Record<string, unknown>) => {
+        if (m.attachments) throw new Error("inline parts refused");
+        sent.push(m);
+      },
+    };
+    expect(await sendConfirm(mailer as never, base)).toBe(confirmMail(base).subject);
+    expect(sent[0].html).toContain("https://juliangigola.com/email-name-w.png");
+    expect(sent[0].html).not.toContain("cid:name-w");
+  });
+
+  it("answers false when the mail cannot go at all", async () => {
+    const mail = new FakeEmail();
+    mail.broken = true;
+    expect(await sendConfirm(mail as never, base)).toBe(null);
+  });
+});
+
+describe("sendCancelled", () => {
+  it("says what happened to the deposit", async () => {
+    const mail = new FakeEmail();
+    expect(await sendCancelled(mail as never, base, "kept", 100, 70)).toBe(true);
+    expect(mail.sent[0].subject).toBe(cancelledSubject(base));
+    expect(mail.sent[0].text).toContain("Hi Ana,");
+    expect(mail.sent[0].text).toContain("is not refunded");
+  });
+
+  it("leaves no empty line pairs when there is no deposit", async () => {
+    const mail = new FakeEmail();
+    await sendCancelled(mail as never, base, "none", 0, 0);
+    expect(mail.sent[0].text).not.toMatch(/\n\n\n/);
+  });
+});
+
+describe("confirmOf", () => {
+  const rec: BookingRecord = { id: "abcdef1234567890", eventId: "ev", slug: "portraits", session: "Portraits", start: "2026-11-21T18:00:00Z", end: "2026-11-21T19:00:00Z", firstStart: "2026-11-21T18:00:00Z", timeZone: "America/Los_Angeles", name: "Ana Lee", email: "ana@example.com", where: "Studio", at: "2026-11-10T00:00:00Z" };
+  const manage = base.manage;
+  // The literal the booking route and the reminder cron built before `confirmOf`.
+  const old = (r: BookingRecord): Confirm => ({ name: r.name, email: r.email, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage, firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r), fee: r.fee } } : {}) });
+  const same = (a: Confirm, b: Confirm) => {
+    const [x, y] = [confirmMail(a), confirmMail(b)];
+    expect([y.subject, y.html, y.text]).toEqual([x.subject, x.html, x.text]);
+  };
+
+  it("mails a call booking as /api/book did", () => {
+    const call = { ...rec, slug: "call", session: "Wedding call", call: true, where: "https://meet.google.com/x" };
+    same({ name: call.name, email: call.email, session: call.session, call: true, start: call.start, end: call.end, where: call.where, uid: call.id, manage }, { ...confirmOf(call, manage), call: true });
+  });
+
+  it("mails a deposit booking, its reminder and a reschedule as before", () => {
+    const paid = { ...rec, intent: "pi_123456789012", deposit: 150, fee: 10 };
+    same(old(paid), confirmOf(paid, manage));
+    same({ kind: "reminder", ...old(paid) }, { kind: "reminder", ...confirmOf(paid, manage) });
+    const moved = { ...paid, start: "2026-11-23T18:00:00Z", end: "2026-11-23T19:00:00Z", moves: 1 };
+    same(old(moved), confirmOf(moved, manage));
+    expect(confirmMail(confirmOf(moved, manage)).text).toContain("The deposit moved with the new date.");
+  });
+});

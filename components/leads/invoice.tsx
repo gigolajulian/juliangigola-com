@@ -7,8 +7,10 @@ import { cn, errorText } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
 import { balance, shortDate, depositOfLead, isSettled, MAX_INVOICE_ROWS, THANKS_NOTES, usd, usdTrim, type Crop, type Invoice, type InvoiceDetails, type InvoiceFrom } from "@/lib/leads/invoice";
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
-import { adminCall, dayLabel, deskCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
-import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
+import { dayLabel, deskCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
+import { adminCall } from "@/lib/admin/admin-call";
+import { btn, primary } from "@/components/desk/chrome";
+import { compose, field, fieldLabel, kindOf } from "@/components/leads/shared";
 import type { Patch } from "@/lib/leads/lead-desk";
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */

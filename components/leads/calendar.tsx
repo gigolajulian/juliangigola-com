@@ -20,10 +20,12 @@ import { List, ListItem } from "@astryxdesign/core/List";
 import { Calendar, type DateRange, type ISODateString } from "@astryxdesign/core/Calendar";
 import { Token } from "@astryxdesign/core/Token";
 import { Divider } from "@astryxdesign/core/Divider";
-import { EVENTS, HOURS, TZ } from "@/lib/booking/rules";
-import { startsFor, zoned } from "@/lib/booking/slots";
+import { EVENTS, HOURS } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
+import { startsFor, instantIn } from "@/lib/booking/slots";
 import type { LeadSummary } from "@/lib/leads/leads";
-import { adminCall, type Size } from "@/lib/leads/lead-desk";
+import { type Size } from "@/lib/leads/lead-desk";
+import { adminCall } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 
 /* The calendar's data and day maths, from the retired classic desk. */
@@ -44,7 +46,7 @@ export function daysOf(start: string, end: string) {
 export function openSpans(day: string, busy: { start: number; end: number }[], now: number) {
   const h = HOURS[weekday(day)];
   if (!h) return [];
-  let spans = [[zoned(...ymd(day), h[0]), zoned(...ymd(day), h[1])]];
+  let spans = [[instantIn(...ymd(day), h[0]), instantIn(...ymd(day), h[1])]];
   for (const b of busy) spans = spans.flatMap(([a, z]) => (b.end <= a || b.start >= z ? [[a, z]] : [[a, b.start], [b.end, z]].filter(([x, y]) => y > x)));
   return spans.filter(([a, z]) => z > Math.max(a, now));
 }
@@ -200,7 +202,7 @@ function Availability({ size, today, now }: { size: Size; today: string; now: nu
   const events = on?.events ?? [];
   const busy = [...events.filter((e) => !e.free).map((e) => ({ start: Date.parse(e.start), end: Date.parse(e.end) })), ...(on?.busy ?? []).map((b) => ({ start: Date.parse(b.start), end: Date.parse(b.end) }))];
   const spans = openSpans(day, busy, now);
-  const startOf = (d: string) => zoned(...ymd(d), 0);
+  const startOf = (d: string) => instantIn(...ymd(d), 0);
   const starts = startsFor(EVENTS.portraits, busy, startOf(day), startOf(plus(day, 1)), now);
   const blocks = (data?.events ?? []).filter((e) => e.block).sort((a, b) => a.start.localeCompare(b.start));
   const status = past ? "Past" : !HOURS[weekday(day)] ? "Closed" : spans.length ? `Open ${spans.map(([a, b]) => range(a, b)).join(", ")}` : "Nothing open";

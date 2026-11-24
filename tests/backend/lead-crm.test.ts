@@ -3,7 +3,7 @@ import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { desk } from "./desk-routes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { recordLead } from "@/lib/leads/lead-store";
-import { csv, fillTemplate, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
+import { fillTemplate, leadsCsv, identity, manualLead, merge, stats } from "@/lib/leads/lead-crm";
 import type { Lead } from "@/lib/leads/leads";
 
 /* The desk as a CRM (`lib/leads/lead-crm.ts`, the routes under `app/api/leads`): leads
@@ -75,7 +75,7 @@ describe("templates, numbers, export", () => {
   });
 
   it("exports CSV with quotes escaped and formulas defused", () => {
-    const out = csv([{ email: "ig:@a", name: '=HYPERLINK("x")', stage: "Inquiry", stageAt: "", firstAt: "", lastAt: "", unread: false, events: [], notes: 'say "hi",\nthen' }]);
+    const out = leadsCsv([{ email: "ig:@a", name: '=HYPERLINK("x")', stage: "Inquiry", stageAt: "", firstAt: "", lastAt: "", unread: false, events: [], notes: 'say "hi",\nthen' }]);
     expect(out.split("\r\n")[0]).toMatch(/^name,email,phone/);
     expect(out).toContain(`"'=HYPERLINK(""x"")"`);
     expect(out).toContain('"say ""hi"",\nthen"');

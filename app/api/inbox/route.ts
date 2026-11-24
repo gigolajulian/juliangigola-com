@@ -1,4 +1,4 @@
-import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/inbox";
+import { SAFE_IMAGE, summary, type Enquiry, type Summary } from "@/lib/leads/enquiry";
 import { everyKey, gate } from "@/lib/leads/desk-route";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
@@ -22,7 +22,7 @@ export const dynamic = "force-dynamic";
  * GET: the list, newest first.
  *
  * One `list` call and no reads: the summary each row shows travels in KV's
- * metadata (see `lib/inbox.ts`). `?key=` fetches one message's body, which is
+ * metadata (see `lib/leads/enquiry.ts`). `?key=` fetches one message's body, which is
  * the only time the value itself is needed.
  */
 export async function GET(request: Request) {
@@ -36,7 +36,7 @@ export async function GET(request: Request) {
     const got = await g.kv.getWithMetadata<{ type?: string }>(wanted, "arrayBuffer");
     if (got.value === null) return json({ error: "Gone." }, 404);
     // Anything stored before the check, or not a plain picture, goes out
-    // as a download that cannot run (`SAFE_IMAGE`, lib/inbox.ts).
+    // as a download that cannot run (`SAFE_IMAGE`, lib/leads/enquiry.ts).
     const type = got.metadata?.type ?? "image/jpeg";
     const safe = SAFE_IMAGE.test(type);
     return new Response(got.value, {
@@ -75,8 +75,9 @@ export async function PATCH(request: Request) {
 
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  const { key, read } = given as { key?: string; read?: boolean };
-  if (!key?.startsWith("msg:") || typeof read !== "boolean")
+  const key = typeof given.key === "string" ? given.key : "";
+  const read = given.read;
+  if (!key.startsWith("msg:") || typeof read !== "boolean")
     return json({ error: "Unknown." }, 400);
 
   const body = await g.kv.get(key);
@@ -108,8 +109,8 @@ export async function DELETE(request: Request) {
 
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  const { key } = given as { key?: string };
-  if (!key?.startsWith("msg:")) return json({ error: "Unknown." }, 400);
+  const key = typeof given.key === "string" ? given.key : "";
+  if (!key.startsWith("msg:")) return json({ error: "Unknown." }, 400);
 
   await g.kv.delete(key);
   // And the images it arrived with.

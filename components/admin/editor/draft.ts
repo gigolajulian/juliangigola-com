@@ -2,8 +2,9 @@ import type { SiteContent } from "@/lib/content";
 import type { Draft } from "@/lib/admin/publish";
 import { sameJson, withOverride } from "@/lib/admin/admin-payload";
 import { isTextRef } from "@/lib/work/added";
-import { FIELD_TAB, type View } from "@/components/admin/admin-tabs";
-import type { AdminEditorProps, Overrides } from "@/components/admin/admin-editor-props";
+import { FIELD_TAB, type View } from "@/components/admin/editor/tabs";
+import type { AdminEditorProps, ListDraft, Overrides } from "@/components/admin/editor/props";
+import type { Bts } from "@/lib/work/work-types";
 
 /** What the repository holds, as far as the editor knows: the content and the manifest. */
 export type Baseline = { content: SiteContent; manifest: Draft };
@@ -25,6 +26,26 @@ export function withProjectOverride<K extends keyof Overrides>(o: Overrides, kin
     else out[slug] = next;
   }
   return { ...o, [kind]: out };
+}
+
+/** One project's entry in the list draft: whether it is in the set, or its BTS. */
+export type ListDraftOf<K extends keyof ListDraft> = K extends "bts" ? Bts : boolean;
+/** The editor's one setter for the list draft, handed to the project list. */
+export type SetListDraft = <K extends keyof ListDraft>(kind: K, slug: string, next: ListDraftOf<K>) => void;
+
+/** The list draft with one project's entry changed. A BTS with no frames and no credit is no entry, not an empty one. */
+export function withListDraft<K extends keyof ListDraft>(d: ListDraft, kind: K, slug: string, next: ListDraftOf<K>): ListDraft {
+  if (kind === "bts") {
+    const b = next as Bts;
+    const bts = { ...d.bts };
+    if (!b.frames.length && !b.by) delete bts[slug];
+    else bts[slug] = b;
+    return { ...d, bts };
+  }
+  const set = new Set(d[kind as "hidden" | "unlisted"]);
+  if (next) set.add(slug);
+  else set.delete(slug);
+  return { ...d, [kind]: set };
 }
 
 /** Which tabs hold unpublished edits, one field at a time. */

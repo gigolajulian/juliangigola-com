@@ -10,7 +10,7 @@
 //
 //   node scripts/gsc-auth.mjs path\to\client_secret.json cal
 //
-// The same for the booking engine (`lib/booking/gcal.ts`): hello@'s calendar,
+// The same for the booking engine (`lib/google.ts`): hello@'s calendar,
 // events and free/busy, plus Gmail read-only for the lead desk's timeline
 // (`lib/leads/sync/gmail-sync.ts`), plus the Sheet the site makes on hello@'s Drive
 // (`drive.file`: only files the site made, `lib/leads/sync/sheet-sync.ts`), into `GCAL_OAUTH`. The client must be an

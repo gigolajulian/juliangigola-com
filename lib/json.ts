@@ -26,3 +26,6 @@ export function contentChecks(file: string) {
 /** A plain object, not null and not an array: what a parsed JSON body or record has to be before its fields are read. */
 export const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null && !Array.isArray(v);
+
+/** `v` when it is a record, else an empty one: fields of anything else read as missing. */
+export const asRecord = (v: unknown): Record<string, unknown> => (isRecord(v) ? v : {});

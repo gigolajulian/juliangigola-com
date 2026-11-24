@@ -19,10 +19,11 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { About, joinParts, Age, Next } from "@/components/leads/row";
 import { dueTasks, isLate, paperDue, shootTag, type LeadSummary, type TaskRow } from "@/lib/leads/leads";
 import { dayShort } from "@/components/leads/plan";
-import { adminCall, authed, ago, isSetAside, dateTimeLabel, centsLabel, isFinishedStage, deskCall, needsMe, nextStep, now, inFilter, plusDays, needsRenewal, ymdPT, type Size } from "@/lib/leads/lead-desk";
+import { ago, isSetAside, dateTimeLabel, centsLabel, isFinishedStage, deskCall, needsMe, nextStep, now, inFilter, plusDays, needsRenewal, ymdPT, type Size } from "@/lib/leads/lead-desk";
+import { adminCall, authed } from "@/lib/admin/admin-call";
 import { balance, shortDate, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
-import { TZ } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
 import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/desk";
 
 /* Today's helpers, from the retired classic desk. */

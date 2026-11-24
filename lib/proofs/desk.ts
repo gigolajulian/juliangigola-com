@@ -3,7 +3,7 @@
  * lead's proof card): the admin fetch and how a gallery's state reads.
  * Browser only, like `lib/leads/lead-desk.ts`.
  */
-import { adminCall } from "@/lib/leads/lead-desk";
+import { adminCall } from "@/lib/admin/admin-call";
 import { isTestEmail, stage, type CardCrop, type Proof, type ProofFrame } from "@/lib/proofs/proof-model";
 import { CARD } from "@/lib/proofs/watermark";
 

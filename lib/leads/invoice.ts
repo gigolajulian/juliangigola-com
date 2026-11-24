@@ -1,5 +1,6 @@
 import { depositFor } from "@/lib/booking/paid";
 import type { InboxKV as KV } from "@/lib/kv";
+import { asRecord } from "@/lib/json";
 
 /* ── invoices from a lead ─────────────────────────────────────────
  * An invoice from the lead, in the
@@ -84,13 +85,14 @@ const amount = (v: unknown) => (typeof v === "number" && Number.isFinite(v) && M
 
 /** What the desk sent, checked, or why not. */
 export function cleanInvoice(v: unknown): Omit<Invoice, "no" | "at"> | { error: string } {
-  const o = (v ?? {}) as Record<string, unknown>;
+  const o = asRecord(v);
   const date = text(o.date, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || isNaN(Date.parse(date))) return { error: "Bad date." };
   if (!Array.isArray(o.lines) || !o.lines.length || o.lines.length > MAX_LINES) return { error: `One to ${MAX_LINES} lines.` };
   const lines: InvoiceLine[] = [];
-  for (const raw of o.lines as Record<string, unknown>[]) {
-    const qty = amount(raw?.qty), rate = amount(raw?.rate), desc = text(raw?.desc, 48);
+  for (const raw of o.lines) {
+    const l = asRecord(raw);
+    const qty = amount(l.qty), rate = amount(l.rate), desc = text(l.desc, 48);
     if (!desc || qty === null || rate === null) return { error: "Every line needs a description, a quantity and a rate." };
     lines.push({ desc, qty, rate });
   }
@@ -98,7 +100,7 @@ export function cleanInvoice(v: unknown): Omit<Invoice, "no" | "at"> | { error: 
   if (paid === null || paid < 0) return { error: "Bad deposit." };
   const notes = text(o.notes, 600);
   if (o.b === undefined) return { date, lines, paid, ...(notes ? { notes } : {}) };
-  const b = cleanDetails(o.b, (o.lines as Record<string, unknown>[]).map((l) => l?.sub));
+  const b = cleanDetails(o.b, o.lines.map((l) => asRecord(l).sub));
   if ("error" in b) return b;
   if (lines.length + (paid ? 1 : 0) > MAX_INVOICE_ROWS) return { error: `${MAX_INVOICE_ROWS} rows fit on this invoice, the deposit counted.` };
   lines.forEach((l, i) => { const sub = text(b.subs[i], 60); if (sub) l.sub = sub; });
@@ -107,7 +109,7 @@ export function cleanInvoice(v: unknown): Omit<Invoice, "no" | "at"> | { error: 
 
 const unit = (v: unknown, lo: number, hi: number) => (typeof v === "number" && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : null);
 function cleanDetails(v: unknown, subs: unknown[]): { b: InvoiceDetails; subs: unknown[] } | { error: string } {
-  const o = (v ?? {}) as Record<string, unknown>, to = (o.to ?? {}) as Record<string, unknown>, c = (o.crop ?? {}) as Record<string, unknown>;
+  const o = asRecord(v), to = asRecord(o.to), c = asRecord(o.crop);
   const due = text(o.due, 10);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(due) || isNaN(Date.parse(due))) return { error: "Bad due date." };
   const photo = text(o.photo, 60);
@@ -131,7 +133,7 @@ function cleanDetails(v: unknown, subs: unknown[]): { b: InvoiceDetails; subs: u
 
 const FROM_KEYS = ["name", "a1", "a2", "a3", "email", "phone", "ein", "signoff", "notes", "bank", "routing", "account", "late", "tax"] as const;
 export function cleanFrom(v: unknown): InvoiceFrom {
-  const o = (v ?? {}) as Record<string, unknown>;
+  const o = asRecord(v);
   return Object.fromEntries(FROM_KEYS.map((k) => [k, text(o[k], k === "notes" ? 600 : 80)])) as InvoiceFrom;
 }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { builds, gatherWhenSeen, streams } from '@/lib/gather';
+import { builds, gatherWhenSeen, streams } from '@/lib/motion/gather';
 import {
   useCallback,
   useEffect,
@@ -129,7 +129,7 @@ export function DriftWall({
      (measured: 31 of 96 loaded on the homepage's last screen). Once the
      wall is seen every tile loads. Julian: no empty slots. */
   // The tiles in view stream in (or build up) once the wall shows, not
-  // while it waits for its photographs hidden (`lib/gather.ts`).
+  // while it waits for its photographs hidden (`lib/motion/gather.ts`).
   useLayoutEffect(() => {
     const box = containerRef.current;
     if (!shown || !box) return;

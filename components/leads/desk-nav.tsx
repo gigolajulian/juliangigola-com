@@ -6,7 +6,8 @@ import { Icon } from "@astryxdesign/core/Icon";
 import { List, ListItem } from "@astryxdesign/core/List";
 import { Heading, Text } from "@astryxdesign/core/Text";
 import { Badge } from "@astryxdesign/core/Badge";
-import { frostBar, glyph } from "@/components/leads/shared";
+import { glyph } from "@/components/desk/chrome";
+import { frostBar } from "@/components/leads/shared";
 
 /** Every page of the desk. */
 export type View = "today" | "leads" | "new" | "calendar" | "money" | "invoices" | "licences" | "aside" | "stats" | "traffic" | "seo" | "hours" | "templates" | "device" | "more" | "proofs";

@@ -12,15 +12,14 @@ import { json, upstreamError } from "@/lib/http";
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
-  const { env, seal: sealing, kv } = await sealedStore();
+  const { env, seal, kv } = await sealedStore();
   const denied = await refuseWorker(request, env.WORKER_KEY);
   if (denied) return denied;
-  const seal = await sealing;
   if (!env.GCAL_OAUTH || !kv || !seal) return json({ error: "Not set up." }, 503);
   try {
     return json({ sheet: await syncSheet(kv, seal, env.GCAL_OAUTH) });
   } catch (e) {
-    // Google's status only, never a token (`lib/booking/gcal.ts`).
+    // Google's status only, never a token (`lib/google.ts`).
     return upstreamError("sheet", e, "Sheet sync failed.");
   }
 }

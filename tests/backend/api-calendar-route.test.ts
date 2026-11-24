@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "@/app/api/calendar/route";
-import { forgetToken } from "@/lib/booking/gcal";
+import { forgetToken } from "@/lib/google";
 import { FakeKV, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 
 /* /api/calendar: the Leads app's calendar. Off without INBOX or GCAL_OAUTH,

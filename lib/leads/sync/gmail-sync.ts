@@ -1,4 +1,5 @@
-import { gcal } from "../../booking/gcal";
+import { gcal } from "@/lib/google";
+import { statusOf } from "@/lib/http";
 import { sealer } from "../lead-crypto";
 import { type Change } from "../leads";
 import { canonLeads, findLead, recordLead, type LeadStore } from "../lead-store";
@@ -72,7 +73,7 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
       h = await gcal<History>(env.GCAL_OAUTH, `${GMAIL}/history?startHistoryId=${start}&historyTypes=messageAdded${page ? `&pageToken=${page}` : ""}`);
     } catch (e) {
       // A cursor older than Gmail keeps (about a week): start again from now.
-      if ((e as { status?: number }).status === 404) return restart();
+      if (statusOf(e) === 404) return restart();
       throw e;
     }
     for (const r of h.history ?? []) {
@@ -88,7 +89,7 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
           m = await gcal<Msg>(env.GCAL_OAUTH, `${GMAIL}/messages/${id}?${FIELDS}`);
         } catch (e) {
           // Deleted (or a draft replaced) since history listed it: skip it, or the cursor never moves past it.
-          if ((e as { status?: number }).status === 404) continue;
+          if (statusOf(e) === 404) continue;
           throw e;
         }
         for (const { email, c } of mailChanges(m)) {

@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 /* ── a photograph's hover waits for the page to settle ──
    Julian: no photograph lights up under a still pointer while a page
-   lands (2026-10-19). `data-hover` on the root, which the photographs'
+   lands. `data-hover` on the root, which the photographs'
    hovers need (`settled:` and their own `:hover` rules), comes on 600ms
    after the splash lifts and after each route lands (a crossing lands as
    one). Links, buttons and focus never wait. */

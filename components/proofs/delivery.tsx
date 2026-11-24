@@ -16,11 +16,11 @@
 import * as React from "react";
 import Link from "next/link";
 import { useClock } from "@/components/proofs/use-clock";
-import { closingSoon, isEmail, modelLabel, type PublicDelivery } from "@/lib/proofs/proof-model";
+import { closingSoon, modelLabel, type PublicDelivery } from "@/lib/proofs/proof-model";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { ProofWall } from "@/components/proofs/wall";
 import { qflag } from "@/lib/flags/query";
-import { noSubscribe, pad } from "@/lib/utils";
+import { isEmail, noSubscribe, pad } from "@/lib/utils";
 
 const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.max(1, Math.round(b / 1e6))} MB`);
 /** A frame's place, counted from 1: index 0 is "01". */

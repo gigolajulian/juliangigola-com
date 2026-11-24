@@ -7,7 +7,7 @@ import { Duo } from "@/components/site/duo";
 import { SESSIONS } from "@/lib/booking/catalog";
 import { matches } from "@/lib/device";
 import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/home/data";
-import { warmGsap } from "@/lib/gsap-lazy";
+import { warmGsap } from "@/lib/motion/gsap-lazy";
 import { useNextOpen } from "./next-open";
 import { CardsCtx } from "./ctx";
 
@@ -16,7 +16,7 @@ import { CardsCtx } from "./ctx";
    the list gives way to the LIVE flow (`BookFlow`: its own picker, the site's
    events, Stripe deposit and copy, untouched) and the photo stays. */
 
-/* The live flow (pickers, deposit, the orb: about 100KB) is not in the home page's first load (audit 2026-11-22). It is
+/* The live flow (pickers, deposit, the orb: about 100KB) is not in the home page's first load (audit). It is
    fetched once the Sessions block nears the screen, on a row's hover or focus, and after the page has loaded and gone
    idle (for a footer link that opens a booking straight away), so the first tap never waits on it. Not React.lazy:
    a Suspense reveal is held about 300ms even when the module is already here. */

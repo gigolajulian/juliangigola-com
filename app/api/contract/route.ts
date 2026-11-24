@@ -1,5 +1,6 @@
-import { refuseAdmin } from "@/lib/vouch";
-import { sealedStore } from "@/lib/kv";
+import { gate as deskGate } from "@/lib/leads/desk-route";
+import { mailable } from "@/lib/leads/lead-crm";
+import type { InboxKV } from "@/lib/kv";
 import { readLead } from "@/lib/leads/lead-store";
 import { FROM_KEY, type InvoiceFrom } from "@/lib/leads/invoice";
 import { cleanContractTemplates, cleanDraft, contractOf, contractUrl, copyName, draft, fillContract, fromLines, readContract, signedCopy, writeContract, CONTRACT_TEMPLATES, UNSET } from "@/lib/contracts/contract";
@@ -8,6 +9,7 @@ import { contractMail, sendClient } from "@/lib/email/proof-mail";
 import { attachment } from "@/lib/proofs/delivery-serve";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
+import { logged } from "@/lib/utils";
 
 /* ── contracts, Julian's side ─────────────────────────────────────
  * Behind the /admin gate. GET ?templates, ?lead=<lead id>
@@ -21,20 +23,18 @@ export const dynamic = "force-dynamic";
 
 const TEMPLATES_KEY = "leads:contract-templates";
 
-/** A contract that is there but will not open (a rotated LEADS_KEY): logged, then `broken()`, never "Gone". */
-const unopened = (label: string) => (e: unknown) => (console.error(label, String(e)), undefined);
+/** A contract that is there but will not open (a rotated LEADS_KEY): `logged`, then `broken()`, never "Gone". */
 const broken = () => json({ error: "That contract cannot be opened. LEADS_KEY may have changed." }, 500);
 
+/** The desk's gate with this route's INBOX message, then LEADS_KEY. */
 async function gate(request: Request) {
-  const { env, seal, kv } = await sealedStore();
-  const denied = await refuseAdmin(request, env.INBOX_KEY);
-  if (denied) return { error: denied };
-  if (!kv) return { error: json({ error: "This build has no inbox attached." }, 503) };
-  if (!seal) return { error: json({ error: "Contracts need LEADS_KEY on the Worker." }, 503) };
-  return { env, kv, s: await seal };
+  const g = await deskGate(request, "This build has no inbox attached.");
+  if (g.error) return g;
+  if (!g.s) return { error: json({ error: "Contracts need LEADS_KEY on the Worker." }, 503) };
+  return { ...g, s: g.s };
 }
 
-const templates = async (kv: NonNullable<CloudflareEnv["INBOX"]>) => {
+const templates = async (kv: InboxKV) => {
   const saved = parseOr<unknown>(await kv.get(TEMPLATES_KEY), null);
   return saved ? cleanContractTemplates(saved) : CONTRACT_TEMPLATES;
 };
@@ -46,7 +46,7 @@ export async function GET(request: Request) {
   if (q.has("templates")) return json({ templates: await templates(g.kv) });
   const copy = q.get("copy");
   if (copy) {
-    const c = await readContract(g.kv, g.s, copy).catch(unopened("contract copy"));
+    const c = await readContract(g.kv, g.s, copy).catch(logged("contract copy"));
     if (c === undefined) return broken();
     if (!c) return json({ error: "Gone." }, 404);
     // An attachment that cannot run on this origin: the client's typed name is in it.
@@ -54,7 +54,7 @@ export async function GET(request: Request) {
   }
   const lead = q.get("lead");
   if (!lead) return json({ error: "Unknown." }, 400);
-  const c = await contractOf(g.kv, g.s, lead).catch(unopened("contract of lead"));
+  const c = await contractOf(g.kv, g.s, lead).catch(logged("contract of lead"));
   if (c === undefined) return broken();
   return json({ contract: c, url: c ? contractUrl(c.id) : null });
 }
@@ -75,14 +75,14 @@ export async function POST(request: Request) {
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (typeof b?.lead !== "string") return json({ error: "Not JSON." }, 400);
-  const lead = await readLead(g.kv, g.s, b.lead).catch((e: unknown) => (console.error("contract lead", String(e)), undefined));
+  const lead = await readLead(g.kv, g.s, b.lead).catch(logged("contract lead"));
   if (lead === undefined) return json({ error: "That lead cannot be opened. LEADS_KEY may have changed." }, 500);
   if (!lead) return json({ error: "Gone." }, 404);
   const t = (await templates(g.kv)).find((x) => x.id === b.template) ?? (await templates(g.kv))[0];
   if (!t) return json({ error: "Add a contract template first." }, 400);
-  const before = await contractOf(g.kv, g.s, b.lead).catch(unopened("contract before new"));
+  const before = await contractOf(g.kv, g.s, b.lead).catch(logged("contract before new"));
   if (before === undefined) return broken();
-  const email = lead.email.includes("@") && !lead.email.startsWith("ig:") && !lead.email.startsWith("tel:") ? lead.email : "";
+  const email = mailable(lead.email) ? lead.email : "";
   const c = draft(before?.signed ? null : before, b.lead, { to: { name: lead.name, email }, text: fillContract(t.body, lead), template: t.id }, new Date().toISOString());
   if ("error" in c) return json(c, 409);
   await writeContract(g.kv, g.s, c);
@@ -94,7 +94,7 @@ export async function PATCH(request: Request) {
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (!b) return json({ error: "Not JSON." }, 400);
-  const before = typeof b.id === "string" ? await readContract(g.kv, g.s, b.id).catch(unopened("contract save")) : null;
+  const before = typeof b.id === "string" ? await readContract(g.kv, g.s, b.id).catch(logged("contract save")) : null;
   if (before === undefined) return broken();
   if (!before) return json({ error: "Gone." }, 404);
   const d = cleanDraft(b);

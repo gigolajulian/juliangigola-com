@@ -25,13 +25,13 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 /* A touch screen keeps its own indicator. The thumb still runs there, but
    unseen and out of reach: its 16px grab strip on the right edge caught a
    thumb scrolling down and threw the page the other way, and it drew
-   beside Safari's own bar (iPhone simulator, 2026-11-02). Done in CSS, not
+   beside Safari's own bar (iPhone simulator). Done in CSS, not
    by skipping the script: skipping it moved the booking times in CI's
    Firefox (tests/ui/book.spec.ts, PR 499). */
 @media not ((hover:hover) and (pointer:fine)){.sb-thumb{visibility:hidden;pointer-events:none}html[data-sb]::after{display:none}}
 @media (max-width:700px) and (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .a-cover .foot{--bg:var(--l-bg);--ink:var(--l-ink);--mute:var(--l-mute);--line:var(--l-line);--accent:var(--l-accent);color:var(--ink)}}
 .v3 .a-cover,.v3 .sheet figcaption{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--line:oklch(1 0 0 / 20%);--accent:var(--dark-accent);color:var(--ink)}
-/* Captions sit on a scrim over the photo: 0.78 fell to 3.6:1 on bright frames, 0.88 holds 4.5:1 (audit 2026-11-11). */
+/* Captions sit on a scrim over the photo: 0.78 fell to 3.6:1 on bright frames, 0.88 holds 4.5:1 (audit). */
 .v3 .sheet figcaption{--mute:oklch(0.88 0.005 80)}
 .v3 *{box-sizing:border-box}
 .v3 [hidden]{display:none!important}
@@ -74,7 +74,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .a-cover .foot{position:relative;z-index:2;margin-top:auto;padding:0 var(--gr) 28px var(--g);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
 /* sized off the role line below it, so the line ends at Gigola's i (11.1 x its font) */
 .v3 .a-cover h1{white-space:nowrap;font:900 min(calc(13*var(--v3u)),calc(11.1*clamp(12px,calc(.95*var(--v3u)),16px)))/.86 var(--display);letter-spacing:-.05em;margin:0 0 max(18px,calc(.146em + 4px))}
-/* The line under the name grows with it, 12px to 16px, so it reads as the name's caption and not a stray label (2026-10-30). */
+/* The line under the name grows with it, 12px to 16px, so it reads as the name's caption and not a stray label. */
 .v3 .a-cover h1+.lbl{font-size:clamp(12px,calc(.95*var(--v3u)),16px);letter-spacing:.12em}
 .v3 .a-cover .right{display:flex;flex-direction:column;align-items:flex-end;gap:16px}
 .v3 .a-cover .ctas{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
@@ -244,7 +244,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .sess-head{margin-bottom:28px}
 .v3 .sess-head h2{font:900 clamp(2.5rem,calc(6*var(--v3u)),5.5rem)/.9 var(--display);letter-spacing:-.05em}
 .v3 .sess-head p{margin:14px 0 0}
-/* Reduce Motion drops movement, not every change: fades and colour shifts keep their timing, and anything that moved, scaled or slid now jumps (2026-10-31). */
+/* Reduce Motion drops movement, not every change: fades and colour shifts keep their timing, and anything that moved, scaled or slid now jumps. */
 @media (prefers-reduced-motion:reduce){.v3 *{transition-property:opacity,color,background-color,border-color,outline-color,text-decoration-color,fill,stroke!important}}
 .v3 button.btn{background:none;color:var(--ink)}
 .v3 .door li a{display:flex;justify-content:space-between;width:100%}
@@ -297,7 +297,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media (hover:hover){.v3 .wt:hover img{transform:scale(1.03)}}
 /* Name over discipline at every width: side by side, a tile's discipline
    sat flush right, 12px from the next tile's name, and the row read as
-   one line ("BRAND CAMPAIGNS I WANNA BE A HUMAN", iPad, 2026-11-02). */
+   one line ("BRAND CAMPAIGNS I WANNA BE A HUMAN", iPad). */
 /* Cover captions, grid and strip: name, then discipline, over a scrim. pretty: no lone word ("VOL. 1") on a last line. */
 .v3 :is(.wt-n,.sc-n){position:absolute;inset:auto 0 0;display:flex;flex-direction:column;pointer-events:none;color:rgb(var(--on-photo));background:linear-gradient(to top,rgb(var(--scrim) / .74),rgb(var(--scrim) / .6) 16%,rgb(var(--scrim) / .4) 34%,rgb(var(--scrim) / .22) 52%,rgb(var(--scrim) / .09) 72%,rgb(var(--scrim) / .02) 88%,rgb(var(--scrim) / 0));text-shadow:0 1px 14px rgb(var(--scrim) / .4)}
 .v3 :is(.wt-n,.sc-n) b{font-family:var(--display);font-weight:900;line-height:.88;letter-spacing:-.05em;text-transform:uppercase;text-wrap:pretty}
@@ -432,7 +432,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .fld.bad :is(input,textarea)::placeholder{color:var(--err);opacity:1}
 .v3 .fld label>span:first-child{white-space:nowrap}
 .v3 .fld .fe{color:var(--err);text-align:right}
-/* Keyboard focus (audit, 2026-11-01): the 1px colour change alone was easy to miss, so the rule thickens to 2px. A shadow, so nothing shifts. */
+/* Keyboard focus (audit): the 1px colour change alone was easy to miss, so the rule thickens to 2px. A shadow, so nothing shifts. */
 .v3 .fld input:focus-visible,.v3 .fld textarea:focus-visible{box-shadow:0 1px 0 var(--accent)}
 .v3 .fld.bad input:focus-visible{box-shadow:0 1px 0 var(--err)}
 .v3 .err{margin:6px 0 0;padding:10px 12px;border:1px solid color-mix(in srgb,var(--err) 55%,transparent);font-size:13px}
@@ -441,7 +441,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .kinds .kind:last-child{grid-column:1/-1}
 .v3 .kind{position:relative;display:flex;justify-content:space-between;align-items:flex-end;gap:8px;min-height:112px;padding:14px;background:none;border:1px solid var(--line);color:var(--ink);text-align:left;font:inherit;cursor:pointer}
 .v3 .kind b{font:800 1.75rem/.95 var(--display);letter-spacing:-.035em}
-/* PICKED in the top corner, so it never runs into the name (iPad, 2026-11-04). */
+/* PICKED in the top corner, so it never runs into the name (iPad). */
 .v3 .kind>.lbl{position:absolute;top:12px;right:12px}
 .v3 .wrapopts{display:flex;flex-wrap:wrap;gap:6px}
 .v3 .bill{border-top:1px solid var(--line)}
@@ -636,7 +636,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .rc-in{position:relative;display:flex;flex-direction:column;gap:14px;width:100%;padding:96px 28px 28px;background:linear-gradient(to top,rgb(var(--scrim) / .82),rgb(var(--scrim) / 0))}
 .v3 .rc-in .lbl{color:rgb(var(--on-photo) / .72)}
 .v3 .rc-in p{margin:0;color:rgb(var(--on-photo) / .82)}
-/* Light theme (audit, 2026-11-01): its consultation photo is bright, and the label sat at 1.5:1 and the title at 2.4:1. A taller, deeper shade with a long tail so it shows no edge, and a brighter label: 6:1 and 9.8:1 now. */
+/* Light theme (audit): its consultation photo is bright, and the label sat at 1.5:1 and the title at 2.4:1. A taller, deeper shade with a long tail so it shows no edge, and a brighter label: 6:1 and 9.8:1 now. */
 :root[data-theme="light"] .v3 .rc-in{padding-top:240px;background:linear-gradient(to top,rgb(var(--scrim) / .88),rgb(var(--scrim) / .8) 40%,rgb(var(--scrim) / .6) 62%,rgb(var(--scrim) / .36) 78%,rgb(var(--scrim) / .15) 90%,rgb(var(--scrim) / .04) 97%,rgb(var(--scrim) / 0))}
 :root[data-theme="light"] .v3 .rc-in .lbl{color:rgb(var(--on-photo) / .9)}
 .v3 .reach-call .btn.fill{background:rgb(var(--on-photo));color:var(--night);border-color:rgb(var(--on-photo))}
@@ -762,7 +762,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Responsive pass: 44px targets on touch (the hit area grows, the drawing stays). */
 @media (pointer:coarse){
   .v3 .a-cover .nav{padding-top:6px}
-  /* The links' 44px hit area already pads the bar: 57px, not 73 (Julian's iPad, 2026-11-04). */
+  /* The links' 44px hit area already pads the bar: 57px, not 73 (Julian's iPad). */
   .v3 .site-hdr{padding-top:max(6px,env(safe-area-inset-top,0px));padding-bottom:6px}
   .v3 :is(.a-cover .nav,.site-hdr .links) a,.v3 .site-wm{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px}
   .v3 .btn{min-height:44px}
@@ -922,11 +922,11 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Two columns on a short screen (18 Pro sideways, 874x402): the photo was a strip under its own caption. Only the picture goes; the studio line and the call and Inquire links stay. Below the base .fr rule, which it has to beat. */
 @media (min-width:801px) and (orientation:landscape) and (max-height:500px){.v3 .f-photo .fr{display:none}}
 .v3 .f-foot{display:none}
-/* The booking wait holds the calendar's height (608px stacked): the Continue bar jumped 470px when it drew (audit 2026-11-22). */
+/* The booking wait holds the calendar's height (608px stacked): the Continue bar jumped 470px when it drew (audit). */
 .v3 .f-wait{min-height:38rem}
 @media (min-width:801px){.v3 .f-photo.over{padding-bottom:0}
 .v3 .f-photo.over .ph{border-radius:4px 4px 0 0}
-/* The mid stop sits behind the name: 60% keeps white over the pale studio wall above 3:1 (booking critique, 2026-11-04). */
+/* The mid stop sits behind the name: 60% keeps white over the pale studio wall above 3:1 (booking critique). */
 .v3 .f-photo.over .ph::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,oklch(0 0 0 / 82%) 0%,oklch(0 0 0 / 60%) 34%,transparent 62%)}
 .v3 .f-photo.over .cap{position:absolute;left:0;right:0;bottom:0;padding:0 28px 32px;color:var(--dark-ink);--line:oklch(1 0 0 / 22%);--mute:oklch(1 0 0 / 66%)}}
 /* Beside the calendar: the photo stops above the foot, what the session gets
@@ -981,7 +981,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* The rest of a set as a contact sheet: three columns, every row one height (a vertical's 4:5),
    a horizontal spans two cells; dense packing fills a hole a horizontal would leave. */
 .v3 .pj-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:dense;gap:20px;padding:clamp(64px,8vw,128px) var(--gr) 96px var(--g)}
-/* Start, not stretch (MAC, 2026-11-05): a stretched cell drops its aspect-ratio in
+/* Start, not stretch (MAC): a stretched cell drops its aspect-ratio in
    Safari 27.2, so a row with no credits cell in it sized to 0 and the sheet vanished.
    The ratio sizes the row; height:100% then levels a 4/5 with an 8/5 beside it. */
 /* Height from the frame's own 4:5, not the row: a tall credits cell (6 credits at 1024) stretched the row and widened its frames into the next column. */
@@ -1184,11 +1184,11 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-steps>div{height:calc(100svh - 64px)}
 .v3 .mo-shot{position:absolute;inset:0;overflow:hidden;opacity:0;transition:opacity .6s ease}
 .v3 .mo-shot[data-on]{opacity:1}
-/* The caption over a bright reel (audit, 2026-11-01): Ladera's still put the label at 1.9:1 and the title at 3:1. A shade up from the bottom, long-tailed so it shows no edge, under the corner one: 7:1 and up on every reel. */
+/* The caption over a bright reel (audit): Ladera's still put the label at 1.9:1 and the title at 3:1. A shade up from the bottom, long-tailed so it shows no edge, under the corner one: 7:1 and up on every reel. */
 .v3 .mo-stage::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .66) 16%,rgb(var(--scrim) / .4) 30%,rgb(var(--scrim) / .16) 44%,rgb(var(--scrim) / .04) 54%,rgb(var(--scrim) / 0) 62%),linear-gradient(20deg,rgb(var(--scrim) / .5) 0%,rgb(var(--scrim) / 0) 42%);pointer-events:none;z-index:1}
 .v3 .mo-stage::before{content:"";position:absolute;inset:0 0 auto;height:300px;background:linear-gradient(to bottom,rgb(var(--scrim) / .72),rgb(var(--scrim) / .36) 55%,rgb(var(--scrim) / 0));pointer-events:none;z-index:1}
 .v3 .mo-hit{all:unset;position:absolute;inset:0;z-index:2;cursor:pointer}
-/* all:unset drops the global ring: put it back for keyboard focus (MAC audit, 2026-11-04). */
+/* all:unset drops the global ring: put it back for keyboard focus (MAC audit). */
 .v3 .mo-hit:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
 .v3 .mo-h,.v3 .mo-cap,.v3 .mo-index,.v3 .mo-play{position:absolute;z-index:3}
 .v3 .mo-h{top:24px;left:var(--g);margin:0;color:rgb(var(--on-photo) / .9)}
@@ -1452,7 +1452,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .htools::after{order:-1;margin:0 8px 0 20px}
 .v3 .hsearch{flex:none;width:240px;height:32px}}
 /* 640 to 1023: the name, the links and the tools do not fit one line (the name clipped to "ulian Gigola"),
-   so the pinned tools take a second row inside the same glass bar, a hairline above them (Julian, 2026-11-22). */
+   so the pinned tools take a second row inside the same glass bar, a hairline above them (Julian). */
 @media (min-width:640px) and (max-width:1023.98px){
 .v3 .site-hdr{flex-wrap:wrap}
 .v3 .site-wm{flex:none}
@@ -1466,8 +1466,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* Docked at 0 like the open bar, the safe area as padding on --bg, so no photo strip shows above it (MAC, Duo). */
 :root[data-pft][data-tuck] .v3 .htools{position:fixed;top:0;right:0;z-index:1;padding:env(safe-area-inset-top,0px) 4px 0;pointer-events:auto;background:var(--bg);border:solid var(--line);border-width:0 0 1px 1px}
 :root[data-pft][data-tuck] .v3 .htools::after{display:none}
-/* bottom:auto: the phone open rule sets inset:0, which on a fixed bar filled the screen (QA, 2026-11-04). */
-/* top:0: the padding already carries the safe area; top plus padding counted it twice (66px on the Duo once Safari collapses its bar, MAC 2026-11-22). */
+/* bottom:auto: the phone open rule sets inset:0, which on a fixed bar filled the screen (QA). */
+/* top:0: the padding already carries the safe area; top plus padding counted it twice (66px on the Duo once Safari collapses its bar). */
 :root[data-pft][data-tuck] .v3 .htools.open{top:0;left:0;bottom:auto;padding:var(--vvpad,env(safe-area-inset-top,0px)) var(--gr) 0 var(--g);border-left:0;translate:0 var(--vvy,0px)}
 .v3 #p-work .whead{display:contents}
 /* Laptop and desktop (a mouse): the header stays on the portfolio, and it and the search,
@@ -1490,7 +1490,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 /* Credits: a person's avatar comes in beside their @handle on hover, and
    is always there on a phone. The handle opens their Instagram in a new tab. */
 .v3 .sv-row li a{display:inline-flex;align-items:center;justify-content:flex-end;width:auto}
-/* A 44px tap area round the 24px handle, inside its row (audit 2026-11-04); the look is unchanged. */
+/* A 44px tap area round the 24px handle, inside its row (audit); the look is unchanged. */
 .v3 .sv-row li a{position:relative}.v3 .sv-row li a::after{content:"";position:absolute;inset:-10px 0}
 .v3 .sv-info li>a{display:flex;justify-content:space-between;gap:24px;width:100%}
 .v3 .cr-av{position:relative;display:inline-grid;place-items:center;flex:none;width:0;height:28px;margin-right:0;border-radius:50%;overflow:hidden;background:var(--accent);color:var(--accent-foreground);font:600 15px/1 var(--mono);text-transform:uppercase;opacity:0;transition:width .3s cubic-bezier(.2,.7,.2,1),margin-right .3s cubic-bezier(.2,.7,.2,1),opacity .2s}
@@ -1572,13 +1572,13 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pj-big .pj-mark{display:none}.v3 .pj-big:has(.pj-mark)::after{content:none}}
 /* A short tab ("All", 25px) grows sideways to 44px, never past half the 28px gap to its neighbour. */
 .v3 .tabs a[href]::after{left:max(-14px,min(0px,calc(50% - 22px)));right:max(-14px,min(0px,calc(50% - 22px)))}
-/* Project page: the closing ask, after the credits (critique, 2026-10-29). */
+/* Project page: the closing ask, after the credits (critique). */
 .v3 .pj-ask{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px 40px;padding:40px 0;border-bottom:1px solid var(--line)}
 .v3 .pj-ask h2{margin:0;font:900 clamp(2rem,calc(4*var(--v3u)),3.75rem)/.95 var(--display);letter-spacing:-.045em}
 .v3 .pj-ask p{margin:12px 0 0;max-width:44ch}
-/* The form's quiet way out to a call or an email (critique, 2026-10-29). */
+/* The form's quiet way out to a call or an email (critique). */
 .v3 .in-alt{margin:20px 0 0;display:flex;flex-wrap:wrap;gap:6px 10px}
-/* Taller to the finger, the line unmoved (audit, 2026-10-30). On a phone the email wraps 6px under the call
+/* Taller to the finger, the line unmoved (audit). On a phone the email wraps 6px under the call
    and the two meet in that gap, so neither covers the other's words: the call grows up to 44, short of the
    chips; the email down to the sticky Next bar, 38 (more would need the bar to move). */
 .v3 .in-alt a{color:var(--ink);text-underline-offset:3px;position:relative;padding:16px 0;margin:-16px 0}
@@ -1589,18 +1589,18 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pj-ask>.btn{margin:0 clamp(40px,7vw,140px) 0 auto} /* toward the right edge, a little in (Julian) */}
 /* Phone: the Next name keeps each word whole, shrinking to fit its longest word (Julian). */
 @media (max-width:700px){.v3 .pj-next b{overflow-wrap:normal;font-size:min(2.5rem,calc((100vw - 2 * var(--g) - 88px) / (var(--lw,8) * .6)))}}
-/* /book: the call as a quiet link under the session grid (critique, 2026-10-29). */
+/* /book: the call as a quiet link under the session grid (critique). */
 .v3 .stabs-more{display:flex;flex-direction:column;align-items:flex-start;margin-top:-4px}
 .v3 .stabs-call{align-self:flex-start;margin:0;padding:12px 0;text-align:left;background:none;border:0;color:var(--mute);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .v3 .stabs-call[aria-pressed="true"]{color:var(--accent)}
 @media (hover:hover){.v3 .stabs-call:hover{color:var(--ink)}}
-/* The frames under the title at their own shape (P3, 2026-10-29): no crop, and no side bars
+/* The frames under the title at their own shape (P3): no crop, and no side bars
    from `contain` in a box of another shape. Capped by the cell on both sides. */
 @media (min-width:901px){.v3 .pj-hero:not(.two) .pj-lead .pj-r img{height:auto;max-height:100%;width:auto;max-width:100%;object-fit:contain}}
 
 /* Audit v3.0.92: under 350px the cover's words clipped; the Menu takes their place. */
 .v3 .a-cover .cover-burger{display:none}
-/* under 480px the four links no longer fit on one line ("Book a session" is longer than "Sessions" was: "Portfolio" ran off the left at 390, QA): the menu button */
+/* under 480px the four links no longer fit on one line ("Book a session" is longer than "Sessions" was: "Portfolio" ran off the left at 390): the menu button */
 @media (max-width:479.98px){.v3 .a-cover .nav>a,.v3 .a-cover .nav>.tbtn{display:none}.v3 .a-cover .cover-burger{display:block}}
 /* Every page's bar shows its four links from 640px, where they fit at full size beside the name (580px plus air), and the menu button below.
    Tighter links from 480 read as packed. The home cover has no name in its bar, so its links stay from 480. */
@@ -1657,7 +1657,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 #p-project .pj-lead .pj-r img{width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}}
 /* A tall or narrow window: the big frame keeps its picture, up to 62vw, where it was cut
    to 48vw. Under 5:4 one frame stands under the title, at the size the column gives it; the second is left out
-   there. A copy of it closing the sheet sat alone on the last row, and Julian cut it (2026-11-18). */
+   there. A copy of it closing the sheet sat alone on the last row, and Julian cut it. */
 @media (min-width:901px){.v3 #p-project .pj-hero:not(.two):not(.bleed) .pj-big{max-width:62vw}}
 /* A horizontal cover: the title where it always is, the line that was under it across
    from it on the right, then the cover edge to edge, cut to what the screen has left under the bar. */
@@ -1747,7 +1747,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .ab-bio{overflow-wrap:break-word}
 }
 
-/* ---- Portfolio search, Apple pass (Julian approved mock v10, 2026-11-22) ----
+/* ---- Portfolio search, Apple pass (Julian approved mock v10) ----
    One field for the row and the header: a filled plate (card tone, 4px, no outline at
    rest), teal ring on focus only (One Accent Rule), an x to clear once typed, a / hint
    for a mouse. Touch: the field owns the row while focused, the views step aside and a

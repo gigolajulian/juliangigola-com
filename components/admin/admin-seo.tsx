@@ -2,7 +2,7 @@
 
 import { errorText } from "@/lib/utils";
 import * as React from "react";
-import { adminCall, authed } from "@/lib/leads/lead-desk";
+import { adminCall, authed } from "@/lib/admin/admin-call";
 
 /* ── seo ──────────────────────────────────────────────────────────
  * What search and visitors make of each page, from `/api/seo`: totals

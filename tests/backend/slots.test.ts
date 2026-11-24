@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanHours, EVENTS } from "@/lib/booking/rules";
-import { forgetToken } from "@/lib/booking/gcal";
-import { localIso, startsFor, zoned } from "@/lib/booking/slots";
+import { forgetToken } from "@/lib/google";
+import { localIso, startsFor, instantIn } from "@/lib/booking/slots";
 
 /* The site's own open times (`lib/booking/slots.ts`, `app/api/slots`): the rules,
    minus what hello@'s calendar says is busy, in the visitor's
@@ -79,8 +79,8 @@ describe("startsFor", () => {
 
   it("follows the clocks across daylight time", () => {
     // Sunday 2026-03-08, the day PDT starts: 10 AM is UTC-7.
-    expect(zoned(2026, 3, 8, 600)).toBe(Date.parse("2026-03-08T17:00:00Z"));
-    expect(zoned(2026, 3, 7, 600)).toBe(Date.parse("2026-03-07T18:00:00Z"));
+    expect(instantIn(2026, 3, 8, 600)).toBe(Date.parse("2026-03-08T17:00:00Z"));
+    expect(instantIn(2026, 3, 7, 600)).toBe(Date.parse("2026-03-07T18:00:00Z"));
     expect(localIso(Date.parse("2026-03-08T17:00:00Z"), "Europe/Paris")).toBe("2026-03-08T18:00:00+01:00");
   });
 });

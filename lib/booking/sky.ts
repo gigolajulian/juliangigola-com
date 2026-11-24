@@ -8,7 +8,7 @@
  * Client-safe, no imports beyond the zone.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
 
 type Stop = readonly [hour: number, l: number, c: number, h: number];
 

@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
-import { MAX_REFS } from "@/lib/inbox";
+import { MAX_REFS } from "@/lib/leads/enquiry";
 
 /* ── references on the inquiry ──
    Images the visitor uploads, and frames of Julian's they pick from a

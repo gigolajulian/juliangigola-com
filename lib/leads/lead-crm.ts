@@ -6,19 +6,21 @@
  * Pure functions: `app/api/leads` reads and writes, these decide.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "../booking/rules";
-import { canonical, isStage, STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
+import { TZ } from "@/lib/time-zone";
+import { canonical } from "./lead-crypto";
+import { isStage, STAGES, WON, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
 import { balance, isSettled } from "./invoice";
 import { cell, paidTotal, type MasterEntry } from "./activity-log";
 import { byCodeUnit } from "@/lib/utils";
+import { asRecord, isRecord } from "@/lib/json";
 
 /** A lead's identity: the address, or an Instagram handle or phone for someone who never wrote from one. */
-export function identity(o: { email?: string; ig?: string; phone?: string }): string | null {
-  const email = o.email?.trim().toLowerCase();
+export function identity(o: { email?: unknown; ig?: unknown; phone?: unknown }): string | null {
+  const email = clip(o.email)?.toLowerCase();
   if (email?.includes("@") && !email.startsWith("@")) return email;
-  const ig = o.ig?.trim().replace(/^@/, "").toLowerCase();
+  const ig = clip(o.ig)?.replace(/^@/, "").toLowerCase();
   if (ig && /^[a-z0-9._]{1,30}$/.test(ig)) return `ig:@${ig}`;
-  const tel = o.phone?.replace(/[^\d+]/g, "");
+  const tel = clip(o.phone)?.replace(/[^\d+]/g, "");
   if (tel && tel.replace(/\D/g, "").length >= 7) return `tel:${tel}`;
   return null;
 }
@@ -26,19 +28,8 @@ export function identity(o: { email?: string; ig?: string; phone?: string }): st
 /** Whether there is an address to reply to (not an Instagram or phone identity). */
 export const mailable = (email: string) => email.includes("@") && !email.startsWith("ig:") && !email.startsWith("tel:");
 
-export type NewLead = {
-  name: string;
-  email?: string;
-  phone?: string;
-  ig?: string;
-  company?: string;
-  kind?: string;
-  stage?: Stage;
-  source?: string;
-  notes?: string;
-};
-
-const clip = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : undefined);
+/** A trimmed string cut to `n`, or undefined for anything else or a blank one. */
+const clip = (v: unknown, n = Infinity) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : undefined);
 
 /** People a lead holds at most: a brand job is a handful. */
 export const PEOPLE_MAX = 12;
@@ -51,8 +42,9 @@ export function cleanPeople(v: unknown, own: string): Person[] | { error: string
   if (v.length > PEOPLE_MAX) return { error: `${PEOPLE_MAX} people at most.` };
   const seen = new Set<string>();
   const out: Person[] = [];
-  for (const x of v as Record<string, unknown>[]) {
-    const email = clip(x?.email, 120)?.toLowerCase();
+  for (const raw of v) {
+    const x = asRecord(raw);
+    const email = clip(x.email, 120)?.toLowerCase();
     if (!email || !ADDRESS.test(email)) return { error: `${email ? `"${email}"` : "A blank"} is not an email address.` };
     if (canonical(email) === canonical(own)) return { error: "That is the lead's own address." };
     if (seen.has(canonical(email))) continue;
@@ -89,18 +81,18 @@ export function cosmosLink(v: unknown): string | undefined {
 }
 
 /** The plan from the desk, checked and cut; null when nothing is left in it. Team: only addresses of the lead's people. */
-export function cleanPlan(v: unknown, people: Person[] = []): ShootPlan | null | { error: string } {
-  if (v === null) return null;
-  if (typeof v !== "object" || Array.isArray(v)) return { error: "Bad plan." };
-  const x = v as Record<string, unknown>;
+export function cleanPlan(x: unknown, people: Person[] = []): ShootPlan | null | { error: string } {
+  if (x === null) return null;
+  if (!isRecord(x)) return { error: "Bad plan." };
   const refs = (Array.isArray(x.refs) ? x.refs : []).map(framePath).filter((r): r is string => !!r).slice(0, REFS_MAX);
   if (Array.isArray(x.refs) && x.refs.some((r) => clip(r, 300) && !framePath(r))) return { error: "References are your own frames: paste a /work/ link." };
   if (clip(x.cosmos, 300) && !cosmosLink(x.cosmos)) return { error: "That is not a cosmos.so link." };
-  const shots = (Array.isArray(x.shots) ? x.shots : []).slice(0, SHOTS_MAX).flatMap((o: Record<string, unknown>) => {
-    const text = clip(o?.text, 120);
+  const shots = (Array.isArray(x.shots) ? x.shots : []).slice(0, SHOTS_MAX).flatMap((raw) => {
+    const o = asRecord(raw);
+    const text = clip(o.text, 120);
     return text ? [{ text, ...(o.done === true ? { done: true } : {}) }] : [];
   });
-  const sh = (x.sheet && typeof x.sheet === "object" ? x.sheet : {}) as Record<string, unknown>;
+  const sh = asRecord(x.sheet);
   const ours = new Set(people.map((p) => canonical(p.email)));
   const team = (Array.isArray(sh.team) ? sh.team : []).filter((e): e is string => typeof e === "string" && ours.has(canonical(e))).map((e) => e.toLowerCase());
   const sheet = { call: clip(sh.call, 20), window: clip(sh.window, 60), place: clip(sh.place, 120), bring: clip(sh.bring, 200), ...(team.length ? { team } : {}) };
@@ -123,8 +115,9 @@ export function cleanTasks(v: unknown, old: Task[] = [], people: Person[] = [], 
   const seen = new Set<string>();
   const tasks: Task[] = [];
   const events: LeadEvent[] = [];
-  for (const x of v as Record<string, unknown>[]) {
-    const text = clip(x?.text, 80);
+  for (const raw of v) {
+    const x = asRecord(raw);
+    const text = clip(x.text, 80);
     if (!text) return { error: "A task needs words." };
     const id = clip(x.id, 24)?.replace(/[^\w-]/g, "") || Math.random().toString(36).slice(2, 10);
     if (seen.has(id)) continue;
@@ -168,7 +161,7 @@ export function callSheet(l: Pick<Lead, "name" | "email" | "when" | "kind" | "pe
 }
 
 /** A lead he added by hand: read already (it is his own news), at the stage he picked. */
-export function manualLead(given: NewLead, at: string): Lead | { error: string } {
+export function manualLead(given: Record<string, unknown>, at: string): Lead | { error: string } {
   const name = clip(given.name, 80);
   if (!name) return { error: "A name, please." };
   const email = identity(given);
@@ -269,7 +262,6 @@ export function cleanTemplates(v: unknown): Template[] {
   return [...saved, ...TEMPLATES.filter((t) => t.id.startsWith("nudge") && !saved.some((s) => s.id === t.id))];
 }
 
-const WON: Stage[] = ["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"];
 const median = (xs: number[]) => {
   if (!xs.length) return null;
   const s = [...xs].sort((a, b) => a - b);
@@ -360,7 +352,7 @@ export function stats(all: (Lead & { id?: string })[], now: number, master: Mast
 
 /** Every lead as CSV, for his records. Spreadsheet formulas are defused.
  * `paid`: dollars paid per email, from the activity log. Open balance: invoices not settled. */
-export function csv(leads: Lead[], paid: Record<string, number> = {}): string {
+export function leadsCsv(leads: Lead[], paid: Record<string, number> = {}): string {
   const cols = ["name", "email", "phone", "instagram", "company", "stage", "kind", "source", "quote", "paid total", "open balance", "lost reason", "first seen", "last activity", "booked for", "archived", "notes"] as const;
   const rows = leads.map((l) =>
     [l.name, mailable(l.email) ? l.email : "", l.phone, l.ig, l.company, l.stage, l.kind, l.source, l.quote, paid[l.email] ?? 0, (l.invoices ?? []).filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0), l.lostReason, l.firstAt, l.lastAt, l.when, l.archivedAt ? "yes" : "", l.notes].map(cell).join(","),

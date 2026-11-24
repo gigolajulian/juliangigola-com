@@ -458,11 +458,11 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-11-15: Julian's own subject for a proof or delivery mail: one line, control characters out, 150 at most; empty keeps the default.
 - 2026-11-15: ── contracts: the link to sign, and the signed copy ──
 
-### lib/gather.ts
+### lib/motion/gather.ts
 - 2026-10-14: photos gather in from outside the page. Walls stream by column. Project frames slide in from the right.
 - 2026-10-15: the 404 wall builds up row by row.
 
-### lib/inbox.ts
+### lib/leads/enquiry.ts
 - 2026-10-14: more to go on without more to fill in (visit trail, referrer, device, city).
 - 2026-11-10: nobody gets turned away, so a@b.c passes.
 
@@ -653,7 +653,7 @@ asked and the wording of the ask are here.
 
 - Undated attributions ("Julian: ...") are still in about 700 comment
   lines. They have no date to file under, so they were left for now.
-- `components/admin-editor.tsx` keeps "As of 2026-09-12": it is a warning
+- `components/admin/editor/editor.tsx` keeps "As of 2026-09-12": it is a warning
   about the current Cloudflare Access policy, not history.
 - Many comments still name `globals.css` for rules that now live in
   `app/styles/*.css`. `globals.css` is still the entry point, so they were
@@ -673,6 +673,20 @@ scrolls and while its group is off screen (`patches/liquid-gooey+0.2.2.patch`).
   patch shows exactly what the site changed, and the test fails when the
   package moves under it.
 - **Not done:** sending the fix upstream. That is Julian's call.
+- 2026-11-24: retired. Its last consumers went in r15, so the package, the
+  patch and its test went in r17.
+
+## 2026-11-24: motion stays a devDependency
+
+`motion` ships in the browser bundle through one vendored widget,
+`components/vendor/tilted-card.jsx` (the lightbox tilt). It sits in
+`devDependencies` on purpose: the Worker runs only the built bundle, never
+`node_modules`, and the build installs devDependencies, so the split in
+`package.json` says what the deployed Worker needs at runtime (nothing from
+either list). `dialkit` is the same: the dev dial panel.
+
+- **Not chosen:** porting the tilt to gsap to drop `motion`. The widget is
+  vendored as it came, and a port is a visible change to its spring.
 
 ## 2026-10-09: globals.css split by area; device queries listed, not custom media
 
@@ -760,7 +774,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/strip/wheel.ts`: An open dialog keeps its own wheel: the reference picker sits in the form, so inside the strip, and its photographs could not be scrolled. (Julian)
 - `components/work-shell.tsx`: Preview (`?cards`): each discipline drawn as one card, its name and its projects (`globals.css`, `data-cards`).
 - `lib/deck.ts`: Dealt again once the galleries' walls are laid out (`strip-relaid`, `strip.tsx`) or held-back sections arrive: from Event coverage on, the first wall, every chapter stood somewhere else than the deal had measured, and the stack stopped working there. (Julian)
-- `lib/inbox.ts`: `inline`: the picks attached inline as `cid:pick-<index>`, shown under their link in the HTML copy; one that would not fetch is the link alone. (Julian)
+- `lib/leads/enquiry.ts`: `inline`: the picks attached inline as `cid:pick-<index>`, shown under their link in the HTML copy; one that would not fetch is the link alone. (Julian)
 
 ### 2026-10-07
 

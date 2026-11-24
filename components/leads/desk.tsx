@@ -1,6 +1,6 @@
 "use client";
 
-/* ── the lead desk on Astryx, opt-in ──────────────────────────────
+/* ── the lead desk on Astryx ─────────────────────────────────────
  * Served at /admin/leads only, so Astryx's CSS never reaches the site.
  *
  * Home is the table-filter shape: Your move, This week, Waiting on them,
@@ -27,7 +27,7 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
-import { SignIn } from "@/components/admin/sign-in";
+import { SignIn } from "@/components/desk/sign-in";
 import { LeadDesk, type LeadAsk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
 import { isSetAside, deskCall, loadErrorText, LOCKED, matches, inFilter, type Size } from "@/lib/leads/lead-desk";
@@ -81,18 +81,55 @@ const stamp = (t: number) => fmt({ weekday: "short", month: "short", day: "numer
 const SHEET_CSS = "dialog[data-jg-sheet]{inset:0;margin:0;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0;border-radius:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}dialog[data-jg-sheet]>*{height:100%;max-height:none!important}";
 const PULL = 72; // px of pull, at the top of the page, that refreshes on release
 
+/**
+ * Pull down to refresh: the installed phone app has no browser bar to do it. At the top of the page, a pull past
+ * PULL px calls `onPull` and bumps the tick, so a page keyed on it remounts and its own fetches (money, visits,
+ * galleries) run again. `enabled` is read as each touch starts. Gives the pull distance and the tick.
+ */
+function usePullRefresh(onPull: () => void, enabled: React.RefObject<boolean>): [number, number] {
+  const [tick, setTick] = React.useState(0);
+  const [pull, setPull] = React.useState(0);
+  React.useEffect(() => {
+    let x0 = 0, y0 = -1, d = 0;
+    const atTop = (el: Element | null) => { for (; el; el = el.parentElement) if (el.scrollTop > 0) return false; return true; };
+    const start = (e: TouchEvent) => {
+      d = 0;
+      y0 = enabled.current && e.touches.length === 1 && atTop(e.target as Element) ? e.touches[0].clientY : -1;
+      x0 = e.touches[0].clientX;
+    };
+    const move = (e: TouchEvent) => {
+      if (y0 < 0) return;
+      d = e.touches[0].clientY - y0;
+      // a sideways swipe (the week strip, a tab row) is not a pull
+      if (Math.abs(e.touches[0].clientX - x0) > Math.max(24, d)) { y0 = -1; d = 0; }
+      setPull(Math.max(0, d));
+    };
+    const end = (e: TouchEvent) => {
+      if (e.type === "touchend" && y0 >= 0 && d > PULL) { onPull(); setTick((t) => t + 1); }
+      y0 = -1;
+      setPull(0);
+    };
+    addEventListener("touchstart", start, { passive: true });
+    addEventListener("touchmove", move, { passive: true });
+    addEventListener("touchend", end);
+    addEventListener("touchcancel", end);
+    return () => { removeEventListener("touchstart", start); removeEventListener("touchmove", move); removeEventListener("touchend", end); removeEventListener("touchcancel", end); };
+  }, [onPull, enabled]);
+  return [pull, tick];
+}
+
 export function LeadsDesk() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [query, setQuery] = React.useState("");
   const [pick, setPick] = React.useState<string | null>(null);
   const [open, setOpen] = React.useState<string | null>(null);
-  // Today first, as on the classic desk.
+  // The desk opens on Today.
   const [screen, setScreen] = React.useState<View>("today");
   const [fresh, setFresh] = React.useState<Lead | null>(null);
   const [calTab, setCalTab] = React.useState<"bookings" | "availability">("bookings");
   const [asideTab, setAsideTab] = React.useState<Filter>("snoozed");
-  // List or Board, kept on this device under the classic desk's key. The desk draws nothing until mounted (see `mode`), so no hydration gap.
+  // List or Board, kept on this device. The desk draws nothing until mounted (see `mode`), so no hydration gap.
   const [board, setBoardState] = React.useState(() => typeof window !== "undefined" && (() => { try { return localStorage.getItem(BOARD_STORE) === "1"; } catch { return false; } })());
   const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
   // The gallery a lead's Galleries section opened the Proofs desk on; the side nav opens it on the list.
@@ -107,18 +144,17 @@ export function LeadsDesk() {
   const railed = useMediaQuery("(max-width: 1279px)");
   const size: Size = isPhone ? "phone" : isMid ? "mid" : "wide";
 
-  const call = deskCall;
   const load = React.useCallback(() => {
-    call<{ leads: LeadSummary[] }>()
+    deskCall<{ leads: LeadSummary[] }>()
       .then((o) => { setLeads(o.leads); setAt(Date.now()); setError(null); })
       .catch((e: unknown) => setError(loadErrorText(e)));
-  }, [call]);
+  }, []);
   React.useEffect(load, [load]);
-  // The installed app's badge: unread leads not put aside, as on the original desk.
+  // The installed app's badge: unread leads not put aside.
   React.useEffect(() => { if (leads) badge(leads.filter((l) => l.unread && !isSetAside(l)).length); }, [leads]);
   React.useEffect(() => {
-    call<{ templates: Template[] }>({ path: "/templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
-  }, [call]);
+    deskCall<{ templates: Template[] }>({ path: "/templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
+  }, []);
   // Search and quick actions, on Ctrl or Cmd K: every lead by name, email, shoot or stage, and every page.
   const [finding, setFinding] = React.useState(false);
   // What the palette asked the open lead to do (add a task, start an invoice).
@@ -150,38 +186,9 @@ export function LeadsDesk() {
   // Unknown until read: Astryx's root Theme writes data-theme onto <html> itself, so mounting it with a guess would lock that guess in.
   const mode = useSiteThemeRead();
 
-  // Pull down to refresh: the installed phone app has no browser bar to do it. At the top of the page, a pull past
-  // PULL px loads the leads again and remounts the page, so its own fetches (money, visits, galleries) run again.
-  // Never with a lead open, which may hold typing.
-  const [tick, setTick] = React.useState(0);
-  const [pull, setPull] = React.useState(0);
+  // Pull down to refresh, never with a lead open, which may hold typing. `tick` remounts the page.
   const pullOk = React.useRef(false);
-  React.useEffect(() => {
-    let x0 = 0, y0 = -1, d = 0;
-    const atTop = (el: Element | null) => { for (; el; el = el.parentElement) if (el.scrollTop > 0) return false; return true; };
-    const start = (e: TouchEvent) => {
-      d = 0;
-      y0 = pullOk.current && e.touches.length === 1 && atTop(e.target as Element) ? e.touches[0].clientY : -1;
-      x0 = e.touches[0].clientX;
-    };
-    const move = (e: TouchEvent) => {
-      if (y0 < 0) return;
-      d = e.touches[0].clientY - y0;
-      // a sideways swipe (the week strip, a tab row) is not a pull
-      if (Math.abs(e.touches[0].clientX - x0) > Math.max(24, d)) { y0 = -1; d = 0; }
-      setPull(Math.max(0, d));
-    };
-    const end = (e: TouchEvent) => {
-      if (e.type === "touchend" && y0 >= 0 && d > PULL) { load(); setTick((t) => t + 1); }
-      y0 = -1;
-      setPull(0);
-    };
-    addEventListener("touchstart", start, { passive: true });
-    addEventListener("touchmove", move, { passive: true });
-    addEventListener("touchend", end);
-    addEventListener("touchcancel", end);
-    return () => { removeEventListener("touchstart", start); removeEventListener("touchmove", move); removeEventListener("touchend", end); removeEventListener("touchcancel", end); };
-  }, [load]);
+  const [pull, tick] = usePullRefresh(load, pullOk);
 
   if (error === LOCKED)
     return (
@@ -210,7 +217,7 @@ export function LeadsDesk() {
   const changed = (l: Lead) => setLeads((rs) => rs?.map((r) => (r.email === l.email ? { ...r, ...leadSummary(l), id: r.id } : r)) ?? null);
   /** A swipe or a button here: the same PATCH the lead's own Snooze, Archive and stage buttons send. */
   const act = (l: LeadSummary, body: LeadPatch) =>
-    call<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, ...body }) })
+    deskCall<{ lead: Lead }>({ method: "PATCH", body: JSON.stringify({ key: `lead:${l.id}`, ...body }) })
       .then((o) => changed(o.lead))
       .catch((e: unknown) => { alert(errorText(e)); load(); });
   const tomorrow = (l: LeadSummary) => act(l, { snoozeUntil: dayOn() });
@@ -320,7 +327,7 @@ export function LeadsDesk() {
 
   // The lead page: its own Astryx layout (components/leads/lead.tsx).
   const lead = current ? (
-    <LeadDesk key={current.id} ask={ask} summary={current} initial={fresh?.email === current.email ? fresh : null} call={call} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={(token) => { show("proofs"); setProofPick(token ?? null); }} />
+    <LeadDesk key={current.id} ask={ask} summary={current} initial={fresh?.email === current.email ? fresh : null} call={deskCall} onChange={changed} onBack={() => setOpen(null)} reload={load} templates={templates} others={live.filter((o) => o.id !== current.id)} size={size} toProofs={(token) => { show("proofs"); setProofPick(token ?? null); }} />
   ) : null;
 
   // The lead from the POST itself: KV lists lag a fresh write, so it goes in by hand and opens whole.
@@ -337,19 +344,19 @@ export function LeadsDesk() {
     setError(LOCKED);
   };
   const pages: Partial<Record<View, React.ReactNode>> = {
-    invoices: <InvoicesDesk leads={live} call={call} open={openLead} changed={changed} />,
+    invoices: <InvoicesDesk leads={live} call={deskCall} open={openLead} changed={changed} />,
     licences: <LicencesDesk leads={live} open={openLead} />,
-    aside: <AsideDesk leads={leads ?? []} call={call} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} top={switcher} />,
-    stats: <StatsDesk call={call} />,
+    aside: <AsideDesk leads={leads ?? []} call={deskCall} open={openLead} done={() => { setOpen(null); load(); }} tab={asideTab} setTab={setAsideTab} top={switcher} />,
+    stats: <StatsDesk call={deskCall} />,
     traffic: <PanelDesk which="traffic" />,
     seo: <PanelDesk which="seo" />,
     hours: <HoursDesk />,
-    templates: <TemplatesDesk call={call} templates={templates} saved={setTemplates} />,
-    device: <DeviceDesk call={call} reload={load} signOut={signOut} />,
+    templates: <TemplatesDesk call={deskCall} templates={templates} saved={setTemplates} />,
+    device: <DeviceDesk call={deskCall} reload={load} signOut={signOut} />,
     more: <More go={show} find={() => setFinding(true)} />,
     proofs: <ProofsDesk embedded key={proofPick ?? ""} initial={proofPick ?? undefined} />,
   };
-  const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyDesk /> : screen === "calendar" ? <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadDesk call={call} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayDesk leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
+  const page = lead ?? pages[screen] ?? (screen === "money" ? <MoneyDesk /> : screen === "calendar" ? <CalendarDesk leads={live.filter((l) => !l.archivedAt)} size={size} open={(l) => setOpen(l.id ?? null)} tab={calTab} setTab={setCalTab} /> : screen === "new" ? <NewLeadDesk call={deskCall} leads={live} size={size} done={added} open={(l) => setOpen(l.id ?? null)} cancel={() => show("leads")} /> : screen === "today" && leads ? <TodayDesk leads={live} size={size} open={(l) => setOpen(l.id ?? null)} show={() => show("leads")} /> : home);
   const section = lead ? null : sectionOf(screen);
   // Leads carries its own Open / Put aside switch under the title; the other groups keep the tab row.
   const shown = section && section[2].length > 1 && section[0] !== "leads" ? (
@@ -359,6 +366,7 @@ export function LeadsDesk() {
       content={page}
     />
   ) : page;
+  // eslint-disable-next-line react-hooks/refs -- only the touch handlers read it; set after the sign-in return, so no hook can
   pullOk.current = !lead;
   if (!mode) return null;
   return (

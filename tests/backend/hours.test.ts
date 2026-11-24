@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeStore, fakeLock, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
-import { forgetToken } from "@/lib/booking/gcal";
+import { forgetToken } from "@/lib/google";
 import { BookingLock } from "@/worker/booking-lock";
 
 /* Hours from the lead desk (`app/api/booking/hours`): only Julian can set

@@ -95,7 +95,7 @@ const POSTER_HOSTS = /^https:\/\/i\.(?:ytimg|vimeocdn)\.com\//;
  * The plain file a resized address stands for, or null when `url` is not one.
  * A picture of ours comes back as `/<path>`; a provider still comes back as
  * its own `https://` URL, never glued onto this host as `/https://...`, which
- * 404s (MAC, 2026-11-23). A slash a proxy merged (`https:/`) is put back.
+ * 404s (MAC). A slash a proxy merged (`https:/`) is put back.
  */
 export function plainSrc(url: string): string | null {
   const rest = /\/cdn-cgi\/image\/[^/]+\/(.+)$/.exec(url)?.[1];

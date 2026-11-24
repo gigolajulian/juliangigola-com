@@ -10,7 +10,7 @@ import { useNavInk } from "./nav-ink";
 import { noSubscribe, sessionGet, sessionSet } from "@/lib/utils";
 
 /* JG V3 chrome: the glass header, the phone menu, the theme
-   toggle and the footer line. Every route uses it, /admin included (2026-10-31). */
+   toggle and the footer line. Every route uses it, /admin included. */
 
 
 /* Motion that is not in the master (the splash, the page zoom, the pointer

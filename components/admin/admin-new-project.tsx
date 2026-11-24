@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import type { Status } from "@/lib/admin/publish";
+import { StatusLine } from "@/components/admin/status-line";
 import { ADDED_PATH, type AddedProject } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import {
@@ -25,12 +27,6 @@ import { cn, errorText } from "@/lib/utils";
  * 2500px the harvester uses. Uploading originals would mean committing 40MB
  * of camera JPEG per shoot for pixels nothing can show.
  * ─────────────────────────────────────────────────────────────── */
-
-type Status =
-  | { kind: "idle" }
-  | { kind: "working"; message: string }
-  | { kind: "error"; message: string }
-  | { kind: "done"; message: string };
 
 type Staged = {
   file: File;
@@ -195,7 +191,7 @@ export function AdminNewProject({
       });
 
       setStatus({
-        kind: "done",
+        kind: "saved",
         message: `Committed ${ready.length} frames. The site rebuilds and goes live in a couple of minutes.`,
       });
       setStaged([]);
@@ -347,18 +343,7 @@ export function AdminNewProject({
         >
           Publish project
         </button>
-        {status.kind !== "idle" ? (
-          <p
-            className={cn(
-              "label",
-              status.kind === "error"
-                ? "text-destructive"
-                : "text-muted-foreground",
-            )}
-          >
-            {status.message}
-          </p>
-        ) : null}
+        <StatusLine status={status} />
       </div>
     </section>
   );

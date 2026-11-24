@@ -48,7 +48,7 @@ const THUMB = 800;
  * are the two vinyl packages, and the only pieces here that are a whole
  * sleeve rather than a single square. Reordering this list is safe — a
  * release is one cell whether it has one side or two, and the second side
- * lives inside that cell (see `components/cover/cover-faces.tsx`).
+ * is in the viewer (see `components/cover/cover-art-gallery.tsx`).
  *
  * `file` is relative to SRC unless it contains a slash, in which case it is
  * relative to the repo root.

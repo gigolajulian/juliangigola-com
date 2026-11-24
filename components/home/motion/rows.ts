@@ -107,7 +107,7 @@ function coverFrame(s: Covers, p: number) {
   discs(s, x, step * (420 / 520), k);
 }
 
-// The title line rises when HomeCovers (rows.tsx) commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
+// The title line rises when HomeCovers (rows.tsx) commits the new item (on touch too). A turned sleeve turns back.
 function coverTold(s: Covers) {
   for (const it of s.items) it.removeAttribute("data-tp-fl");
   rise(s.el.querySelector(".mt-ttl .ln > span"));
@@ -425,13 +425,13 @@ function films(): Driver {
       if (n < 2) return;
       const ac = new AbortController();
       const opts = { signal: ac.signal };
-      // ?mttp=films: phones and tablets play the current film's preview too, unless the visitor asked to save data
+      // phones and tablets play the current film's preview too, unless the visitor asked to save data
       const s: Films = { el, ctx, row, items, n, cur: +(el.dataset.cur ?? 0), pool: new Map(), pvT: 0, seen: false, movedAt: 0, touchFilms: false };
       // each film rests at the middle of its share of the hold; the shares are eased like Cover art's (rows.tsx)
       snap(el, ctx, n, (p) => ease(p) * n - 0.5, (i) => unease((i + 0.5) / n), () => false, ac.signal);
       row.addEventListener("keydown", (e) => filmKey(s, e), opts);
       addEventListener("scroll", () => (s.movedAt = performance.now()), { passive: true, signal: ac.signal });
-      s.touchFilms = !(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+      s.touchFilms = !navigator.connection?.saveData;
       addEventListener("message", (e) => heard(s, e), opts);
       // a screen early, so the first film is already playing when the section arrives
       const io = new IntersectionObserver(([e]) => ((s.seen = e.isIntersecting), preview(s)), { rootMargin: "100% 0px" });

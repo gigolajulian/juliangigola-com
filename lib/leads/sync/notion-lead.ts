@@ -1,5 +1,6 @@
-import type { Enquiry } from "@/lib/inbox";
+import type { Enquiry } from "@/lib/leads/enquiry";
 import type { Paper, Stage } from "@/lib/leads/leads";
+import { HttpError } from "@/lib/http";
 
 /* ── leads into Notion ────────────────────────────────────────────
  * Every enquiry and booking also lands as a row on the Business
@@ -84,7 +85,7 @@ export async function findRow(token: string, email: string): Promise<string | nu
     sorts: [{ timestamp: "created_time", direction: "descending" }],
     page_size: 1,
   });
-  if (!res.ok) throw Object.assign(new Error(`notion query ${res.status}`), { status: res.status });
+  if (!res.ok) throw new HttpError(`notion query ${res.status}`, res.status);
   return ((await res.json()) as { results: { id: string }[] }).results[0]?.id ?? null;
 }
 

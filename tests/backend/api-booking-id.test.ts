@@ -3,7 +3,7 @@ import { readLog } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { POST } from "@/app/api/booking/[id]/route";
 import { bookingToken } from "@/lib/booking/token";
-import { forgetToken } from "@/lib/booking/gcal";
+import { forgetToken } from "@/lib/google";
 import { BookingLock } from "@/worker/booking-lock";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
 

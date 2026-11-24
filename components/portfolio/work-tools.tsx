@@ -181,11 +181,11 @@ export function Views({
         {VIEWS[2][2]}
       </button>
       {/* Grid, Strip and Canvas: one set. On a phone it folds to the view that is on
-          (data-rep), and the first tap unfolds it (Julian, 2026-11-22). */}
+          (data-rep), and the first tap unfolds it (Julian). */}
       <div className={unfold ? "vset open" : "vset"}>
       <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" data-rep={rep === "canvas" ? "" : undefined} onClick={() => fold(() => go("canvas"))}>
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
-            {/* Two columns out of step, their ends faded: the field runs past the edge (Julian's pick, 2026-11-14). */}
+            {/* Two columns out of step, their ends faded: the field runs past the edge (Julian's pick). */}
             <rect x="1.5" y="1" width="5.5" height="6.5" />
             <rect x="1.5" y="9" width="5.5" height="6" opacity=".55" />
             <rect x="9" y="1" width="5.5" height="1" opacity=".55" />

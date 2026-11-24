@@ -12,8 +12,7 @@ import { Calendar, DotList, dlabel, iso } from "@/components/booking/flow";
 import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
-import { looksLikeEmail } from "@/lib/inbox";
-import { noSubscribe } from "@/lib/utils";
+import { looksLikeEmail, noSubscribe } from "@/lib/utils";
 
 /* JG V3 booking (/book/<session>): one stepper. The sessions
    with a time book through the site's own engine and take the deposit
@@ -38,7 +37,7 @@ function Tabs({ at }: { at: SessionSlug }) {
     setTap({ from: at, x });
     router.replace(`/book/${x}`, { scroll: false });
   };
-  /* The call is a way in, not a session: a quiet link under the grid (critique, 2026-10-29). */
+  /* The call is a way in, not a session: a quiet link under the grid (critique). */
   return (
     <>
       {/* A radio group moves on the arrow keys, one Tab stop for the group (QA on #589). */}
@@ -77,7 +76,7 @@ function More({ on, go }: { on: boolean; go: (x: SessionSlug) => void }) {
       <button type="button" className="stabs-call lbl" aria-pressed={on} onClick={() => go("consultation")}>
         <span className="q">Not sure what you need?</span> <span className="a">Book a 15 min call <i aria-hidden="true">&rarr;</i></span>
       </button>
-      {/* The art director's way out of the session flow (booking critique, 2026-11-04). */}
+      {/* The art director's way out of the session flow (booking critique). */}
       <Link href="/contact/form" prefetch={false} className="stabs-call lbl">
         <span className="q">Commission or campaign?</span> <span className="a">Inquire <i aria-hidden="true">&rarr;</i></span>
       </Link>
@@ -101,11 +100,11 @@ export function BookFlow({ slug, tabs = true, h1 = false, startView }: { slug: S
      copy the photo slot will ask for (its `sizes`, the theme showing, the
      phone frame where there is one). Switching session swapped the src in
      place, and Safari showed the slot empty until the new file came: about
-     80ms of nothing between Portraits and Headshots (MAC, 2026-11-08). */
+     80ms of nothing between Portraits and Headshots (MAC). */
   React.useEffect(() => {
     /* Save-Data or a slow line skips it, as the portfolio's warm does: the
-       five photos are ~550 KB on a 3x phone (audit 2026-11-11). */
-    const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+       five photos are ~550 KB on a 3x phone (audit). */
+    const net = navigator.connection;
     if (!more || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
     const warm = () => {
       const light = document.documentElement.dataset.theme === "light";

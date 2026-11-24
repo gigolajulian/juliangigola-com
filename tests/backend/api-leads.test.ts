@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { summary, enquiry, enquiryKey } from "@/lib/inbox";
+import { summary, enquiry, enquiryKey } from "@/lib/leads/enquiry";
 import { recordLead } from "@/lib/leads/lead-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
@@ -238,6 +238,11 @@ describe("leads", () => {
     expect((await desk("PATCH", "", { body: JSON.stringify({ key: "lead:0000", seen: true }) })).status).toBe(404);
     ctx.env = { INBOX: kv, INBOX_KEY: KEY };
     expect((await desk("GET")).status).toBe(503);
+    expect(await (await desk("GET", "/tasks")).json()).toEqual({ error: "Leads need LEADS_KEY on the Worker." });
+  });
+
+  it("answers 400, not a crash, for a lead added by hand with a non-string address", async () => {
+    expect((await desk("POST", "", { body: { name: "Ana", email: 5 } })).status).toBe(400);
   });
 });
 
@@ -302,5 +307,49 @@ describe("invoices", () => {
     expect(JSON.stringify([...kv.data.values()])).not.toContain("00-0000000");
     const got = await (await desk("GET", "/invoice-from")).json();
     expect(got.from).toMatchObject(from);
+  });
+});
+
+describe("invoice photo, activity log and Notion import", () => {
+  const JPEG = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/";
+
+  it("keeps an invoice photo once under its hash, sealed, and opens it by key", async () => {
+    const first = await desk("POST", "/invoice-photo", { body: { photo: JPEG } });
+    expect(first.status).toBe(200);
+    const { key } = await first.json();
+    expect(key).toMatch(/^invoice-photo:[0-9a-f]{32}$/);
+    expect(JSON.stringify(kv.data.get(key))).not.toContain("/9j/");
+    const puts = kv.puts.length;
+    expect(await (await desk("POST", "/invoice-photo", { body: { photo: JPEG } })).json()).toEqual({ key });
+    expect(kv.puts.length).toBe(puts);
+    expect(await (await desk("GET", `/invoice-photo?key=${key}`)).json()).toEqual({ photo: JPEG });
+  });
+
+  it("refuses a photo that is not a JPEG, and a key that is not one", async () => {
+    const png = await desk("POST", "/invoice-photo", { body: { photo: "data:image/png;base64,iVBORw0KGgo=" } });
+    expect(png.status).toBe(400);
+    expect(kv.puts).toEqual([]);
+    const bad = await desk("GET", "/invoice-photo?key=lead:nope");
+    expect(bad.status).toBe(404);
+    expect(await bad.json()).toEqual({ error: "Photo not found." });
+    expect((await desk("GET", `/invoice-photo?key=invoice-photo:${"0".repeat(32)}`)).status).toBe(404);
+  });
+
+  it("/log opens one client's activity log by id, with or without the lead: prefix", async () => {
+    await recordLead({ INBOX: kv as never, LEADS_KEY }, "a@example.com", { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:a" }, name: "Ana" });
+    const id = await (await sealer(LEADS_KEY)!).id("a@example.com");
+    const { log } = await (await desk("GET", `/log?id=${id}`)).json();
+    expect(log.map((e: { kind: string }) => e.kind)).toEqual(["inquiry"]);
+    expect((await (await desk("GET", `/log?id=lead:${id}`)).json()).log).toEqual(log);
+    expect(await (await desk("GET", "/log?id=nobody")).json()).toEqual({ log: [] });
+    expect((await desk("GET", `/log?id=${id}`, { key: null })).status).toBe(401);
+  });
+
+  it("/import/notion only counts unless dry is false", async () => {
+    expect(await (await desk("POST", "/import/notion", { body: { people: [] } })).json()).toEqual({ dry: true, created: 0, filled: 0, unchanged: 0, gone: 0, skipped: 0, lines: 0 });
+    const people = [{ email: "n@example.com", rows: [{ ref: "r1", at: "2026-01-02", note: "Portraits" }] }];
+    expect(await (await desk("POST", "/import/notion", { body: { people } })).json()).toMatchObject({ dry: true, created: 1, lines: 1 });
+    expect(kv.puts).toEqual([]);
+    expect((await desk("POST", "/import/notion", { body: { people: "nope" } })).status).toBe(400);
   });
 });

@@ -25,7 +25,7 @@ export default function robots(): MetadataRoute.Robots {
       // Google-Extended is off the list at Julian's ask so Gemini can
       // recommend the site. Google uses that one token for both Gemini answers
       // and Gemini training, so the terms' AI search clause names Google as
-      // the exception. Googlebot-Image is let in at Julian's ask (2026-10-23)
+      // the exception. Googlebot-Image is let in at Julian's ask
       // so the photographs show in Google Images; the terms still bar
       // training on them.
       {

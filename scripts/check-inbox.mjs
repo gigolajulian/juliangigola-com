@@ -1,8 +1,9 @@
 /**
  * The inbox: keys, the cooldown, and what gets stored.
  *
- * Runs the real `lib/inbox.ts`, which is dependency-free for exactly this
- * reason. What it cannot cover is the KV binding itself — that needs a Worker
+ * Runs the real `lib/leads/enquiry.ts`, which imports only plain modules for
+ * exactly this reason (`lib/utils.ts`, `lib/time-zone.ts`; the hook below maps
+ * `@/` to them). What it cannot cover is the KV binding itself — that needs a Worker
  * — so the split is deliberate: every decision lives in the module under test
  * and the action does nothing but read the form, ask this, and write.
  *
@@ -14,7 +15,15 @@
  */
 
 import assert from "node:assert/strict";
-import {
+import { registerHooks } from "node:module";
+
+// `@/lib/x` is `lib/x.ts`, as tsconfig's paths say.
+const root = new URL("../", import.meta.url);
+registerHooks({
+  resolve: (spec, ctx, next) => next(spec.startsWith("@/") ? new URL(`${spec.slice(2)}.ts`, root).href : spec, ctx),
+});
+
+const {
   COOLDOWN_MS,
   DAILY_CAP,
   cooldown,
@@ -23,13 +32,13 @@ import {
   emailCopy,
   enquiry,
   enquiryKey,
-  looksLikeEmail,
   problems,
   replyLink,
   summary,
   waitPhrase,
   MAX,
-} from "../lib/inbox.ts";
+} = await import("../lib/leads/enquiry.ts");
+const { looksLikeEmail } = await import("../lib/utils.ts");
 
 let n = 0;
 const ok = (cond, what) => {

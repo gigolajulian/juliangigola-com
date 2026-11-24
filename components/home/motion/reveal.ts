@@ -11,7 +11,7 @@ const BLOCKS = [
 ].join(",");
 
 /* In for good once it comes into frame. Visible by default: a block is hidden only once the observer has seen it
-   below the fold, so an observer that never calls back leaves the text showing (audit 2026-11-22). */
+   below the fold, so an observer that never calls back leaves the text showing (audit). */
 export function arrived(es: IntersectionObserverEntry[], io: IntersectionObserver) {
   for (const e of es) {
     const el = e.target as HTMLElement;

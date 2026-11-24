@@ -2,7 +2,7 @@ import * as React from "react";
 import { Orb } from "@/components/effects/orb";
 import type { Status } from "@/lib/admin/publish";
 import { cn } from "@/lib/utils";
-import { TABS, type View } from "@/components/admin/admin-tabs";
+import { TABS, type View } from "@/components/admin/editor/tabs";
 
 type Column = "map" | "work" | "preview";
 

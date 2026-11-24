@@ -20,7 +20,7 @@ export async function POST(request: Request) {
   try {
     return json({ folded: await syncGmail(env) });
   } catch (e) {
-    // Google's status and message only, never a token (`lib/booking/gcal.ts`).
+    // Google's status and message only, never a token (`lib/google.ts`).
     return upstreamError("gmail", e, "Gmail sync failed.");
   }
 }

@@ -16,7 +16,7 @@ export const aboutDrivers: Driver[] = [
         const rp = progressBetween(top + m.ol, 0.72 * ctx.vh, 0.48 * ctx.vh).toFixed(3);
         if (sp !== m.sp) el.style.setProperty("--sp", (m.sp = sp));
         if (rp !== m.rp) el.style.setProperty("--rp", (m.rp = rp));
-        // ?mttp=about: the facts and the button come up as the foot of the column reaches the lower part of the screen
+        // the facts and the button come up as the foot of the column reaches the lower part of the screen
         const ep = progressBetween(top + m.ft, 0.92 * ctx.vh, 0.55 * ctx.vh).toFixed(3);
         if (ep !== m.ep) el.style.setProperty("--ep", (m.ep = ep));
       };

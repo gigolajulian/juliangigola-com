@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { summary, enquiry, enquiryKey } from "@/lib/inbox";
+import { summary, enquiry, enquiryKey } from "@/lib/leads/enquiry";
 import { FakeKV, LEADS_KEY, SCOPED, githubToken, reply, INBOX_KEY as KEY } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";
 
@@ -151,6 +151,8 @@ describe("PATCH", () => {
   it("answers 400 to bad JSON and bad fields, 404 to a missing message", async () => {
     expect((await PATCH(req("PATCH", { body: "{nope" }))).status).toBe(400);
     expect((await PATCH(req("PATCH", { body: JSON.stringify({ key: "cool:x", read: true }) }))).status).toBe(400);
+    expect((await PATCH(req("PATCH", { body: JSON.stringify({ key: 5, read: true }) }))).status).toBe(400);
+    expect((await DELETE(req("DELETE", { body: JSON.stringify({ key: 5 }) }))).status).toBe(400);
     expect((await PATCH(req("PATCH", { body: JSON.stringify({ key: "msg:1", read: "yes" }) }))).status).toBe(400);
     expect((await PATCH(req("PATCH", { body: JSON.stringify({ key: "msg:000000000000001:gone", read: true }) }))).status).toBe(404);
   });

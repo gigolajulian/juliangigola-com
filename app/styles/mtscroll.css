@@ -122,7 +122,7 @@
 [data-mtscroll] .mt-group2{margin-top:calc(22 * var(--u))}
 [data-mtscroll] .mt-br{display:block;width:100%;border-top:1px solid var(--hair)!important;padding:calc(7 * var(--u)) 0 calc(12 * var(--u))!important}
 [data-mtscroll] .mt-br b{display:block;font:900 calc(46 * var(--u))/calc(52 * var(--u)) var(--display);letter-spacing:-.052em;color:var(--row);transition:color .25s ease-out}
-/* the small line under a row name: a step up from --row, which measured 4.07:1 dark and 3.87:1 light at 11px (audit 2026-11-18) */
+/* the small line under a row name: a step up from --row, which measured 4.07:1 dark and 3.87:1 light at 11px (audit) */
 [data-mtscroll] .mt-br .lbl{display:block;margin-top:2px;color:color-mix(in oklab,var(--ink) 58%,var(--bg));transition:color .25s ease-out}
 [data-mtscroll] .mt-br:is([aria-pressed="true"],:focus-visible) :is(b,.lbl){color:var(--ink)}
 @media (hover:hover){[data-mtscroll] .mt-br:hover :is(b,.lbl){color:var(--ink)}}
@@ -409,7 +409,7 @@
 }
 /* Short wide screens (a Duo open, 951x669, about 540 tall in Safari with its bars): Cover art's heading, row and dropped record centred under the header,
    the record whole, "See all covers" beside the heading to leave the height to the row. The record drops 118px and grows with the focused sleeve,
-   past rows.css's 126px of room, so the row clipped its bottom (Julian, 2026-11-21). Phones on their side (under 480 tall) keep their own layout. */
+   past rows.css's 126px of room, so the row clipped its bottom (Julian). Phones on their side (under 480 tall) keep their own layout. */
 @media (min-width:600px) and (max-width:1023px) and (min-height:480px) and (orientation:landscape){
   [data-mtscroll] .mt-covers .mt-stage{box-sizing:border-box;min-height:calc(100svh - 57px);padding:0;justify-content:center}
   [data-mtscroll] .mt-covers .mt-rowhead .btn.btn{order:0;align-self:flex-end;margin:-48px 16px 0}
@@ -451,7 +451,7 @@
 }
 
 /* A short window under 600 wide (iPhone Duo unfolded on its side: 594x368). The name block was laid out for a 600px tall screen, so the name sat at the
-   window's lower edge under Safari's bar and the tagline and buttons were off screen (MAC, 2026-11-17). It takes the window's own height here. */
+   window's lower edge under Safari's bar and the tagline and buttons were off screen (MAC). It takes the window's own height here. */
 @media (max-width:599px) and (max-height:599px) and (orientation:landscape){[data-mtscroll] .mt-name{height:100svh}}
 /* L: phone on its side. Four wall columns, the name on one line with the buttons beside it. */
 @media (max-height:599px) and (min-width:600px){
@@ -643,7 +643,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-book:not([data-open]) .mt-photo{order:1;margin-top:20px}
 }
 
-/* Elevate picks, phones (2026-11-14): the By quote client frame is square, held on its left; About is a 4:5 frame
+/* Elevate picks, phones: the By quote client frame is square, held on its left; About is a 4:5 frame
    cropped onto me (reframe A). */
 @media (max-width:599px){
   [data-mtscroll] .mt-photo-w{aspect-ratio:1/1}
@@ -661,7 +661,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.85;transition:opacity .3s ease-out}
 [data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
 /* The artist line is the muted ink under the caption's .85 dim, so it sat at 3.3 to 4.5:1 on the covers not in front
-   (audit 2026-11-22). A quarter toward the foreground keeps it second to the title and clears 4.5:1 dimmed. */
+   (audit). A quarter toward the foreground keeps it second to the title and clears 4.5:1 dimmed. */
 [data-mtscroll] .mt-cvcap .mute{color:color-mix(in oklab,var(--muted-foreground) 72%,var(--foreground))}
 /* Touch has no hover to lift it, so the caption sits at full there (audit 2026-11-19: the artist line was 2.9:1 at rest). */
 @media (hover:none){[data-mtscroll] .mt-cvcap{opacity:1}}
@@ -677,7 +677,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-cvcap,[data-mtscroll] .mt-cvn{display:none}
 }
 
-/* c1 (2026-11-14): the logo band is its own room. It began as off-white with black marks; Julian inverted it for the dark
+/* c1: the logo band is its own room. It began as off-white with black marks; Julian inverted it for the dark
    theme the same night: a charcoal band with light marks. Was: only the logo band sits on off-white seamless with black marks;
    it cuts in and out hard at its edges and the photos stay on black. Dark theme only: the light theme is light already. */
 :root[data-mtscroll]:not([data-theme="light"]) .mt-logos{background:color-mix(in oklab,var(--bg),#fff 3%);color:#d9d9d6;padding-block:calc(56 * var(--u))}
@@ -771,7 +771,7 @@ html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[dat
   @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 66%,transparent) 30%,color-mix(in srgb,var(--bg) 60%,transparent) 60%,color-mix(in srgb,var(--bg) 52%,transparent) 78%,color-mix(in srgb,var(--bg) 16%,transparent) 92%,transparent)}}
   html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 66%,transparent) 30%,color-mix(in srgb,var(--bg) 60%,transparent) 60%,color-mix(in srgb,var(--bg) 52%,transparent) 78%,color-mix(in srgb,var(--bg) 16%,transparent) 92%,transparent)}
 }
-/* On a phone: a taller band than the phone's own, which left the tops of the letters on a dark photo at about 2:1. Both bands are the lightest that keep the name at 4.5:1 over the darkest 5% behind it (Julian: "a bit lighter", 2026-11-19). */
+/* On a phone: a taller band than the phone's own, which left the tops of the letters on a dark photo at about 2:1. Both bands are the lightest that keep the name at 4.5:1 over the darkest 5% behind it (Julian: "a bit lighter"). */
 @media (max-width:599px){
   @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}}
   html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}
@@ -802,7 +802,7 @@ html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data
 html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:600;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(118px + env(safe-area-inset-bottom))}}
 @media (min-width:1024px){html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(114 * var(--u))}}
-/* Name and tagline, tuned by Julian per screen shape (hero tuner, second pass 2026-11-23): phone, then desktop in three bands by shape.
+/* Name and tagline, tuned by Julian per screen shape (hero tuner, second pass): phone, then desktop in three bands by shape.
    Desktop values are in --u, so each band hits its tuned pixels at its sample screen (1440x900, 1920x1080, 2560x1080; --u 1, 1.2, 1.2). */
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{bottom:calc(107px + env(safe-area-inset-bottom))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:12px!important;left:calc(19 * var(--pu));bottom:calc(64px + env(safe-area-inset-bottom))}}
 @media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:17/10){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(33 * var(--u));bottom:calc(79 * var(--u))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:max(11px,calc(14 * var(--u)))!important;left:calc(46 * var(--u));bottom:calc(55 * var(--u))}}

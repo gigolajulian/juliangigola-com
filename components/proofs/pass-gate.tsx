@@ -9,6 +9,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { postJson } from "@/lib/http";
 
 export function PassGate({ id, kind }: { id: string; kind: "proofs" | "photos" }) {
   const [value, setValue] = React.useState("");
@@ -20,13 +21,9 @@ export function PassGate({ id, kind }: { id: string; kind: "proofs" | "photos" }
     if (!value) return setBad("Add the password.");
     setBusy(true);
     setBad(null);
-    try {
-      const res = await fetch(`/api/proof/${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "unlock", password: value }) });
-      if (res.ok) return location.reload();
-      setBad(((await res.json().catch(() => ({}))) as { error?: string }).error ?? "That did not work. Try again.");
-    } catch {
-      setBad("No connection. Try again.");
-    }
+    const r = await postJson(`/api/proof/${id}`, { action: "unlock", password: value });
+    if (r.ok) return location.reload();
+    setBad(r.status === 0 ? "No connection. Try again." : (r.error ?? "That did not work. Try again."));
     setBusy(false);
     field.current?.focus();
   };
