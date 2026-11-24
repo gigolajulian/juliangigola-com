@@ -53,7 +53,7 @@ beforeEach(() => {
     CLIENT_EMAIL: client,
     EMAIL: mail,
     STRIPE_SECRET_KEY: "sk_test_x",
-    DEPOSIT_LIMIT: { limit: async () => ({ success: true }) },
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
   };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });

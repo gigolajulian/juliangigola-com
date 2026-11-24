@@ -27,7 +27,7 @@ export async function POST(request: Request) {
   const { env, ctx } = await getCloudflareContext({ async: true });
   if (!env.GCAL_OAUTH || !env.BOOKING_LOCK) return json({ error: "Booking is off." }, 503);
 
-  const slow = await limited(env.DEPOSIT_LIMIT, "book", request);
+  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "book", request);
   if (slow) return slow;
 
   const raw = await bodyOf(request);

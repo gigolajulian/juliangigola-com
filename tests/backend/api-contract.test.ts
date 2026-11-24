@@ -24,7 +24,7 @@ beforeEach(async () => {
   kv = new FakeKV();
   client = new FakeEmail();
   hello = new FakeEmail();
-  ctx.env = { INBOX: kv, INBOX_KEY: KEY, LEADS_KEY, CLIENT_EMAIL: client, EMAIL: hello, DEPOSIT_LIMIT: { limit: async () => ({ success: true }) } };
+  ctx.env = { INBOX: kv, INBOX_KEY: KEY, LEADS_KEY, CLIENT_EMAIL: client, EMAIL: hello, PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) } };
   await writeLead(kv as never, await seal(), LEAD, lead, null);
 });
 

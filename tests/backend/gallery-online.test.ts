@@ -25,7 +25,7 @@ beforeEach(() => {
   ctx.env = {
     INBOX: kv, LEADS_KEY, INBOX_KEY: "k",
     PROOFS: { get: async () => ({ body: new Response("abc").body, size: 3 }) },
-    DEPOSIT_LIMIT: { limit: async () => ({ success: ++tries <= 5 }) },
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: ++tries <= 5 }) },
     DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
   };
 });

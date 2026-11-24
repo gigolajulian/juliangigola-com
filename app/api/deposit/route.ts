@@ -19,7 +19,7 @@ export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   if (!env.STRIPE_SECRET_KEY) return json({ error: "Deposits are off." }, 503);
 
-  const slow = await limited(env.DEPOSIT_LIMIT, "deposit", request);
+  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "deposit", request);
   if (slow) return slow;
 
   const parsed = parseBooking(await bodyOf(request));

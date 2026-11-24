@@ -23,7 +23,7 @@ const base = (over: Partial<Proof> = {}): Proof => ({ token: TOKEN, name: "Ana p
 beforeEach(() => {
   kv = new FakeKV();
   sent = [];
-  ctx.env = { INBOX: kv, LEADS_KEY, BOOKING_SECRET: "s", DEPOSIT_LIMIT: { limit: async () => ({ success: true }) }, EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) } };
+  ctx.env = { INBOX: kv, LEADS_KEY, BOOKING_SECRET: "s", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) }, EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) } };
 });
 const open = (email = "ana@gmail.com") => POST(new Request("https://juliangigola.com/api/proof/x", { method: "POST", body: JSON.stringify({ action: "track", email, kind: "open" }) }), { params: Promise.resolve({ token: TOKEN }) });
 
