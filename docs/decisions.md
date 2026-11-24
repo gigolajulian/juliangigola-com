@@ -673,6 +673,20 @@ scrolls and while its group is off screen (`patches/liquid-gooey+0.2.2.patch`).
   patch shows exactly what the site changed, and the test fails when the
   package moves under it.
 - **Not done:** sending the fix upstream. That is Julian's call.
+- 2026-11-24: retired. Its last consumers went in r15, so the package, the
+  patch and its test went in r17.
+
+## 2026-11-24: motion stays a devDependency
+
+`motion` ships in the browser bundle through one vendored widget,
+`components/vendor/tilted-card.jsx` (the lightbox tilt). It sits in
+`devDependencies` on purpose: the Worker runs only the built bundle, never
+`node_modules`, and the build installs devDependencies, so the split in
+`package.json` says what the deployed Worker needs at runtime (nothing from
+either list). `dialkit` is the same: the dev dial panel.
+
+- **Not chosen:** porting the tilt to gsap to drop `motion`. The widget is
+  vendored as it came, and a port is a visible change to its spring.
 
 ## 2026-10-09: globals.css split by area; device queries listed, not custom media
 
