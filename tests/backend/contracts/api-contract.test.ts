@@ -79,6 +79,18 @@ describe("/api/contract", () => {
     expect(res.status).toBe(401);
   });
 
+  it("asks who it is before saying what the build lacks, with its own messages", async () => {
+    ctx.env = { INBOX_KEY: KEY };
+    expect((await GET(new Request("https://juliangigola.com/api/contract?templates"))).status).toBe(401);
+    const noInbox = await GET(admin("GET", undefined, "?templates"));
+    expect(noInbox.status).toBe(503);
+    expect(await noInbox.json()).toEqual({ error: "This build has no inbox attached." });
+    ctx.env = { INBOX: kv, INBOX_KEY: KEY };
+    const noKey = await GET(admin("GET", undefined, "?templates"));
+    expect(noKey.status).toBe(503);
+    expect(await noKey.json()).toEqual({ error: "Contracts need LEADS_KEY on the Worker." });
+  });
+
   it("fills a template from the lead and stores a sealed draft with a strong id", async () => {
     const { contract: c, url } = await make();
     expect(c.id).toMatch(/^[0-9A-Za-z]{16}$/);

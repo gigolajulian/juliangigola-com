@@ -1,4 +1,4 @@
-import { gate } from "@/lib/admin/gate";
+import { sealedGate } from "@/lib/admin/gate";
 import { mailable } from "@/lib/leads/lead-crm";
 import type { InboxKV } from "@/lib/kv";
 import { readLead } from "@/lib/leads/lead-store";
@@ -46,13 +46,9 @@ async function openOr<T>(label: string, read: Promise<T>, refused = broken): Pro
   return v === undefined ? refused() : v;
 }
 
-/** The desk's gate with this route's INBOX message, then LEADS_KEY. */
-async function contractGate(request: Request) {
-  const g = await gate(request, "This build has no inbox attached.");
-  if (g.error) return g;
-  if (!g.s) return { error: json({ error: "Contracts need LEADS_KEY on the Worker." }, 503) };
-  return { ...g, s: g.s };
-}
+/** The desk's sealed gate with this route's messages for a missing INBOX and LEADS_KEY. */
+const contractGate = (request: Request) =>
+  sealedGate(request, "This build has no inbox attached.", () => json({ error: "Contracts need LEADS_KEY on the Worker." }, 503));
 
 const templates = async (kv: InboxKV) => {
   const saved = parseOr<unknown>(await kv.get(TEMPLATES_KEY), null);

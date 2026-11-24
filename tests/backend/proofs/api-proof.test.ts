@@ -44,7 +44,9 @@ describe("/api/proof", () => {
     ctx.env = { INBOX: kv, INBOX_KEY: KEY, LEADS_KEY };
     expect((await call(GET, req("GET", { query: "?list" }))).status).toBe(503);
     ctx.env = { INBOX: kv, INBOX_KEY: KEY, PROOFS: r2 };
-    expect((await call(GET, req("GET", { query: "?list" }))).status).toBe(503);
+    const off = await call(GET, req("GET", { query: "?list" }));
+    expect(off.status).toBe(503);
+    expect(await off.json()).toEqual({ error: "Proofs need INBOX, PROOFS and LEADS_KEY on this build." });
   });
 
   it("refuses every verb with a wrong key", async () => {

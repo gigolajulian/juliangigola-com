@@ -24,10 +24,10 @@ export async function gate(request: Request, noInbox = "This build has no inbox 
   return { env, kv, s: seal, notion: env.NOTION_TOKEN, vapid: env.VAPID_KEY };
 }
 
-/** `gate`, then `noSeal()` without LEADS_KEY: for the routes that open leads. */
-export async function sealedGate(request: Request) {
-  const g = await gate(request);
+/** `gate`, then `refused()` without LEADS_KEY: for the routes that open leads (and contracts, with their own messages). */
+export async function sealedGate(request: Request, noInbox?: string, refused = noSeal) {
+  const g = await gate(request, noInbox);
   if (g.error) return g;
-  if (!g.s) return { error: noSeal() };
+  if (!g.s) return { error: refused() };
   return { ...g, s: g.s };
 }

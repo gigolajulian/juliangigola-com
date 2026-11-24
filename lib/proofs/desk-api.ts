@@ -16,7 +16,7 @@
  * that can push to the repo. The client's side is `/api/proof/[token]`.
  * ─────────────────────────────────────────────────────────────── */
 
-import { gate } from "@/lib/admin/gate";
+import { sealedGate } from "@/lib/admin/gate";
 import { copiesFor, dropProofOpens } from "@/lib/leads/lead-store";
 import {
   cardKey,
@@ -49,13 +49,14 @@ import { bodyOf, json } from "@/lib/http";
 const MAX_FRAME = 8 * 1024 * 1024;
 
 const UNBOUND = "Proofs need INBOX, PROOFS and LEADS_KEY on this build.";
+const unbound = () => json({ error: UNBOUND }, 503);
 
-/** The desk's gate with this route's message, then PROOFS and LEADS_KEY. */
+/** The desk's sealed gate with this route's message, then PROOFS. */
 async function proofGate(request: Request) {
-  const g = await gate(request, UNBOUND);
+  const g = await sealedGate(request, UNBOUND, unbound);
   if (g.error) return { error: g.error };
-  if (!g.env.PROOFS || !g.s) return { error: json({ error: UNBOUND }, 503) };
-  return { ...g, r2: g.env.PROOFS, s: g.s };
+  if (!g.env.PROOFS) return { error: unbound() };
+  return { ...g, r2: g.env.PROOFS };
 }
 
 type Gated = Exclude<Awaited<ReturnType<typeof proofGate>>, { error: Response }>;
