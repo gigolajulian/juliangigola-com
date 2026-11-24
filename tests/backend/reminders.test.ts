@@ -35,7 +35,7 @@ const rec = (id: string, hoursOut: number, more: Partial<BookingRecord> = {}): B
 beforeEach(() => {
   store = new FakeStore();
   client = new FakeEmail();
-  env = { BOOKING_LOCK: fakeLock(new BookingLock({ storage: store }, {})) as never, CLIENT_EMAIL: client as never, BOOKING_SECRET: "booking-secret-for-tests" };
+  env = { BOOKING_LOCK: fakeLock(new BookingLock({ storage: store }, {})) as never, CLIENT_EMAIL: client as never, BOOKING_SECRET: "booking-secret-for-tests", WORKER_KEY: "worker-key-for-tests" };
 });
 
 describe("reminders", () => {

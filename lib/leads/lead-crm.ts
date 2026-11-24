@@ -3,12 +3,11 @@
  * Leads added by hand (DMs, texts, referrals), merging two records of one
  * person, the numbers (inquiries a week, reply time, booked rate, where
  * bookings come from, quotes), an export, and reply templates.
- * Pure functions: `app/api/inbox/route.ts` reads and writes, these decide.
+ * Pure functions: `app/api/leads` reads and writes, these decide.
  * ─────────────────────────────────────────────────────────────── */
 
 import { TZ } from "../booking/rules";
-import { STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
-import { canonical } from "./lead-crypto";
+import { canonical, isStage, STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
 import { balance, isSettled } from "./invoice";
 import { cell, paidTotal, type MasterEntry } from "./activity-log";
 import { byCodeUnit } from "@/lib/utils";
@@ -174,7 +173,7 @@ export function manualLead(given: NewLead, at: string): Lead | { error: string }
   if (!name) return { error: "A name, please." };
   const email = identity(given);
   if (!email) return { error: "An email, an Instagram handle or a phone number, please." };
-  const stage = given.stage && (STAGES as readonly string[]).includes(given.stage) ? given.stage : "Inquiry";
+  const stage = isStage(given.stage) ? given.stage : "Inquiry";
   const lead: Lead = {
     email,
     name,

@@ -5,7 +5,7 @@
  * Booking pages, "no vertical pages", San Jose and San Francisco mainly,
  * "I can travel to any of those, LA and NY too", and "I don't need
  * separate pages for each" city. So a page per service, a deck of screens
- * like the homepage (`components/local-screens.tsx`), whose title names
+ * like the homepage (`app/[service]/page.tsx`), whose title names
  * the two cities he works in and whose "Where" screen names every place
  * he shoots, visibly: a search engine ranks a city it can read on the
  * page, and the structured data says the same thing.
@@ -19,7 +19,7 @@
 
 import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "../site";
-import { isSession, SESSIONS as V3_SESSIONS } from "../photos-and-sessions";
+import { isSession, SESSIONS as V3_SESSIONS } from "@/lib/booking/catalog";
 import { CONTENT } from "../content";
 import { getProject, projectsIn } from "../work/work";
 import type { BookingSlug } from "./slugs";

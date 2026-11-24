@@ -39,13 +39,13 @@ export function useCoverPreload(
     return () => clearTimeout(t);
   }, [warm, view]);
 
-  /* On for everyone (Julian, 2026-11-22: "push to live"), ?preload=0 turns it off for a test: the lazy photos
+  /* On for everyone (Julian, 2026-11-22: "push to live"): the lazy photos
      within 1.5 screens ahead of the scroll are asked for in reading order,
      LOOK_CAP at a time, so covers land in order and never as a burst. It
      promotes the real <img>, so each file is fetched once at its own width. */
   React.useEffect(() => {
     const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
-    if (/[?&]preload=0/.test(location.search) || view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
+    if (view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
     const LOOK_CAP = 3;
     let busy = 0;
     let raf = 0;

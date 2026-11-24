@@ -4,6 +4,21 @@ Dated decisions about how the site is built, and why. Newest first. Code
 comments say what the code does; who asked for a change, when, and what
 it replaced belongs here.
 
+## 2026-11-24: Settled rollback flags removed
+
+Julian approved dropping the query flags whose new behavior had shipped:
+`?mtpin=0`, `?mtsnap=0` and `?mtsnap=near`, `?preload=0` (the splash's
+preload hold and the portfolio cover preload), `?gw=0`, `?goo=0`,
+`?v3motion=0`, `?navfx=0`, `?blur=0`, `?sb=0` and `?sb=1`, `?vt=full`,
+`?idle=0` and `?mttp`. Each section now has one code path. The head script
+sets `data-v3motion` and `data-navfx` on every visit; they stay as the
+mark that scripts run, so a visitor with no JavaScript keeps the static
+styles. The dated entries in `docs/mt-decisions.md` that name the flags are
+history. Flags still read on purpose: `?intro`, `?splash`, `?loader`,
+`?debug`, `?navdbg`, `?lerp`, `?v4pages` (a trial, not a rollback) and
+`?proofwall=0` (the plain gate is also what the server renders before the
+wall can measure the window).
+
 ## 2026-11-20: Provenance out of the code comments
 
 Code comments state the rule in the present tense. Who asked, when, the
@@ -532,7 +547,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 ### lib/theme-color.ts
 - 2026-11-16: The browser bar's colour per theme: pure white and pure black,
 
-### lib/photos-and-sessions.ts
+### lib/booking/catalog.ts
 - 2026-11-14: the model test shows the name, an hour, a week and the $100 deposit, with the rate quoted on the call.
 - 2026-11-10: Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle.
 
@@ -976,7 +991,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/contact-sheet.tsx`: Beside the words from a laptop up; under them on an upright tablet, where side by side left the sheet a postage stamp (the live QA, iPad).
 - `components/cover-cell.tsx`: The films' slate on every project. (Julian)
 - `components/credit-card.tsx`: Who they are, a weight under bold, the role on a line of its own ("Julian Gigola · Phot…" was cut), then the handle, a weight lighter, right over the way out to it. (Julian)
-- `components/lightbox.tsx`: Whole, never cropped, the 3D made elite, and not crowding the picture ("too close"). (Julian)
+- `components/cover/lightbox.tsx`: Whole, never cropped, the 3D made elite, and not crowding the picture ("too close"). (Julian)
 - `components/local-questions.tsx`: Behind it, the session's own photographs on the drifting wall the homepage's ask has. (Julian)
 - `components/local-questions.tsx`: A rack focus, as a lens pulls it: with the pointer on the words the wall behind them is soft; off the words, over the photographs, the wall comes sharp and up and the words go soft. (Julian, delight)
 - `components/services-screen.tsx`: A preview of the portfolio, not the whole of it. (Julian)

@@ -124,6 +124,4 @@ export type Booking = {
   phone?: string;
   where?: string;
   notes?: string;
-  /** Booked by the site's engine (`lib/booking/engine.ts`), through its lock. */
-  engine: "own";
 };

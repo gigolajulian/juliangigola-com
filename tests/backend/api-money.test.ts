@@ -7,7 +7,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 const { GET } = await import("@/app/api/money/route");
 
-const req = (query = "", key: string | null = KEY) => new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-inbox-key": key } : {} });
+const req = (query = "", key: string | null = KEY) => new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-admin-key": key } : {} });
 const calls: string[] = [];
 
 beforeEach(() => {
@@ -52,7 +52,7 @@ describe("GET /api/money", () => {
 
 describe("/api/money: the gate and the cursor", () => {
   const KEY = "inbox-key-for-tests";
-  const get = (query = "", key: string | null = KEY) => GET(new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-inbox-key": key } : {} }));
+  const get = (query = "", key: string | null = KEY) => GET(new Request(`https://juliangigola.com/api/money${query}`, { headers: key ? { "x-admin-key": key } : {} }));
 
   let calls: string[];
   beforeEach(() => {

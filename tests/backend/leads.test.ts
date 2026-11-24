@@ -1,99 +1,99 @@
 import { describe, expect, it } from "vitest";
-import { NUDGES, REMIND_MAX, shootTag, backfillLead, fold, isLate, paperDue, quoteNudge, leadStoreKey, myMove, leadSummary, renewDue, trashDaysLeft, type InboxRow, type Lead, type LeadSummary } from "@/lib/leads/leads";
+import { NUDGES, REMIND_MAX, shootTag, backfillLead, applyLeadEvent, isLate, paperDue, quoteNudge, leadStoreKey, myMove, leadSummary, renewDue, trashDaysLeft, type InboxRow, type Lead, type LeadSummary } from "@/lib/leads/leads";
 import { recordLead, writeLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 2, h)).toISOString();
 const email = "Maya@Example.com";
 
-describe("fold", () => {
+describe("applyLeadEvent", () => {
   it("keeps the start of their message and the picture count for the list, capped in the summary", () => {
     const long = "Hi Julian,\n\n  I saw the Portraits set " + "x".repeat(300);
-    const l = fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", snippet: long, refs: 2 });
+    const l = applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", snippet: long, refs: 2 });
     expect(l.snippet).toBe(("Hi Julian, I saw the Portraits set " + "x".repeat(300)).slice(0, 140));
     expect(l.refs).toBe(2);
     expect(leadSummary(l).snippet).toHaveLength(90);
     // A later event without a message keeps them; a message with no pictures drops the count.
-    const call = fold(l, email, { event: { at: at(2), kind: "call", ref: "cal:1" } });
+    const call = applyLeadEvent(l, email, { event: { at: at(2), kind: "call", ref: "cal:1" } });
     expect(call).toMatchObject({ refs: 2 });
-    expect(fold(call, email, { event: { at: at(3), kind: "inquiry", ref: "msg:2" }, snippet: "Again", refs: 0 })).not.toHaveProperty("refs");
+    expect(applyLeadEvent(call, email, { event: { at: at(3), kind: "inquiry", ref: "msg:2" }, snippet: "Again", refs: 0 })).not.toHaveProperty("refs");
   });
 
   it("logs a proofs open once per gallery, fills a bare name, and is not news", () => {
-    const bare = fold(null, email, { event: { at: at(1), kind: "mail", ref: "m" } });
-    const l = fold(bare, email, { event: { at: at(2), kind: "proofs", ref: "tok", note: "Nov 1" }, name: "Maya" });
+    const bare = applyLeadEvent(null, email, { event: { at: at(1), kind: "mail", ref: "m" } });
+    const l = applyLeadEvent(bare, email, { event: { at: at(2), kind: "proofs", ref: "tok", note: "Nov 1" }, name: "Maya" });
     expect(l).toMatchObject({ name: "Maya", unread: bare.unread, lastAt: bare.lastAt });
-    expect(fold(l, email, { event: { at: at(3), kind: "proofs", ref: "tok" }, name: "M" })).toBe(l);
-    expect(fold({ ...l, name: "Maya R" }, email, { event: { at: at(4), kind: "proofs", ref: "tok2" }, name: "M" }).name).toBe("Maya R");
-    expect(fold(null, email, { event: { at: at(1), kind: "proofs", ref: "tok" }, name: "Maya" })).toMatchObject({ name: "Maya", unread: false });
+    expect(applyLeadEvent(l, email, { event: { at: at(3), kind: "proofs", ref: "tok" }, name: "M" })).toBe(l);
+    expect(applyLeadEvent({ ...l, name: "Maya R" }, email, { event: { at: at(4), kind: "proofs", ref: "tok2" }, name: "M" }).name).toBe("Maya R");
+    expect(applyLeadEvent(null, email, { event: { at: at(1), kind: "proofs", ref: "tok" }, name: "Maya" })).toMatchObject({ name: "Maya", unread: false });
   });
 
   it("moves to Delivered on the first download of the finals, from any earlier stage", () => {
-    const l = fold(null, email, { event: { at: at(1), kind: "booking", ref: "cal:9" } });
-    const sel = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Selecting" });
-    expect(fold(sel, email, { event: { at: at(3), kind: "download", ref: "tok", note: "Nov 1" } })).toMatchObject({ stage: "Delivered", stageAt: at(3) });
+    const l = applyLeadEvent(null, email, { event: { at: at(1), kind: "booking", ref: "cal:9" } });
+    const sel = applyLeadEvent(l, email, { event: { at: at(2), kind: "stage" }, stage: "Selecting" });
+    expect(applyLeadEvent(sel, email, { event: { at: at(3), kind: "download", ref: "tok", note: "Nov 1" } })).toMatchObject({ stage: "Delivered", stageAt: at(3) });
   });
   it("starts a lead at Inquiry from a form, keyed by the lowercased address", () => {
-    const l = fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", kind: "portrait" });
+    const l = applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya", kind: "portrait" });
     expect(l).toMatchObject({ email: "maya@example.com", name: "Maya", stage: "Inquiry", unread: true, kind: "portrait" });
   });
 
   it("merges form, call and paid booking into one person, moving forward only", () => {
-    let l = fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" });
-    l = fold(l, email, { event: { at: at(2), kind: "call", ref: "cal-a" }, when: at(30) });
+    let l = applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" });
+    l = applyLeadEvent(l, email, { event: { at: at(2), kind: "call", ref: "cal-a" }, when: at(30) });
     expect(l.stage).toBe("Call booked");
-    l = fold(l, email, { event: { at: at(3), kind: "booking", ref: "cal-b" }, deposit: "https://stripe/x" });
+    l = applyLeadEvent(l, email, { event: { at: at(3), kind: "booking", ref: "cal-b" }, deposit: "https://stripe/x" });
     expect(l).toMatchObject({ stage: "Confirmed", stageAt: at(3), deposit: "https://stripe/x" });
     // A second inquiry from a confirmed client keeps her Confirmed.
-    l = fold(l, email, { event: { at: at(4), kind: "inquiry", ref: "msg:2" } });
+    l = applyLeadEvent(l, email, { event: { at: at(4), kind: "inquiry", ref: "msg:2" } });
     expect(l.stage).toBe("Confirmed");
     expect(l.events).toHaveLength(4);
   });
 
   it("folds a webhook retry in once", () => {
-    const l = fold(null, email, { event: { at: at(1), kind: "call", ref: "cal-a" } });
-    expect(fold(l, email, { event: { at: at(2), kind: "call", ref: "cal-a" } })).toBe(l);
+    const l = applyLeadEvent(null, email, { event: { at: at(1), kind: "call", ref: "cal-a" } });
+    expect(applyLeadEvent(l, email, { event: { at: at(2), kind: "call", ref: "cal-a" } })).toBe(l);
   });
 
   it("reopens a delivered or lost client on a new inquiry", () => {
-    let l = fold(null, email, { event: { at: at(1), kind: "inquiry" } });
-    l = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Lost" });
+    let l = applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry" } });
+    l = applyLeadEvent(l, email, { event: { at: at(2), kind: "stage" }, stage: "Lost" });
     expect(l.stage).toBe("Lost");
-    l = fold(l, email, { event: { at: at(3), kind: "inquiry" } });
+    l = applyLeadEvent(l, email, { event: { at: at(3), kind: "inquiry" } });
     expect(l).toMatchObject({ stage: "Inquiry", stageAt: at(3) });
   });
 
   it("lets Julian move a stage back, and snoozing wakes on news", () => {
-    let l = fold(null, email, { event: { at: at(1), kind: "booking" } });
-    l = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
+    let l = applyLeadEvent(null, email, { event: { at: at(1), kind: "booking" } });
+    l = applyLeadEvent(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
     expect(l.stage).toBe("Quoted");
-    l = fold(l, email, { event: { at: at(3), kind: "snooze" }, snoozeUntil: at(50) });
+    l = applyLeadEvent(l, email, { event: { at: at(3), kind: "snooze" }, snoozeUntil: at(50) });
     expect(l.snoozeUntil).toBe(at(50));
-    l = fold(l, email, { event: { at: at(4), kind: "call" } });
+    l = applyLeadEvent(l, email, { event: { at: at(4), kind: "call" } });
     expect(l.snoozeUntil).toBeUndefined();
   });
 
   it("unsnoozing by hand keeps the stage and puts it back under Needs me", () => {
-    let l = fold(null, email, { event: { at: at(1), kind: "inquiry" } });
-    l = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
+    let l = applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry" } });
+    l = applyLeadEvent(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
     l = { ...l, unread: false };
-    l = fold(l, email, { event: { at: at(3), kind: "snooze" }, snoozeUntil: at(50) });
-    l = fold(l, email, { event: { at: at(4), kind: "snooze", note: "woken" }, snoozeUntil: "" });
+    l = applyLeadEvent(l, email, { event: { at: at(3), kind: "snooze" }, snoozeUntil: at(50) });
+    l = applyLeadEvent(l, email, { event: { at: at(4), kind: "snooze", note: "woken" }, snoozeUntil: "" });
     expect(l).toMatchObject({ stage: "Quoted", unread: true });
     expect(l.snoozeUntil).toBeUndefined();
   });
 
   it("logs a mail on the timeline without making it news or moving the stage", () => {
-    let l = fold(null, email, { event: { at: at(1), kind: "call", ref: "c1" } });
+    let l = applyLeadEvent(null, email, { event: { at: at(1), kind: "call", ref: "c1" } });
     l = { ...l, unread: false };
-    l = fold(l, email, { event: { at: at(2), kind: "mail", note: "Booked: Call", mail: { to: "client", kind: "confirm", booking: "c1" } } });
+    l = applyLeadEvent(l, email, { event: { at: at(2), kind: "mail", note: "Booked: Call", mail: { to: "client", kind: "confirm", booking: "c1" } } });
     expect(l).toMatchObject({ stage: "Call booked", unread: false, lastAt: at(1) });
     expect(l.events.at(-1)).toMatchObject({ kind: "mail", note: "Booked: Call", mail: { to: "client" } });
   });
 
   it("keeps a flag once", () => {
-    let l = fold(null, email, { event: { at: at(1), kind: "deposit-stuck", ref: "pi_1" }, flag: "stuck" });
-    l = fold(l, email, { event: { at: at(2), kind: "deposit-stuck", ref: "pi_2" }, flag: "stuck" });
+    let l = applyLeadEvent(null, email, { event: { at: at(1), kind: "deposit-stuck", ref: "pi_1" }, flag: "stuck" });
+    l = applyLeadEvent(l, email, { event: { at: at(2), kind: "deposit-stuck", ref: "pi_2" }, flag: "stuck" });
     expect(l.flags).toEqual(["stuck"]);
   });
 });
@@ -171,13 +171,13 @@ describe("renewDue", () => {
     expect(renewDue({}, end)).toBe(false);
   });
   it("brings back an archived lead, never a trashed one", () => {
-    const l = fold(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
+    const l = applyLeadEvent(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
     const archived: Lead = { ...l, licence, archivedAt: at(1) };
     expect(renewDue(archived, end)).toBe(true);
     expect(renewDue({ ...archived, trashedAt: at(2) }, end)).toBe(false);
   });
   it("rides in the list summary", () => {
-    const l = fold(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
+    const l = applyLeadEvent(null, "a@b.co", { event: { at: at(0), kind: "inquiry" } });
     expect(leadSummary({ ...l, licence }).licence).toEqual(licence);
   });
 });
@@ -263,23 +263,23 @@ describe("sealer", () => {
 describe("leadSummary", () => {
   it("keeps a sealed summary under KV's 1024-byte metadata cap, however long the name", async () => {
     const s = await sealer(btoa(String.fromCharCode(...new Uint8Array(32).fill(7))))!;
-    const l = fold(null, `${"a".repeat(300)}@example.com`, { event: { at: "2026-11-03T00:00:00Z", kind: "call" }, name: "N".repeat(600), kind: "intro-call" });
+    const l = applyLeadEvent(null, `${"a".repeat(300)}@example.com`, { event: { at: "2026-11-03T00:00:00Z", kind: "call" }, name: "N".repeat(600), kind: "intro-call" });
     expect(JSON.stringify({ s: await s.seal(leadSummary(l)) }).length).toBeLessThan(1024);
   });
 });
 
 describe("archive and trash", () => {
   it("sets aside without touching the stage, a new message unarchives, the trash keeps it", () => {
-    let l = fold(null, email, { event: { at: at(1), kind: "inquiry" } });
-    l = fold(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
-    l = fold(l, email, { event: { at: at(3), kind: "archive", note: "in" }, on: true });
+    let l = applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry" } });
+    l = applyLeadEvent(l, email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
+    l = applyLeadEvent(l, email, { event: { at: at(3), kind: "archive", note: "in" }, on: true });
     expect(l).toMatchObject({ stage: "Quoted", archivedAt: at(3) });
-    l = fold(l, email, { event: { at: at(4), kind: "inquiry" } });
+    l = applyLeadEvent(l, email, { event: { at: at(4), kind: "inquiry" } });
     expect(l.archivedAt).toBeUndefined();
-    l = fold(l, email, { event: { at: at(5), kind: "trash", note: "in" }, on: true });
-    l = fold(l, email, { event: { at: at(6), kind: "inquiry" } });
+    l = applyLeadEvent(l, email, { event: { at: at(5), kind: "trash", note: "in" }, on: true });
+    l = applyLeadEvent(l, email, { event: { at: at(6), kind: "inquiry" } });
     expect(l.trashedAt).toBe(at(5));
-    l = fold(l, email, { event: { at: at(7), kind: "trash", note: "out" }, on: false });
+    l = applyLeadEvent(l, email, { event: { at: at(7), kind: "trash", note: "out" }, on: false });
     expect(l.trashedAt).toBeUndefined();
     expect(l.stage).toBe("Quoted");
   });
@@ -316,8 +316,8 @@ describe("backfillLead", () => {
   });
 
   it("adds old rows to an existing lead without touching its stage, snooze or unread, and changes nothing the second time", () => {
-    let l = fold(null, "maya@example.com", { event: { at: at(10), kind: "inquiry", ref: "msg:10" } });
-    l = { ...fold(l, "maya@example.com", { event: { at: at(11), kind: "stage" }, stage: "Quoted" }), unread: false, snoozeUntil: at(40) };
+    let l = applyLeadEvent(null, "maya@example.com", { event: { at: at(10), kind: "inquiry", ref: "msg:10" } });
+    l = { ...applyLeadEvent(l, "maya@example.com", { event: { at: at(11), kind: "stage" }, stage: "Quoted" }), unread: false, snoozeUntil: at(40) };
     const once = backfillLead(l, "maya@example.com", [row(1), row(10)])!;
     expect(once).toMatchObject({ stage: "Quoted", unread: false, snoozeUntil: at(40), firstAt: at(1) });
     expect(once.events.map((e) => e.at)).toEqual([at(1), at(10), at(11)]);
@@ -325,7 +325,7 @@ describe("backfillLead", () => {
   });
 
   it("skips a booking already recorded live under its booking id", () => {
-    const l = fold(null, "maya@example.com", { event: { at: at(3), kind: "booking", ref: "cal-uid" } });
+    const l = applyLeadEvent(null, "maya@example.com", { event: { at: at(3), kind: "booking", ref: "cal-uid" } });
     expect(backfillLead(l, "maya@example.com", [row(3, { type: "booking", detail: "Headshots" })])).toBeNull();
   });
 });

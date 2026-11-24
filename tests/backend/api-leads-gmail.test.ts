@@ -5,15 +5,15 @@ import { CURSOR } from "@/lib/leads/sync/gmail-sync";
 import { FakeKV, LEADS_KEY } from "./fakes";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { personKey, readLead, writeLead } from "@/lib/leads/lead-store";
-import { fold } from "@/lib/leads/leads";
+import { applyLeadEvent } from "@/lib/leads/leads";
 
-/* /api/leads/gmail: the booking Worker's cron, BOOKING_SECRET as bearer.
+/* /api/leads/gmail: the booking Worker's cron, WORKER_KEY as bearer.
    The first run only records where Gmail's history stands. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
-const SECRET = "booking-secret-for-tests";
+const SECRET = "worker-key-for-tests";
 const OAUTH = JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" });
 const call = (auth?: string) => POST(new Request("https://juliangigola.com/api/leads/gmail", { method: "POST", headers: auth ? { authorization: auth } : {} }));
 
@@ -21,7 +21,7 @@ let kv: FakeKV;
 beforeEach(() => {
   forgetToken();
   kv = new FakeKV();
-  ctx.env = { INBOX: kv, LEADS_KEY, BOOKING_SECRET: SECRET, GCAL_OAUTH: OAUTH };
+  ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: SECRET, GCAL_OAUTH: OAUTH };
   vi.stubGlobal("fetch", async (url: string) =>
     url.includes("oauth2") ? Response.json({ access_token: "t", expires_in: 3600 }) : url.endsWith("/profile") ? Response.json({ historyId: "4242" }) : Response.json({}, { status: 404 }),
   );
@@ -32,7 +32,7 @@ describe("POST /api/leads/gmail", () => {
   it("refuses no bearer, a wrong one, and every call while the secret is unset", async () => {
     expect((await call()).status).toBe(401);
     expect((await call("Bearer wrong")).status).toBe(401);
-    ctx.env = { ...ctx.env, BOOKING_SECRET: undefined };
+    ctx.env = { ...ctx.env, WORKER_KEY: undefined };
     expect((await call(`Bearer ${SECRET}`)).status).toBe(401);
     expect(kv.puts).toEqual([]);
   });
@@ -66,7 +66,7 @@ describe("POST /api/leads/gmail", () => {
   it("folds mail from a person on a lead into that lead, and skips a stranger", async () => {
     const s = await sealer(LEADS_KEY)!;
     const id = await s.id("brand@example.com");
-    await writeLead(kv as never, s, id, { ...fold(null, "brand@example.com", { event: { at: "2026-11-15T10:00:00Z", kind: "inquiry" } }), people: [{ name: "Ana", email: "ana@agency.com" }] });
+    await writeLead(kv as never, s, id, { ...applyLeadEvent(null, "brand@example.com", { event: { at: "2026-11-15T10:00:00Z", kind: "inquiry" } }), people: [{ name: "Ana", email: "ana@agency.com" }] });
     await kv.put(personKey(await s.id("ana@agency.com")), id);
     await kv.put(CURSOR, "100");
     const msg = (mid: string, from: string) => ({ id: mid, labelIds: ["INBOX"], internalDate: String(Date.UTC(2026, 10, 15, 12)), payload: { headers: [{ name: "From", value: from }, { name: "Subject", value: "Shot list" }] } });

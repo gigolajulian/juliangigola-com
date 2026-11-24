@@ -85,11 +85,13 @@
      the clean original. One transformation per frame, inside the free 5,000 a month. */
   "images": { "binding": "IMAGES" },
 
-  /* Caps how fast one address can start deposits (`app/api/deposit`), so a
-     script cannot fill Stripe with PaymentIntents. Counted per Cloudflare
-     location, nothing stored. */
+  /* Caps how fast one address can write to the public routes, each under its own
+     kind: a free call (`app/api/book`), a deposit (`app/api/deposit`, so a script
+     cannot fill Stripe with PaymentIntents) and its references, a contract
+     signature, a gallery password and picks. Counted per Cloudflare location,
+     nothing stored. The namespace_id is the one DEPOSIT_LIMIT had, so the counts carry over. */
   "ratelimits": [
-    { "name": "DEPOSIT_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } },
+    { "name": "PUBLIC_WRITE_LIMIT", "namespace_id": "1001", "simple": { "limit": 5, "period": 60 } },
     /* Delivery downloads (`app/delivery/[id]`), per address: a client saving photos one by one stays well under it,
        a script trying links does not. */
     { "name": "DOWNLOAD_LIMIT", "namespace_id": "1002", "simple": { "limit": 60, "period": 60 } }

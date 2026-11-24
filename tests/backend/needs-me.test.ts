@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import { needsMe } from "@/lib/leads/lead-desk";
-import { fold, type LeadSummary } from "@/lib/leads/leads";
+import { applyLeadEvent, type LeadSummary } from "@/lib/leads/leads";
 
 /* Needs me, as a truth table over what decides it. Fake people only. */
 
@@ -40,7 +40,7 @@ it.each([
 
 it("fills the name of a lead first made from a mixed-case address with no name", () => {
   const at = "2026-11-02T00:00:00Z";
-  const bare = fold(null, "Maya@Example.com", { event: { at, kind: "call", ref: "cal:1" } });
+  const bare = applyLeadEvent(null, "Maya@Example.com", { event: { at, kind: "call", ref: "cal:1" } });
   expect(bare.name).toBe("Maya@Example.com");
-  expect(fold(bare, "Maya@Example.com", { event: { at, kind: "inquiry", ref: "msg:1" }, name: "Maya" }).name).toBe("Maya");
+  expect(applyLeadEvent(bare, "Maya@Example.com", { event: { at, kind: "inquiry", ref: "msg:1" }, name: "Maya" }).name).toBe("Maya");
 });

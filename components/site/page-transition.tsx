@@ -34,11 +34,22 @@ const SECTIONS = ["/", "/portfolio"];
 
 /** Ends a held pop's snapshot once the page it went to has rendered. */
 let landed: (() => void) | null = null;
-/** What the page returned to still has to paint before it is snapshotted (a Back's restored cover, v4/home/back.ts). */
-const holds: Promise<unknown>[] = [];
-export const holdLanding = (p: Promise<unknown>) => void holds.push(p);
+const cap = () => new Promise((r) => setTimeout(r, 300));
+/** What the page returned to still has to paint before it is snapshotted (a Back's restored cover, components/home/back.ts).
+    Each one leaves once it settles, or after 300ms, so a hold no landing waited for is not kept. */
+const holds = new Set<Promise<unknown>>();
+export const holdLanding = (p: Promise<unknown>) => {
+  holds.add(p);
+  void Promise.race([p, cap()]).finally(() => holds.delete(p));
+};
+/** The holds now, taken for one landing. */
+const takeHolds = () => {
+  const all = [...holds];
+  holds.clear();
+  return all;
+};
 /** All of them, 300ms at most. */
-const settle = (all: Promise<unknown>[]) => Promise.race([Promise.all(all), new Promise((r) => setTimeout(r, 300))]);
+const settle = (all: Promise<unknown>[]) => Promise.race([Promise.all(all), cap()]);
 const sectionOf = (path: string) =>
   SECTIONS.reduce(
     (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),
@@ -53,18 +64,12 @@ const sectionOf = (path: string) =>
    transitions.css) and crossfades with the screen instead. The homepage
    (~100MB) keeps its zoom.
    On for everyone since Julian tried it on his iPhone ("ITS GOOD",
-   2026-10-18); `?vt=full` snapshots every page whole again, for testing. */
+   2026-10-18). */
 const SNAPSHOT_BUDGET = 192 * 2 ** 20;
 const gauge = () => {
-  let on = true;
-  try {
-    const q = new URLSearchParams(location.search).get("vt");
-    if (q) sessionStorage.setItem("jg-vt", q);
-    on = sessionStorage.getItem("jg-vt") !== "full";
-  } catch {}
   const m = document.getElementById("main");
   const d = window.devicePixelRatio || 1;
-  const tall = on && !!m && m.scrollHeight * m.clientWidth * d * d * 4 > SNAPSHOT_BUDGET;
+  const tall = !!m && m.scrollHeight * m.clientWidth * d * d * 4 > SNAPSHOT_BUDGET;
   /* On #main and its children, not the root: a root attribute over
      `#main > *` restyled every element on the page as it landed, about
      1,220 on /portfolio (audit 2026-11-11). */
@@ -77,9 +82,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
      than the clock (a cold Worker, a route compiling on dev) lost its
      way halfway and fell back to the browser's own crossfade. */
   const path = usePathname();
-  /* Off when the tab turned V3 motion off with `?v3motion=0`; on by default (`data-v3motion`, `app/layout.tsx`).
-     The boundary stays mounted either way so the page is never rebuilt. */
-  const on = React.useSyncExternalStore(noSubscribe, () => document.documentElement.hasAttribute("data-v3motion"), () => false);
+  /* Off on the server and the first paint. The boundary stays mounted either way so the page is never rebuilt. */
+  const on = React.useSyncExternalStore(noSubscribe, () => true, () => false);
   const shown = React.useRef(path);
   React.useLayoutEffect(() => {
     shown.current = path;
@@ -88,7 +92,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     // Safari snapshotted the home before the restored cover decoded: an empty sleeve for 1 to 4 frames (MAC on 9e9dc6c9). 300ms at most.
     const land = landed;
     landed = null;
-    if (land) settle(holds.splice(0)).then(land);
+    if (land) settle(takeHolds()).then(land);
     if (document.documentElement.dataset.nav === undefined) return;
     const trip = (
       document as Document & {
@@ -203,7 +207,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
           // one 300ms clock from the row's first frame for the whole hold: the two capped waits chained ran to 407 and 417ms (MAC SSH on 53741f32)
           const go = () => lid.remove();
           setTimeout(go, 300);
-          Promise.all(holds.splice(0)).then(() => requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(go))));
+          Promise.all(takeHolds()).then(() => requestAnimationFrame(() => requestAnimationFrame(() => void settled().then(go))));
         };
         requestAnimationFrame(look);
         return;

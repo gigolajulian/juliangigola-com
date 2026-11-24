@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { renderToString } from "react-dom/server";
 import { render, screen } from "@testing-library/react";
 import { MotionGate, NAV, FootLine, SiteFooter, SiteHeader } from "@/components/site/chrome";
 
@@ -7,10 +8,12 @@ describe("chrome", () => {
     expect(NAV.map((n) => n.href)).toEqual(["/portfolio", "/about", "/contact", "/book"]);
   });
 
-  it("MotionGate shows the fallback without data-v3motion", () => {
-    render(<MotionGate fallback={<span>still</span>}><span>moving</span></MotionGate>);
-    expect(screen.getByText("still")).toBeTruthy();
-    expect(screen.queryByText("moving")).toBeNull();
+  it("MotionGate renders the fallback on the server and its children on the client", () => {
+    const gate = <MotionGate fallback={<span>still</span>}><span>moving</span></MotionGate>;
+    expect(renderToString(gate)).toBe("<span>still</span>");
+    render(gate);
+    expect(screen.getByText("moving")).toBeTruthy();
+    expect(screen.queryByText("still")).toBeNull();
   });
 
   it("FootLine has the legal link", () => {

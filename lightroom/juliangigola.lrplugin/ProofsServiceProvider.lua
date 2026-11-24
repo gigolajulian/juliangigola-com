@@ -205,11 +205,17 @@ end
 -- ── the selects, back into Lightroom ──────────────────────────────
 
 -- One read per refresh: both hooks ask for the same gallery.
+-- Sent selects read for the first time tell the site they are in Lightroom (POST pulled, the desk's
+-- "In Lightroom"). Never in the way of the picks: a failed stamp is tried again on the next read.
 local cache = {}
 local function gallery(remote)
   local hit = cache[remote]
   if hit and LrDate.currentTime() - hit.at < 30 then return hit.proof end
   local p = fetch(remote).proof
+  if p.submittedAt and not p.pulledAt then
+    local ok, out = LrTasks.pcall(send, "POST", nil, { action = "pulled", token = remote })
+    if ok and type(out) == "table" and out.pulledAt then p.pulledAt = out.pulledAt end
+  end
   cache[remote] = { at = LrDate.currentTime(), proof = p }
   return p
 end

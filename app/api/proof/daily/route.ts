@@ -8,7 +8,7 @@ import { json } from "@/lib/http";
 
 /* ── POST /api/proof/daily: the galleries' daily summary to hello@ ─
  * Called by the booking Worker's hourly cron (`worker/index.ts`) at 9 AM
- * Pacific, with BOOKING_SECRET as the bearer. Covers galleries set to
+ * Pacific, with WORKER_KEY as the bearer. Covers galleries set to
  * "daily", from the last summary (or a day back) to now. The last run is
  * its own KV key, never a field on the galleries: a write here must not
  * race a client's picks. `?dry` answers with the mail and sends nothing.
@@ -19,7 +19,7 @@ const LAST = "proofdigest:last";
 
 export async function POST(request: Request) {
   const { env, seal: sealing, kv } = await sealedStore();
-  const denied = await refuseWorker(request, env.BOOKING_SECRET);
+  const denied = await refuseWorker(request, env.WORKER_KEY);
   if (denied) return denied;
   const seal = await sealing;
   if (!kv || !seal) return json({ error: "Not set up." }, 503);

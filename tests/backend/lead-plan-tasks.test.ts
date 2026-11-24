@@ -1,16 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
-import { dueTasks, fold, leadSummary, leadStoreKey, type Lead } from "@/lib/leads/leads";
+import { dueTasks, applyLeadEvent, leadSummary, leadStoreKey, type Lead } from "@/lib/leads/leads";
 import { callSheet, cleanPlan, cleanTasks, merge } from "@/lib/leads/lead-crm";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
+import { desk } from "./desk-routes";
 
 /* The shoot plan and tasks from CRMO (Julian 2026-11-20): kept in the full record, never the list summary;
    whole-list PATCHes; a task newly ticked writes one timeline line; Today lists what falls due. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
-const inbox = await import("@/app/api/inbox/route");
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 20, h)).toISOString();
 const s = await sealer(LEADS_KEY)!;
@@ -25,13 +25,12 @@ beforeEach(() => {
 
 async function seed(extra: Partial<Lead> = {}) {
   const id = await s.id(EMAIL);
-  const lead: Lead = { ...fold(null, EMAIL, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Nadia Okafor" }), people: [RIO], ...extra };
+  const lead: Lead = { ...applyLeadEvent(null, EMAIL, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Nadia Okafor" }), people: [RIO], ...extra };
   await writeLead(kv as never, s, id, lead);
   return { id, key: `lead:${id}` };
 }
 const patch = (body: object) =>
-  inbox.PATCH(new Request("https://juliangigola.com/api/inbox", { method: "PATCH", body: JSON.stringify(body), headers: { "x-inbox-key": KEY } }));
-const get = (q: string) => inbox.GET(new Request(`https://juliangigola.com/api/inbox${q}`, { headers: { "x-inbox-key": KEY } }));
+  desk("PATCH", "", { body });
 
 describe("cleanPlan", () => {
   it("keeps his own frames, four at most, a cosmos.so link, and a team only from the lead's people", () => {
@@ -114,7 +113,7 @@ describe("plan and tasks in the record", () => {
     const { lead } = (await res.json()) as { lead: Lead };
     expect(lead.plan).toEqual({ brief: "Album cover", sheet: { team: [RIO.email] } });
     expect(lead.events.filter((e) => e.kind === "task").map((e) => e.note)).toEqual(["Confirm MUA"]);
-    const { tasks } = (await (await get("?tasks")).json()) as { tasks: { id: string; lead: string; name: string }[] };
+    const { tasks } = (await (await desk("GET", "/tasks")).json()) as { tasks: { id: string; lead: string; name: string }[] };
     expect(tasks).toEqual([{ id: "b", text: "Rent gel", due: "2026-12-02", who: RIO.email, lead: id, name: "Nadia Okafor" }]);
     expect((await patch({ key, plan: { cosmos: "https://example.com" } })).status).toBe(400);
     expect((await patch({ key, plan: null })).status).toBe(200);
@@ -122,8 +121,8 @@ describe("plan and tasks in the record", () => {
   });
 
   it("merge keeps both records' tasks and this one's plan", () => {
-    const a = { ...fold(null, EMAIL, { event: { at: at(1), kind: "inquiry" } }), tasks: [{ id: "a", text: "One" }], plan: { brief: "Mine" } };
-    const b = { ...fold(null, "other@example.com", { event: { at: at(2), kind: "inquiry" } }), tasks: [{ id: "b", text: "Two" }], plan: { brief: "Theirs" } };
+    const a = { ...applyLeadEvent(null, EMAIL, { event: { at: at(1), kind: "inquiry" } }), tasks: [{ id: "a", text: "One" }], plan: { brief: "Mine" } };
+    const b = { ...applyLeadEvent(null, "other@example.com", { event: { at: at(2), kind: "inquiry" } }), tasks: [{ id: "b", text: "Two" }], plan: { brief: "Theirs" } };
     const m = merge(a, b, at(3));
     expect(m.tasks?.map((t) => t.id)).toEqual(["a", "b"]);
     expect(m.plan).toEqual({ brief: "Mine" });

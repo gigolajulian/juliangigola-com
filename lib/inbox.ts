@@ -16,7 +16,7 @@
  * This module is the part with no Cloudflare in it: keys, validation and the
  * cooldown arithmetic, so `scripts/check-inbox.mjs` can run the real
  * functions. The binding itself is touched in `lib/leads/enquiry-action.ts` and
- * `app/api/inbox/route.ts` (the whole admin desk's endpoint).
+ * `app/api/inbox/route.ts` (the enquiries; the leads are under `app/api/leads`).
  * ─────────────────────────────────────────────────────────────── */
 
 /** What the contact form gets back from `submitEnquiry` (`lib/leads/enquiry-action.ts`). */

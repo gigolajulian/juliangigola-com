@@ -8,7 +8,9 @@ import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
-import { noSubscribe, errorText } from "@/lib/utils";
+import { qflag } from "@/lib/flags/query";
+import { noSubscribe } from "@/lib/utils";
+import { postJson } from "@/lib/http";
 
 /* ── the client's gallery ─────────────────────────────────────────
  * The look Julian approved 2026-11-06 (mock https://claude.ai/artifact/Nn3EU21DEofuLLJyXJHtcG):
@@ -37,14 +39,13 @@ type Step = null | "review" | "done";
 
 // The gate as the grid's own wall (components/proofs/wall.tsx) by default;
 // `?proofwall=0` for the plain gate. Read on the client only.
-const readWall = () => new URLSearchParams(location.search).get("proofwall") !== "0";
-// The wall tuned per screen in the gridwall tuner by default; `?gw=0` for the untuned wall.
-// The window's size, so it compares.
+const readWall = () => !qflag("proofwall", "0");
+// The wall tuned per screen in the gridwall tuner. The window's size, so it compares; empty on the server.
 const onResize = (cb: () => void) => {
   addEventListener("resize", cb);
   return () => removeEventListener("resize", cb);
 };
-const readGw = () => (new URLSearchParams(location.search).get("gw") !== "0" ? `${innerWidth}x${innerHeight}` : "");
+const readGw = () => `${innerWidth}x${innerHeight}`;
 
 /** A full-screen sheet: focus moves in, Tab stays inside, Escape closes, focus goes back to what opened it. */
 function useDialog(active: boolean, close: () => void) {
@@ -160,7 +161,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   const n = selects.length;
   const extra = Math.max(0, n - included);
-  // Same sums as owed() in lib/proofs: the shoot balance first, then extras; a reopened gallery owes only what is new.
+  // Same sums as amountOwed() in lib/proofs: the shoot balance first, then extras; a reopened gallery owes only what is new.
   const balDue = Math.max(0, balance * 100 - initial.paid) / 100;
   const paidPastBal = Math.max(0, initial.paid - balance * 100);
   const due = balDue + Math.max(0, extra - (price ? Math.floor(paidPastBal / (price * 100)) : 0)) * price;
@@ -179,7 +180,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   // One array for the wall: a new one every render rebuilt the wall under its own landing (its columns and fades reset).
   const wallFrames = React.useMemo(() => frames.map((f) => ({ src: `/proof/${token}/f/${encodeURIComponent(f.id)}?w=${THUMB_W}`, w: f.w, h: f.h })), [frames, token]);
 
-  const post = React.useCallback((b: Record<string, unknown>) => fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(b) }), [token]);
+  const post = React.useCallback(<T,>(b: Record<string, unknown>) => postJson<T>(`/api/proof/${token}`, b), [token]);
 
   // Sign in every visit, the browser's autofill fills it. Clears the address older builds kept.
   // Back from Stripe in the same tab (paid, cancelled or failed): the address it left, so they are not asked again.
@@ -193,10 +194,8 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   async function enter(address: string, name?: string) {
     setEmail(address);
-    try {
-      const out = (await (await post({ action: "track", email: address, kind: "open", name })).json()) as { picks?: string[] };
-      if (!initial.submitted && out.picks) setSelects(out.picks);
-    } catch {}
+    const r = await post<{ picks?: string[] }>({ action: "track", email: address, kind: "open", name });
+    if (!initial.submitted && r.ok && r.data?.picks) setSelects(r.data.picks);
     setReady(true);
   }
 
@@ -211,13 +210,10 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     }
     // A failed save says so in the bar and tries again on the next change.
     const t = setTimeout(() => {
-      fetch(`/api/proof/${token}`, { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects }) })
-        .then((r) => {
-          if (!r.ok) throw new Error(String(r.status));
-          saved.current = key;
-          setUnsaved(false);
-        })
-        .catch(() => setUnsaved(true));
+      void postJson(`/api/proof/${token}`, { email, selects }, "PATCH").then((r) => {
+        if (r.ok) saved.current = key;
+        setUnsaved(!r.ok);
+      });
     }, 600);
     return () => clearTimeout(t);
   }, [selects, email, token, locked, ready]);
@@ -248,7 +244,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
       looks.current = {};
       if (!seconds && !Object.keys(body.looks).length) return;
       if (beacon) navigator.sendBeacon?.(`/api/proof/${token}`, JSON.stringify(body));
-      else post(body).catch(() => {});
+      else void post(body);
     };
     const io = new IntersectionObserver(
       (es) => {
@@ -313,28 +309,23 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
     setBusy(true);
     setVia(method);
     setError(null);
-    try {
-      const res = await fetch(`/api/proof/${token}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email, selects, method }) });
-      const out = (await res.json()) as { checkout?: string; done?: boolean; paid?: number; submittedAt?: string | null; mailed?: boolean; error?: string };
-      if (out.checkout) {
-        if (email) sessionStorage.setItem(`${EMAIL_STORE}:${token}`, email);
-        return void (location.href = out.checkout);
-      }
-      if (!res.ok || !out.done) throw new Error(out.error ?? "That did not go through. Try again.");
-      setPaid(out.paid ?? 0);
-      setSent({ at: out.submittedAt ?? new Date().toISOString(), mailed: !!out.mailed });
-      setStep("done");
-      scrollTo({ top: 0 });
-    } catch (e) {
-      setError(errorText(e));
-    } finally {
-      setBusy(false);
+    const r = await post<{ checkout?: string; done?: boolean; paid?: number; submittedAt?: string | null; mailed?: boolean }>({ email, selects, method });
+    const out = r.ok ? r.data : null;
+    setBusy(false);
+    if (out?.checkout) {
+      if (email) sessionStorage.setItem(`${EMAIL_STORE}:${token}`, email);
+      return void (location.href = out.checkout);
     }
+    if (!out?.done) return setError((!r.ok && r.error) || "That did not go through. Try again.");
+    setPaid(out.paid ?? 0);
+    setSent({ at: out.submittedAt ?? new Date().toISOString(), mailed: !!out.mailed });
+    setStep("done");
+    scrollTo({ top: 0 });
   }
 
   const review = () => {
     setStep("review");
-    if (email) post({ action: "track", email, kind: "review" }).catch(() => {});
+    if (email) void post({ action: "track", email, kind: "review" });
   };
 
   const ordinal = (i: number) => String(i + 1).padStart(3, "0");

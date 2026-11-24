@@ -1,6 +1,5 @@
-import { qflag } from "@/lib/home/flags";
 import { foreign } from "@/components/site/nav-ink";
-import { clamp, MT2, type Ctx, type Driver } from "./engine";
+import { clamp, type Ctx, type Driver } from "./engine";
 
 /* Hero wall travel (spec 3.2). Held (D): the wall travels up through the hold,
    each column trailing by its lag A, and the name block leaves once at the end.
@@ -34,9 +33,6 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
   ctas.style.pointerEvents = out ? "none" : "";
   for (const a of ctas.querySelectorAll("a,button")) out ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
 }
-
-/* Phones and tablets pin the name too (hero.css). `?mtpin=0` brings back the name that scrolls away with the first screen. */
-const PIN = !qflag("mtpin", "0");
 
 /* The name's way out, the same on every layout: it rides down out of the window and is over as See the work's top edge enters it.
    It takes the last three quarters of the scroll up to that point,
@@ -210,7 +206,8 @@ export const heroDrivers: Driver[] = [
     name: "hero",
     always: true,
     setup(el) {
-      if (MT2) (toned = 0), (tonedY = -1); // module throttle, fresh per mount
+      toned = 0; // module throttle, fresh per mount
+      tonedY = -1;
       const part = (n: HTMLElement, a: number, c: number): Part => ({ el: n, lag: a, col: c, lastY: 0 });
       const st: State = {
         cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.lag) || 0, Number(n.dataset.col))),
@@ -254,7 +251,6 @@ export const heroDrivers: Driver[] = [
         document.documentElement.toggleAttribute("data-mt-pasthero", el.getBoundingClientRect().bottom <= (hdr?.offsetHeight ?? 60));
         if (!due) due = window.setTimeout(sweep, 100); // ten sweeps a second while scrolling, and one after the last scroll event
       };
-      if (!PIN) document.documentElement.setAttribute("data-mt-nopin", "");
       // The idle wall turns a card over to its next photo (hero.css). The value is the duration: hero.tsx reads it for the caption.
       const ac = new AbortController();
       document.documentElement.setAttribute("data-mt-flip", String(FLIP));
@@ -266,7 +262,6 @@ export const heroDrivers: Driver[] = [
       const off = () => {
         clearInterval(look);
         ac.abort();
-        document.documentElement.removeAttribute("data-mt-nopin");
         document.documentElement.removeAttribute("data-mt-flip");
         document.documentElement.style.removeProperty("--mt-flip");
         document.documentElement.removeAttribute("data-mt-pasthero");
@@ -341,14 +336,14 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
   else for (const c of st.cols) move(c, -gone * c.lag * 0.5 * (ctx.vw / 1440));
   /* Phones and tablets: the name block is sticky (hero.css), so it holds while the wall scrolls under it, then sinks out the desktop's way.
      How far it sinks: from the name's top to the window's lower edge, and 24px. */
-  if (PIN && st.name && st.texts[0] && ctx.vw + "x" + ctx.vh !== st.sizeKey) {
+  if (st.name && st.texts[0] && ctx.vw + "x" + ctx.vh !== st.sizeKey) {
     st.sizeKey = ctx.vw + "x" + ctx.vh;
     const b = st.name.getBoundingClientRect();
     st.drop = b.height - (st.texts[0].getBoundingClientRect().top - b.top) + 24;
   }
-  if (PIN) sink(st, ctx);
+  sink(st, ctx);
   // phones and tablets too: captions ran through the name and tagline (MAC). Only while the name is on screen.
-  const on = PIN ? !st.out && el.getBoundingClientRect().bottom > 0 : -ctx.top < ctx.vh; // read before tone, as before the split
+  const on = !st.out && el.getBoundingClientRect().bottom > 0; // read before tone, as before the split
   tone(st);
   clearance(st, on);
 }

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { BOOK_MENU } from "@/lib/booking/service-pages";
 import { SessionBook } from "@/components/booking/book";
-import { SESSIONS, isSession } from "@/lib/photos-and-sessions";
+import { SESSIONS, isSession } from "@/lib/booking/catalog";
 import { shareOg } from "@/lib/og/share";
 
 /* One session's booking on a page of its own, for

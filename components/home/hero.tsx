@@ -4,7 +4,6 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { matches } from "@/lib/device";
-import { qflag } from "@/lib/home/flags";
 import { projectHref } from "@/lib/project-href";
 import { EXTRAS, type HomeFrame } from "@/lib/home/data";
 import { flipMs } from "./motion/root-attrs";
@@ -62,7 +61,7 @@ function inView(f: HTMLElement, was: Record<number, HomeFrame>) {
   return r.width && r.top < innerHeight * 0.8 && r.bottom > innerHeight * 0.2 && !was[+f.dataset.i!];
 }
 
-/* Idle wall (on by default, `?idle=0` turns it off): after 4 still seconds one of the 12 locked frames on screen changes every 2.5 seconds
+/* Idle wall: after 4 still seconds one of the 12 locked frames on screen changes every 2.5 seconds
    for a frame that is not on the wall. Any pointer move, scroll, key or touch holds it. Off for reduced motion and during the splash. */
 function useIdleWall(frames: HomeFrame[], extras: HomeFrame[]) {
   const root = React.useRef<HTMLElement>(null);
@@ -71,7 +70,7 @@ function useIdleWall(frames: HomeFrame[], extras: HomeFrame[]) {
   const live = React.useRef({ onWall, was, pool: extras.slice(16) }); // the first 16 extras are on the wall (side columns); the rest come in by the idle swap
   React.useEffect(() => void Object.assign(live.current, { onWall, was }));
   React.useEffect(() => {
-    if (qflag("idle", "0") || matches("calm")) return;
+    if (matches("calm")) return;
     let last = performance.now(), swapped = 0;
     const touch = () => (last = performance.now());
     const evs = ["pointermove", "pointerdown", "wheel", "scroll", "keydown", "touchstart"] as const;

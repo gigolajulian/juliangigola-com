@@ -12,7 +12,7 @@ import { isLate, type LeadSummary } from "@/lib/leads/leads";
 import { ago, nextStep, now } from "@/lib/leads/lead-desk";
 
 /** "Consultation · Call booked · Sat, Nov 14, 12:00 PM": whatever parts there are. */
-export const about = (parts: (string | null | undefined | false)[]) => parts.filter(Boolean).join(" · ");
+export const joinParts = (parts: (string | null | undefined | false)[]) => parts.filter(Boolean).join(" · ");
 
 export function About({ children }: { children: React.ReactNode }) {
   return <Text type="body" size="sm" color="secondary" maxLines={1}>{children}</Text>;

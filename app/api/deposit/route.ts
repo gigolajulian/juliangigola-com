@@ -4,7 +4,7 @@ import { amountOf, intentForm } from "@/lib/booking/deposit";
 import { CURRENCY } from "@/lib/booking/paid";
 import { openNow } from "@/lib/booking/slots";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
-import { bodyOf, json, upstreamError } from "@/lib/http";
+import { bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
@@ -19,16 +19,15 @@ export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   if (!env.STRIPE_SECRET_KEY) return json({ error: "Deposits are off." }, 503);
 
-  const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  if (!(await env.DEPOSIT_LIMIT.limit({ key: `deposit:${ip}` })).success)
-    return json({ error: "Too many tries. Wait a minute." }, 429);
+  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "deposit", request);
+  if (slow) return slow;
 
   const parsed = parseBooking(await bodyOf(request));
   if (!parsed.ok) return json({ error: parsed.reason }, 400);
   const b = parsed.booking;
 
   try {
-    if (!(await openNow(env.GCAL_OAUTH, b.slug, b.start, { kv: env.INBOX, hours: await liveHours(env) }))) return json({ error: "taken" }, 409);
+    if (!(await openNow(env.GCAL_OAUTH, b.slug, b.start, { kv: env.INBOX, hours: await liveHours(env) }))) return taken();
   } catch (e) {
     return upstreamError("deposit calendar", e, "Could not reach the calendar. Try again.");
   }

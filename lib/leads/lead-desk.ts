@@ -10,7 +10,7 @@ import { isLate, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPat
 
 export type Filter = "today" | "traffic" | "seo" | "site" | "device" | "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash" | "more" | "new" | "stats" | "money" | "templates" | "hours" | "proofs" | "licences";
 
-/** The inbox key if one was pasted, else the /admin GitHub token. */
+/** The admin key if one was pasted, else the /admin GitHub token. */
 export const authed = () => credentials(window.localStorage.getItem(KEY_STORE) ?? "");
 
 /** A failed admin request, with the status the route answered. */
@@ -41,9 +41,9 @@ export async function adminCall<T = Record<string, unknown>>(path: string, init:
 
 /** The desk's three layouts, by window width. */
 export type Size = "phone" | "mid" | "wide";
-export type Call = <T = Record<string, unknown>>(init?: RequestInit & { query?: string }) => Promise<T>;
-/** /api/inbox, with the query string beside the request. */
-export const inboxCall: Call = ({ query = "", ...init } = {}) => adminCall(`/api/inbox${query}`, init);
+/** A request to the lead desk's routes: `path` is under /api/leads ("" the leads themselves, "/templates", "/log?id=..."). */
+export type Call = <T = Record<string, unknown>>(init?: RequestInit & { path?: string }) => Promise<T>;
+export const deskCall: Call = ({ path = "", ...init } = {}) => adminCall(`/api/leads${path}`, init);
 
 /** A change to the open lead; answers with the lead as stored. */
 export type Patch = (b: LeadPatch) => Promise<Lead>;
@@ -53,7 +53,7 @@ export const OFFLINE = "Offline. The desk loads again when you are back online."
 export const isLocked = (e: unknown) => e instanceof AdminError && e.status === 401;
 export const LOCKED = "Not authorized.";
 /** What a failed load says: offline, or the route's own words. */
-export const loadError = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : isLocked(e) ? LOCKED : errorText(e));
+export const loadErrorText = (e: unknown) => (navigator.onLine === false || e instanceof TypeError ? OFFLINE : isLocked(e) ? LOCKED : errorText(e));
 
 /** "Nov 11, 4:05 PM" in Julian's time. */
 export const stampPT = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).format(new Date(iso));
@@ -74,21 +74,21 @@ export const plusDays = (iso: string, n: number) => {
   return d.toISOString().slice(0, 10);
 };
 
-export const snoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil) > now();
+export const isSnoozed = (l: LeadSummary) => !!l.snoozeUntil && Date.parse(l.snoozeUntil) > now();
 export const isFinishedStage = (s: Stage) => s === "Delivered" || s === "Lost";
 /** Archived or in the trash: out of every list but its own. */
-export const aside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
+export const isSetAside = (l: LeadSummary) => !!(l.archivedAt || l.trashedAt);
 /** His reminder has come round: it beats a snooze. */
 const due = (l: LeadSummary) => !!l.due && Date.parse(l.due) <= now();
 /** The desk's search: name, email, type of shoot or their message. */
 export const matches = (l: LeadSummary, words: string) => !words || [l.name, l.email, l.kind, l.snippet].some((v) => v?.toLowerCase().includes(words));
 /** A licence ending soon brings back even a Delivered lead; a snooze holds it off. */
-export const renew = (l: LeadSummary) => !snoozed(l) && renewDue(l, now());
+export const needsRenewal = (l: LeadSummary) => !isSnoozed(l) && renewDue(l, now());
 export function needsMe(l: LeadSummary) {
-  if (renew(l)) return true;
-  if (aside(l) || isFinishedStage(l.stage)) return false;
+  if (needsRenewal(l)) return true;
+  if (isSetAside(l) || isFinishedStage(l.stage)) return false;
   if (due(l)) return true;
-  if (snoozed(l)) return false;
+  if (isSnoozed(l)) return false;
   return l.unread || isLate(l, now()) || !!l.flags?.length || !!paperDue(l, now()) || !!myMove(l, now());
 }
 
@@ -100,7 +100,7 @@ export function nextStep(l: LeadSummary): string | null {
   if (l.flags?.includes("no-deposit")) return "Ask for the deposit";
   const paper = paperDue(l, now());
   if (paper) return paper === "contract" ? "Sign contract" : "Sign release";
-  if (renew(l)) return "Renew licence";
+  if (needsRenewal(l)) return "Renew licence";
   if (l.stage === "Inquiry") return "Reply";
   if (l.stage === "Quoted") return quoteNudge(l, now());
   return myMove(l, now());
@@ -110,12 +110,12 @@ export function inFilter(l: LeadSummary, f: Filter) {
   if (f === "trash") return !!l.trashedAt;
   if (f === "archived") return !!l.archivedAt && !l.trashedAt;
   if (f === "needs") return needsMe(l);
-  if (aside(l)) return false;
+  if (isSetAside(l)) return false;
   if (f === "upcoming") return !!l.when && Date.parse(l.when) > now() - 2 * 3600e3 && !isFinishedStage(l.stage);
   if (f === "more" || f === "hours" || f === "proofs" || f === "licences") return false;
-  if (f === "snoozed") return snoozed(l);
+  if (f === "snoozed") return isSnoozed(l);
   if (f === "open") return !isFinishedStage(l.stage);
-  return l.stage === f && !snoozed(l);
+  return l.stage === f && !isSnoozed(l);
 }
 
 export const ago = (iso: string) => {

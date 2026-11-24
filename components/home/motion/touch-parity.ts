@@ -1,27 +1,15 @@
-/* Phones and tablets get the desktop's motion. On by default.
-   `?mttp=0` turns all of it off, `?mttp=-flip,-sink` the listed items, `?mttp=flip,sink` keeps only those. engine.ts sets html[data-tp-<item>] for touch-parity.css. */
-import { qvalue } from "@/lib/home/flags";
+/* Phones and tablets get the desktop's motion, item by item. engine.ts sets html[data-tp-<item>] for touch-parity.css. */
 
-export const TP = ["sink", "covers", "flip", "films", "drift", "about", "sheet", "press"] as const;
-export type TpItem = (typeof TP)[number];
-
-export const touchParityOn = (k: TpItem) => {
-  if (typeof location === "undefined") return false;
-  const m = qvalue("mttp", "[\\w,-]+");
-  if (!m || m === "all") return true;
-  if (m === "0") return false;
-  const ks = m.split(",");
-  return ks.some((x) => x.startsWith("-")) ? !ks.includes("-" + k) : ks.includes(k);
-};
+const TP_ITEMS = ["sink", "covers", "flip", "films", "drift", "about", "sheet", "press"] as const;
 
 export function touchParity() {
-  const html = document.documentElement, on = TP.filter(touchParityOn);
-  for (const k of on) html.setAttribute("data-tp-" + k, "");
+  const html = document.documentElement;
+  for (const k of TP_ITEMS) html.setAttribute("data-tp-" + k, "");
   // iOS Safari only shows :active on a page with a touchstart listener
   const noop = () => {};
-  if (on.includes("press")) addEventListener("touchstart", noop, { passive: true });
+  addEventListener("touchstart", noop, { passive: true });
   return () => {
-    for (const k of on) html.removeAttribute("data-tp-" + k);
+    for (const k of TP_ITEMS) html.removeAttribute("data-tp-" + k);
     removeEventListener("touchstart", noop);
   };
 }

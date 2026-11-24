@@ -2,14 +2,14 @@ import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
 import { ACCOUNT, SITE_HOST, ZONE, cloudflare, searchConsole as gsc, sitePath } from "@/lib/analytics";
-import { json } from "@/lib/http";
+import { json, upstreamError } from "@/lib/http";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * The numbers behind /admin's Traffic tab, from Cloudflare's own analytics:
  * real visits (Web Analytics, which only counts pages that ran in a
  * browser) and, for the last day, how many page requests were bots.
  *
- * Behind the same gate as the rest of /admin (`isAdmin`): the inbox key or a GitHub token that can push.
+ * Behind the same gate as the rest of /admin (`isAdmin`): the admin key or a GitHub token that can push.
  * The Cloudflare token stays on the Worker (`CF_ANALYTICS_TOKEN`) and only
  * ever reads analytics.
  * ─────────────────────────────────────────────────────────────── */
@@ -85,7 +85,7 @@ export async function GET(request: Request) {
       bing,
     });
   } catch (e) {
-    return json({ error: errorText(e) }, 502);
+    return upstreamError("traffic", e, errorText(e));
   }
 }
 

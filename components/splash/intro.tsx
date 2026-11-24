@@ -4,7 +4,7 @@ import * as React from "react";
 import loader from "@/image-loader";
 import { burst } from "@/components/splash/burst-splash";
 import { split } from "@/components/splash/split-splash";
-import { HERO } from "@/lib/photos-and-sessions";
+import { HERO } from "@/lib/home/photos";
 import { keepNames } from "@/lib/keep-names";
 
 /* The homepage's split splash: the run of frames (the portfolio's first covers,
@@ -24,15 +24,15 @@ const HERO_FULL = {
 
 /* ── the opening ──────────────────────────────────────────────────
  * The splash is decided by the inline script in `layout.tsx` before the
- * first paint (a first visit, not admin, no reduced motion, unless
- * `?v3motion=0`) and played by `split-splash.ts` on the homepage and
+ * first paint (a first visit, not admin, no reduced motion) and played by `split-splash.ts` on the homepage and
  * `burst-splash.ts` elsewhere, both run as the document is read. The
  * stylesheet keeps this layer hidden unless that script has set
  * `data-intro`, so a visitor with no JavaScript is never shut behind a
  * curtain that cannot lift.
  * ─────────────────────────────────────────────────────────────── */
 
-/* Once a visit: `sessionStorage` remembers the splash has played. */
+/* Once a visit: `sessionStorage` remembers the splash has played.
+   Inlined via toString(), so it may not call imported helpers. */
 function seen() {
   if (document.documentElement.dataset.intro !== "1") return;
   try {

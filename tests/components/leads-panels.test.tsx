@@ -15,7 +15,7 @@ describe("InvoiceRow", () => {
     expect(screen.getByText(/\$800\.00 due/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "PDF" }));
     expect((await screen.findByRole("alert")).textContent).toBe("Add your details for invoices first.");
-    expect(String(vi.mocked(fetch).mock.calls[0][0])).toBe("/api/inbox?invoiceFrom");
+    expect(String(vi.mocked(fetch).mock.calls[0][0])).toBe("/api/leads/invoice-from");
   });
 });
 

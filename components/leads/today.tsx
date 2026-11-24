@@ -16,10 +16,10 @@ import { List, ListItem } from "@astryxdesign/core/List";
 import { Badge } from "@astryxdesign/core/Badge";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Divider } from "@astryxdesign/core/Divider";
-import { About, about, Age, Next } from "@/components/leads/row";
+import { About, joinParts, Age, Next } from "@/components/leads/row";
 import { dueTasks, isLate, paperDue, shootTag, type LeadSummary, type TaskRow } from "@/lib/leads/leads";
 import { dayShort } from "@/components/leads/plan";
-import { adminCall, authed, ago, aside, dateTimeLabel, centsLabel, isFinishedStage, inboxCall, needsMe, nextStep, now, inFilter, plusDays, renew, ymdPT, type Size } from "@/lib/leads/lead-desk";
+import { adminCall, authed, ago, isSetAside, dateTimeLabel, centsLabel, isFinishedStage, deskCall, needsMe, nextStep, now, inFilter, plusDays, needsRenewal, ymdPT, type Size } from "@/lib/leads/lead-desk";
 import { balance, shortDate, dueOf, overdue, usd } from "@/lib/leads/invoice";
 import type { InvoiceRow } from "@/components/leads/invoices";
 import { TZ } from "@/lib/booking/rules";
@@ -28,7 +28,7 @@ import { proofApi, feed, type FeedItem, type ProofRow } from "@/lib/proofs/desk"
 /* Today's helpers, from the retired classic desk. */
 const clock = (ms: number) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit" }).format(ms);
 /** Where a move comes from, as the mock tags it. */
-export const source = (l: LeadSummary) => (renew(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
+export const source = (l: LeadSummary) => (needsRenewal(l) ? "Licence" : paperDue(l, now()) ? "Paperwork" : l.stage === "Invoiced" || l.stage === "Selecting" ? "Proofs" : "Leads");
 /** A date is a call while the call is booked, and stays one once it is done and the quote is out: a quoted lead cannot have shot yet. */
 export const isCall = (l: LeadSummary) => l.stage === "Call booked" || (l.stage === "Quoted" && !!l.when && Date.parse(l.when) < now());
 export const callOrShoot = (l: LeadSummary) => (isCall(l) ? "Call" : shootTag(l.kind) ?? "Shoot");
@@ -41,7 +41,7 @@ export function daysOf(leads: LeadSummary[], from: string, n: number) {
   const map = new Map<string, DayEv[]>();
   const put = (d: string, e: DayEv) => map.set(d, [...(map.get(d) ?? []), e]);
   for (const l of leads) {
-    if (aside(l)) continue;
+    if (isSetAside(l)) continue;
     const who = l.name || l.email;
     if (l.when && !isFinishedStage(l.stage)) {
       const ms = Date.parse(l.when);
@@ -101,7 +101,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   React.useEffect(() => {
     adminCall<{ available?: number; pending?: number }>("/api/money").then(setMoney).catch(() => setMoney("Not connected"));
   }, []);
-  // Traffic answers to the inbox key or the GitHub token, like the other admin routes.
+  // Traffic answers to the admin key or the GitHub token, like the other admin routes.
   const [traffic, setTraffic] = React.useState<Spark | string | null>(null);
   React.useEffect(() => {
     if (!Object.keys(authed()).length) return queueMicrotask(() => setTraffic("Inbox key or GitHub token needed"));
@@ -110,7 +110,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   // Unpaid invoices past their due date, oldest due first.
   const [pastDue, setPastDue] = React.useState<InvoiceRow[]>([]);
   React.useEffect(() => {
-    inboxCall<{ invoices: InvoiceRow[] }>({ query: "?invoices" })
+    deskCall<{ invoices: InvoiceRow[] }>({ path: "/invoices" })
       .then((o) => setPastDue(o.invoices.filter((i) => overdue(i, today)).sort((a, b) => dueOf(a).localeCompare(dueOf(b)))))
       .catch(() => {});
   }, [today]);
@@ -122,9 +122,9 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   // Every lead's open tasks (`?tasks`), due within a week or late; leads put aside are left out, as Your move leaves them.
   const [taskRows, setTaskRows] = React.useState<TaskRow[] | string | null>(null);
   React.useEffect(() => {
-    inboxCall<{ tasks: TaskRow[] }>({ query: "?tasks" }).then((o) => setTaskRows(o.tasks ?? [])).catch(() => setTaskRows("Tasks did not load"));
+    deskCall<{ tasks: TaskRow[] }>({ path: "/tasks" }).then((o) => setTaskRows(o.tasks ?? [])).catch(() => setTaskRows("Tasks did not load"));
   }, []);
-  const due = dueTasks((Array.isArray(taskRows) ? taskRows : []).filter((t) => leads.some((l) => l.id === t.lead && !aside(l))), today);
+  const due = dueTasks((Array.isArray(taskRows) ? taskRows : []).filter((t) => leads.some((l) => l.id === t.lead && !isSetAside(l))), today);
   const lateBy = (d: string) => Math.round((Date.parse(`${today}T12:00:00Z`) - Date.parse(`${d}T12:00:00Z`)) / 864e5);
   const whenDue = (d: string) => (d === today ? "Today" : d === plusDays(today, 1) ? "Tomorrow" : new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { weekday: "short", timeZone: "UTC" }));
   const m = typeof money === "object" ? money : null;
@@ -139,7 +139,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
       label={<HStack gap={2} vAlign="center"><StackItem size="fill"><Text type="large" weight="semibold">{l.name || l.email}</Text></StackItem><Age l={l} /></HStack>}
       description={
         <VStack gap={1}>
-          <About>{about([l.kind ? shootTag(l.kind) : null, l.stage])}</About>
+          <About>{joinParts([l.kind ? shootTag(l.kind) : null, l.stage])}</About>
           <Next l={l} />
         </VStack>
       }

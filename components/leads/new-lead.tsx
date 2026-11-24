@@ -47,7 +47,7 @@ export function NewLeadDesk({ call, leads, size, done, open, cancel }: { call: C
   const add = () => {
     setBusy(true);
     setNote(null);
-    call<{ id: string; lead: Lead }>({ method: "POST", body: JSON.stringify({ add: f }) })
+    call<{ id: string; lead: Lead }>({ method: "POST", body: JSON.stringify(f) })
       .then((o) => done(o.id, o.lead))
       .catch((err: unknown) => setNote(errorText(err)))
       .finally(() => setBusy(false));

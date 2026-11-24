@@ -5,6 +5,7 @@ import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { openNow, type KV } from "@/lib/booking/slots";
+import { statusOf } from "@/lib/http";
 
 /* ── the site's own booking engine ────────────────────────────────
  * One Durable Object (`worker/booking-lock.ts`) runs every booking through
@@ -91,7 +92,6 @@ export function parseBooking(raw: unknown, call = false): Parsed {
     phone: cap(b.phone, 20) || undefined,
     where: cap(b.where) || undefined,
     notes: cap(b.notes) || undefined,
-    engine: "own",
   };
   return { ok: true, booking };
 }
@@ -235,7 +235,7 @@ export async function cancelOwn(store: Store, secret: string | undefined, id: st
     await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, { method: "DELETE" });
   } catch (e) {
     // Deleted by hand on the calendar already: the cancel still stands.
-    const s = (e as { status?: number }).status;
+    const s = statusOf(e);
     if (s !== 404 && s !== 410) throw e;
   }
   const record = { ...was, cancelled: new Date().toISOString() };

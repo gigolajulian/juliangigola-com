@@ -63,7 +63,7 @@ export function AdminInbox({
   const [error, setError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
 
-  /** Every call to the route, with the key attached. */
+  /** Every call to the route, with the key attached. Async so a throw from localStorage (in `credentials`) rejects like any failed call. */
   const call = React.useCallback(
     async (
       init: RequestInit & { query?: string } = {},

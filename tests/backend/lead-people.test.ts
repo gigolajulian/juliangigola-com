@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { copiesFor, findLead, personKey, readLead, recordLead, writeLead } from "@/lib/leads/lead-store";
-import { fold, leadSummary, leadStoreKey, type Lead, type Person } from "@/lib/leads/leads";
+import { applyLeadEvent, leadSummary, leadStoreKey, type Lead, type Person } from "@/lib/leads/leads";
 import { cleanPeople, merge, PEOPLE_MAX } from "@/lib/leads/lead-crm";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
+import { desk } from "./desk-routes";
 
 /* Several people under one client (Julian 2026-11-15): the art director,
    the producer and the stylist sit on the brand's lead, their mail lands
@@ -12,7 +13,6 @@ import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
-const inbox = await import("@/app/api/inbox/route");
 const proof = await import("@/app/api/proof/route");
 
 const at = (h: number) => new Date(Date.UTC(2026, 10, 15, h)).toISOString();
@@ -29,13 +29,13 @@ beforeEach(() => {
 /** The brand's lead, with people on it and their aliases written. */
 async function brand(people: Person[] = [AD]) {
   const id = await s.id(BRAND);
-  const lead: Lead = { ...fold(null, BRAND, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Brand Co" }), people };
+  const lead: Lead = { ...applyLeadEvent(null, BRAND, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Brand Co" }), people };
   await writeLead(kv as never, s, id, lead);
   for (const p of people) await kv.put(personKey(await s.id(p.email)), id);
   return { id, key: `lead:${id}` };
 }
 const patch = (body: object) =>
-  inbox.PATCH(new Request("https://juliangigola.com/api/inbox", { method: "PATCH", body: JSON.stringify(body), headers: { "x-inbox-key": KEY } }));
+  desk("PATCH", "", { body });
 
 describe("findLead", () => {
   it("finds a person's lead, prefers an address's own lead, and ignores an alias whose lead is gone", async () => {
@@ -43,7 +43,7 @@ describe("findLead", () => {
     expect((await findLead(kv as never, s, "Ana@Agency.com")).id).toBe(id);
     // Their own lead wins over the alias.
     const own = await s.id(AD.email);
-    await writeLead(kv as never, s, own, fold(null, AD.email, { event: { at: at(2), kind: "inquiry" } }));
+    await writeLead(kv as never, s, own, applyLeadEvent(null, AD.email, { event: { at: at(2), kind: "inquiry" } }));
     expect((await findLead(kv as never, s, AD.email)).id).toBe(own);
     await kv.delete(leadStoreKey(own));
     // The brand's lead emptied from the trash: the alias points nowhere, so a new lead starts at her own id.
@@ -85,8 +85,8 @@ describe("people in the record", () => {
   });
 
   it("join on a merge, once each, and never as the lead's own address", () => {
-    const a = { ...fold(null, BRAND, { event: { at: at(1), kind: "inquiry" } }), people: [AD] };
-    const b = { ...fold(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ ...AD, role: "AD" }, { name: "B", email: BRAND }, { name: "Sam", email: "sam@x.co" }] };
+    const a = { ...applyLeadEvent(null, BRAND, { event: { at: at(1), kind: "inquiry" } }), people: [AD] };
+    const b = { ...applyLeadEvent(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ ...AD, role: "AD" }, { name: "B", email: BRAND }, { name: "Sam", email: "sam@x.co" }] };
     // The merged record's own address joins too, so its mail keeps landing here.
     expect(merge(a, b, at(3)).people).toEqual([AD, { name: "Sam", email: "sam@x.co" }, { name: "other@x.co", email: "other@x.co" }]);
   });
@@ -110,12 +110,12 @@ describe("PATCH people", () => {
   it("refuses a bad address, one with its own lead, and one already on another lead", async () => {
     const { key } = await brand([]);
     expect((await patch({ key, people: [{ email: "nope" }] })).status).toBe(400);
-    await writeLead(kv as never, s, await s.id("own@x.co"), fold(null, "own@x.co", { event: { at: at(2), kind: "inquiry" } }));
+    await writeLead(kv as never, s, await s.id("own@x.co"), applyLeadEvent(null, "own@x.co", { event: { at: at(2), kind: "inquiry" } }));
     const own = await patch({ key, people: [{ email: "own@x.co" }] });
     expect(own.status).toBe(409);
     expect((await own.json()).error).toMatch(/Merge/);
     const other = await s.id("other@x.co");
-    await writeLead(kv as never, s, other, { ...fold(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ name: "T", email: "taken@x.co" }] });
+    await writeLead(kv as never, s, other, { ...applyLeadEvent(null, "other@x.co", { event: { at: at(2), kind: "inquiry" } }), people: [{ name: "T", email: "taken@x.co" }] });
     await kv.put(personKey(await s.id("taken@x.co")), other);
     expect((await patch({ key, people: [{ email: "taken@x.co" }] })).status).toBe(409);
     // An alias left behind by a lead that no longer lists the address blocks nothing and routes nothing.
@@ -138,7 +138,7 @@ describe("gallery mail", () => {
     const sent: { to: string; cc?: string[] }[] = [];
     const r2 = { put: vi.fn(async () => {}), get: vi.fn(async () => null), delete: vi.fn(async () => {}) };
     ctx.env = { ...ctx.env, PROOFS: r2, CLIENT_EMAIL: { send: async (m: { to: string; cc?: string[] }) => void sent.push(m) } };
-    const post = (body: object) => proof.POST(new Request("https://juliangigola.com/api/proof", { method: "POST", body: JSON.stringify(body), headers: { "x-inbox-key": KEY } }));
+    const post = (body: object) => proof.POST(new Request("https://juliangigola.com/api/proof", { method: "POST", body: JSON.stringify(body), headers: { "x-admin-key": KEY } }));
     const { token } = await (await post({ action: "create", name: "Brand Co" }))!.json();
     const p = (await readProof(kv as never, s, token))!;
     await writeProof(kv as never, s, { ...p, email: BRAND, finals: [{ id: "a1", file: "a.jpg", w: 10, h: 10, bytes: 1, crc: 1 }] });

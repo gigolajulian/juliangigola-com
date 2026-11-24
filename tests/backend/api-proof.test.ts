@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH, POST, PUT } from "@/app/api/proof/route";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";
+import { proofKey } from "@/lib/proofs/proof-model";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
@@ -13,7 +14,7 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("./fakes")).cloudflareMock(ctx));
 
 const req = (method: string, { body, query = "", key = KEY, type }: { body?: BodyInit; query?: string; key?: string; type?: string } = {}) =>
-  new Request(`https://juliangigola.com/api/proof${query}`, { method, body, headers: { "x-inbox-key": key, ...(type ? { "content-type": type } : {}) } });
+  new Request(`https://juliangigola.com/api/proof${query}`, { method, body, headers: { "x-admin-key": key, ...(type ? { "content-type": type } : {}) } });
 const json = (o: unknown) => JSON.stringify(o);
 // The handlers are typed as maybe answering nothing; they always answer.
 const call = async (h: (r: Request) => Promise<Response | undefined>, r: Request) => (await h(r))!;
@@ -66,6 +67,27 @@ describe("/api/proof", () => {
     const got = await (await call(GET, req("GET", { query: `?token=${token}` }))).json();
     expect(got.proof.frames).toEqual([{ id: "a1", file: "a.jpg", w: 3, h: 2 }]);
     expect((await readProof(kv as never, (await sealer(LEADS_KEY))!, token))?.name).toBe("Test");
+  });
+
+  it("stamps pulledAt only on the plugin's POST pulled, once, and only for sent selects", async () => {
+    const s = (await sealer(LEADS_KEY))!;
+    const { token } = await (await call(POST, req("POST", { body: json({ action: "create", name: "Test" }) }))).json();
+    const pulled = async () => (await (await call(POST, req("POST", { body: json({ action: "pulled", token }) }))).json()).pulledAt;
+    expect(await pulled()).toBeNull(); // nothing sent yet
+    await writeProof(kv as never, s, { ...(await readProof(kv as never, s, token))!, submittedAt: "2026-11-20T10:00:00.000Z" });
+    await call(GET, req("GET", { query: `?token=${token}` }));
+    expect((await readProof(kv as never, s, token))!.pulledAt).toBeUndefined(); // a read stamps nothing
+    const first = await pulled();
+    expect(first).toMatch(/^\d{4}-/);
+    expect(await pulled()).toBe(first);
+  });
+
+  it("readProof: null for a gallery that is not there, a throw for one it cannot open", async () => {
+    const s = (await sealer(LEADS_KEY))!;
+    expect(await readProof(kv as never, s, "nothere")).toBeNull();
+    const { token } = await (await call(POST, req("POST", { body: json({ action: "create", name: "Test" }) }))).json();
+    kv.data.get(proofKey(token))!.value = "not-sealed";
+    await expect(readProof(kv as never, s, token)).rejects.toThrow();
   });
 
   it("refuses a bad client email and keeps the stored one", async () => {

@@ -1,5 +1,6 @@
 import * as React from "react";
 import { pad } from "@/lib/utils";
+import { useSkyCalendar } from "@/components/booking/sky-motion";
 
 /** Two digits; `iso` below is a local date as "2026-11-04". The booking picker reuses both (`time-picker-parts.tsx`). */
 
@@ -52,6 +53,7 @@ export function Calendar({
   picked,
   tag,
   onPick,
+  parts,
 }: {
   view: "week" | "month";
   setView: (v: "week" | "month") => void;
@@ -63,23 +65,27 @@ export function Calendar({
   /** A day's tag ("3 open", "Open") or null when it cannot be picked. */
   tag: (d: Date) => string | null;
   onPick: (d: Date) => void;
+  /** Sky picker only: which of morning, afternoon, evening still have a time, as three colored dots. */
+  parts?: (d: Date) => boolean[] | null;
 }) {
   const cells = view === "month" ? monthCells(anchor) : weekCells(anchor);
+  const cal = React.useRef<HTMLDivElement>(null);
+  const before = useSkyCalendar(!!parts, cal);
   const head = view === "month" ? anchor : (cells[0] as Date);
   return (
     <>
       <div className="cal-top lbl">
         <span>{head.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
         <span className="seg">
-          <button type="button" aria-pressed={view === "week"} onClick={() => setView("week")}>Week</button>
-          <button type="button" aria-pressed={view === "month"} onClick={() => setView("month")}>Month</button>
+          <button type="button" aria-pressed={view === "week"} onClick={() => { if (view !== "week") before(0); setView("week"); }}>Week</button>
+          <button type="button" aria-pressed={view === "month"} onClick={() => { if (view !== "month") before(0); setView("month"); }}>Month</button>
         </span>
         <span className="arrows">
-          <button type="button" aria-label="Earlier" disabled={!canBack} onClick={() => shift(-1)}>&larr;</button>
-          <button type="button" aria-label="Later" disabled={!canNext} onClick={() => shift(1)}>&rarr;</button>
+          <button type="button" aria-label="Earlier" disabled={!canBack} onClick={() => { before(-1); shift(-1); }}>&larr;</button>
+          <button type="button" aria-label="Later" disabled={!canNext} onClick={() => { before(1); shift(1); }}>&rarr;</button>
         </span>
       </div>
-      <div className={`cal lbl ${view}`}>
+      <div ref={cal} className={`cal lbl ${view}`}>
         {WEEKDAYS.map((w) => (
           <span key={w} className="wd">{w}</span>
         ))}
@@ -90,10 +96,15 @@ export function Calendar({
           /* Open times as up to three dots, so the tag never outgrows its square;
              the count stays in the label. */
           const open = tg && /open$/i.test(tg) ? Number(/^\d+/.exec(tg)?.[0] ?? 0) : -1;
+          const sky = parts?.(t);
           return (
             <button key={id} type="button" data-day={id} aria-pressed={id === picked} disabled={tg === null} aria-label={`${dlabel(t)}${tg ? `, ${tg}` : ""}`} onClick={() => onPick(t)}>
               <b>{t.getDate()}</b>
-              {open >= 0 ? (
+              {sky ? (
+                <span className="dots sky" aria-hidden="true">
+                  {sky.map((on, i) => <i key={i} className={on ? undefined : "out"} />)}
+                </span>
+              ) : open >= 0 ? (
                 <span className={open && open <= 2 ? "dots few" : "dots"} aria-hidden="true">
                   {Array.from({ length: open >= 7 ? 3 : open >= 3 ? 2 : 1 }, (_, i) => <i key={i} />)}
                 </span>

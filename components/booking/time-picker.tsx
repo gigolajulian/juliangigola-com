@@ -34,7 +34,7 @@ export function TimePicker(props: Props) {
   const waiting = <p role="status" className="lbl mute">Loading availability</p>;
   if (skin && (state === "loading" || !days || held)) return v3plain(jg, heldBar);
   if (skin && !pick) return Object.values(days ?? {}).some((l) => l.length) ? v3plain(waiting, heldBar) : v3plain(<p className="lbl mute">No open times in the next few months. <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>);
-  if (state === "loading" || !days || (held && state === "ready" && !skin)) {
+  if (state === "loading" || !days || (held && !skin)) {
     return (
       // Held to the card's inset and a phone card's height while it waits
       // (the embed's `block` had it on the card's edge, in a sliver).
@@ -58,7 +58,7 @@ export function TimePicker(props: Props) {
   const sum = `${DAYS[date.getDay()]} ${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)} · ${t} ${ap}`;
 
   const ctx: CardCtx = { ...c, pick, days, t, ap, until, date, sum };
-  /* ── JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
+  /* ── The V3 stepper: Time, You, (Deposit), Booked. The same
      times, booking and deposit as the cards below; only the look is new. */
   /* Called, not mounted: as an element it was a new component in the shell's
      place, and the shell remounted when the first time came. It has no hooks. */

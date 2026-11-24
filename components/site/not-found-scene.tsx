@@ -4,6 +4,7 @@ import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { matches } from "@/lib/device";
 import { THEME_COLOR } from "@/lib/theme-color";
+import { sessionGet } from "@/lib/utils";
 
 /* ── the numerals, and the hand that focuses them ──────────────────
  * The 404 opens out of focus: the numerals sit under 16px of blur at 78%,
@@ -34,10 +35,7 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
   React.useLayoutEffect(() => {
     const html = document.documentElement;
     if (html.dataset.theme) return;
-    let t = null;
-    try {
-      t = sessionStorage.getItem("theme");
-    } catch {}
+    const t = sessionGet("theme");
     const l = t === "light" || (t !== "dark" && matchMedia("(prefers-color-scheme: light)").matches);
     html.dataset.theme = l ? "light" : "dark";
     document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", l ? THEME_COLOR.light : THEME_COLOR.dark));

@@ -5,11 +5,11 @@ import {
   COMMISSIONS,
   COVER_ART,
   FEATURED,
-  DISCIPLINE_TILES,
   commissionsIn,
   projectsIn,
   isDisciplineGallery,
 } from "@/lib/work/work";
+import { DISCIPLINE_TILES } from "@/lib/work/disciplines";
 import type { Frame } from "@/lib/work/work-types";
 import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";

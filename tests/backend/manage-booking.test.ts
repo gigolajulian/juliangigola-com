@@ -55,7 +55,7 @@ beforeEach(() => {
     CLIENT_EMAIL: client,
     EMAIL: mail,
     STRIPE_SECRET_KEY: "sk_test_x",
-    DEPOSIT_LIMIT: { limit: async () => ({ success: true }) },
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
   };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
@@ -86,13 +86,13 @@ beforeEach(() => {
 
 /** A paid portraits session through the webhook; its id and token from the client's mail. */
 async function paid(start: string) {
-  const meta = { kind: "deposit", engine: "own", slug: "portraits", start, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
+  const meta = { kind: "deposit", slug: "portraits", start, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com" };
   expect(await bookDeposit(ctx.env as never, "pi_TEST1234567890", meta)).toBe("booked");
   const link = String(client.sent.at(-1)!.text).match(/\/booking\/(\w+)\?t=([\w.-]+)&do=cancel/)!;
   return { id: link[1], t: link[2] };
 }
 const post = (id: string, body: unknown, key?: string) =>
-  change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body), headers: key ? { "x-inbox-key": key } : {} }), { params: Promise.resolve({ id }) });
+  change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body), headers: key ? { "x-admin-key": key } : {} }), { params: Promise.resolve({ id }) });
 
 describe("the link", () => {
   it("opens its own booking until a day after it, and nothing else", async () => {
@@ -232,9 +232,9 @@ describe("cancel", () => {
 
   it("a free call cancels with no money", async () => {
     const res = await book(new Request("https://juliangigola.com/api/book", { method: "POST", body: JSON.stringify({ slug: "music-call", start: wednesday(7), timeZone: "America/Los_Angeles", name: "QA", email: "qa@example.com", via: "Phone" }) }));
-    const { data } = await res.json();
+    const { id } = await res.json();
     const t = String(client.sent[0].text).match(/t=([\w.-]+)&do=cancel/)![1];
-    expect(await (await post(data.uid, { t, action: "cancel" })).json()).toMatchObject({ refunded: null, record: { paid: false } });
+    expect(await (await post(id, { t, action: "cancel" })).json()).toMatchObject({ refunded: null, record: { paid: false } });
   });
 });
 
@@ -295,7 +295,9 @@ describe("reschedule", () => {
     const start = wednesday(7);
     const { id, t } = await paid(start);
     busy.push({ start: plus(start, 3), end: plus(start, 4), id: "other" });
-    expect((await post(id, { t, action: "reschedule", start: plus(start, 3) })).status).toBe(409);
+    const refused = await post(id, { t, action: "reschedule", start: plus(start, 3) });
+    expect(refused.status).toBe(409);
+    expect(await refused.json()).toEqual({ error: "That time was just taken. Pick another.", code: "taken" });
     // One hour on: its own 10 to 11 plus buffer would be in the way if it were not its own.
     expect((await post(id, { t, action: "reschedule", start: plus(start, 1) })).status).toBe(200);
   });

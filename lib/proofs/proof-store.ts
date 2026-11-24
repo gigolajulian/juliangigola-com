@@ -55,15 +55,10 @@ export function forDesk<T extends Proof>(p: T): Omit<T, "pass"> & { hasPass: boo
 }
 
 
-/** One gallery, opened. Null when it is not there, and also when it cannot be opened (a rotated LEADS_KEY), unlike `readLead`, which throws. */
+/** One gallery, opened. Null when it is not there; throws when it cannot be opened (a rotated LEADS_KEY), like `readLead` and `readContract`. */
 export async function readProof(kv: KV, s: Seal, token: string): Promise<Proof | null> {
   const raw = await kv.get(proofKey(token));
-  if (!raw) return null;
-  try {
-    return await s.open<Proof>(raw);
-  } catch {
-    return null;
-  }
+  return raw ? s.open<Proof>(raw) : null;
 }
 
 /** A gallery by its storage token or a renamed gallery's date id. */

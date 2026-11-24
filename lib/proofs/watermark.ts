@@ -28,7 +28,7 @@ const asset = async (env: Env, src: string, origin: string) => {
 };
 
 /** The wordmark drawn into one JPEG. Throws if Images or the mark is unavailable: never fall back to the clean frame. */
-export async function bake(env: Env, jpeg: ArrayBuffer, origin: string): Promise<ArrayBuffer> {
+export async function watermarkJpeg(env: Env, jpeg: ArrayBuffer, origin: string): Promise<ArrayBuffer> {
   const { width, height } = await env.IMAGES.info(stream(jpeg));
   const box = markBox(width, height);
   const mark = await asset(env, MARK.src, origin);
@@ -66,7 +66,7 @@ export async function servedFrame(env: Env, p: Pick<Proof, "token" | "watermark"
   const clean = await env.PROOFS.get(frameKey(p.token, id));
   if (!clean) return null;
   if (!p.watermark) return { body: clean.body, etag: clean.httpEtag };
-  const bytes = await bake(env, await clean.arrayBuffer(), origin);
+  const bytes = await watermarkJpeg(env, await clean.arrayBuffer(), origin);
   const put = await env.PROOFS.put(markedKey(p.token, id), bytes, { httpMetadata: { contentType: "image/jpeg" } });
   return { body: stream(bytes), etag: put.httpEtag };
 }

@@ -6,7 +6,7 @@ import { DialRoot, useDialKit } from "dialkit";
 import { BookTimes } from "@/components/booking/book-times";
 import { DialCopyAll } from "@/components/dev/dial-copy-all";
 import { InquireWall } from "@/components/enquiry/inquire-wall";
-import type { WallTile } from "@/lib/wall-tile";
+import type { WallTile } from "@/lib/work/wall-tile";
 import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 
 export type Bookable = {

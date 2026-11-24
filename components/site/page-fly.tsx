@@ -9,8 +9,8 @@ import { v4pages } from "@/lib/flags/v4pages";
    the photo you click grows into the next page's hero. Any link, or a row
    with `data-fly-to`, that holds a photo (or sits in a door with one) is a
    source; the next page's project frame or stepper photo is the target.
-   Links without a photo, or pages without a hero, open plainly. Only while
-   V3 motion is on (the default, `?v3motion=0` turns it off), never under reduced motion. */
+   Links without a photo, or pages without a hero, open plainly. Never under
+   reduced motion. */
 const HERO = ".v3 .pj-big, .v3 .f-photo .ph";
 /* Motion plan item 3 (docs/decisions.md): the photo travels on
    `move` in 600, the covers left behind recede, the project's other frames
@@ -102,7 +102,7 @@ export function PageFly() {
       if (!el || e.metaKey || e.ctrlKey || e.shiftKey || e.button) return;
       const to = el.dataset.flyTo ?? (el instanceof HTMLAnchorElement && el.origin === location.origin && !el.hash ? el.pathname : null);
       pushed.current = to;
-      if (!document.documentElement.hasAttribute("data-v3motion") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       const scope = el.dataset.flySrc ? document.querySelector(el.dataset.flySrc) : el.querySelector("img") ? el : el.closest(".door");
       const img = scope && [...scope.querySelectorAll("img")].find(shown);
       // An oversized grid photo flies from its frame, not from its own larger box.
@@ -191,6 +191,8 @@ export function PageFly() {
     document.addEventListener("pointercancel", up, true);
     document.addEventListener("dragstart", up, true);
     document.addEventListener("click", click, true);
+    // PageTransition mounts first (app/layout.tsx), so its capture listener runs before this one: it stops a Back and
+    // dispatches it again inside its view transition, and this listener acts on that replay.
     window.addEventListener("popstate", pop, true);
     return () => {
       document.removeEventListener("pointerdown", down, true);
@@ -240,7 +242,7 @@ export function PageFly() {
     back.current = null;
     if (b && Date.now() - b.t < 4000) {
       const main = document.getElementById("main");
-      // not the home: it puts back its own spot (v4/home/back.ts) and lands at rest, a 2.5vh settle there read as the row arriving late (Julian, #1351)
+      // not the home: it puts back its own spot (components/home/back.ts) and lands at rest, a 2.5vh settle there read as the row arriving late (Julian, #1351)
       if (main && path !== "/" && !(document as Document & { activeViewTransition?: unknown }).activeViewTransition) {
         main.animate({ transform: ["translateY(-2.5vh)", "none"] }, { duration: 400, easing: "cubic-bezier(.32,.72,0,1)" });
         main.animate({ opacity: [0, 1] }, { duration: 400, easing: OUT });

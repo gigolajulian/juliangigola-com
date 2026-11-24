@@ -42,12 +42,11 @@ import { isSettled } from "@/lib/leads/invoice";
 import { endDay, type Size } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import type { Enquiry } from "@/lib/inbox";
-import { canonical } from "@/lib/leads/lead-crypto";
-import { isLate, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import { canonical, isLate,NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { callSheet, fillTemplate, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
-import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
+import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, nextStep, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
 import { compose, frostBar, ios, kindOf, line, mailto, glyph } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
@@ -100,20 +99,16 @@ const history = (log: Lead["events"] | null, own: Lead["events"]) => {
     .sort((a, b) => a.at.localeCompare(b.at));
 };
 
-/** An action asked for from the ⌘K palette; `n` makes each ask new. */
-export type LeadAsk = { do: "task" | "invoice"; n: number };
-
-export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs, ask }: { ask?: LeadAsk | null; toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+/** One lead as its page reads it: the record, the message it came in with, the whole log and the galleries.
+    Loaded once per lead and marked seen; `patch` writes a change and hands the new record to the list. */
+function useLeadDetail({ summary, initial, call, onChange, reload, onLoadError }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; reload: () => void; onLoadError: (text: string) => void }) {
   // A lead added a moment ago comes in whole: KV may not serve its key yet.
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
-  const [asked, setAsked] = React.useState(false);
-  const [editing, setEditing] = React.useState<"contact" | "quote" | "remind" | "licence" | "snooze" | "merge" | "invoice" | null>(null);
-  const [note, setNote] = React.useState<string | null>(null);
   const [proofs, setProofs] = React.useState<ProofRow[]>([]);
-  const [addingTask, setAddingTask] = React.useState(false);
   const key = `lead:${summary.id}`;
+
 
   const patch = React.useCallback(
     async (body: LeadPatch) => {
@@ -126,29 +121,28 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     },
     [call, key, onChange, reload],
   );
-  const run = (p: Promise<unknown>, ok?: string) => p.then(() => { setNote(ok ?? null); setEditing(null); }).catch((e: unknown) => setNote(errorText(e)));
   // The whole activity log (`lib/leads/activity-log.ts`); the lead itself keeps only its last 50 events.
   const [log, setLog] = React.useState<Lead["events"] | null>(null);
   const newest = lead?.events.at(-1)?.at ?? "";
   React.useEffect(() => {
     let live = true;
-    call<{ log: Lead["events"] }>({ query: `?log=${encodeURIComponent(summary.id ?? "")}` }).then((o) => live && setLog(o.log)).catch(() => {});
+    call<{ log: Lead["events"] }>({ path: `/log?id=${encodeURIComponent(summary.id ?? "")}` }).then((o) => live && setLog(o.log)).catch(() => {});
     return () => { live = false; };
   }, [call, summary.id, newest]);
 
   React.useEffect(() => {
     let live = true;
-    call<{ lead: Lead }>({ query: `?key=${encodeURIComponent(key)}` }).then(({ lead: l }) => {
+    call<{ lead: Lead }>({ path: `?id=${encodeURIComponent(summary.id ?? "")}` }).then(({ lead: l }) => {
       if (!live) return;
       setLead(l);
       // Their latest words, from the raw row the form stored.
       const ref = [...l.events].reverse().find((e) => e.kind === "inquiry" && e.ref)?.ref;
       if (ref)
-        call<{ enquiry: Enquiry }>({ query: `?key=${encodeURIComponent(ref)}` })
+        adminCall<{ enquiry: Enquiry }>(`/api/inbox?key=${encodeURIComponent(ref)}`)
           .then((m) => live && (setMessage(m.enquiry), setMsgKey(ref)))
           .catch(() => {});
       if (l.unread) patch({ seen: true }).catch(() => {});
-    }).catch((e: unknown) => live && !initial && setNote(errorText(e)));
+    }).catch((e: unknown) => live && !initial && onLoadError(errorText(e)));
     proofApi<{ proofs: ProofRow[] }>({ query: "?list" })
       .then((o) => live && setProofs(o.proofs.filter((p) => p.email)))
       .catch(() => {});
@@ -156,6 +150,20 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     // Once per lead: `patch` is stable for the same key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
+
+  return { lead, message, msgKey, proofs, log, patch };
+}
+
+/** An action asked for from the ⌘K palette; `n` makes each ask new. */
+export type LeadAsk = { do: "task" | "invoice"; n: number };
+
+export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs, ask }: { ask?: LeadAsk | null; toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+  const [asked, setAsked] = React.useState(false);
+  const [editing, setEditing] = React.useState<"contact" | "quote" | "remind" | "licence" | "snooze" | "merge" | "invoice" | null>(null);
+  const [note, setNote] = React.useState<string | null>(null);
+  const [addingTask, setAddingTask] = React.useState(false);
+  const { lead, message, msgKey, proofs, log, patch } = useLeadDetail({ summary, initial, call, onChange, reload, onLoadError: setNote });
+  const run = (p: Promise<unknown>, ok?: string) => p.then(() => { setNote(ok ?? null); setEditing(null); }).catch((e: unknown) => setNote(errorText(e)));
 
   const l = lead ?? summary;
   const full = lead;
@@ -176,12 +184,12 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const late = isLate(l, now());
   const step = nextStep(l);
   const nudge = templates.find((t) => t.id === `nudge${NUDGES.indexOf(quoteNudge(l, now()) as (typeof NUDGES)[number]) + 1}`);
-  const renewT = templates.find((x) => x.id === "renew") ?? TEMPLATES.find((x) => x.id === "renew")!;
+  const renewTemplate = templates.find((x) => x.id === "renew") ?? TEMPLATES.find((x) => x.id === "renew")!;
   const replyHref = mail(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
   const bookHref = mail(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
   // The one filled button: the nudge or renewal when one is due, the call sheet once booked with a plan, else Reply.
   const sheet = full?.plan && l.when && l.stage === "Confirmed" ? callSheet(full) : null;
-  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fillTemplate(renewT.subject, l), fillTemplate(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
+  const primaryAction = !mailOk ? null : needsRenewal(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fillTemplate(renewTemplate.subject, l), fillTemplate(renewTemplate.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
 
   const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY).toISOString() }), "Snoozed.");
   const archive = () => run(patch({ archive: !l.archivedAt }), l.archivedAt ? "Back in the list." : "Archived.");
@@ -213,7 +221,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     { label: "3 days", onClick: () => snoozeFor(3) },
     { label: "1 week", onClick: () => snoozeFor(7) },
     { label: "Pick a date", onClick: () => setEditing("snooze") },
-    ...(snoozed(l) ? [{ type: "divider" as const }, { label: "Unsnooze", onClick: () => run(patch({ snoozeUntil: "" }), "Unsnoozed.") }] : []),
+    ...(isSnoozed(l) ? [{ type: "divider" as const }, { label: "Unsnooze", onClick: () => run(patch({ snoozeUntil: "" }), "Unsnoozed.") }] : []),
   ];
   // The booking the site made for them (`ref` = its id), while it stands: cancel it before it starts, or mark a no-show after.
   // shortcut: the latest booking only; a lead with two live bookings needs a picker here.
@@ -247,9 +255,9 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const usable = templates.filter((t) => t.id !== "renew" || l.licence);
   const reply = mailOk ? (
     <HStack gap={2} wrap="wrap">
-      {lead1 ? <Win label={lead1.label} win={lead1.win} href={lead1.href} onClick={() => setAsked(true)} /> : null}
+      {primaryAction ? <Win label={primaryAction.label} win={primaryAction.win} href={primaryAction.href} onClick={() => setAsked(true)} /> : null}
       <a ref={replyLink} href={replyHref} target="_blank" rel="noreferrer" hidden aria-hidden="true" tabIndex={-1} onClick={() => setAsked(true)} />
-      <Button label="Reply in Gmail" variant={lead1 ? "secondary" : "primary"} icon={<Icon icon={MailGlyph} />} href={replyHref} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} />
+      <Button label="Reply in Gmail" variant={primaryAction ? "secondary" : "primary"} icon={<Icon icon={MailGlyph} />} href={replyHref} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} />
       <DropdownMenu
         button={{ label: "Template", variant: "secondary" }}
         items={[
@@ -328,7 +336,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             <HStack gap={2} vAlign="center">
               <Button label="Leads" variant="ghost" size="sm" icon={<Icon icon={BackGlyph} />} onClick={onBack} />
               <StackItem size="fill" />
-              {phoneSize ? null : <DropdownMenu button={{ label: snoozed(l) ? `Snoozed to ${dayLabel(l.snoozeUntil!)}` : "Snooze", variant: "ghost", size: "sm", icon: <Icon icon={ClockGlyph} /> }} alignment="end" items={snoozeItems} />}
+              {phoneSize ? null : <DropdownMenu button={{ label: isSnoozed(l) ? `Snoozed to ${dayLabel(l.snoozeUntil!)}` : "Snooze", variant: "ghost", size: "sm", icon: <Icon icon={ClockGlyph} /> }} alignment="end" items={snoozeItems} />}
               {phoneSize || l.stage === "Lost" ? null : <Button label="Mark as lost" variant="ghost" size="sm" onClick={() => setStage("Lost")} />}
               {more}
             </HStack>
@@ -352,7 +360,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             {note ? <Text type="code" size="sm" color="secondary" role="status">{note}</Text> : null}
             {l.trashedAt ? <Banner status="warning" title="In the trash" description={`Deleted for good in ${Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.`} endContent={<Button label="Recover" variant="secondary" size="sm" onClick={() => run(patch({ trash: false }), "Recovered.")} />} /> : null}
             {l.flags?.includes("stuck") ? <Banner status="error" title="A deposit was paid but not booked" description="Refund or rebook it in Stripe, or send the booking link." endContent={full?.deposit ? <Button label="Open Stripe" variant="secondary" size="sm" href={full.deposit} target="_blank" rel="noreferrer" /> : undefined} /> : null}
-            {renew(l) && l.licence ? <Banner status="info" title={`Licence ends ${endDay(l.licence.end)}`} description={l.licence.use} /> : null}
+            {needsRenewal(l) && l.licence ? <Banner status="info" title={`Licence ends ${endDay(l.licence.end)}`} description={l.licence.use} /> : null}
             {asked && l.stage === "Inquiry" ? <Banner status="info" title="Sent it?" endContent={<Button label="Mark as Replied" variant="secondary" size="sm" onClick={() => run(patch({ stage: "Replied" }).then(() => setAsked(false)))} />} /> : null}
             {editing === "snooze" ? (
               <Banner status="info" title="Snooze until" isDismissable onDismiss={() => setEditing(null)}

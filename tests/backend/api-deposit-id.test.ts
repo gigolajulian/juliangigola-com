@@ -16,7 +16,7 @@ let kv: FakeKV;
 beforeEach(() => {
   kv = new FakeKV();
   intent = { amount: 10000, currency: "usd", metadata: { kind: "deposit" } };
-  ctx.env = { INBOX: kv, STRIPE_SECRET_KEY: "sk_test_x", DEPOSIT_LIMIT: { limit: async () => ({ success: true }) } };
+  ctx.env = { INBOX: kv, STRIPE_SECRET_KEY: "sk_test_x", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) } };
   vi.stubGlobal("fetch", async (u: string) => (u.endsWith(`/payment_intents/${PI}`) ? reply({ id: PI, ...intent }) : reply({ error: {} }, 404)));
 });
 afterEach(() => vi.unstubAllGlobals());

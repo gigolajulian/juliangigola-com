@@ -1,80 +1,11 @@
 import { EVENTS } from "@/lib/booking/rules";
 import { depositFor, takesDeposit } from "@/lib/booking/paid";
 import { SESSION_TYPES } from "@/lib/booking/sessions";
-
-/* JG V3 (master v39, DESIGN.md "Photos"): what each screen shows, per theme.
-   Dark is the hard-light set; light is a second, brighter set. Paths under
-   `public/`. Names are the captions the master prints. */
-
-export type Shot = { src: string; name: string; meta?: string };
-export type Pair = { d: Shot; l: Shot };
+import { ABOUT_PHOTO } from "@/lib/home/photos";
 
 const w = (slug: string, n: string) => `/work/${slug}/${n}.jpg`;
 
-export const HERO: Pair[] = [
-  { d: { src: w("diesel", "03"), name: "Diesel" }, l: { src: w("valgur", "06"), name: "VALGUR 06" } },
-  { d: { src: w("valgur", "06"), name: "Valgur" }, l: { src: w("places", "02"), name: "PLACES 02" } },
-  { d: { src: w("wild-and-unapologetic", "06"), name: "Wild and Unapologetic" }, l: { src: w("weddings", "01"), name: "WEDDINGS 01" } },
-  { d: { src: w("hua", "11"), name: "Hua" }, l: { src: "/v3/novocaine-16.jpg", name: "NOVOCAINE 16" } },
-];
-export const HERO_ALT = ["Diesel 03", "Valgur: two knights and a lightning strike", "Wild and Unapologetic 06", "Hua 11"];
-
-/* Three columns of two, each drifting at its own speed. */
-export const RECENT: { speed: number; shots: Pair[] }[] = [
-  {
-    speed: -0.06,
-    shots: [
-      { d: { src: w("valgur", "02"), name: "Valgur 02", meta: "Artist presskit" }, l: { src: w("paradox", "01"), name: "Paradox 01", meta: "Campaigns" } },
-      { d: { src: "/hero/nyx-06.jpg", name: "Nyx 06", meta: "Editorial" }, l: { src: w("iris", "07"), name: "Iris 07", meta: "Artist presskit" } },
-    ],
-  },
-  {
-    speed: 0.1,
-    shots: [
-      { d: { src: w("i-wanna-be-a-human", "01"), name: "I Wanna Be A Human 01", meta: "Editorial" }, l: { src: w("i-wanna-be-a-human", "01"), name: "I Wanna Be A Human 01", meta: "Editorial" } },
-      { d: { src: w("oakley-x-nike", "01"), name: "Oakley x Nike 01", meta: "Campaigns" }, l: { src: w("undisputed", "04"), name: "Undisputed 04", meta: "Editorial" } },
-    ],
-  },
-  {
-    speed: 0.02,
-    shots: [
-      { d: { src: w("liminal", "01"), name: "Liminal 01", meta: "Chroma" }, l: { src: w("ukiyosunknown", "01"), name: "Ukiyosunknown 01", meta: "Campaigns" } },
-      { d: { src: w("novocaine", "04"), name: "Novocaine 04", meta: "Editorial" }, l: { src: w("aegis", "03"), name: "Aegis 03", meta: "Editorial" } },
-    ],
-  },
-];
-
-export const COMMISSIONS: Pair[] = [
-  { d: { src: w("cyber1a", "01"), name: "Cyber1a 01", meta: "Artist presskit" }, l: { src: w("relay", "09"), name: "Relay 09", meta: "Editorial" } },
-  { d: { src: w("ghostlight", "05"), name: "Ghostlight 05" }, l: { src: w("azure-bloom", "08"), name: "Azure Bloom 08" } },
-  { d: { src: w("paranoia", "13"), name: "Paranoia 13" }, l: { src: w("paradox", "02"), name: "Paradox 02" } },
-  { d: { src: w("vigil", "05"), name: "Vigil 05" }, l: { src: w("byte-me", "17"), name: "Byte Me 17" } },
-  { d: { src: w("events", "01"), name: "Events 01" }, l: { src: w("ukiyosunknown", "01"), name: "Ukiyosunknown 01" } },
-  { d: { src: w("true-grit", "01"), name: "True Grit 01" }, l: { src: w("graduation", "01"), name: "Graduation 01" } },
-  { d: { src: w("vendetta", "11"), name: "Vendetta 11" }, l: { src: w("goodcult", "01"), name: "Goodcult 01" } },
-  { d: { src: w("celestis", "03"), name: "Celestis 03" }, l: { src: w("i-wanna-be-a-human", "06"), name: "I Wanna Be A Human 06" } },
-  { d: { src: w("gilt", "01"), name: "Gilt 01" }, l: { src: w("sago", "01"), name: "Sago 01" } },
-];
-/* Each tab opens its discipline on /portfolio (`categoryHref` in lib/work/work.ts). */
-export const COMMISSION_TABS: [label: string, href: string][] = [
-  ["All", "/portfolio"],
-  ["Campaigns", "/portfolio?d=campaigns"],
-  ["Presskits", "/portfolio?d=artist-presskit"],
-  ["Editorial", "/portfolio?d=editorial"],
-  ["Portraits", "/portfolio?d=portraits"],
-  ["Mixed media", "/portfolio?d=mixed-media"],
-  ["Cover art", "/portfolio?d=coverart"],
-  ["Motion", "/portfolio/video"],
-];
-
-export const DOORS = {
-  commissions: { d: w("stratus-lookbook-vol-1", "12"), l: w("undisputed", "10") },
-  book: { d: w("places", "12"), l: w("paradox", "02") },
-};
-export const CALL_CARD = { d: w("channel-orange", "01"), l: w("second-skin", "13") };
-export const ABOUT_PHOTO = "/about/julian-steps.jpg";
-
-/* ── sessions (master SESS; deposit list from lib/booking/paid.ts) ── */
+/* ── the session catalog: what /book, the homepage and the service pages offer (deposits from lib/booking/paid.ts) ── */
 export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "model-test" | "graduation" | "weddings" | "consultation" | "music-photography" | "fashion-photography" | "brand-photography" | "editorial" | "events";
 export type Session = {
   slug: SessionSlug;
@@ -164,7 +95,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     from: null,
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/consultation",
-    /* The master's call card shows the About portrait. */
+    /* The call card shows the About portrait. */
     photo: { d: ABOUT_PHOTO, l: ABOUT_PHOTO, at: { d: "50% 85%", l: "50% 85%" } },
   },
   /* The commission calls and events (BOOK_MENU in `lib/booking/service-pages.ts`, same words),

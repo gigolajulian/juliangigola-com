@@ -1,20 +1,17 @@
 import { scrollGoal, settleTo, shiftScroll } from "@/components/site/smooth-scroll";
 import { matches } from "@/lib/device";
-import { qvalue } from "@/lib/home/flags";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/work/videos";
-import { clamp, MT2, rise, smooth, tell, type Ctx, type Driver } from "./engine";
+import { clamp, rise, smooth, tell, type Ctx, type Driver } from "./engine";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
-import { touchParityOn } from "./touch-parity";
 
 
-/* Snap (?mtsnap=0 turns it off): a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
+/* Snap: a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
    nearest one. Within a step of the item it rested on it leans 0.44 of a step the way the scroll went, so one wheel notch (100px, a small part of a step) moves on instead of
-   falling back; ?mtsnap=near is plain nearest. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
+   falling back. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
+const LEAN = 0.44;
 function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
-  const m = qvalue("mtsnap");
-  if (m === "0" || matches("calm")) return;
-  const lean = m === "near" ? 0 : 0.44;
+  if (matches("calm")) return;
   let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
   const settle = () => {
     // fine pointers only: a finger's own momentum is left alone (MAC, #1209: the iPad snapped too)
@@ -22,7 +19,7 @@ function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, s
     const top = el.getBoundingClientRect().top + scrollY, range = el.offsetHeight - innerHeight, y = scrollGoal(), p = (y - top) / range;
     // the two ends are items too: resting exactly there keeps `rest`, a pixel past them the page is free
     if (y < top - 1 || y > top + range + 1) return void (rest = NaN);
-    const f = at(p), i = clamp(Math.round(f + (Math.abs(f - rest) < 1 ? Math.sign(f - rest) * lean : 0)), 0, n - 1), to = top + share(i) * range;
+    const f = at(p), i = clamp(Math.round(f + (Math.abs(f - rest) < 1 ? Math.sign(f - rest) * LEAN : 0)), 0, n - 1), to = top + share(i) * range;
     rest = i;
     // 1px: scrollY is fractional, an exact compare would glide forever
     if (Math.abs(to - y) > 1) settleTo(to);
@@ -99,9 +96,8 @@ function coverFrame(s: Covers, p: number) {
   p = ease(p);
   const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
   if (i !== s.cur) {
-    // The row's own scroll steps item by item so HomeCovers (rows.tsx) names the current one; the transform carries the rest.
-    if (MT2) tell(s.el, { cur: i }); // ?mt2=1: tell HomeCovers the item; the row's scroll stays at 0 and the transform carries all of it
-    else s.row.scrollLeft = i * step;
+    // HomeCovers (rows.tsx) is told the item; the row's scroll stays at 0 and the transform carries all of it.
+    tell(s.el, { cur: i });
     s.base = s.row.scrollLeft;
     s.cur = i;
   } else if (x === s.lastX) return;
@@ -114,7 +110,7 @@ function coverFrame(s: Covers, p: number) {
 // The title line rises when HomeCovers (rows.tsx) commits the new item (on touch too with ?mttp=covers). A turned sleeve turns back.
 function coverTold(s: Covers) {
   for (const it of s.items) it.removeAttribute("data-tp-fl");
-  if (s.ctx.held || touchParityOn("covers")) rise(s.el.querySelector(".mt-ttl .ln > span"));
+  rise(s.el.querySelector(".mt-ttl .ln > span"));
 }
 
 /* Sideways drag moves the page scroll, so the two never disagree. */
@@ -180,7 +176,7 @@ function coverResize(s: Covers) {
   const was = s.cur; // measureCovers() resets it
   measureCovers(s);
   if (s.ctx.held) return;
-  if (MT2 && was > 0) s.row.scrollLeft = was * s.step; // ?mt2=1: the row rested at 0 while held; land it on the told item
+  if (was > 0) s.row.scrollLeft = was * s.step; // the row rested at 0 while held; land it on the told item
   s.track.style.transform = "";
   loose(s);
 }
@@ -229,7 +225,7 @@ function covers(): Driver {
       row.addEventListener("scroll", () => loose(s), { passive: true, signal: ac.signal });
       snap(el, ctx, n, (p) => ease(p) * (n - 1), (i) => unease(i / (n - 1)), () => s.down !== null, ac.signal);
 
-      if (touchParityOn("flip")) for (const it of items) if (it.hasAttribute("data-flip")) it.addEventListener("click", () => flip(s, it), opts);
+      for (const it of items) if (it.hasAttribute("data-flip")) it.addEventListener("click", () => flip(s, it), opts);
 
       /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
       for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !s.dragged, opts);
@@ -435,7 +431,7 @@ function films(): Driver {
       snap(el, ctx, n, (p) => ease(p) * n - 0.5, (i) => unease((i + 0.5) / n), () => false, ac.signal);
       row.addEventListener("keydown", (e) => filmKey(s, e), opts);
       addEventListener("scroll", () => (s.movedAt = performance.now()), { passive: true, signal: ac.signal });
-      s.touchFilms = touchParityOn("films") && !(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
+      s.touchFilms = !(navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData;
       addEventListener("message", (e) => heard(s, e), opts);
       // a screen early, so the first film is already playing when the section arrives
       const io = new IntersectionObserver(([e]) => ((s.seen = e.isIntersecting), preview(s)), { rootMargin: "100% 0px" });

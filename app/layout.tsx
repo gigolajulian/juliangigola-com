@@ -25,6 +25,7 @@ import { ScrollThumb } from "@/components/site/scroll-thumb";
 import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { ScrollReveal } from "@/components/site/scroll-reveal";
 import { V4PAGES_HEAD } from "@/lib/flags/v4pages";
+import { SKY_HEAD } from "@/lib/flags/sky";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else, and Archivo Expanded for the booking
@@ -193,7 +194,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             failure simply means no opening. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var mo=true;try{var k3="jg-v3motion-off",q3=location.search;if(/[?&]v3motion=0/.test(q3))sessionStorage.setItem(k3,"1");else if(/[?&]v3motion/.test(q3))sessionStorage.removeItem(k3);mo=!sessionStorage.getItem(k3)}catch(e){}if(mo)document.documentElement.dataset.v3motion="";try{var kb="jg-solidhdr";if(/[?&]blur=0/.test(q3))sessionStorage.setItem(kb,"1");else if(/[?&]blur/.test(q3))sessionStorage.removeItem(kb);if(sessionStorage.getItem(kb))document.documentElement.dataset.solidhdr=""}catch(e){}try{var kn="jg-navfx-off";if(/[?&]navfx=0/.test(q3))sessionStorage.setItem(kn,"1");else if(/[?&]navfx/.test(q3))sessionStorage.removeItem(kn);if(!sessionStorage.getItem(kn))document.documentElement.dataset.navfx=""}catch(e){document.documentElement.dataset.navfx=""}try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;var mt=location.pathname==="/";if(mt&&mo&&!/[?&]intro=0/.test(q)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&(/[?&]intro=1/.test(q)||!sessionStorage.getItem("jg-intro"))){var rr=document.documentElement;rr.dataset.mtIntro="1";setTimeout(function(){if(rr.dataset.mtIntro==="1"&&!("mtOwn" in rr.dataset)){delete rr.dataset.mtIntro;rr.dataset.mtLate=""}},6000)}if(/[?&]intro=0/.test(q)||!mo||mt)return;var split=/[?&]splash=split/.test(q);var force=split||(/[?&]intro=1/.test(q)&&location.pathname==="/");var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||location.pathname.indexOf("/delivery/")===0||location.pathname.indexOf("/contract/")===0||/^(admin|leads)[.]/.test(location.hostname);if(location.pathname!=="/"&&location.pathname.indexOf("/book")!==0&&!admin&&!calm){var kc="jg-cover-intro",sc=false;try{sc=!!sessionStorage.getItem(kc);sessionStorage.setItem(kc,"1")}catch(e){sc=true}if(!sc||/[?&]intro=1/.test(q))document.documentElement.dataset.coverIntro=""}if(force||(!admin&&!seen&&!calm&&location.pathname==="/")){var r=document.documentElement;r.dataset.intro="1";if(split||location.pathname==="/")r.dataset.splash="split";else r.dataset.splash="name";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
+            __html: `(function(){document.documentElement.dataset.v3motion="";document.documentElement.dataset.navfx="";try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;var mt=location.pathname==="/";if(mt&&!/[?&]intro=0/.test(q)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&(/[?&]intro=1/.test(q)||!sessionStorage.getItem("jg-intro"))){var rr=document.documentElement;rr.dataset.mtIntro="1";setTimeout(function(){if(rr.dataset.mtIntro==="1"&&!("mtOwn" in rr.dataset)){delete rr.dataset.mtIntro;rr.dataset.mtLate=""}},6000)}if(/[?&]intro=0/.test(q)||mt)return;var split=/[?&]splash=split/.test(q);var force=split||(/[?&]intro=1/.test(q)&&location.pathname==="/");var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||location.pathname.indexOf("/delivery/")===0||location.pathname.indexOf("/contract/")===0||/^(admin|leads)[.]/.test(location.hostname);if(location.pathname!=="/"&&location.pathname.indexOf("/book")!==0&&!admin&&!calm){var kc="jg-cover-intro",sc=false;try{sc=!!sessionStorage.getItem(kc);sessionStorage.setItem(kc,"1")}catch(e){sc=true}if(!sc||/[?&]intro=1/.test(q))document.documentElement.dataset.coverIntro=""}if(force||(!admin&&!seen&&!calm&&location.pathname==="/")){var r=document.documentElement;r.dataset.intro="1";if(split||location.pathname==="/")r.dataset.splash="split";else r.dataset.splash="name";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
           }}
         />
         {/* `data-v4pages`: what is left of the inner-pages plan on trial (lib/flags/v4pages.ts). `?v4pages` turns
@@ -204,6 +205,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: V4PAGES_HEAD,
           }}
         />
+        {/* `data-sky`: the time picker in the hour's light, on trial (lib/flags/sky.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: SKY_HEAD }} />
       </head>
       <body className="min-h-full flex flex-col">
         {/* The JG cover for a first arrival on an inner page (`data-cover-intro`, set in the head), up before the
@@ -230,7 +233,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             page is already underneath it. See `intro.tsx`. Not behind
             MotionGate: that renders nothing on the server, and the splash
             has to be in the HTML to start before hydration. The head
-            script above sets `data-intro` on a first arrival unless `?v3motion=0`. */}
+            script above sets `data-intro` on a first arrival. */}
         <Intro run={SPLASH_RUN} />
 
         <SiteHeader />
@@ -273,6 +276,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             so every gallery and strip shares it and none carries its own. */}
         <TextCaret />
         <NavMemo />
+        {/* After PageTransition: it holds a Back and replays the popstate, which PageFly's own listener then sees. */}
         <PageFly />
         {/* fps, finger dots and a frame log, only with `?debug`. The
             overlay itself loads only then: `debug-gate.tsx`. */}

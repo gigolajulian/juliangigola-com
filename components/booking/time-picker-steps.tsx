@@ -14,11 +14,14 @@ import type { Shell } from "@/components/enquiry/flow";
 import { looksLikeEmail } from "@/lib/inbox";
 import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type StepsSkin } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
+import { SkyTimes } from "@/components/booking/sky-times";
+import { skyOn } from "@/lib/flags/sky";
+import { partOf, pacific, sunsetLabel, tone } from "@/lib/booking/sky";
 
 /** The quiet that ends a trackpad flick: events closer than this are still the same push. */
 const GESTURE_GAP_MS = 120;
 
-/* JG V3 (master v39 stepper): Time, You, (Deposit), Booked. The same
+/* The V3 stepper: Time, You, (Deposit), Booked. The same
    times, booking and deposit as the cards; only the look is new. */
 export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
   const { skin, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, swipeX: swipeXRef, wheelGate, stripRef, more, setMore, paid, deposit, refs, v3root, error, bad, setBad, blank, setBlank, load, choose, today, book, refill, v3steps, v3sub, date } = c;
@@ -155,6 +158,9 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
     const next = times[at0 + dir];
     if (next) choose(pick.date, minutesOf(next), true);
   };
+  /* ?sky (lib/flags/sky.ts): the times in the hour's light, the readout under them, the day's dots by part of day. */
+  const sky = skyOn();
+  const zone = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "longGeneric" }).formatToParts(0).find((p) => p.type === "timeZoneName")?.value.replace(/ Time$/, "") ?? tz;
   return shell({
     head: paid ? "Book a session" : skin?.name === "Consultation" ? "Book a consultation" : "Book a call",
     sub: v3sub,
@@ -179,11 +185,19 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
             return n ? `${n} open` : null;
           }}
           onPick={(d) => choose(iso(d), pick.min, false)}
+          parts={sky ? (d) => {
+            const l = days[iso(d)];
+            if (!l?.length) return null;
+            const p = [false, false, false];
+            for (const x of l) p[partOf(Math.round(pacific(Date.parse(x)).hour * 60))] = true;
+            return p;
+          } : undefined}
         />
+        {sky ? <SkyTimes times={times} picked={pick.min} length={length} ruler={view === "month"} choose={(m) => choose(pick.date, m, true)} /> : null}
         {/* The time big, stepped with
             the arrows, a wheel, a swipe or the arrow keys; the day's open times
             in one row under it, faded with a hint when they run past the edge. */}
-        <div className="fig scrub">
+        <div className="fig scrub" style={sky ? (({ dark, light }) => ({ "--tc": dark, "--tcl": light }) as React.CSSProperties)(tone(Date.parse(pick.start))) : undefined}>
           <div className="num">
             <b ref={(el) => {
               if (!el) return;
@@ -221,8 +235,14 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
             <button type="button" className="arr" aria-label="Later time" disabled={at0 < 0 || at0 >= times.length - 1} onClick={() => stepTime(1)}>→</button>
           </div>
           <span className="lbl mute mline">{dlabel(date)}{chosen === "time" ? ` | until ${clockLabel(end)}` : ""}</span>
+          {sky ? (
+            <dl className="sky-meta lbl">
+              <div><dt className="mute">Time zone</dt><dd>{zone}</dd></div>
+              {paid ? <div><dt className="mute">Sunset, San Jose</dt><dd>{sunsetLabel(pacific(Date.parse(pick.start)).ymd)}</dd></div> : null}
+            </dl>
+          ) : null}
         </div>
-        <div className={cn("strip", more && "more")}>
+        {sky ? null : <div className={cn("strip", more && "more")}>
           <div ref={stripRef} className="idx lbl" onScroll={(e) => { const el = e.currentTarget; setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 4); }}>
             {times.map((x) => {
               const m = minutesOf(x);
@@ -233,7 +253,7 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
             })}
           </div>
           <p className="lbl mute swipe" aria-hidden>Swipe for more times →</p>
-        </div>
+        </div>}
       </div>
     ),
     bar: <button type="button" className="btn fill" onClick={() => { setChosen("time"); setStep("form"); }}>Continue</button>,
