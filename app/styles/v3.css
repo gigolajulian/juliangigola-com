@@ -1826,39 +1826,37 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .cal button .dots.sky i:nth-child(3){background:var(--sky-e)}
 .v3 .cal button .dots.sky i.out{background:none;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 35%,transparent)}
 /* the date top right; in a wide week cell the dots sit bottom left, so the cell uses both sides (a phone's cell is too narrow: dots under the date) */
-:root[data-sky] .v3 .cal button{align-items:flex-end;text-align:right}
-@media (min-width:801px){:root[data-sky] .v3 .cal.week button{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;align-items:end}:root[data-sky] .v3 .cal.week button b{grid-column:2;grid-row:1/3;justify-self:end;align-self:end}:root[data-sky] .v3 .cal.week button .dots{grid-column:1;grid-row:2}}
+:root[data-sky] .v3 .cal:has(.dots.sky) button{align-items:flex-end;text-align:right}
+@media (min-width:801px){:root[data-sky] .v3 .cal.week:has(.dots.sky) button{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;align-items:end}:root[data-sky] .v3 .cal.week:has(.dots.sky) button b{grid-column:2;grid-row:1/3;justify-self:end;align-self:end}:root[data-sky] .v3 .cal.week:has(.dots.sky) button .dots{grid-column:1;grid-row:2}}
 /* week: one time per row */
 .v3 .sky-rows>div{display:flex;flex-direction:column}
 .v3 .sky-rows .grp{margin:18px 0 4px;font-size:11px;letter-spacing:.12em}
 .v3 .sky-rows>div:first-child .grp{margin-top:0}
-.v3 .sky-rows [data-slot]{position:relative;display:flex;align-items:center;gap:10px;min-height:50px;padding:6px 0;margin-top:-1px;background:none;border:0;border-top:1px solid var(--line);color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:color .25s}
-.v3 .sky-rows [data-slot] i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--tone);transition:transform .45s cubic-bezier(.34,1.56,.64,1)}
-.v3 .sky-rows [data-slot] b{font:800 1rem/1 var(--font-figures),var(--display);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
-.v3 .sky-rows [data-slot] small{font-size:12px;letter-spacing:.08em;color:color-mix(in srgb,currentColor 80%,transparent)}
+.v3 .sky-rows [data-slot]{position:relative;display:flex;align-items:center;gap:10px;min-height:50px;padding:6px 0;margin-top:-1px;background:none;border:0;border-top:1px solid var(--line);color:var(--ink);font:inherit;text-align:left;cursor:pointer;transition:color 250ms var(--ease-out-strong)}
+.v3 .sky-rows [data-slot] i{flex:none;width:6px;height:6px;border-radius:50%;background:var(--tone);transition:transform 250ms var(--ease-spring)}
+.v3 .sky-rows [data-slot] b{font-size:15px;font-weight:500;letter-spacing:.04em;font-variant-numeric:tabular-nums}
+.v3 .sky-rows [data-slot] small{font-size:12px;letter-spacing:.08em}
 .v3 .sky-rows [data-slot] .hint{margin-left:auto;font-size:11px;letter-spacing:.1em;color:var(--mute)}
-.v3 .sky-rows [data-slot]::before{content:"";position:absolute;left:0;right:0;top:-1px;height:2px;background:var(--tone);transform:scaleX(0);transform-origin:0 50%;transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.v3 .sky-rows [data-slot]::before{content:"";position:absolute;left:0;right:0;top:-1px;height:2px;background:var(--tone);transform:scaleX(0);transform-origin:0 50%;transition:transform 400ms var(--ease-out-strong)}
 .v3 .sky-rows [data-slot]:is([aria-pressed="true"],.in){color:var(--tone)}
 .v3 .sky-rows [data-slot][aria-pressed="true"]::before{transform:none}
 .v3 .sky-rows [data-slot][aria-pressed="true"] i{transform:scale(1.7)}
-/* month: the ruler, one lit segment per time; it draws in left to right and a light sweeps it, so it reads as the place to tap */
+/* month: the ruler, one lit segment per time; it draws in left to right and a hovered hour lifts, so it reads as the place to tap */
 .v3 .sky-ruler{position:relative;overflow-x:clip;display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));column-gap:3px}
 .v3 .sky-ruler [data-slot]{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;min-height:44px;padding:12px 0 10px;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer}
 .v3 .sky-ruler [data-slot] i{display:none}
-.v3 .sky-ruler [data-slot] b{font:800 clamp(.8125rem,1.2vw,1.0625rem)/1 var(--font-figures),var(--display);transition:translate .25s cubic-bezier(.2,.8,.2,1)}
+.v3 .sky-ruler [data-slot] b{font-size:clamp(.8125rem,1.2vw,1rem);font-weight:500;line-height:1;transition:translate 150ms var(--ease-out-strong)}
 .v3 .sky-ruler [data-slot] small{font-size:10px;letter-spacing:.08em;opacity:0}
 .v3 .sky-ruler [data-slot]:is(:first-child,[aria-pressed="true"]) small{opacity:1}
-.v3 .sky-ruler [data-slot]::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--tone);opacity:.4;transform-origin:0 50%;transition:height .25s,top .25s,opacity .25s;animation:sky-seg .5s cubic-bezier(.2,.8,.2,1) backwards;animation-delay:calc(var(--i) * 45ms + 150ms)}
+.v3 .sky-ruler [data-slot]::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--tone);opacity:.4;transform-origin:0 50%;transition:height 150ms,top 150ms,opacity 150ms;animation:sky-seg 400ms var(--ease-out-strong) backwards;animation-delay:calc(var(--i) * 40ms)}
 .v3 .sky-ruler [data-slot].in::before{opacity:.75}
 .v3 .sky-ruler [data-slot][aria-pressed="true"]{color:var(--tone)}
 .v3 .sky-ruler [data-slot][aria-pressed="true"]::before{opacity:1;height:8px;top:-2px}
 @media (hover:hover){.v3 .sky-ruler [data-slot]:hover::before{opacity:1;height:8px;top:-2px}.v3 .sky-ruler [data-slot]:hover b{translate:0 -2px}}
-.v3 .sky-ruler::after{content:"";position:absolute;top:-2px;left:0;width:18%;height:8px;background:linear-gradient(90deg,transparent,rgb(255 255 255 / .6),transparent);opacity:0;pointer-events:none;animation:sky-sweep 1.5s cubic-bezier(.2,.8,.2,1) 1.1s 2}
 .v3 .sky-ruler .rl{padding-top:8px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.12em;color:var(--mute);line-height:1.35}
 .v3 .sky-ruler .rl+.rl{padding-left:6px;border-left:1px solid var(--line)}
 @keyframes sky-seg{from{transform:scaleX(0)}}
-@keyframes sky-sweep{0%{opacity:0;translate:-100% 0}15%,85%{opacity:1}100%{opacity:0;translate:560% 0}}
-@media (prefers-reduced-motion:reduce){.v3 .sky-ruler [data-slot]::before,.v3 .sky-ruler::after{animation:none}.v3 :is(.sky-rows,.sky-ruler) *{transition:none}}
+@media (prefers-reduced-motion:reduce){.v3 :is(.sky-rows,.sky-ruler) :is(*,*::before){animation:none;transition:none}}
 /* the readout under the times, AM and PM in the hour's color, then the details */
 :root[data-sky] .v3 .fig.scrub .ap{color:var(--tone);font-size:clamp(1.25rem,2vw,1.875rem);opacity:1}
 .v3 .sky-meta{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px clamp(20px,3vw,36px);margin:4px 0 0}

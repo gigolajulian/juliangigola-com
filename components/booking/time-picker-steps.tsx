@@ -189,7 +189,7 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
             const l = days[iso(d)];
             if (!l?.length) return null;
             const p = [false, false, false];
-            for (const x of l) p[partOf(minutesOf(x))] = true;
+            for (const x of l) p[partOf(Math.round(pacific(Date.parse(x)).hour * 60))] = true;
             return p;
           } : undefined}
         />
