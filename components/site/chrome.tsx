@@ -160,11 +160,6 @@ function HeaderBar() {
     setWas(path);
     setMenu(false);
   }
-  React.useEffect(() => {
-    const open = () => setMenu(true);
-    addEventListener("v3:menu", open);
-    return () => removeEventListener("v3:menu", open);
-  }, []);
   /* Focus goes into the drawer on open and back to the button that opened it
      on close; the page and footer behind it are inert, the header (its close
      button) stays live. Read in a layout effect, before inert drops focus. */
