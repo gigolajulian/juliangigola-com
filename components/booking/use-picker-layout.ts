@@ -1,11 +1,11 @@
 import * as React from "react";
 import { warmGsap, withGsap } from "@/lib/gsap-lazy";
-import { iso, STEP_AT, type PickedTime, type Slot, type Step } from "@/components/booking/time-picker-parts";
+import { iso, STEP_AT, type PickedTime, type Step } from "@/components/booking/time-picker-parts";
 
 type Layout = {
   step: Step;
   pick: PickedTime | null;
-  days: Record<string, Slot[]> | null;
+  days: Record<string, string[]> | null;
   view: "week" | "month";
   anchor: Date;
   week: Date[];

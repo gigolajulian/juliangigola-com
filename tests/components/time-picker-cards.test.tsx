@@ -32,10 +32,11 @@ const slots = {
   "2026-11-20": [],
   "2026-11-23": ["14:00"],
 };
-const answer = (lengthInMinutes = 60) => ({
-  status: "success",
-  event: { title: "Session", lengthInMinutes, price: 0, locations: [] },
-  data: Object.fromEntries(Object.entries(slots).map(([d, ts]) => [d, ts.map((t) => ({ start: `${d}T${t}:00-08:00`, end: `${d}T${t}:00-08:00` }))])),
+const answer = (length = 60) => ({
+  title: "Session",
+  length,
+  where: false,
+  slots: Object.fromEntries(Object.entries(slots).map(([d, ts]) => [d, ts.map((t) => `${d}T${t}:00-08:00`)])),
 });
 
 type Call = [string, RequestInit | undefined];

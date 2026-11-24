@@ -34,21 +34,21 @@ export async function open(browser: Browser, browserName: string, r: Ratio): Pro
      free event, Wednesday to Sunday open 10:00 to 17:30 every half hour,
      Monday and Tuesday closed. */
   const slots = (q: URLSearchParams) => {
-    const data: Record<string, { start: string; end: string }[]> = {};
+    const data: Record<string, string[]> = {};
     const day = new Date(`${q.get("start")!.slice(0, 10)}T12:00:00Z`);
     const end = new Date(`${q.get("end")!.slice(0, 10)}T12:00:00Z`);
     for (; day <= end; day.setUTCDate(day.getUTCDate() + 1)) {
       if (day.getUTCDay() === 1 || day.getUTCDay() === 2) continue;
       const date = day.toISOString().slice(0, 10);
       const at = (m: number) => `${date}T${String(m / 60 | 0).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}:00.000-07:00`;
-      data[date] = Array.from({ length: 16 }, (_, i) => ({ start: at(600 + i * 30), end: at(630 + i * 30) }));
+      data[date] = Array.from({ length: 16 }, (_, i) => at(600 + i * 30));
     }
     return data;
   };
   await ctx.route("**/api/slots?**", (route) => {
     const q = new URL(route.request().url()).searchParams;
     const title = (q.get("slug") ?? "session").replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
-    return route.fulfill({ json: { status: "success", event: { title, lengthInMinutes: 30, price: 0, locations: [{ type: "attendeeDefined" }] }, data: slots(q) } });
+    return route.fulfill({ json: { title, length: 30, where: true, slots: slots(q) } });
   });
   await ctx.addInitScript(() => {
     try {

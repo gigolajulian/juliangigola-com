@@ -150,10 +150,10 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
   const canNext = +(view === "week" ? monday(anchor) : new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)) < +today + AHEAD * 864e5;
   const times = days[pick.date] ?? [];
   const [hh, mm] = clock(pick.min)[0].split(":");
-  const at0 = times.findIndex((x) => minutesOf(x.start) === pick.min);
+  const at0 = times.findIndex((x) => minutesOf(x) === pick.min);
   const stepTime = (dir: number) => {
     const next = times[at0 + dir];
-    if (next) choose(pick.date, minutesOf(next.start), true);
+    if (next) choose(pick.date, minutesOf(next), true);
   };
   return shell({
     head: paid ? "Book a session" : skin?.name === "Consultation" ? "Book a consultation" : "Book a call",
@@ -225,10 +225,10 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
         <div className={cn("strip", more && "more")}>
           <div ref={stripRef} className="idx lbl" onScroll={(e) => { const el = e.currentTarget; setMore(el.scrollLeft + el.clientWidth < el.scrollWidth - 4); }}>
             {times.map((x) => {
-              const m = minutesOf(x.start);
+              const m = minutesOf(x);
               const [h, a] = clock(m);
               return (
-                <button key={x.start} type="button" data-slot="" aria-pressed={m === pick.min} aria-label={clockLabel(m)} onClick={() => choose(pick.date, m, true)}>{h}<small>{a}</small></button>
+                <button key={x} type="button" data-slot="" aria-pressed={m === pick.min} aria-label={clockLabel(m)} onClick={() => choose(pick.date, m, true)}>{h}<small>{a}</small></button>
               );
             })}
           </div>

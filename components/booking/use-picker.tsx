@@ -5,7 +5,7 @@ import type { DepositBody } from "@/components/booking/deposit-step";
 import { takesDeposit } from "@/lib/booking/paid";
 import { ORB_ROUND } from "@/components/effects/orb";
 import { TZ } from "@/lib/booking/rules";
-import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type StepsSkin } from "@/components/booking/time-picker-parts";
+import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Step, type StepsSkin } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
 import { clockHere } from "@/components/booking/picker-dates";
 import { useSlots } from "@/components/booking/use-slots";
@@ -104,7 +104,7 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     void load();
   }, [load]);
 
-  const open = (date: string) => new Set((days?.[date] ?? []).map((s) => minutesOf(s.start)));
+  const open = (date: string) => new Set((days?.[date] ?? []).map((s) => minutesOf(s)));
 
   /* First open day and time, once there are any. */
   React.useEffect(() => {
@@ -112,7 +112,7 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     const date = Object.keys(days).filter((d) => days[d].length).sort(byCodeUnit)[0];
     if (!date) return;
     const s = days[date][0];
-    setPick({ date, min: minutesOf(s.start), start: s.start });
+    setPick({ date, min: minutesOf(s), start: s });
     setAnchor(fromIso(date));
   }, [state, days, pick, setPick, setAnchor]);
 
@@ -120,7 +120,7 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
      times loaded again): the day stays, the time is to pick again. */
   React.useEffect(() => {
     if (!pick || chosen !== "time" || !days) return;
-    if (!days[pick.date]?.some((x) => minutesOf(x.start) === pick.min)) {
+    if (!days[pick.date]?.some((x) => minutesOf(x) === pick.min)) {
       setChosen("day");
     }
   }, [days, pick, chosen, setChosen]);
@@ -284,4 +284,4 @@ export type Picker = Pick<Props, "title" | "className" | "skin"> &
   };
 
 /** What a card draws from: the picker, with a time on show. */
-export type CardCtx = Omit<Picker, "pick" | "days"> & { pick: PickedTime; days: Record<string, Slot[]>; t: string; ap: string; until: string; date: Date; sum: string };
+export type CardCtx = Omit<Picker, "pick" | "days"> & { pick: PickedTime; days: Record<string, string[]>; t: string; ap: string; until: string; date: Date; sum: string };

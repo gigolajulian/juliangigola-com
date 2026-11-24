@@ -7,7 +7,7 @@ import { json } from "@/lib/http";
 
 /* ── open times for the picker, from the site's own engine ────────
  * GET /api/slots?slug=portraits&start=2026-11-04&end=2027-03-04&timeZone=...
- * Answers { status, event, data: { day: [{ start, end }] } },
+ * Answers { title, length, where, slots: { day: [start] } } (`SlotsAnswer`),
  * which `components/booking/use-picker.tsx` reads; a failure is { error }. Starts are
  * written in the visitor's zone and grouped by their day there. See
  * `lib/booking/slots.ts`. Off (503) until GCAL_OAUTH is set.
@@ -40,7 +40,7 @@ export async function GET(request: Request) {
     return json({ error: "Unknown time zone." }, 400);
   }
   const cache = edge();
-  const key = new Request(`https://slots-cache.invalid/${slug}/${start}/${end}/${encodeURIComponent(tz)}`);
+  const key = new Request(`https://slots-cache.invalid/v2/${slug}/${start}/${end}/${encodeURIComponent(tz)}`);
   const kept = cache && !q.has("fresh") ? await cache.match(key).catch(() => undefined) : undefined;
   if (kept) return json(await kept.json());
   // The visitor's days, widened by a day each side for any zone; capped at 130 days.
@@ -54,23 +54,14 @@ export async function GET(request: Request) {
     console.error("slots", String(e));
     return json({ error: "Could not reach the calendar." }, 502);
   }
-  const data: SlotsAnswer["data"] = {};
+  const slots: SlotsAnswer["slots"] = {};
   for (const s of starts) {
     const at = localIso(s, tz);
     const day = at.slice(0, 10);
     if (day < start || day > end) continue;
-    (data[day] ??= []).push({ start: at, end: localIso(s + rule.length * 6e4, tz) });
+    (slots[day] ??= []).push(at);
   }
-  const answer = {
-    status: "success",
-    event: {
-      title: rule.title,
-      lengthInMinutes: rule.length,
-      price: 0,
-      locations: [{ type: rule.call ? "integration" : "attendeeDefined" }],
-    },
-    data,
-  } satisfies SlotsAnswer;
+  const answer: SlotsAnswer = { title: rule.title, length: rule.length, where: !rule.call, slots };
   await cache?.put(key, Response.json(answer, { headers: { "cache-control": `max-age=${KEEP_S}` } })).catch(() => {});
   return json(answer);
 }
