@@ -3,15 +3,12 @@ import { act, cleanup, fireEvent, render, renderHook, screen } from "@testing-li
 import { projectHref } from "@/lib/work/project-href";
 import { THEME_COLOR } from "@/lib/theme-color";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
-import { useDialKitStyles } from "@/lib/dev/dialkit-styles";
 import { sleeveTilt } from "@/components/cover/sleeve-tilt";
 import { JG_COVER, mountCover } from "@/components/splash/jg-cover";
 import { inkGround, inkWord } from "@/components/site/nav-ink";
 import * as coverSound from "@/components/cover/cover-sound";
 import SOUND from "@/lib/work/cover-art-sound.json";
 
-const styles = vi.hoisted(() => ({ loaded: 0 }));
-vi.mock("dialkit/styles.css", () => (styles.loaded++, {}));
 
 afterEach(() => {
   cleanup();
@@ -47,13 +44,6 @@ describe("email logo", () => {
     });
     expect(dims[0]).toEqual([378, 67]);
     expect(dims[1]).toEqual(dims[0]);
-  });
-});
-
-describe("useDialKitStyles", () => {
-  it("loads DialKit's stylesheet outside production", async () => {
-    renderHook(() => useDialKitStyles());
-    await vi.waitFor(() => expect(styles.loaded).toBe(1));
   });
 });
 

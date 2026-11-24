@@ -377,31 +377,6 @@
   border-color: color-mix(in oklab, var(--accent) var(--tp-tint, 55%), var(--border));
 }
 
-/* The booking page is one window only side by side, from lg. Stacked
-   under it (an upright iPad) it is taller than the screen, and the
-   strips' lock from 40rem (strip.css) left the times and Confirm out of
-   reach of a finger, with the footer drawn across the card. */
-@media (min-width: 40rem) and (max-width: 63.99rem) {
-  html:has(.book-page[data-quiet-footer]),
-  body:has(.book-page[data-quiet-footer]) {
-    height: auto;
-    overflow: visible;
-  }
-}
-
-/* Julian, 1280x720: "scale down". On a short desktop the whole booking
-   page is drawn at 80%, so it lays out as a 900px-tall window would,
-   rather than squeezing the picker's gaps and boxes to fit. The height
-   is given back so the page still fills the window. */
-@media (min-width: 64rem) and (max-height: 50rem) {
-  .book-page {
-    zoom: 0.8;
-    height: calc(100% / 0.8);
-    /* Julian: the card too large. Narrower here than the dial's 2.2. */
-    --card-w: 1.5fr !important;
-  }
-}
-
 /* The inquiry form in the Sessions booking card (`book-here.tsx`). The
    card's pane is a size container, so the gaps follow the card's height:
    close on a laptop, open on a tall screen, the form in the middle. */
@@ -565,10 +540,6 @@
 }
 .questions-wall.cross-wall {
   filter: blur(9px);
-}
-.cross-wall .inquire-wall {
-  mask: none;
-  -webkit-mask: none;
 }
 html[data-sheet] main.rise {
   transform: none;

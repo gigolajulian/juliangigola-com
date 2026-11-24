@@ -257,8 +257,8 @@ const csp = [
   // The two players, and only as an embed. `frame-ancestors 'self'` above
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
-  // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/booking/book-picker.tsx`).
+  // calendar.google.com: the old /book picker's appointment schedules. That
+  // picker is gone; the entry stays until Julian drops it.
   // Stripe's Payment Element for the $100 deposit (`lib/booking/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.
@@ -338,16 +338,6 @@ const nextConfig: NextConfig = {
      Next's 1MB default would refuse the second or third. */
   experimental: {
     serverActions: { bodySizeLimit: "24mb" },
-  },
-
-  /**
-   * DialKit on the dev server only (Julian). A production build gets
-   * `lib/dev/dialkit-stub.ts` in its place: the configs' defaults and no panel,
-   * so visitors never download 72KB gzipped of tuning panels.
-   */
-  turbopack: {
-    resolveAlias:
-      process.env.NODE_ENV === "production" ? { dialkit: "./lib/dev/dialkit-stub.ts" } : {},
   },
 
   /**

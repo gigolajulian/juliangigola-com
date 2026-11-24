@@ -68,7 +68,7 @@ interface CloudflareEnv {
   STRIPE_WEBHOOK_SECRET?: string;
 
   /**
-   * Notion internal integration token (`lib/leads/sync/notion-lead.ts`): copies each
+   * Notion internal integration token (`lib/leads/notion-lead.ts`): copies each
    * enquiry and booking onto the Business Hub Bookings board. Unset, nothing
    * is copied. Set with:
    *

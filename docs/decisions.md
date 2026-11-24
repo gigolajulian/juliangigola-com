@@ -676,21 +676,14 @@ scrolls and while its group is off screen (`patches/liquid-gooey+0.2.2.patch`).
 - 2026-11-24: retired. Its last consumers went in r15, so the package, the
   patch and its test went in r17.
 
-## 2026-11-24: motion stays a devDependency, for dialkit only
+## 2026-11-24: motion and dialkit are gone
 
-The lightbox tilt (`components/vendor/tilted-card.tsx`) is on gsap now,
-through `lib/motion/gsap-lazy.ts`, so `motion` no longer ships in the browser
-bundle. It stays in `devDependencies` because dialkit, the dev dial panel,
-imports `motion/react` as an optional peer, and npm does not install an
-optional peer that nothing else asks for. A production build swaps dialkit
-for `lib/dev/dialkit-stub.ts`, so neither reaches the deployed Worker.
-
-- **Not chosen:** dropping `motion` from `package.json`. The current lockfile
-  would still install it for dialkit, but a lockfile built from scratch
-  would not, and `next dev` would fail on the booking and enquiry pages.
-- 2026-11-24: the tilt's springs became a power2.out tween over 1.2 s, which
-  passes half way and 99% about when the old spring did (Julian approved the
-  small change in feel).
+The lightbox tilt (`components/vendor/tilted-card.tsx`) runs on gsap,
+through `lib/motion/gsap-lazy.ts`. Its spring became a power2.out tween over
+1.2 s, which passes half way and 99% about when the old spring did (Julian
+approved the small change in feel). The old /book picker was the last user
+of dialkit, the dev dial panel, so with it gone dialkit, its production stub
+and `motion` (dialkit's peer) left `package.json`.
 
 ## 2026-10-09: globals.css split by area; device queries listed, not custom media
 

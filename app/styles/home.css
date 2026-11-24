@@ -258,28 +258,6 @@
     --screen-title-y: 6rem;
   }
 }
-/* "Copy all" (components/dev/dial-copy-all.tsx), in the panel's header,
-   left of the close button; hidden while the panel is folded. The open
-   header is DialKit's sticky one, which it sits against; making the header
-   relative instead pulled the folded button's icon off centre. */
-.dial-copy-all {
-  position: absolute;
-  top: 10px;
-  right: 32px;
-  height: 24px;
-  padding: 0 8px;
-  border: 0;
-  border-radius: 6px;
-  background: var(--dial-surface);
-  color: var(--dial-text-label);
-  font: 500 11px/24px system-ui, sans-serif;
-  cursor: pointer;
-}
-.dial-copy-all:hover {
-  background: var(--dial-surface-hover);
-  color: var(--dial-text-primary);
-}
-
 /* Julian: the line under each card on a phone, in two even lines. The
    label's wide tracking left one word alone on a third line in a half
    column ("BRANDS"); a little tighter, and balanced. */

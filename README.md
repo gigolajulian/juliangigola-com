@@ -74,7 +74,7 @@ All 74 projects and 1,131 frames were migrated off the old Format site.
 | `components/effects/`, `components/vendor/` | Shared effects (tilt, liquid, photo fade) and vendored components. |
 | `components/admin/`, `leads/`, `proofs/`, `contracts/` | /admin, the Leads desk, client proof galleries and signed contracts. |
 | `components/desk/` | Chrome the private desks share: icons, sign-in, references. |
-| `components/dev/` | The `?debug` overlay and the DialKit copy button. Dev only. |
+| `components/dev/` | The `?debug` overlay. Dev only. |
 | `lib/motion/` | Shared motion: the lazy GSAP loader, springs, throws, wheel and rubberband. |
 | `lib/flags/` | Query-string and session flags for features on trial. |
 | `lib/og/` | Share cards, share metadata and search metadata with the JSON-LD graph (`lib/og/seo.ts`). |
@@ -122,13 +122,11 @@ An override that names a frame already in the archive uses `archiveFrame()` inst
 reads the dimensions from the manifest — hardcoding them there is how they went stale when
 the archive moved from 1600px to 2500px.
 
-### Animation: GSAP, and motion only where it came with the code
+### Animation: GSAP
 
 Site code animates with GSAP (`gsap`, plus `gsap/Flip` loaded on demand for layout
-changes). `motion` stays installed for two reasons only: the vendored React Bits
-components in `components/vendor/` are written against it, and `dialkit` (dev-only tuning)
-needs it as a peer. New site code uses GSAP; a vendored component keeps the library it came
-with.
+changes). The one vendored component, the lightbox tilt in `components/vendor/`, runs on it
+too, so there is no second animation library.
 
 ## Hosting
 
