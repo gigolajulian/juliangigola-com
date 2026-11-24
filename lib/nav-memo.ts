@@ -14,13 +14,11 @@ export function walk(pages: string[], at: number, path: string, popped: boolean)
 let pages: string[] = [],
   at = 0,
   popped = false,
-  popAt = 0,
   listening = false,
   poppedTo = "";
 
 // Back or Forward to another page; a hash or query step on the same page is not a move.
 const pop = () => {
-  popAt = Date.now();
   popped = location.pathname !== pages[at];
   poppedTo = popped ? location.pathname : "";
 };
@@ -46,12 +44,6 @@ export function takePop() {
   const hit = poppedTo !== "" && poppedTo === location.pathname;
   poppedTo = "";
   return hit;
-}
-
-/** When the last Back or Forward was. */
-export function lastPopAt() {
-  listenNav();
-  return popAt;
 }
 
 /** Whether the page before this one in this tab was on this site. */
