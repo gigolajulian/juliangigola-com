@@ -43,13 +43,14 @@ import { endDay, type Size } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import type { Enquiry } from "@/lib/leads/enquiry";
 import { canonical } from "@/lib/leads/lead-crypto";
-import { isLate,NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import { isLate,NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, WON, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { callSheet, fillTemplate, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
 import { ago, dateTimeLabel, type Call, DAY, dayLabel, nextStep, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
 import { adminCall, authed } from "@/lib/admin/admin-call";
-import { compose, frostBar, ios, kindOf, line, mailto, glyph } from "@/components/leads/shared";
+import { glyph } from "@/components/desk/chrome";
+import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
 import { PlanSection, TaskSection } from "@/components/leads/plan";
@@ -455,7 +456,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
               <TaskSection tasks={full?.tasks ?? []} people={full?.people ?? []} isDisabled={!full} adding={addingTask && !!full} setAdding={setAddingTask} keys={size === "wide"} onSave={(tasks) => patch({ tasks })} />
             </Section>
 
-            {(["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"] as Stage[]).includes(l.stage) ? (
+            {WON.includes(l.stage) ? (
               <Section>
                 <VStack gap={3}>
                   <Heading level={2}>Paperwork</Heading>

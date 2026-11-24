@@ -9,7 +9,8 @@ import { balance, shortDate, depositOfLead, isSettled, MAX_INVOICE_ROWS, THANKS_
 import { framed, loadImage, place, shrink, toneFor } from "@/lib/leads/invoice-photo";
 import { dayLabel, deskCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { adminCall } from "@/lib/admin/admin-call";
-import { btn, compose, field, fieldLabel, kindOf, primary } from "@/components/leads/shared";
+import { btn, primary } from "@/components/desk/chrome";
+import { compose, field, fieldLabel, kindOf } from "@/components/leads/shared";
 import type { Patch } from "@/lib/leads/lead-desk";
 
 /** The PDF of one invoice. Loaded on the tap, fonts and all. A design B one fetches its sealed photo unless `src` is in hand. */

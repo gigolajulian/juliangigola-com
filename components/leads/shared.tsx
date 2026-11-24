@@ -1,25 +1,17 @@
 "use client";
 
-import type { CSSProperties, ReactNode, SVGProps } from "react";
+import type { CSSProperties } from "react";
 
 import { dateTimeLabel, dayLabel, type Filter } from "@/lib/leads/lead-desk";
 import type { LeadEvent } from "@/lib/leads/leads";
-
-/** A desk icon: a 24 box, a 1.6 line in the text colour. */
-export const glyph = (d: ReactNode) =>
-  function Glyph(p: SVGProps<SVGSVGElement>) {
-    return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...p}>{d}</svg>;
-  };
 
 /** "intro-call" as "Intro call". */
 const kindOf = (k?: string) => (k ? k.charAt(0).toUpperCase() + k.slice(1).replace(/-/g, " ") : undefined);
 
 
-const btn = "inline-flex min-h-11 items-center justify-center gap-2 rounded-[10px] border border-border px-4 text-[15px] font-medium transition-colors duration-200 hoverable:hover:bg-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 /** A form field and its label, as the desk's forms draw them. */
 const field = "min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base normal-case placeholder:normal-case placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-accent";
 const fieldLabel = "grid gap-1.5 text-[14px] text-muted-foreground";
-const primary = "border-accent bg-accent font-semibold text-accent-foreground hoverable:hover:bg-accent/90";
 
 /** A Gmail draft from hello@ (the second account in his Chrome, the Gmail app on the phone). */
 const q = (o: Record<string, string>) => new URLSearchParams(o).toString().replace(/\+/g, "%20");
@@ -51,8 +43,8 @@ function mailto(to: string, subject: string, body: string, quote?: { name: strin
  * where the service worker reads it to add one per push. */
 function badge(n: number) {
   try {
-    const nav = navigator as Navigator & { setAppBadge?: (n?: number) => Promise<void>; clearAppBadge?: () => Promise<void> };
-    (n ? nav.setAppBadge?.(n) : nav.clearAppBadge?.())?.catch(() => {});
+    // Optional calls: lib.dom declares both, but not every browser has them.
+    (n ? navigator.setAppBadge?.(n) : navigator.clearAppBadge?.())?.catch(() => {});
     caches?.open("leads-badge").then((c) => c.put("n", new Response(String(n)))).catch(() => {});
   } catch {}
 }
@@ -114,4 +106,4 @@ const GLASS = "[data-astryx-desk][data-glass]{--color-background-body:transparen
 /* The win button: under a mouse the plane flies off and comes back, in a loop. */
 const WIN_CSS = ".jg-win:hover svg{animation:jg-fly 1.1s cubic-bezier(.5,0,.3,1) infinite}@keyframes jg-fly{0%{transform:none;opacity:1}45%{transform:translate(16px,-16px);opacity:0}46%{transform:translate(-14px,14px);opacity:0}100%{transform:none;opacity:1}}@media (prefers-reduced-motion:reduce){.jg-win:hover svg{animation:none}}";
 
-export { frostBar, FROST_ROOM, GLASS, WIN_CSS, kindOf, btn, field, fieldLabel, primary, ios, compose, mailto, badge, label, line };
+export { frostBar, FROST_ROOM, GLASS, WIN_CSS, kindOf, field, fieldLabel, ios, compose, mailto, badge, label, line };

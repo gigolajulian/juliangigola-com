@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import { SignIn } from "@/components/admin/sign-in";
+import { SignIn } from "@/components/desk/sign-in";
 import { swScope } from "@/components/leads/setup";
 
 describe("SignIn", () => {

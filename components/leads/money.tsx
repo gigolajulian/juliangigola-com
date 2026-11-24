@@ -2,12 +2,11 @@
 
 /* ── Money on Astryx ──────────────────────────────────────────────
  * His Stripe balance as tiles and what moved it as a table.
- * Same read-only /api/money as the classic MoneyView
- * (components/leads/money.tsx), paged with Show more.
+ * Read-only /api/money, paged with Show more.
  * ─────────────────────────────────────────────────────────────── */
 
 import * as React from "react";
-import { Layout, LayoutContent, LayoutHeader, HStack, VStack, StackItem, Card } from "@astryxdesign/core/Layout";
+import { Layout, LayoutContent, LayoutHeader, HStack, VStack, StackItem } from "@astryxdesign/core/Layout";
 import { Grid } from "@astryxdesign/core/Grid";
 import { Button } from "@astryxdesign/core/Button";
 import { Heading, Text } from "@astryxdesign/core/Text";
@@ -17,6 +16,7 @@ import { Table } from "@astryxdesign/core/Table";
 import { centsLabel, dayLabel } from "@/lib/leads/lead-desk";
 import { adminCall } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
+import { StatTile } from "@/components/leads/numbers";
 
 export type Txn = { id: string; at: string; type: string; amount: number; fee: number; net: number; currency: string; status: string; what: string };
 /** Stripe's types in his words. */
@@ -43,16 +43,6 @@ export function MoneyDesk() {
   }, []);
   React.useEffect(() => page(), [page]);
 
-  const tile = (k: string, v: string, hint: string) => (
-    <Card padding={4}>
-      <VStack gap={1}>
-        <Text type="code" size="xsm" color="secondary" weight="medium">{k.toUpperCase()}</Text>
-        <Heading level={2}>{v}</Heading>
-        <Text type="code" size="sm" color="secondary">{hint}</Text>
-      </VStack>
-    </Card>
-  );
-
   return (
     <Layout
       height="fill"
@@ -73,8 +63,8 @@ export function MoneyDesk() {
             {top?.test ? <Banner status="info" title="Stripe test mode" description="These are test payments." /> : null}
             {top ? (
               <Grid columns={{ minWidth: 180 }} gap={3}>
-                {tile("Available", centsLabel(top.available), "Ready to pay out")}
-                {tile("On the way", centsLabel(top.pending), "Not settled yet")}
+                <StatTile k="Available" v={centsLabel(top.available)} hint="Ready to pay out" />
+                <StatTile k="On the way" v={centsLabel(top.pending)} hint="Not settled yet" />
               </Grid>
             ) : null}
             {top ? (

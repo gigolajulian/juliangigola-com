@@ -1,9 +1,8 @@
 "use client";
 
 /* ── Stats, Traffic and SEO on Astryx ─────────────────────────────
- * Stats is the classic StatsView rebuilt:
- * same `?stats` read, tiles, 12 weeks of bars, sources, lost reasons,
- * stages. Traffic and SEO are the shared /admin panels, loaded lazily
+ * Stats reads `?stats` and shows tiles, 12 weeks of bars, sources,
+ * lost reasons and stages. Traffic and SEO are the shared /admin panels, loaded lazily
  * inside an Astryx page: /admin uses them too, so they stay one copy.
  * ─────────────────────────────────────────────────────────────── */
 
@@ -23,14 +22,9 @@ const AdminTraffic = React.lazy(() => import("@/components/admin/admin-traffic")
 const AdminSeo = React.lazy(() => import("@/components/admin/admin-seo").then((m) => ({ default: m.AdminSeo })));
 const hours = (h: number | null) => (h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`);
 
-
-export function StatsDesk({ call }: { call: Call }) {
-  const [s, setS] = React.useState<Stats | null>(null);
-  const [err, setErr] = React.useState<string | null>(null);
-  React.useEffect(() => {
-    call<{ stats: Stats }>({ path: "/stats" }).then((o) => setS(o.stats)).catch((e: unknown) => setErr(errorText(e)));
-  }, [call]);
-  const tile = (k: string, v: string, hint: string) => (
+/** One figure on the Stats and Money pages: a label, the value, a hint under it. */
+export function StatTile({ k, v, hint }: { k: string; v: string; hint: string }) {
+  return (
     <Card padding={4}>
       <VStack gap={1}>
         <Text type="code" size="xsm" color="secondary" weight="medium">{k.toUpperCase()}</Text>
@@ -39,18 +33,26 @@ export function StatsDesk({ call }: { call: Call }) {
       </VStack>
     </Card>
   );
+}
+
+export function StatsDesk({ call }: { call: Call }) {
+  const [s, setS] = React.useState<Stats | null>(null);
+  const [err, setErr] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    call<{ stats: Stats }>({ path: "/stats" }).then((o) => setS(o.stats)).catch((e: unknown) => setErr(errorText(e)));
+  }, [call]);
   const top = s ? Math.max(1, ...s.weeks.map((w) => w.inquiries)) : 1;
   return (
     <Page bare eyebrow={s ? `${s.total} LEADS` : "THE NUMBERS"} title="Stats">
       {err ? <Text color="secondary">{err}</Text> : !s ? <Text type="code" size="sm" color="secondary">Counting</Text> : (
         <VStack gap={6} maxWidth={760}>
           <Grid columns={{ minWidth: 160 }} gap={3}>
-            {tile("Booked", s.bookedRate === null ? "None yet" : `${Math.round(s.bookedRate * 100)}%`, "of leads over a week old")}
-            {tile("First reply", hours(s.replyHours), "median, inquiry to answer")}
-            {tile("Quoted, open", dollarsLabel(s.pipeline), "waiting on an answer")}
-            {tile("Booked value", dollarsLabel(s.won), "from the quotes you entered")}
-            {tile("Repeat clients", String(s.repeat), "two or more sessions or calls")}
-            {tile("Lifetime value", s.lifetime === null ? "None yet" : dollarsLabel(Math.round(s.lifetime)), "average paid, less refunds")}
+            <StatTile k="Booked" v={s.bookedRate === null ? "None yet" : `${Math.round(s.bookedRate * 100)}%`} hint="of leads over a week old" />
+            <StatTile k="First reply" v={hours(s.replyHours)} hint="median, inquiry to answer" />
+            <StatTile k="Quoted, open" v={dollarsLabel(s.pipeline)} hint="waiting on an answer" />
+            <StatTile k="Booked value" v={dollarsLabel(s.won)} hint="from the quotes you entered" />
+            <StatTile k="Repeat clients" v={String(s.repeat)} hint="two or more sessions or calls" />
+            <StatTile k="Lifetime value" v={s.lifetime === null ? "None yet" : dollarsLabel(Math.round(s.lifetime))} hint="average paid, less refunds" />
           </Grid>
           <VStack gap={2}>
             <Heading level={2}>Top clients by paid</Heading>

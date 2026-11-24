@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { StatsDesk } from "@/components/leads/numbers";
+import { StatsDesk, StatTile } from "@/components/leads/numbers";
 import type { Call } from "@/lib/leads/lead-desk";
 
 describe("StatsDesk", () => {
@@ -11,5 +11,14 @@ describe("StatsDesk", () => {
     expect(await screen.findByText("40%")).toBeTruthy();
     expect(screen.getByText("Instagram DM")).toBeTruthy();
     expect(screen.getByText("Ana")).toBeTruthy();
+  });
+});
+
+describe("StatTile", () => {
+  it("shows the label in capitals, the value and the hint", () => {
+    render(<StatTile k="On the way" v="$12" hint="Not settled yet" />);
+    expect(screen.getByText("ON THE WAY")).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "$12" })).toBeTruthy();
+    expect(screen.getByText("Not settled yet")).toBeTruthy();
   });
 });
