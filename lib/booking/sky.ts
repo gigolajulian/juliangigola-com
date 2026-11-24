@@ -101,3 +101,27 @@ export function sunHint(ms: number) {
   if (hour < s.set - 3) return "Sun high";
   return hour < s.set ? `${f(s.set - hour)} to sunset` : `${f(hour - s.set)} after sunset`;
 }
+
+/** Open-Meteo's hourly forecast as /api/weather passes it on: Pacific wall times, °F, WMO codes. */
+export type Hourly = { time: string[]; temperature_2m: number[]; weather_code: number[] };
+
+/** A WMO weather code in a plain word or two. */
+export function weatherWord(code: number) {
+  if (code <= 1) return "Clear";
+  if (code === 2) return "Partly cloudy";
+  if (code === 3) return "Cloudy";
+  if (code <= 48) return "Fog";
+  if (code <= 57) return "Drizzle";
+  if (code <= 67) return "Rain";
+  if (code <= 77 || code === 85 || code === 86) return "Snow";
+  if (code <= 82) return "Showers";
+  return "Thunderstorms";
+}
+
+/** "Clear, 62°": the forecast for the hour a start falls in, or null past the forecast's reach. */
+export function weatherAt(hourly: Hourly | null, ms: number) {
+  const { ymd, hour } = pacific(ms);
+  const i = hourly?.time.indexOf(`${ymd}T${String(Math.floor(hour)).padStart(2, "0")}:00`) ?? -1;
+  if (!hourly || i < 0 || hourly.temperature_2m[i] == null || hourly.weather_code[i] == null) return null;
+  return `${weatherWord(hourly.weather_code[i])}, ${Math.round(hourly.temperature_2m[i])}°`;
+}

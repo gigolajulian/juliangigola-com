@@ -1,5 +1,5 @@
 import { expect, test } from "vitest";
-import { partOf, sunsetLabel, sunHint, tone } from "@/lib/booking/sky";
+import { partOf, sunsetLabel, sunHint, tone, weatherAt, weatherWord } from "@/lib/booking/sky";
 
 // Pacific wall time to an instant: the offsets are the real ones for these dates.
 const at = (ymd: string, hhmm: string, off: string) => Date.parse(`${ymd}T${hhmm}:00${off}`);
@@ -41,4 +41,12 @@ test("parts of the day and the sun hint", () => {
   expect([partOf(600), partOf(720), partOf(1019), partOf(1020)]).toEqual([0, 1, 1, 2]);
   expect(sunHint(at("2026-11-26", "16:00", "-08:00"))).toMatch(/min to sunset$/);
   expect(sunHint(at("2026-11-26", "19:00", "-08:00"))).toMatch(/after sunset$/);
+});
+
+test("weather: WMO codes in plain words, read at the start's Pacific hour", () => {
+  expect([0, 2, 3, 45, 53, 63, 75, 81, 86, 95].map(weatherWord)).toEqual(["Clear", "Partly cloudy", "Cloudy", "Fog", "Drizzle", "Rain", "Snow", "Showers", "Snow", "Thunderstorms"]);
+  const hourly = { time: ["2026-11-26T10:00", "2026-11-26T11:00"], temperature_2m: [58.4, 61.6], weather_code: [3, 0] };
+  expect(weatherAt(hourly, at("2026-11-26", "11:30", "-08:00"))).toBe("Clear, 62°");
+  expect(weatherAt(hourly, at("2026-11-27", "11:00", "-08:00"))).toBeNull(); // past the forecast
+  expect(weatherAt(null, at("2026-11-26", "10:00", "-08:00"))).toBeNull(); // fetch failed
 });
