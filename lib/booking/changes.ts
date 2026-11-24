@@ -47,7 +47,8 @@ async function cancelMine(env: BookingEnv, id: string) {
 }
 
 /** Julian marks a no-show from the desk: a line on the lead and a mail to hello@. Nothing is
-    refunded and the client is not mailed. Only once the session has started, on a live booking; a second click adds nothing. */
+    refunded and the client is not mailed. Only once the session has started, on a live booking. A second click finds
+    the lead's `no-show:<id>` line already there (`recordLead` answers "same") and sends nothing: `{ok, already}`. */
 async function noShow(env: BookingEnv, id: string) {
   const r = await lockOp(env, "get", id).then(
     (x) => x.record,
@@ -58,9 +59,10 @@ async function noShow(env: BookingEnv, id: string) {
   if (Date.parse(r.start) > Date.now()) return json({ error: "This session has not started." }, 409);
   const what = [r.session, whenPT(r.start), r.name].join(", ");
   const paid = depositPaid(r);
-  await recordLead(env, r.email, {
+  const logged = await recordLead(env, r.email, {
     event: { at: new Date().toISOString(), kind: "no-show", ref: `no-show:${r.id}`, note: [r.session, whenPT(r.start)].join(", ") },
   });
+  if (logged.status === "same") return json({ ok: true, already: true });
   await alertAndLog(
     env,
     `No-show: ${what}`,

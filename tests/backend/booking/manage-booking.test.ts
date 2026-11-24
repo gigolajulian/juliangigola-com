@@ -394,12 +394,15 @@ describe("the desk", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(Date.parse(start) + 2 * 36e5);
     const res = await post(id, { action: "no-show" }, KEY);
-    await post(id, { action: "no-show" }, KEY);
+    const again = await post(id, { action: "no-show" }, KEY);
     vi.setSystemTime(PIN);
     expect(res.status).toBe(200);
     expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
     expect(client.sent).toHaveLength(before);
-    expect(mail.sent.some((m) => /^No-show: /.test(String(m.subject)) && String(m.text).includes("The $250 deposit is kept."))).toBe(true);
+    expect(await again.json()).toEqual({ ok: true, already: true });
+    const noShows = mail.sent.filter((m) => /^No-show: /.test(String(m.subject)));
+    expect(noShows).toHaveLength(1);
+    expect(String(noShows[0].text)).toContain("The $250 deposit is kept.");
     const lead = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!;
     expect(lead.events.filter((e) => e.kind === "no-show")).toHaveLength(1);
   });
