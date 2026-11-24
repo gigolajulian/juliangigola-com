@@ -1,6 +1,6 @@
 import * as React from "react";
 
-export const VIEWS = [
+const VIEWS = [
   [
     "grid",
     "Grid view",

@@ -21,20 +21,20 @@ export const SECTIONS: [View, string, [string, View][]][] = [
 ];
 export const sectionOf = (v: View) => SECTIONS.find(([, , pages]) => pages.some(([, p]) => p === v));
 
-export const HomeGlyph = glyph(<path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z" />);
-export const InboxGlyph = glyph(<><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></>);
-export const CalendarGlyph = glyph(<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>);
-export const MoreGlyph = glyph(<><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></>);
-export const MoneyGlyph = glyph(<><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></>);
+const HomeGlyph = glyph(<path d="M4 11l8-7 8 7v9h-5v-6h-6v6H4z" />);
+const InboxGlyph = glyph(<><path d="M4 13l3-8h10l3 8v6H4z" /><path d="M4 13h5l1 2h4l1-2h5" /></>);
+const CalendarGlyph = glyph(<><rect x="4" y="5" width="16" height="15" rx="2" /><path d="M4 10h16M9 3v4M15 3v4" /></>);
+const MoreGlyph = glyph(<><circle cx="6" cy="12" r="1.2" /><circle cx="12" cy="12" r="1.2" /><circle cx="18" cy="12" r="1.2" /></>);
+const MoneyGlyph = glyph(<><rect x="3" y="6" width="18" height="12" rx="2" /><circle cx="12" cy="12" r="2.5" /></>);
 export const PlusGlyph = glyph(<path d="M12 5v14M5 12h14" />);
-export const ChartGlyph = glyph(<path d="M4 20h16M7 16v-5M12 16V7M17 16v-8" />);
-export const GearGlyph = glyph(<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></>);
-export const PhotoGlyph = glyph(<><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-8 8" /></>);
+const ChartGlyph = glyph(<path d="M4 20h16M7 16v-5M12 16V7M17 16v-8" />);
+const GearGlyph = glyph(<><circle cx="12" cy="12" r="3" /><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1" /></>);
+const PhotoGlyph = glyph(<><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M20 16l-5-5-8 8" /></>);
 export const FindGlyph = glyph(<><circle cx="11" cy="11" r="6" /><path d="M20 20l-4.5-4.5" /></>);
-export const SiteGlyph = glyph(<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>);
-export const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { proofs: PhotoGlyph, leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
+const SiteGlyph = glyph(<><rect x="3" y="4" width="18" height="16" rx="2" /><path d="M3 9h18M9 9v11" /></>);
+const GLYPH: Partial<Record<View, React.ComponentType<React.SVGProps<SVGSVGElement>>>> = { proofs: PhotoGlyph, leads: InboxGlyph, calendar: CalendarGlyph, money: MoneyGlyph, stats: ChartGlyph, templates: GearGlyph };
 /** Out of the desk: the site editor. */
-export const LINKS: [string, string, React.ComponentType<React.SVGProps<SVGSVGElement>>][] = [["Pages and work", "/admin", SiteGlyph]];
+const LINKS: [string, string, React.ComponentType<React.SVGProps<SVGSVGElement>>][] = [["Pages and work", "/admin", SiteGlyph]];
 
 export function Eyebrow({ children }: { children: React.ReactNode }) {
   return <Text type="code" size="xsm" color="secondary" weight="medium">{children}</Text>;
