@@ -157,7 +157,7 @@ html[data-sb]:is([data-intro], [data-landing])::after {
    the keyframed ones paused (they fill backwards, so paused is their
    start), the `@starting-style` ones pinned at their start. */
 [data-intro="1"]
-  :is(.strip-cell, .title-word, .title-rest, .dissolve, .lift, .cover-float-frame, .cover-float-card) {
+  :is(.strip-cell, .lift) {
   animation-play-state: paused;
 }
 [data-intro="1"] :is(.rise, .emerge) {

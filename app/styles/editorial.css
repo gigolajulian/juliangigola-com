@@ -75,8 +75,6 @@
 .ed-day[aria-pressed="true"], .ed-cell[aria-pressed="true"] { background: var(--foreground); color: var(--background); }
 .ed-day[aria-pressed="true"] .label { color: var(--background); }
 .ed-day[aria-pressed="true"] i, .ed-cell[aria-pressed="true"] i { background: var(--background); }
-@keyframes ed-bt-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(6px); } }
-@media (prefers-reduced-motion: reduce) { @keyframes ed-fade-in { from { opacity: 0; } } }
 /* A phone month shows the time picked too, as the week does. */
 
 /* the times, a kind to a row */
@@ -95,7 +93,6 @@
 .ed-row:focus-within { border-bottom-color: var(--accent); }
 .ed-row > .label, .ed-row > legend { color: var(--muted-foreground); }
 .ed-row:focus-within > .label { color: var(--foreground); }
-.ed-row > [data-said], .ed-pair [data-said] { grid-column: 2; margin-top: 0.25rem; }
 .ed-row input, .ed-v { width: 100%; min-width: 0; background: transparent; outline: none; font: 400 1rem/1.4 var(--font-mono); color: var(--foreground); text-transform: none; }
 .ed-row input::placeholder { color: color-mix(in oklab, var(--foreground) 30%, transparent); text-transform: none; }
 fieldset.ed-row { margin: 0; min-width: 0; }
@@ -127,10 +124,9 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed[data-fit="1"] .ed-body { padding-top: 1.125rem; }
 .ed[data-fit="1"] .ed-times { margin-top: 1rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) { --ed-cell: 2.25rem; }
-.ed:is([data-fit="2"], [data-fit="3"]) .ed-big { display: none; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-body { padding-top: 1rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-times { margin-top: 0.875rem; }
-.ed:is([data-fit="2"], [data-fit="3"]) :is(.ed-kind, .ed-row) { padding-block: 0.5rem; }
+.ed:is([data-fit="2"], [data-fit="3"]) .ed-row { padding-block: 0.5rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-slot { height: 2.125rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-day { padding-block: 0.5rem 0.625rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-times > .ed-on { display: block; }
@@ -160,17 +156,11 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed:not([data-fit="3"]) > .ed-body:has(> .ed-times) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: 3rem; align-content: start; }
   .ed:not([data-fit="3"]) > .ed-body > .ed-l { display: contents; }
   .ed:not([data-fit="3"]) > .ed-body > .ed-l > * { grid-column: 1 / -1; }
-  .ed:not([data-fit="3"]) > .ed-body > .ed-l > .ed-big { grid-column: 1; grid-row: 3; align-self: start; justify-content: flex-start; min-height: 0; margin-top: 1.75rem; }
   .ed:not([data-fit="3"]) > .ed-body > .ed-times { grid-column: 2; grid-row: 3; margin-top: 1.75rem; }
   .ed:not([data-fit="3"]) .ed-times > .ed-on { display: none; }
-  .ed:not([data-fit="3"]) .ed-kind { grid-template-columns: minmax(0, 1fr); gap: 0.625rem; }
-  .ed:not([data-fit="3"]) .ed-kind:first-child { border-top: 0; padding-top: 0; }
   .ed:not([data-fit="3"]) .ed-slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .ed:not([data-fit="1"], [data-fit="3"]) .ed-big { --ed-time: 7rem; }
-  .ed[data-view="month"]:not([data-fit="3"]) .ed-big { display: flex; --ed-time: 5.5rem; }
   .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-l > div:not(.ed-head, .ed-big) { grid-column: 1; grid-row: 2; }
   .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-times { grid-row: 2 / span 2; margin-top: 1rem; }
-  .ed:is([data-fit="2"]) .ed-big { display: flex; }
   /* A bigger calendar on a desktop: the month takes
      more of the width, the times scroll in their own column instead of
      forcing the smallest fit, and at fit 0 the cells grow into the room
@@ -215,11 +205,11 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* The step bar, the month arrows and the small links keep their drawn
    size; an unseen box gives a mouse 24px (WCAG 2.2, audit)
    and a thumb 2.75rem. */
-:is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 1.5rem); height: max(100%, 1.5rem); translate: -50% -50%; }
+:is(.ed-steps button, .ed-ctl button, .ed-opts label, .ed-quiet, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 1.5rem); height: max(100%, 1.5rem); translate: -50% -50%; }
 @media (pointer: coarse) {
   .ed-ctl { gap: 1.75rem; }
   .ed-steps { gap: 1.25rem; }
-  :is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { width: max(100%, 2.75rem); height: 2.75rem; }
+  :is(.ed-steps button, .ed-ctl button, .ed-opts label, .ed-quiet, .ed-back)::before { width: max(100%, 2.75rem); height: 2.75rem; }
 }
 
 /* the form and the ends may run longer than a short card: they alone scroll */
@@ -292,8 +282,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-hero { flex-shrink: 0; padding: 2rem var(--ed-x) 0; display: flex; flex-direction: column; gap: 1rem; }
 .ed-hero h2 { display: flex; justify-content: space-between; align-items: flex-end; gap: 0.5rem 1.5rem; flex-wrap: wrap; font: 700 clamp(3rem, 6.2cqw, 5.4rem)/0.84 var(--font-display); letter-spacing: -0.045em; text-transform: uppercase; margin: 0; }
 .ed-hero small { color: var(--ed-mu); text-align: right; padding-bottom: 0.35rem; }
-/* The inquiry's top-right lines in the navbar's mono, like the tile sub-lines. */
-.ed.ed-inq .ed-hero small { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-size: 0.625rem !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.03em !important; line-height: 1.5 !important; }
 .ed-mk { display: flex; align-items: center; gap: 0.625rem; color: var(--ed-mu); padding-bottom: 1.25rem; border-bottom: 1px solid var(--ed-line); }
 .ed-mk i { width: 5px; height: 5px; background: var(--foreground); flex-shrink: 0; }
 .ed-box { border: 1px solid var(--foreground); color: var(--foreground) !important; padding: 0.3rem 0.5rem; margin-left: 0.25rem; }
@@ -403,103 +391,3 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-fields > .ed-row:first-child { border-top: 0; }
 .ed-fields > label.ed-row:has(textarea) { grid-column: 1 / -1; }
 .ed .ed-row input::placeholder, .ed .ed-row textarea.tp-notes::placeholder { text-transform: uppercase; }
-
-/* ── the inquiry (inquire-card.tsx) ─────────────────────────────────
-   The inquiry on the same page: six tiles for the kinds, each with who
-   it is for, its two questions in boxes under it, then the details, then
-   what happens next. */
-.ed-inq [hidden] { display: none !important; }
-/* Never clipped: past its room the body scrolls (the Inquiries card is shorter than the booking one). */
-.ed-inq .ed-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-top: 1rem; }
-.ed-inq .ed-hero { padding-top: 1.5rem; gap: 0.75rem; }
-.ed-inq .ed-mk { padding-bottom: 1rem; }
-.ed-inq .ed-floor > .label { min-width: 0; overflow-wrap: anywhere; }
-.ed-inq .ed-fields { display: flex !important; flex-direction: column; flex: 1; min-height: 0; }
-.ed-inq .ed-fields > .ed-row:first-child { border-top: 0; }
-.ed :is(.ed-nx-row b, .ed-nx-d, .ed-kinds em, .ed-kinds small, .ed-inq .ed-floor a) {
-  font-family: var(--ed-f) !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  line-height: 1.3 !important;
-  letter-spacing: 0.01em !important;
-  text-transform: uppercase !important;
-  font-style: normal;
-}
-/* the kinds: tiles, three across, the pick filled */
-.ed-inq .ed-kind-row { flex: none; padding-bottom: 0.25rem; border-bottom: 0; }
-/* Two across: wide enough that the line under each
-   name stays one line, at the tile's foot. */
-.ed-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 4.25rem; gap: 0.5rem; padding-top: 0.5rem; }
-.ed-kinds label { position: relative; display: flex; cursor: pointer; }
-.ed-kinds label > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0.5rem 0.65rem 0.8rem; border: 1px solid var(--ed-line); color: var(--ed-mu); transition: border-color 0.2s; }
-.ed-kinds em { color: var(--foreground); }
-/* Small, in the navbar's mono; `.ed.ed-inq` outranks the
-   caps rule above, which had been winning. The colour, not opacity, keeps it
-   readable. */
-.ed.ed-inq .ed-kinds small { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-size: 0.625rem !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.03em !important; margin-top: auto; padding-top: 0.5rem; color: var(--ed-mu); text-wrap: balance; }
-.ed-kinds input:checked + span { background: var(--foreground); border-color: var(--foreground); }
-.ed-kinds input:checked + span :is(em, small) { color: var(--background); }
-.ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
-@media (hover: hover) { .ed-kinds label:hover > span { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); } }
-/* its questions: the same box, a field line inside */
-.ed-asks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0.75rem 0 0.5rem; flex: none; }
-.ed .ed-ask { border: 1px solid var(--ed-line); padding: 0.75rem 0.8rem 0.65rem; gap: 0; justify-content: space-between; min-height: 4rem; transition: border-color 0.2s; }
-.ed .ed-ask > .label { color: var(--foreground); }
-.ed .ed-ask input { border-bottom: 1px solid color-mix(in oklab, var(--foreground) 28%, transparent); padding-bottom: 0.45rem; transition: border-color 0.2s; }
-.ed .ed-ask:focus-within { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); }
-.ed .ed-ask:focus-within input { border-bottom-color: var(--accent); }
-/* details: the project box takes the room */
-.ed-inq .ed-row:has(textarea) { flex: 1; min-height: 7rem; }
-@container ed (min-width: 40rem) { .ed-inq .ed-row:has(textarea) { min-height: 0; } .ed-inq textarea.tp-notes { flex: 1; height: auto !important; min-height: 2.75rem; } }
-/* One page: the kinds and their questions on the
-   left, the details on the right from 40rem; one column under it. */
-.ed-inq .ed-one { display: grid !important; grid-template-columns: minmax(0, 1fr); flex: 1 1 auto; min-height: 0; }
-.ed-inq .ed-one > div { display: flex; flex-direction: column; min-width: 0; grid-column: auto; }
-.ed-inq .ed-one .ed-asks { padding: 0.5rem 0 0.75rem; }
-@container ed (min-width: 40rem) {
-  .ed-inq .ed-one { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 3rem; }
-  .ed-inq .ed-one .ed-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(3.5rem, auto); }
-  .ed-inq .ed-one .ed-asks { grid-template-columns: minmax(0, 1fr); }
-  .ed-inq .ed-one textarea.tp-notes { min-height: 4rem; }
-}
-/* What is written in the fields, in the navbar's mono,
-   sitting right above its line. */
-.ed.ed-inq :is(.ed-row input, .ed-row textarea.tp-notes) { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.03em !important; }
-.ed.ed-inq :is(.ed-row input, .ed-row textarea.tp-notes)::placeholder { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-weight: 400 !important; }
-.ed.ed-inq .ed-ask input { padding-bottom: 0.15rem; }
-.ed.ed-inq .ed-one > div > label.ed-row:not(:has(textarea)) { gap: 0.4rem; padding-bottom: 0.3rem; }
-.ed-inq .ed-refs { border-bottom: 0; }
-.ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.ed-inq .ed-refs .contact-field > div > p.label { flex-basis: 100%; margin: 0 0 0.25rem; }
-/* The two on one line, a size down so both fit a phone's column. */
-.ed.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.6rem 0.4rem; flex: 1 1 0; min-width: 0; text-align: center; white-space: nowrap; font-size: 0.6875rem !important; }
-/* sent: three equal bands, the first marked */
-.ed-nx { flex: 1; display: grid; grid-auto-rows: minmax(3.5rem, 1fr); padding: 1.5rem 0 1.25rem; min-height: 0; }
-.ed-nx-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 1.25rem; align-items: start; align-content: center; gap: 0.4rem 1rem; color: var(--ed-mu); }
-.ed-nx-row b { color: var(--foreground); padding-top: 0.35em; }
-.ed-nx-row .ed-nx-t { grid-column: 2; font: 700 clamp(1.35rem, 3.4cqw, 2.6rem)/0.95 var(--font-display); letter-spacing: -0.02em; text-transform: uppercase; color: var(--foreground); }
-.ed-nx-row .ed-nx-d { grid-column: 2; }
-.ed-nx-row i { grid-row: 1; grid-column: 3; width: 1.25rem; height: 2px; background: var(--ed-line); margin-top: 0.6em; }
-.ed-nx-row[data-on] i { background: var(--accent); }
-.ed-inq .ed-floor a.ed-btn { text-decoration: none; display: inline-flex; align-items: center; }
-/* in its boxes: the card's own padding, not the box's */
-.contact-card > div:has(> .ed-inq) { padding: 0 !important; }
-.contact-card > div:has(> .ed-inq) { display: flex; flex-direction: column; }
-.contact-card > div > .ed-inq { flex: 1 1 auto; min-height: 0; height: auto; }
-/* The Inquiries card is as tall as its one page needs: it grows into the
-   screen's padding on a short window before
-   the body scrolls inside. */
-@media (min-width: 40rem) { .contact-card:has(.ed.ed-inq) { align-self: center; height: auto; max-width: 48rem; margin-block: 0; max-height: calc(100% + 1.5rem) !important; } }
-/* A short window with a mouse sits closer under the bar (contact.css), so less room to grow into. */
-@media (min-width: 40rem) and (pointer: fine) and (max-height: 48rem) { .contact-card:has(.ed.ed-inq) { max-height: calc(100% + 0.5rem) !important; } }
-.book-form:has(> .ed-inq) { display: contents; }
-@container ed (max-width: 39.99rem) {
-  .ed-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: auto; }
-  .ed .ed-kinds small { padding-top: 0.9rem; }
-  .ed-asks { grid-template-columns: 1fr; }
-  .ed .ed-ask { min-height: 0; }
-  .ed-inq .ed-row:has(textarea) { flex: none; min-height: 0; }
-  .ed-nx-row .ed-nx-t { font-size: 1.35rem; }
-  .ed-inq .ed-floor { flex-wrap: wrap; }
-  .ed-inq .ed-floor > .ed-btn { flex: 1 0 100%; }
-}

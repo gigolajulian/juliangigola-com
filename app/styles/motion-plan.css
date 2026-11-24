@@ -27,10 +27,6 @@
   :root:root .v3 .site-hdr {
     transform: none;
   }
-  /* Booking time slots lift 2px on hover; still, under Reduce Motion. */
-  :root:root .tp-open:hover {
-    translate: none !important;
-  }
   /* The lightbox side photo's tilt follows the mouse; it holds still. */
   :root:root .tilted-card-inner {
     transform: none !important;
@@ -53,7 +49,7 @@
    left behind recede, the photo flies in its own layer. Back
    (`data-nav="out"`): the new page comes down instead of up, and fades. */
 @media (prefers-reduced-motion: no-preference) {
-  :root:root :is(#main, #main > *, [data-morph]) {
+  :root:root :is(#main, #main > *) {
     view-transition-name: none !important;
   }
   :root:root .v3 .site-hdr {
@@ -188,14 +184,14 @@
   scale: 0.97;
 }
 /* Grid photos: one zoom, the same everywhere, mouse only. */
-:root:root .v3 :is(.wt, .bts-f, .cn-frame, .a-seq a.fig .ph) img {
+:root:root .v3 :is(.wt, .bts-f, .a-seq a.fig .ph) img {
   transition: transform var(--dur-small) var(--ease-out-strong), opacity 0.4s;
 }
-:root:root .v3 :is(.wt:hover, .bts-f:hover, .cn-frame button:hover, .a-seq a.fig:hover .ph) img {
+:root:root .v3 :is(.wt:hover, .bts-f:hover, .a-seq a.fig:hover .ph) img {
   transform: none;
 }
 @media (hover: hover) and (pointer: fine) {
-  :root:root .v3 :is(.wt:hover, .bts-f:hover, .cn-frame button:hover, .a-seq a.fig:hover .ph) img {
+  :root:root .v3 :is(.wt:hover, .bts-f:hover, .a-seq a.fig:hover .ph) img {
     transform: scale(1.02);
   }
 }
