@@ -64,7 +64,7 @@ const MARKS: [slug: string, name: string, w: number, h: number][] = [
 /* Where a strip mark goes when it is not its project's page (PRESS in lib/work/work.ts). */
 const MARK_HREF: Record<string, string> = { empire: "https://www.empi.re/", "pear-vc": "/portfolio/video#pear-vc", "ladera-granola": "/portfolio/video#ladera-granola" };
 
-/* The About grid's own order (Julian's Arrange, master v45); the homepage strip keeps MARKS order. */
+/* The About grid's own order (Julian's Arrange); the homepage strip keeps MARKS order. */
 const ABOUT_ORDER = ["empire", "goodcult", "jubo", "wired-magazine", "paradox", "sols", "ladera-granola", "pear-vc", "sago", "ukiyosunknown"];
 
 /** `cell`: each mark in its own box, in ABOUT_ORDER (the About grid). */

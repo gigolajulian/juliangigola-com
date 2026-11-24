@@ -72,7 +72,7 @@ export default function NotFound() {
           }}
         />
 
-        {/* JG V3 (leftovers card H): the master's type, buttons and rows over the same wall. */}
+        {/* The V3 type, buttons and rows over the same wall. */}
         <section className="v3 nf pointer-events-none relative [&_a]:pointer-events-auto">
           <div className="rise nf-slate lbl mute">
             <span>

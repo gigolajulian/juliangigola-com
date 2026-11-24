@@ -34,7 +34,7 @@ const SECTIONS = ["/", "/portfolio"];
 
 /** Ends a held pop's snapshot once the page it went to has rendered. */
 let landed: (() => void) | null = null;
-/** What the page returned to still has to paint before it is snapshotted (a Back's restored cover, v4/home/back.ts). */
+/** What the page returned to still has to paint before it is snapshotted (a Back's restored cover, components/home/back.ts). */
 const holds: Promise<unknown>[] = [];
 export const holdLanding = (p: Promise<unknown>) => void holds.push(p);
 /** All of them, 300ms at most. */

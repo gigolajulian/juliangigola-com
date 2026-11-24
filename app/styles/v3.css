@@ -1,4 +1,4 @@
-/* JG V3 (master v39, DESIGN.md). The master's stylesheet, scoped under
+/* JG V3 (DESIGN.md). The V3 stylesheet, scoped under
    `.v3` (the public chrome and pages, `components/site/chrome.tsx`) so the
    old screens and /admin keep theirs. Hover rules sit under
    `(hover:hover)`; master `.page` is `.v3page` here (`.page` is the page

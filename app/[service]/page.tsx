@@ -90,7 +90,6 @@ export default async function BookingPage(props: PageProps<"/[service]">) {
     />
   );
 
-  /* JG V3 (leftovers card A). */
   return (
     <>
       {graph}

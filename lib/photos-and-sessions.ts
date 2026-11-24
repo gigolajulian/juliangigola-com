@@ -2,7 +2,7 @@ import { EVENTS } from "@/lib/booking/rules";
 import { depositFor, takesDeposit } from "@/lib/booking/paid";
 import { SESSION_TYPES } from "@/lib/booking/sessions";
 
-/* JG V3 (master v39, DESIGN.md "Photos"): what each screen shows, per theme.
+/* JG V3 (DESIGN.md "Photos"): what each screen shows, per theme.
    Dark is the hard-light set; light is a second, brighter set. Paths under
    `public/`. Names are the captions the master prints. */
 

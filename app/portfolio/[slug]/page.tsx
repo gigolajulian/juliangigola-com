@@ -102,6 +102,6 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
     return <CoverPage releases={COVER_RELEASES} onwards={onwards ? { href: onwards.href, name: onwards.name } : undefined} />;
   }
 
-  /* JG V3 (leftovers card B): a vertical page, the client's logo in the head. */
+  /* A vertical page, the client's logo in the head. */
   return <ProjectView project={project} next={onwards} />;
 }

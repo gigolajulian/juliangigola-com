@@ -9,7 +9,7 @@ import { scrollTop } from "./smooth-scroll";
 import { useNavInk } from "./nav-ink";
 import { noSubscribe } from "@/lib/utils";
 
-/* JG V3 chrome (master v39): the glass header, the phone menu, the theme
+/* JG V3 chrome: the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included (2026-10-31). */
 
 
