@@ -185,3 +185,15 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     return { status: "failed" };
   }
 }
+
+/** A gallery's "proofs" opens taken off a person's lead (a visit he forgot, his own test). A lead made only of
+    this gallery's opens, with nothing of his on it, goes with them. */
+export async function dropProofOpens(kv: InboxKV, s: Sealer, email: string, token: string) {
+  const id = await s.id(email);
+  const lead = await readLead(kv, s, id);
+  const events = lead?.events.filter((e) => !(e.kind === "proofs" && e.ref === token));
+  if (lead && events && events.length < lead.events.length) {
+    if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion) await writeLead(kv, s, id, { ...lead, events });
+    else await kv.delete(leadStoreKey(id));
+  }
+}
