@@ -1827,6 +1827,11 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .cal button .dots.sky i.out{background:none;box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--ink) 35%,transparent)}
 /* the date top right; in a wide week cell the dots sit bottom left, so the cell uses both sides (a phone's cell is too narrow: dots under the date) */
 :root[data-sky] .v3 .cal:has(.dots.sky) button{align-items:flex-end;text-align:right}
+/* month: closed days keep a faint box, so the month reads as one grid */
+:root[data-sky] .v3 .cal.month:has(.dots.sky) button:disabled{border-color:var(--line)}
+/* week: the strip keeps its old look, a line above each day and no box; the picked day's line in the accent */
+:root[data-sky] .v3 .cal.week:has(.dots.sky) button{border-width:1px 0 0;border-color:var(--line)}
+:root[data-sky] .v3 .cal.week:has(.dots.sky) button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 1px 0 var(--accent)}
 @media (min-width:801px){:root[data-sky] .v3 .cal.week:has(.dots.sky) button{display:grid;grid-template-columns:auto 1fr;grid-template-rows:1fr auto;align-items:end}:root[data-sky] .v3 .cal.week:has(.dots.sky) button b{grid-column:2;grid-row:1/3;justify-self:end;align-self:end}:root[data-sky] .v3 .cal.week:has(.dots.sky) button .dots{grid-column:1;grid-row:2}}
 /* week: one time per row */
 .v3 .sky-rows>div{display:flex;flex-direction:column}
