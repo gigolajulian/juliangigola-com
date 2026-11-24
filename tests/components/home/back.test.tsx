@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { render, renderHook } from "@testing-library/react";
 import { dropSpot, keepSpot, spotHere, useBackHome } from "@/components/home/back";
-import { painted } from "@/lib/painted";
+import { rememberPainted, resetPainted } from "@/components/cover/lightbox/painted";
 import { NavMemo } from "@/components/site/back-link";
 
 /* The home keeps its own spot for Back from any page (components/home/back.ts): the block under the screen's top and
@@ -19,6 +19,7 @@ afterEach(() => {
   sessionStorage.clear();
   history.scrollRestoration = "auto";
   window.scrollY = 0;
+  resetPainted();
 });
 
 describe("home Back spot", () => {
@@ -56,7 +57,7 @@ describe("home Back spot", () => {
       im.decode = () => Promise.resolve();
       return im;
     });
-    painted.set("/c/3.jpg", "/seen-3.jpg");
+    rememberPainted("/c/3.jpg", "/seen-3.jpg");
     const told: unknown[] = [];
     sec.addEventListener("mt-tell", (e) => told.push((e as CustomEvent).detail));
     keepSpot({ b: "covers", off: 0, x: 900 });
