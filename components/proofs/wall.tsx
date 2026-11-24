@@ -13,8 +13,8 @@ import { localGet, localSet } from "@/lib/storage";
  * right to reach the gallery. So the wall is laid out on the gallery's
  * own columns: one wall column of the grid's width for each, carrying
  * that column's frames in order, with spare columns either side for the
- * tilt, its tiles in the gallery's own shape. On Open proofs (Julian
- * 2026-11-11, "the wall becomes the gallery") each column carries on
+ * tilt, its tiles in the gallery's own shape. On Open proofs ("the wall
+ * becomes the gallery", Julian) each column carries on
  * from its speed at the click and eases into the slot where its photos
  * stand on the gallery's cells, while the wall turns flat and face on and
  * comes sharp. Once still the wall is the gallery to the pixel, and the
@@ -321,8 +321,8 @@ export function ProofWall({
   }
 
   /** Reduced motion, or the wall not measurable: nothing travels. The card goes, the wall stops and racks out of focus,
-   *  and the gallery's first screen comes up in place over it once every photo in it is drawn. Reduced motion (Julian
-   *  2026-11-11: "3d gridwall on email entering page and just fade in the proof gallery"): the wall stays, held still by
+   *  and the gallery's first screen comes up in place over it once every photo in it is drawn. Reduced motion (Julian's
+   *  call): the wall stays, held still by
    *  DriftWall, and the gallery fades in over it while it fades out. */
   async function reveal(still: boolean) {
     setLeaving(true);

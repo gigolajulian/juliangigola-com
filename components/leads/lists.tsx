@@ -18,7 +18,7 @@ import { Tab, TabList } from "@astryxdesign/core/TabList";
 import { endDay } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import { renewDue, type LeadSummary } from "@/lib/leads/leads";
-import { type Call, dayLabel, inFilter, type Filter } from "@/lib/leads/lead-desk";
+import { type Call, dayLabel, inFilter, isFilter, type Filter } from "@/lib/leads/lead-desk";
 
 type Row = LeadSummary & Record<string, unknown>;
 export const ASIDE: [Filter, string][] = [["snoozed", "Snoozed"], ["archived", "Archived"], ["trash", "Trash"], ["Delivered", "Delivered"], ["Lost", "Lost"]];
@@ -74,7 +74,7 @@ export function AsideDesk({ leads, call, open, done, tab, setTab, top }: { leads
   return (
     <Page eyebrow="OUT OF THE WAY" title="Put aside">
       {top}
-      <TabList value={tab} onChange={(v) => { setTab(v as Filter); setSure(false); }} hasDivider layout="hug">
+      <TabList value={tab} onChange={(v) => { if (!isFilter(v)) return; setTab(v); setSure(false); }} hasDivider layout="hug">
         {ASIDE.map(([f, label]) => <Tab key={f} value={f} label={`${label} · ${leads.filter((l) => inFilter(l, f)).length}`} />)}
       </TabList>
       {tab === "trash" && rows.length ? (

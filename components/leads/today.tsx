@@ -118,7 +118,7 @@ export function TodayDesk({ leads, size, open, show }: { leads: LeadSummary[]; s
   // Gallery activity across every gallery, from the proofs list (never `?token=`, which marks selects as pulled).
   const [acts, setActs] = React.useState<FeedItem[] | null>(null);
   React.useEffect(() => {
-    proofApi<{ proofs: ProofRow[] }>({ query: "?list" }).then((o) => setActs(feed(o.proofs))).catch(() => setActs([]));
+    proofApi<{ proofs: ProofRow[] }>({ path: "?list" }).then((o) => setActs(feed(o.proofs))).catch(() => setActs([]));
   }, []);
   // Every lead's open tasks (`?tasks`), due within a week or late; leads put aside are left out, as Your move leaves them.
   const [taskRows, setTaskRows] = React.useState<TaskRow[] | string | null>(null);

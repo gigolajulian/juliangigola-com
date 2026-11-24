@@ -9,6 +9,7 @@ import { ADDED_PATH, isTextRef, type FrameRef } from "@/lib/work/added";
 import { adoptable, projectsFile, sameJson, type Manifest, type ProjectsFile } from "@/lib/admin/admin-payload";
 import { commitFiles, failureMessage, readFile, type CommitFile, TOKEN_STORE, REPO, GITHUB_API } from "@/lib/admin/admin-github";
 import type { Bts, Copy, Credit } from "@/lib/work/work-types";
+import { localRemove } from "@/lib/storage";
 
 /**
  * The manifest half of the draft, as the editor holds it.
@@ -76,7 +77,7 @@ export async function loadRepo(
       const message = await failureMessage(res);
       // A rejected token is not worth keeping, otherwise every visit
       // retries it and the page looks broken rather than logged out.
-      if (res.status === 401) window.localStorage.removeItem(TOKEN_STORE);
+      if (res.status === 401) localRemove(TOKEN_STORE);
       return {
         error:
           res.status === 401
@@ -206,8 +207,7 @@ export async function publishDraft({
        * `loadRepo` already adopts the repo when the page is clean; a page
        * with edits on it cannot, because adopting would throw them away.
        * So it refuses instead. One reload costs a minute. The other way
-       * costs work, silently, and nobody finds out until they look at a
-       * page that used to name three people. */
+       * costs work, silently. */
       const live = current
         ? adoptDraft(JSON.parse(current) as ProjectsFile, baseline)
         : baseline;

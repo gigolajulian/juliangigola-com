@@ -6,6 +6,7 @@ import { References } from "@/components/desk/references";
 import { cn, errorText } from "@/lib/utils";
 import { credentials, KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { adminCall, isLocked } from "@/lib/admin/admin-call";
+import { localGet, localRemove, localSet } from "@/lib/storage";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.
@@ -31,7 +32,7 @@ type Row = Summary & { key: string };
  * the answer did not come: no badge is the right failure, not a wrong one.
  */
 export async function unreadCount(): Promise<number | null> {
-  const headers = credentials(window.localStorage.getItem(KEY_STORE) ?? "");
+  const headers = credentials(localGet(KEY_STORE) ?? "");
   if (!Object.keys(headers).length) return null;
   try {
     const { rows } = await adminCall<{ rows: Row[] }>("/api/inbox", { headers });
@@ -63,7 +64,7 @@ export function AdminInbox({
   const [error, setError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
 
-  /** Every call to the route, with the key attached. Async so a throw from localStorage (in `credentials`) rejects like any failed call. */
+  /** Every call to the route, with the key attached. */
   const call = React.useCallback(
     async (
       init: RequestInit & { query?: string } = {},
@@ -85,14 +86,14 @@ export function AdminInbox({
         setRows(out.rows);
         if (withKey) {
           setKey(withKey);
-          window.localStorage.setItem(KEY_STORE, withKey);
+          localSet(KEY_STORE, withKey);
         }
       } catch (e) {
         setError(errorText(e));
         // A rejected key is not worth keeping — otherwise every visit retries
         // it and the tab looks broken rather than locked.
         if (isLocked(e)) {
-          window.localStorage.removeItem(KEY_STORE);
+          localRemove(KEY_STORE);
           setRows(null);
         }
       } finally {
@@ -112,10 +113,10 @@ export function AdminInbox({
   // Opens on its own: with a pasted key if there is one, otherwise with the
   // GitHub token — which is the usual case, and means the tab just works.
   React.useEffect(() => {
-    const saved = window.localStorage.getItem(KEY_STORE);
+    const saved = localGet(KEY_STORE);
     // eslint-disable-next-line react-hooks/set-state-in-effect
     if (saved) void list(saved);
-    else if (window.localStorage.getItem(TOKEN_STORE)) void list();
+    else if (localGet(TOKEN_STORE)) void list();
   }, [list]);
 
   async function reveal(row: Row) {
@@ -209,7 +210,7 @@ export function AdminInbox({
           onUnlock={(k) => {
             // A pasted GitHub token signs in as the token, the same as on the desks.
             saveAdminKey(k);
-            void list(window.localStorage.getItem(KEY_STORE) ?? undefined);
+            void list(localGet(KEY_STORE) ?? undefined);
           }}
           busy={busy}
         />

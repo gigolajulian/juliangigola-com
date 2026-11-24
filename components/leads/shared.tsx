@@ -10,16 +10,16 @@ const kindOf = (k?: string) => (k ? k.charAt(0).toUpperCase() + k.slice(1).repla
 
 
 /** A form field and its label, as the desk's forms draw them. */
-const field = "min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base normal-case placeholder:normal-case placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-accent";
-const fieldLabel = "grid gap-1.5 text-[14px] text-muted-foreground";
+const fieldClass = "min-h-11 w-full rounded-[10px] border border-border bg-transparent px-3.5 text-base normal-case placeholder:normal-case placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-accent";
+const fieldLabelClass = "grid gap-1.5 text-[14px] text-muted-foreground";
 
 /** A Gmail draft from hello@ (the second account in his Chrome, the Gmail app on the phone). */
 const q = (o: Record<string, string>) => new URLSearchParams(o).toString().replace(/\+/g, "%20");
 /** iPhone, or an iPad asking for the desktop site (it says Macintosh, with touch). */
-const ios = () => /iPhone|iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
+const isIosDevice = () => /iPhone|iPad/.test(navigator.userAgent) || (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
 
 function compose(to: string, subject: string, body: string) {
-  return ios()
+  return isIosDevice()
     ? `googlegmail://co?${q({ to, subject, body })}`
     : `https://mail.google.com/mail/u/1/?${q({ view: "cm", fs: "1", to, su: subject, body })}`;
 }
@@ -41,7 +41,7 @@ function mailto(to: string, subject: string, body: string, quote?: { name: strin
 
 /** The unread count on the app icon (iPhone home screen, desktop dock), and
  * where the service worker reads it to add one per push. */
-function badge(n: number) {
+function setUnreadBadge(n: number) {
   try {
     // Optional calls: lib.dom declares both, but not every browser has them.
     (n ? navigator.setAppBadge?.(n) : navigator.clearAppBadge?.())?.catch(() => {});
@@ -50,10 +50,10 @@ function badge(n: number) {
 }
 
 const LABEL: Partial<Record<Filter, string>> = { needs: "Your move", open: "All open", upcoming: "Upcoming", snoozed: "Snoozed", archived: "Archived", trash: "Trash" };
-const label = (f: Filter) => LABEL[f] ?? f;
+const filterLabel = (f: Filter) => LABEL[f] ?? f;
 
 /** One timeline line, in words. */
-function line(e: LeadEvent): string {
+function eventSentence(e: LeadEvent): string {
   switch (e.kind) {
     case "inquiry": return `Inquiry from the form${e.note ? `, ${e.note}` : ""}`;
     case "call": return `Call booked${e.note ? `: ${e.note}` : ""}`;
@@ -106,4 +106,4 @@ const GLASS = "[data-astryx-desk][data-glass]{--color-background-body:transparen
 /* The win button: under a mouse the plane flies off and comes back, in a loop. */
 const WIN_CSS = ".jg-win:hover svg{animation:jg-fly 1.1s cubic-bezier(.5,0,.3,1) infinite}@keyframes jg-fly{0%{transform:none;opacity:1}45%{transform:translate(16px,-16px);opacity:0}46%{transform:translate(-14px,14px);opacity:0}100%{transform:none;opacity:1}}@media (prefers-reduced-motion:reduce){.jg-win:hover svg{animation:none}}";
 
-export { frostBar, FROST_ROOM, GLASS, WIN_CSS, kindOf, field, fieldLabel, ios, compose, mailto, badge, label, line };
+export { frostBar, FROST_ROOM, GLASS, WIN_CSS, kindOf, fieldClass, fieldLabelClass, isIosDevice, compose, mailto, setUnreadBadge, filterLabel, eventSentence };

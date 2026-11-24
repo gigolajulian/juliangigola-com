@@ -21,7 +21,8 @@ import { Divider } from "@astryxdesign/core/Divider";
 import { SW_URL, swScope } from "@/components/leads/setup";
 import { ContractTemplatesDesk } from "@/components/leads/contract";
 import { type Call, ymdPT } from "@/lib/leads/lead-desk";
-import { adminCall, authed } from "@/lib/admin/admin-call";
+import { adminBlob, adminCall } from "@/lib/admin/admin-call";
+import { localSet } from "@/lib/storage";
 import type { Template } from "@/lib/leads/lead-crm";
 import type { Hours, Window } from "@/lib/booking/rules";
 import type { Stage } from "@/lib/leads/leads";
@@ -151,9 +152,8 @@ export function TemplatesDesk({ call, templates, saved }: { call: Call; template
 
 /** Every lead as a CSV file, through the same key as the rest of the desk. */
 async function exportCsv(what: "leads" | "activity" = "leads") {
-  const res = await fetch(what === "activity" ? "/api/leads/csv?events" : "/api/leads/csv", { headers: authed(), cache: "no-store" });
-  if (!res.ok) throw new Error(`Export failed (${res.status})`);
-  const url = URL.createObjectURL(await res.blob());
+  const blob = await adminBlob(what === "activity" ? "/api/leads/csv?events" : "/api/leads/csv", "Export failed");
+  const url = URL.createObjectURL(blob);
   const a = Object.assign(document.createElement("a"), { href: url, download: `${what}-${new Date().toISOString().slice(0, 10)}.csv` });
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
@@ -187,7 +187,7 @@ export function DeviceDesk({ call, reload, signOut }: { call: Call; reload: () =
       const raw = Uint8Array.from(atob(key.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
       const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: raw });
       await call({ path: "/push", method: "PUT", body: JSON.stringify(sub.toJSON()) });
-      try { localStorage.setItem(PUSH_FLAG, "1"); } catch {}
+      localSet(PUSH_FLAG, "1");
       setOn(true);
     } catch (e) { setNote(errorText(e)); }
   };

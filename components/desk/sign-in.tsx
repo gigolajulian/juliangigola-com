@@ -3,6 +3,8 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
 import { btn, primary } from "@/components/desk/chrome";
+import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { localGet } from "@/lib/storage";
 
 /** The admin key, pasted once per device. On the iPhone the installed app keeps
     its own storage apart from Safari, so it asks once there too. A password
@@ -41,5 +43,18 @@ export function SignIn({ onKey, wrong }: { onKey: (k: string) => void; wrong: bo
       </details>
       <button type="submit" className={cn(btn, primary, "justify-self-start")}>Open leads</button>
     </form>
+  );
+}
+
+/** A desk's locked state: sign-in, marked wrong when a key or token is already kept (it was refused). `retry` loads the desk again after a key is kept. */
+export function LockedGate({ retry }: { retry: () => void }) {
+  return (
+    <SignIn
+      onKey={(k) => {
+        saveAdminKey(k);
+        retry();
+      }}
+      wrong={!!(localGet(KEY_STORE) || localGet(TOKEN_STORE))}
+    />
   );
 }

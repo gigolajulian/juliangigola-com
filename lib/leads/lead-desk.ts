@@ -5,10 +5,14 @@
  */
 import { adminCall } from "@/lib/admin/admin-call";
 import { TZ } from "@/lib/time-zone";
-import { isLate, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import { isLate, isStage, myMove, paperDue, quoteNudge, renewDue, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 
+/** The desk's own lists, beside the stages. */
+const LISTS = ["needs", "open", "upcoming", "snoozed", "archived", "trash"] as const;
 /** A list of leads `inFilter` answers: a stage, or one of the desk's own lists. */
-export type Filter = "needs" | "open" | "upcoming" | Stage | "snoozed" | "archived" | "trash";
+export type Filter = (typeof LISTS)[number] | Stage;
+/** A tab or command id that names a Filter. */
+export const isFilter = (v: unknown): v is Filter => isStage(v) || (LISTS as readonly unknown[]).includes(v);
 
 /** The desk's three layouts, by window width. */
 export type Size = "phone" | "mid" | "wide";

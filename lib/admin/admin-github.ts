@@ -14,6 +14,7 @@
 
 import { isRecord } from "@/lib/json";
 import { HttpError } from "@/lib/http";
+import { localGet, localRemove, localSet } from "@/lib/storage";
 
 /**
  * Where the editor keeps the GitHub token in the browser. Named here, not
@@ -32,9 +33,9 @@ export const isGithubToken = (k: string) => /^(ghp_|github_pat_)/.test(k);
 /** Keeps a key pasted into a desk's sign-in: a GitHub token replaces the token and drops any admin key, anything else is the admin key. */
 export function saveAdminKey(k: string) {
   if (isGithubToken(k)) {
-    localStorage.setItem(TOKEN_STORE, k);
-    localStorage.removeItem(KEY_STORE);
-  } else localStorage.setItem(KEY_STORE, k);
+    localSet(TOKEN_STORE, k);
+    localRemove(KEY_STORE);
+  } else localSet(KEY_STORE, k);
 }
 
 /**
@@ -43,7 +44,7 @@ export function saveAdminKey(k: string) {
  */
 export const credentials = (key: string): Record<string, string> => {
   if (key) return { "x-admin-key": key };
-  const token = window.localStorage.getItem(TOKEN_STORE);
+  const token = localGet(TOKEN_STORE);
   return token ? { authorization: `Bearer ${token}` } : {};
 };
 

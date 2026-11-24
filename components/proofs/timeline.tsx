@@ -10,8 +10,9 @@
 import * as React from "react";
 import { closingSoon, remindState, type Proof } from "@/lib/proofs/proof-model";
 import { useClock } from "@/components/proofs/use-clock";
+import { TZ } from "@/lib/time-zone";
 
-const short = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" }).format(new Date(iso));
+const short = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(iso));
 
 type P = Pick<Proof, "email" | "sentAt" | "firstViewAt" | "submittedAt" | "pulledAt" | "deliveredAt" | "firstDownloadAt" | "closesAt" | "offline" | "reminded" | "selects" | "included">;
 

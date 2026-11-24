@@ -3,6 +3,7 @@ import type { SiteContent } from "@/lib/content";
 import { loadRepo, publishDraft, type Draft, type Status } from "@/lib/admin/publish";
 import { sameJson } from "@/lib/admin/admin-payload";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
+import { localGet, localRemove, localSet } from "@/lib/storage";
 import type { Baseline } from "@/components/admin/editor/draft";
 import type { PendingUpload } from "@/lib/admin/admin-sequence";
 
@@ -88,7 +89,7 @@ export function useContentSession({
   // here directly would be a cascading render on every mount, and the token
   // field would flash a value that may already be expired.
   React.useEffect(() => {
-    const saved = window.localStorage.getItem(TOKEN_STORE);
+    const saved = localGet(TOKEN_STORE);
     if (saved) void load(saved);
     // Once, on mount: `load` closes over nothing that changes what a stored
     // token should do, and in the deps it would refetch on every keystroke.
@@ -110,7 +111,7 @@ export function useContentSession({
       setBaseline((b) => ({ ...b, content: r.content }));
     }
     setToken(t);
-    window.localStorage.setItem(TOKEN_STORE, t);
+    localSet(TOKEN_STORE, t);
     setStatus({ kind: "idle" });
   }
 
@@ -148,7 +149,7 @@ export function useContentSession({
 
   /** Drops the stored token and the connection with it. */
   const forget = () => {
-    window.localStorage.removeItem(TOKEN_STORE);
+    localRemove(TOKEN_STORE);
     setToken("");
     setSha(null);
     setStatus({ kind: "idle" });

@@ -27,15 +27,16 @@ import { TextInput } from "@astryxdesign/core/TextInput";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
-import { SignIn } from "@/components/desk/sign-in";
+import { LockedGate } from "@/components/desk/sign-in";
 import { LeadDesk, type LeadAsk } from "@/components/leads/lead";
-import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS } from "@/components/leads/shared";
+import { FROST_ROOM, frostBar, GLASS, setUnreadBadge, WIN_CSS } from "@/components/leads/shared";
 import { deskCall, inFilter, isSetAside, matches, type Size } from "@/lib/leads/lead-desk";
 import { loadErrorText, LOCKED } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 import { useSiteThemeRead } from "@/lib/site-theme";
 import type { Template } from "@/lib/leads/lead-crm";
-import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
+import { localGet, localRemove, localSet } from "@/lib/storage";
 import { leadIdOf, leadStoreKey, leadSummary, shootTag, type Lead, type LeadPatch, type LeadSummary } from "@/lib/leads/leads";
 import { TodayDesk } from "@/components/leads/today";
 import { NewLeadDesk } from "@/components/leads/new-lead";
@@ -49,7 +50,7 @@ import { PanelDesk, StatsDesk } from "@/components/leads/numbers";
 import { DeviceDesk, HoursDesk, TemplatesDesk } from "@/components/leads/setup-panels";
 import { type Filter } from "@/lib/leads/lead-desk";
 import { ProofsDesk } from "@/components/proofs/desk";
-import { Eyebrow, FIND_KEY, FindGlyph, GO, Nav, More, PlusGlyph, Rail, sectionOf, TabBar, type Found, type View } from "@/components/leads/desk-nav";
+import { Eyebrow, FIND_KEY, FindGlyph, GO, isView, Nav, More, PlusGlyph, Rail, sectionOf, TabBar, type Found, type View } from "@/components/leads/desk-nav";
 import { date, fmt, OpenLeadPanel } from "@/components/leads/lead-panel";
 import { DAY_MS, WEEK_MS } from "@/lib/time-zone";
 
@@ -119,6 +120,35 @@ function usePullRefresh(onPull: () => void, enabled: React.RefObject<boolean>): 
   return [pull, tick];
 }
 
+/** A yes or no kept on this device under `key`. Read on first render, so only for a component that draws nothing on the server. */
+function useStoredFlag(key: string): [boolean, (on: boolean) => void] {
+  const [on, setOn] = React.useState(() => typeof window !== "undefined" && localGet(key) === "1");
+  const set = (next: boolean) => {
+    setOn(next);
+    localSet(key, next ? "1" : "0");
+  };
+  return [on, set];
+}
+
+/** What the Ctrl or Cmd K palette offers: every lead by name, email, shoot or stage, actions on the open lead, then every page. */
+function finderItems(leads: LeadSummary[] | null, openName: string | undefined): Found[] {
+  return [
+    ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: leadStoreKey(l.id!), label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? fmt({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
+    // Actions on the lead that is open, then the ones that need none.
+    ...(openName ? [{ id: "do:task", label: `Add a task to ${openName}`, auxiliaryData: { group: "Do", words: ["task", "todo"] } }, { id: "do:invoice", label: `New invoice for ${openName}`, auxiliaryData: { group: "Do", words: ["invoice", "bill"] } }] : []),
+    { id: "go:new", label: "New lead", auxiliaryData: { group: "Do", words: ["add", "lead"] } },
+    ...GO,
+  ];
+}
+
+/** Where a lead sits on the home list, or null when it is not open. `at` is when the list loaded. */
+const groupAt = (at: number) => (l: LeadSummary): Group | null => {
+  if (inFilter(l, "needs")) return "now";
+  if (!inFilter(l, "open")) return null;
+  if (inFilter(l, "upcoming") && Date.parse(l.when!) < at + WEEK_MS) return "week";
+  return "waiting";
+};
+
 export function LeadsDesk() {
   const [leads, setLeads] = React.useState<LeadSummary[] | null>(null);
   const [error, setError] = React.useState<string | null>(null);
@@ -131,14 +161,16 @@ export function LeadsDesk() {
   const [calTab, setCalTab] = React.useState<"bookings" | "availability">("bookings");
   const [asideTab, setAsideTab] = React.useState<Filter>("snoozed");
   // List or Board, kept on this device. The desk draws nothing until mounted (see `mode`), so no hydration gap.
-  const [board, setBoardState] = React.useState(() => typeof window !== "undefined" && (() => { try { return localStorage.getItem(BOARD_STORE) === "1"; } catch { return false; } })());
-  const setBoard = (on: boolean) => { setBoardState(on); try { localStorage.setItem(BOARD_STORE, on ? "1" : "0"); } catch {} };
+  const [board, setBoard] = useStoredFlag(BOARD_STORE);
   // The gallery a lead's Galleries section opened the Proofs desk on; the side nav opens it on the list.
   const [proofPick, setProofPick] = React.useState<string | null>(null);
-  const show = (v: View) => { setScreen(v); setOpen(null); setProofPick(null); };
   const [templates, setTemplates] = React.useState<Template[]>([]);
   // When the list was loaded: groups by date without reading the clock during render.
   const [at, setAt] = React.useState(0);
+  // Search and quick actions, on Ctrl or Cmd K.
+  const [finding, setFinding] = React.useState(false);
+  // What the palette asked the open lead to do (add a task, start an invoice).
+  const [ask, setAsk] = React.useState<LeadAsk | null>(null);
   const isPhone = useMediaQuery("(max-width: 760px)");
   // Wide from 1180, an iPad on its side: the rail below is what leaves room for the open lead.
   const isMid = useMediaQuery("(max-width: 1179px)");
@@ -152,14 +184,10 @@ export function LeadsDesk() {
   }, []);
   React.useEffect(load, [load]);
   // The installed app's badge: unread leads not put aside.
-  React.useEffect(() => { if (leads) badge(leads.filter((l) => l.unread && !isSetAside(l)).length); }, [leads]);
+  React.useEffect(() => { if (leads) setUnreadBadge(leads.filter((l) => l.unread && !isSetAside(l)).length); }, [leads]);
   React.useEffect(() => {
     deskCall<{ templates: Template[] }>({ path: "/templates" }).then((o) => setTemplates(o.templates)).catch(() => {});
   }, []);
-  // Search and quick actions, on Ctrl or Cmd K: every lead by name, email, shoot or stage, and every page.
-  const [finding, setFinding] = React.useState(false);
-  // What the palette asked the open lead to do (add a task, start an invoice).
-  const [ask, setAsk] = React.useState<LeadAsk | null>(null);
   React.useEffect(() => {
     const on = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== "k") return;
@@ -171,16 +199,7 @@ export function LeadsDesk() {
   }, []);
   const openName = leads?.find((l) => l.id === open)?.name;
   const finder = React.useMemo(
-    () => createStaticSource<Found>(
-      [
-        ...(leads ?? []).filter((l) => !l.trashedAt && l.id).map((l) => ({ id: leadStoreKey(l.id!), label: l.name || l.email, auxiliaryData: { group: "Leads", words: [l.email, l.kind ?? "", l.stage], note: [l.stage, l.when ? fmt({ month: "short", day: "numeric" }).format(new Date(l.when)) : null].filter(Boolean).join(" · ") } })),
-        // Actions on the lead that is open, then the ones that need none.
-        ...(openName ? [{ id: "do:task", label: `Add a task to ${openName}`, auxiliaryData: { group: "Do", words: ["task", "todo"] } }, { id: "do:invoice", label: `New invoice for ${openName}`, auxiliaryData: { group: "Do", words: ["invoice", "bill"] } }] : []),
-        { id: "go:new", label: "New lead", auxiliaryData: { group: "Do", words: ["add", "lead"] } },
-        ...GO,
-      ],
-      { keywords: (i) => i.auxiliaryData?.words ?? [] },
-    ),
+    () => createStaticSource<Found>(finderItems(leads, openName), { keywords: (i) => i.auxiliaryData?.words ?? [] }),
     [leads, openName],
   );
   // Astryx follows the site's own light/dark (html[data-theme], dark when unset), so the ink matches the page behind it.
@@ -191,27 +210,28 @@ export function LeadsDesk() {
   const pullOk = React.useRef(false);
   const [pull, tick] = usePullRefresh(load, pullOk);
 
+  const words = query.trim().toLowerCase();
+  // The home list once per change: open leads that match, each with its group, and each group in its own order.
+  const { live, groupOf, rows, grouped } = React.useMemo(() => {
+    const live = (leads ?? []).filter((l) => !l.trashedAt);
+    const groupOf = groupAt(at);
+    const rows = live.filter((l) => matches(l, words)).map((l) => [l, groupOf(l)] as const).filter((r): r is readonly [LeadSummary, Group] => r[1] !== null);
+    const grouped = GROUPS.map(([g, name]) => [g, name, rows.filter(([, gg]) => gg === g).map(([l]) => l).sort((a, b) => (g === "week" ? a.when!.localeCompare(b.when!) : b.lastAt.localeCompare(a.lastAt)))] as const);
+    return { live, groupOf, rows, grouped };
+  }, [leads, at, words]);
+
+  const show = (v: View) => { setScreen(v); setOpen(null); setProofPick(null); };
+
   if (error === LOCKED)
     return (
-      <SignIn
-        onKey={(k) => {
-          saveAdminKey(k);
+      <LockedGate
+        retry={() => {
           setError(null);
           load();
         }}
-        wrong={!!(localStorage.getItem(KEY_STORE) || localStorage.getItem(TOKEN_STORE))}
       />
     );
 
-  const live = (leads ?? []).filter((l) => !l.trashedAt);
-  const words = query.trim().toLowerCase();
-  const groupOf = (l: LeadSummary): Group | null => {
-    if (inFilter(l, "needs")) return "now";
-    if (!inFilter(l, "open")) return null;
-    if (inFilter(l, "upcoming") && Date.parse(l.when!) < at + WEEK_MS) return "week";
-    return "waiting";
-  };
-  const rows = live.filter((l) => matches(l, words)).map((l) => [l, groupOf(l)] as const).filter((r): r is readonly [LeadSummary, Group] => r[1] !== null);
   const needs = rows.filter(([, g]) => g === "now").length;
   const sel = live.find((l) => l.id === pick) ?? rows[0]?.[0];
   const current = live.find((l) => l.id === open);
@@ -234,7 +254,7 @@ export function LeadsDesk() {
   const openCount = live.filter((l) => groupOf(l) !== null).length;
   const asideCount = (leads ?? []).filter((l) => ASIDE.some(([f]) => inFilter(l, f))).length;
   const switcher = (
-    <SegmentedControl label="Open or put aside" value={screen === "aside" ? "aside" : "leads"} onChange={(v) => show(v as View)} layout={size === "wide" ? "hug" : "fill"} size={size === "phone" ? "lg" : "md"}>
+    <SegmentedControl label="Open or put aside" value={screen === "aside" ? "aside" : "leads"} onChange={(v) => isView(v) && show(v)} layout={size === "wide" ? "hug" : "fill"} size={size === "phone" ? "lg" : "md"}>
       <SegmentedControlItem value="leads" label={`Open ${openCount}`} />
       <SegmentedControlItem value="aside" label={`Put aside ${asideCount}`} />
     </SegmentedControl>
@@ -282,8 +302,7 @@ export function LeadsDesk() {
             {!leads && !error ? <Eyebrow>LOADING LEADS</Eyebrow> : null}
             {boarding ? (
               <BoardDesk leads={live.filter((l) => !l.archivedAt && l.stage !== "Lost" && matches(l, words))} onMove={(l, stage) => act(l, { stage })} open={(l) => setOpen(l.id ?? null)} />
-            ) : GROUPS.map(([g, name]) => {
-              const these = rows.filter(([, gg]) => gg === g).map(([l]) => l).sort((a, b) => (g === "week" ? a.when!.localeCompare(b.when!) : b.lastAt.localeCompare(a.lastAt)));
+            ) : grouped.map(([g, name, these]) => {
               if (!these.length) return null;
               return (
                 <VStack key={g} gap={1}>
@@ -340,7 +359,8 @@ export function LeadsDesk() {
   };
   const openLead = (l: LeadSummary) => setOpen(l.id ?? null);
   const signOut = () => {
-    try { localStorage.removeItem(KEY_STORE); localStorage.removeItem(TOKEN_STORE); } catch {}
+    localRemove(KEY_STORE);
+    localRemove(TOKEN_STORE);
     setLeads(null);
     setError(LOCKED);
   };
@@ -363,7 +383,7 @@ export function LeadsDesk() {
   const shown = section && section[2].length > 1 && section[0] !== "leads" ? (
     <Layout
       height="fill"
-      header={<LayoutHeader><TabList value={screen} onChange={(v) => show(v as View)} hasDivider layout="hug">{section[2].map(([label, v]) => <Tab key={v} value={v} label={label} />)}</TabList></LayoutHeader>}
+      header={<LayoutHeader><TabList value={screen} onChange={(v) => isView(v) && show(v)} hasDivider layout="hug">{section[2].map(([label, v]) => <Tab key={v} value={v} label={label} />)}</TabList></LayoutHeader>}
       content={page}
     />
   ) : page;
@@ -397,8 +417,10 @@ export function LeadsDesk() {
           )}
           onValueChange={(id) => {
             setFinding(false);
-            if (id.startsWith("go:")) show(id.slice(3) as View);
-            else if (id.startsWith("do:")) setAsk({ do: id.slice(3) as LeadAsk["do"], n: Date.now() });
+            const page = id.slice(3);
+            if (id.startsWith("go:")) {
+              if (isView(page)) show(page);
+            } else if (id.startsWith("do:")) setAsk({ do: id.slice(3) as LeadAsk["do"], n: Date.now() });
             else setOpen(leadIdOf(id));
           }}
         />

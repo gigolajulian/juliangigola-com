@@ -43,15 +43,16 @@ import { endDay, type Size } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import type { Enquiry } from "@/lib/leads/enquiry";
 import { canonical } from "@/lib/leads/canonical";
-import { isLate, leadStoreKey, NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, WON, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
-import { callSheet, fillTemplate, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
+import { leadView, type LeadView } from "@/lib/leads/lead-view";
+import { isStage, leadStoreKey, PAPER, REMIND_MAX, STAGES, trashDaysLeft, WON, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import { fillTemplate, mailable, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
-import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
-import { ago, dateTimeLabel, type Call, dayLabel, nextStep, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
+import { depositOfLead, usd } from "@/lib/leads/invoice";
+import { ago, dateTimeLabel, type Call, dayLabel, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
 import { DAY_MS } from "@/lib/time-zone";
 import { adminCall, authed } from "@/lib/admin/admin-call";
 import { glyph } from "@/components/desk/chrome";
-import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
+import { compose, eventSentence, frostBar, isIosDevice, kindOf, mailto } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
 import { PlanSection, TaskSection } from "@/components/leads/plan";
@@ -91,7 +92,7 @@ function Fold({ title, note }: { title: string; note?: string }) {
 const many = (n: number, one: string) => `${n} ${one}${n === 1 ? "" : "s"}`;
 
 /** A mail link: Mail on iOS, a Gmail compose window elsewhere. */
-const mail = (to: string, subject: string, body: string) => (ios() ? mailto(to, subject, body) : compose(to, subject, body));
+const mail = (to: string, subject: string, body: string) => (isIosDevice() ? mailto(to, subject, body) : compose(to, subject, body));
 /** `YYYY-MM-DDTHH:MM` in his clock, for the reminder fields. */
 const localParts = (iso: string) => new Date(Date.parse(iso) - new Date().getTimezoneOffset() * 60e3).toISOString().slice(0, 16).split("T");
 
@@ -147,7 +148,7 @@ function useLeadDetail({ summary, initial, call, onChange, reload, onLoadError }
           .catch(() => {});
       if (l.unread) patch({ seen: true }).catch(() => {});
     }).catch((e: unknown) => live && !initial && onLoadError(errorText(e)));
-    proofApi<{ proofs: ProofRow[] }>({ query: "?list" })
+    proofApi<{ proofs: ProofRow[] }>({ path: "?list" })
       .then((o) => live && setProofs(o.proofs.filter((p) => p.email)))
       .catch(() => {});
     return () => void (live = false);
@@ -158,48 +159,16 @@ function useLeadDetail({ summary, initial, call, onChange, reload, onLoadError }
   return { lead, message, msgKey, proofs, log, patch };
 }
 
-/** An action asked for from the ⌘K palette; `n` makes each ask new. */
-export type LeadAsk = { do: "task" | "invoice"; n: number };
+type Editing = "contact" | "quote" | "remind" | "licence" | "snooze" | "merge" | "invoice" | null;
 
-export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs, ask }: { ask?: LeadAsk | null; toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
-  const [asked, setAsked] = React.useState(false);
-  const [editing, setEditing] = React.useState<"contact" | "quote" | "remind" | "licence" | "snooze" | "merge" | "invoice" | null>(null);
-  const [note, setNote] = React.useState<string | null>(null);
-  const [addingTask, setAddingTask] = React.useState(false);
-  const { lead, message, msgKey, proofs, log, patch } = useLeadDetail({ summary, initial, call, onChange, reload, onLoadError: setNote });
-  const run = (p: Promise<unknown>, ok?: string) => p.then(() => { setNote(ok ?? null); setEditing(null); }).catch((e: unknown) => setNote(errorText(e)));
-
-  const l = lead ?? summary;
-  const full = lead;
-  // A new ask from the palette opens its form, once (state adjusted in render, not an effect).
-  const [seenAsk, setSeenAsk] = React.useState(ask?.n);
-  if (ask && ask.n !== seenAsk) {
-    setSeenAsk(ask.n);
-    if (ask.do === "task") setAddingTask(true);
-    else setEditing("invoice");
-  }
-  // The client's galleries: sent to the lead's address or to any of its people.
-  const theirs = new Set([l.email, ...(full?.people ?? []).map((p) => p.email)].map(canonical));
-  const galleries = proofs.filter((p) => theirs.has(canonical(p.email!)));
-  const first = l.name.split(" ")[0];
-  const mailOk = mailable(l.email);
-  const ig = full?.ig ?? (l.email.startsWith("ig:") ? l.email.slice(3) : undefined);
-  const phone = full?.phone ?? (l.email.startsWith("tel:") ? l.email.slice(4) : undefined);
-  const late = isLate(l, now());
-  const step = nextStep(l);
-  const nudge = templates.find((t) => t.id === `nudge${NUDGES.indexOf(quoteNudge(l, now()) as (typeof NUDGES)[number]) + 1}`);
-  const renewTemplate = templates.find((x) => x.id === "renew") ?? TEMPLATES.find((x) => x.id === "renew")!;
-  const replyHref = mail(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
-  const bookHref = mail(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
-  // The one filled button: the nudge or renewal when one is due, the call sheet once booked with a plan, else Reply.
-  const sheet = full?.plan && l.when && l.stage === "Confirmed" ? callSheet(full) : null;
-  const primaryAction = !mailOk ? null : needsRenewal(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fillTemplate(renewTemplate.subject, l), fillTemplate(renewTemplate.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
-
+/** The lead page's actions that do more than one PATCH: snooze, archive and stage (also on the classic desk's keys:
+    R reply, S snooze, E archive, T task, 1 to 9 stage), and cancelling or marking a no-show on the booking the site made. */
+function useLeadActions({ view, full, patch, run, reload, editing, setEditing, setAddingTask }: { view: LeadView; full: Lead | null; patch: (b: LeadPatch) => Promise<Lead>; run: (p: Promise<unknown>, ok?: string) => unknown; reload: () => void; editing: Editing; setEditing: React.Dispatch<React.SetStateAction<Editing>>; setAddingTask: (on: boolean) => void }) {
+  const { l, booked, which, first } = view;
   const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY_MS).toISOString() }), "Snoozed.");
   const archive = () => run(patch({ archive: !l.archivedAt }), l.archivedAt ? "Back in the list." : "Archived.");
   const setStage = (s: Stage) => l.stage !== s && run(patch({ stage: s }));
 
-  // The classic desk's keys: R reply, S snooze, E archive, 1–9 stage.
   const replyLink = React.useRef<HTMLAnchorElement>(null);
   React.useEffect(() => {
     const on = (e: KeyboardEvent) => {
@@ -219,6 +188,45 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     return () => removeEventListener("keydown", on);
   });
 
+  const desk = (action: "cancel-mine" | "no-show", ok: string) => run(adminCall(`/api/booking/${booked}`, { method: "POST", body: JSON.stringify({ action }) }).then(reload), ok);
+  const cancelMine = () => {
+    if (window.confirm(`Cancel ${which}? The event leaves the calendar, the deposit is refunded in full through Stripe, and ${first} is emailed.`)) desk("cancel-mine", "Cancelled and refunded.");
+  };
+  const noShow = () => {
+    if (window.confirm(`Mark ${which} as a no-show? It is logged here and mailed to hello@. Nothing is refunded and ${first} is not emailed.`)) desk("no-show", "Marked a no-show.");
+  };
+  return { snoozeFor, archive, setStage, replyLink, cancelMine, noShow };
+}
+
+/** An action asked for from the ⌘K palette; `n` makes each ask new. */
+export type LeadAsk = { do: "task" | "invoice"; n: number };
+
+export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs, ask }: { ask?: LeadAsk | null; toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+  const [asked, setAsked] = React.useState(false);
+  const [editing, setEditing] = React.useState<Editing>(null);
+  const [note, setNote] = React.useState<string | null>(null);
+  const [addingTask, setAddingTask] = React.useState(false);
+  const { lead, message, msgKey, proofs, log, patch } = useLeadDetail({ summary, initial, call, onChange, reload, onLoadError: setNote });
+  const run = (p: Promise<unknown>, ok?: string) => p.then(() => { setNote(ok ?? null); setEditing(null); }).catch((e: unknown) => setNote(errorText(e)));
+
+  const full = lead;
+  // A new ask from the palette opens its form, once (state adjusted in render, not an effect).
+  const [seenAsk, setSeenAsk] = React.useState(ask?.n);
+  if (ask && ask.n !== seenAsk) {
+    setSeenAsk(ask.n);
+    if (ask.do === "task") setAddingTask(true);
+    else setEditing("invoice");
+  }
+  const view = leadView(lead, summary, templates, now());
+  const { l, first, mailOk, ig, phone, late, step, nudgeStep, primary, booked, ahead, invoiced, owed, paidAt } = view;
+  // The client's galleries: sent to the lead's address or to any of its people.
+  const theirs = new Set([l.email, ...(full?.people ?? []).map((p) => p.email)].map(canonical));
+  const galleries = proofs.filter((p) => theirs.has(canonical(p.email!)));
+  const replyHref = mail(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
+  const bookHref = mail(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
+  const primaryAction = primary ? { label: primary.label, win: primary.win, href: mail(...primary.mail) } : null;
+  const { snoozeFor, archive, setStage, replyLink, cancelMine, noShow } = useLeadActions({ view, full, patch, run, reload, editing, setEditing, setAddingTask });
+
   const phoneSize = size === "phone";
   const snoozeItems = [
     { label: "1 day", onClick: () => snoozeFor(1) },
@@ -227,19 +235,6 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     { label: "Pick a date", onClick: () => setEditing("snooze") },
     ...(isSnoozed(l) ? [{ type: "divider" as const }, { label: "Unsnooze", onClick: () => run(patch({ snoozeUntil: "" }), "Unsnoozed.") }] : []),
   ];
-  // The booking the site made for them (`ref` = its id), while it stands: cancel it before it starts, or mark a no-show after.
-  // shortcut: the latest booking only; a lead with two live bookings needs a picker here.
-  const bookedEvent = l.when ? [...(full?.events ?? [])].reverse().find((e) => (e.kind === "booking" || e.kind === "call") && e.ref) : undefined;
-  const booked = bookedEvent?.ref;
-  const which = `${bookedEvent?.note ?? "the booking"} on ${l.when ? dateTimeLabel(l.when) : ""}`;
-  const ahead = !!l.when && Date.parse(l.when) > now();
-  const desk = (action: "cancel-mine" | "no-show", ok: string) => run(adminCall(`/api/booking/${booked}`, { method: "POST", body: JSON.stringify({ action }) }).then(reload), ok);
-  const cancelMine = () => {
-    if (window.confirm(`Cancel ${which}? The event leaves the calendar, the deposit is refunded in full through Stripe, and ${first} is emailed.`)) desk("cancel-mine", "Cancelled and refunded.");
-  };
-  const noShow = () => {
-    if (window.confirm(`Mark ${which} as a no-show? It is logged here and mailed to hello@. Nothing is refunded and ${first} is not emailed.`)) desk("no-show", "Marked a no-show.");
-  };
   const more = (
     <MoreMenu
       size="sm"
@@ -266,7 +261,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
         button={{ label: "Template", variant: "secondary" }}
         items={[
           ...(usable.length ? [{ type: "section" as const, title: "Reply with a template", items: usable.map((t) => ({ label: t.name, href: mail(l.email, fillTemplate(t.subject, l), fillTemplate(t.body, l)), ...NEW_TAB, onClick: () => setAsked(true) })) }, { type: "divider" as const }] : []),
-          ...(ios() ? [{ label: "Reply in Mail", href: mailto(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`, message ? { name: message.name, at: message.at, text: message.message } : undefined), onClick: () => setAsked(true) }] : []),
+          ...(isIosDevice() ? [{ label: "Reply in Mail", href: mailto(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`, message ? { name: message.name, at: message.at, text: message.message } : undefined), onClick: () => setAsked(true) }] : []),
           { label: "Send booking link", href: bookHref, ...NEW_TAB },
         ]}
       />
@@ -281,7 +276,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
           {history(log, lead.events).reverse().map((e, i) => (
             <VStack key={i} gap={0}>
               <Eyebrow>{dayLabel(e.at).toUpperCase()}</Eyebrow>
-              <Text type="body">{line(e)}</Text>
+              <Text type="body">{eventSentence(e)}</Text>
             </VStack>
           ))}
         </VStack>
@@ -301,11 +296,6 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   );
 
   const at0 = ROAD.indexOf(l.stage as (typeof ROAD)[number]);
-  // One invoice total per client, lines as needed. Once invoiced, the balance is what the open invoices still owe.
-  const invoices = full?.invoices ?? [];
-  const invoiced = invoices.length ? subtotal(invoices.flatMap((v) => v.lines)) : undefined;
-  const owed = invoices.length ? invoices.filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? depositOfLead(full) : 0) : undefined;
-  const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
 
   const [contactOpen, setContactOpen] = React.useState(false);
   // What to do now, first on the page. On a phone its buttons sit in the bar at the bottom.
@@ -319,7 +309,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             {late ? (
               <HStack gap={2} vAlign="center" wrap="wrap">
                 <Badge label={`${ago(l.stageAt)} waiting`} variant="warning" />
-                <Text type="body" size="sm" color="secondary">{l.stage === "Quoted" ? (quoteNudge(l, now()) === "Mark as lost?" ? "Three nudges, no answer. Mark it lost?" : "The quote has had no answer.") : "The site promises a reply within a day."}</Text>
+                <Text type="body" size="sm" color="secondary">{l.stage === "Quoted" ? (nudgeStep === "Mark as lost?" ? "Three nudges, no answer. Mark it lost?" : "The quote has had no answer.") : "The site promises a reply within a day."}</Text>
               </HStack>
             ) : null}
           </VStack>
@@ -380,7 +370,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
                     {at0 >= 0 ? <ProgressBar label="Stage" isLabelHidden value={at0 + 1} max={ROAD.length} /> : null}
                   </VStack>
                 </StackItem>
-                <Selector label="Stage" isLabelHidden size="sm" variant="secondary" value={l.stage} onChange={(v) => setStage(v as Stage)} options={[...STAGES]} />
+                <Selector label="Stage" isLabelHidden size="sm" variant="secondary" value={l.stage} onChange={(v) => isStage(v) && setStage(v)} options={[...STAGES]} />
                 {l.stage === "Lost" ? <Selector label="Why it was lost" isLabelHidden size="sm" variant="secondary" placeholder="Why it was lost" value={full?.lostReason || undefined} onChange={(v) => run(patch({ lostReason: v }), "Saved.")} options={LOST_REASONS} /> : null}
               </HStack>
             </Section>
