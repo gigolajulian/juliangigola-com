@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DELETE, GET, PATCH, POST, PUT } from "@/app/api/proof/route";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";
+import { proofKey } from "@/lib/proofs/proof-model";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
@@ -66,6 +67,14 @@ describe("/api/proof", () => {
     const got = await (await call(GET, req("GET", { query: `?token=${token}` }))).json();
     expect(got.proof.frames).toEqual([{ id: "a1", file: "a.jpg", w: 3, h: 2 }]);
     expect((await readProof(kv as never, (await sealer(LEADS_KEY))!, token))?.name).toBe("Test");
+  });
+
+  it("readProof: null for a gallery that is not there, a throw for one it cannot open", async () => {
+    const s = (await sealer(LEADS_KEY))!;
+    expect(await readProof(kv as never, s, "nothere")).toBeNull();
+    const { token } = await (await call(POST, req("POST", { body: json({ action: "create", name: "Test" }) }))).json();
+    kv.data.get(proofKey(token))!.value = "not-sealed";
+    await expect(readProof(kv as never, s, token)).rejects.toThrow();
   });
 
   it("refuses a bad client email and keeps the stored one", async () => {
