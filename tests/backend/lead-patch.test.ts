@@ -24,9 +24,9 @@ beforeEach(async () => {
   kv.puts = [];
 });
 
-const patch = async (body: Record<string, unknown>) => {
-  const res = await patchLead(kv as never, s, { key, ...body });
-  return { status: res.status, body: (await res.json()) as { lead?: Lead; error?: string } };
+const patch = async (body: Record<string, unknown>): Promise<{ status: number; body: { lead?: Lead; error?: string } }> => {
+  const r = await patchLead(kv as never, s, { key, ...body });
+  return "error" in r ? { status: r.status, body: { error: r.error } } : { status: 200, body: { lead: r.lead } };
 };
 const stored = async () => (await readLead(kv as never, s, id))!;
 const BILL = { date: "2026-11-06", lines: [{ desc: "Portraits", qty: 1, rate: 450 }], paid: 100 };
@@ -53,7 +53,7 @@ describe("patchLead: refusals", () => {
 
   it("404s a lead that is not there", async () => {
     const res = await patchLead(kv as never, s, { key: "lead:0000", seen: true });
-    expect(res.status).toBe(404);
+    expect(res).toEqual({ error: "Gone.", status: 404 });
   });
 });
 

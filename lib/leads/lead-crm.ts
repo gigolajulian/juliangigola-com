@@ -7,7 +7,7 @@
  * ─────────────────────────────────────────────────────────────── */
 
 import { TZ } from "../booking/rules";
-import { canonical, STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
+import { canonical, isStage, STAGES, type Lead, type LeadEvent, type Person, type ShootPlan, type Stage, type Task } from "./leads";
 import { balance, isSettled } from "./invoice";
 import { cell, paidTotal, type MasterEntry } from "./activity-log";
 import { byCodeUnit } from "@/lib/utils";
@@ -173,7 +173,7 @@ export function manualLead(given: NewLead, at: string): Lead | { error: string }
   if (!name) return { error: "A name, please." };
   const email = identity(given);
   if (!email) return { error: "An email, an Instagram handle or a phone number, please." };
-  const stage = given.stage && (STAGES as readonly string[]).includes(given.stage) ? given.stage : "Inquiry";
+  const stage = isStage(given.stage) ? given.stage : "Inquiry";
   const lead: Lead = {
     email,
     name,

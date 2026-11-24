@@ -72,6 +72,10 @@ export type Sent = { to: "client" | "hello@"; kind: string; booking?: string };
 export const PAPER = ["Not sent", "Sent", "Signed", "Not needed"] as const;
 export type Paper = (typeof PAPER)[number];
 
+/** A stage or paper status from outside (a request, Notion), checked against the lists. */
+export const isStage = (v: unknown): v is Stage => (STAGES as readonly unknown[]).includes(v);
+export const isPaper = (v: unknown): v is Paper => (PAPER as readonly unknown[]).includes(v);
+
 /** Something on the lead that needs him, beyond its stage. */
 export type Flag = "stuck" | "no-deposit";
 

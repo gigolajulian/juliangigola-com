@@ -289,7 +289,9 @@ export async function PATCH(request: Request) {
   }
   if (typeof given.key === "string" && given.key.startsWith("lead:")) {
     const seal = await gate.seal;
-    return seal ? patchLead(gate.inbox, seal, given, gate.notion) : noSeal();
+    if (!seal) return noSeal();
+    const r = await patchLead(gate.inbox, seal, given, gate.notion);
+    return "error" in r ? json({ error: r.error }, r.status) : json({ lead: r.lead });
   }
   // His reply templates, saved whole.
   if (given.templates !== undefined) {
