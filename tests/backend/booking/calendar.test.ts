@@ -113,6 +113,22 @@ describe("busyAll", () => {
     timeout.mockRestore();
   });
 
+  it("gives up on a feed whose cache read never settles, and tries it again on the next call", async () => {
+    const timeout = vi.spyOn(AbortSignal, "timeout").mockImplementation(() => {
+      const c = new AbortController();
+      queueMicrotask(() => c.abort());
+      return c.signal;
+    });
+    vi.stubGlobal("caches", { default: { match: () => new Promise(() => {}), put: async () => {} } });
+    const src = "https://stuck.example.com/d.ics";
+    expect((await busyAll(SECRET, A, B, [{ label: "Stuck", src }])).failed).toEqual(["Stuck"]);
+    // The stuck read is not kept: the next call reads the feed again.
+    vi.stubGlobal("caches", undefined);
+    ics = "BEGIN:VCALENDAR\nEND:VCALENDAR";
+    timeout.mockRestore();
+    expect((await busyAll(SECRET, A, B, [{ label: "Stuck", src }])).failed).toEqual([]);
+  });
+
   it("skips an extra it cannot read, but never hello@ itself", async () => {
     freebusy = { calendars: { primary: { busy: [] }, "x@gmail.com": { errors: [{ reason: "notFound" }] } } };
     const out = await busyAll(SECRET, A, B, [{ label: "X", src: "x@gmail.com" }, { label: "Dead", src: "https://gone.example.com/b.ics" }]);
