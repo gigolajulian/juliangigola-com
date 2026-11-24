@@ -99,20 +99,16 @@ const history = (log: Lead["events"] | null, own: Lead["events"]) => {
     .sort((a, b) => a.at.localeCompare(b.at));
 };
 
-/** An action asked for from the ⌘K palette; `n` makes each ask new. */
-export type LeadAsk = { do: "task" | "invoice"; n: number };
-
-export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs, ask }: { ask?: LeadAsk | null; toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+/** One lead as its page reads it: the record, the message it came in with, the whole log and the galleries.
+    Loaded once per lead and marked seen; `patch` writes a change and hands the new record to the list. */
+function useLeadDetail({ summary, initial, call, onChange, reload, onLoadError }: { summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; reload: () => void; onLoadError: (text: string) => void }) {
   // A lead added a moment ago comes in whole: KV may not serve its key yet.
   const [lead, setLead] = React.useState<Lead | null>(initial ?? null);
   const [message, setMessage] = React.useState<Enquiry | null>(null);
   const [msgKey, setMsgKey] = React.useState<string | null>(null);
-  const [asked, setAsked] = React.useState(false);
-  const [editing, setEditing] = React.useState<"contact" | "quote" | "remind" | "licence" | "snooze" | "merge" | "invoice" | null>(null);
-  const [note, setNote] = React.useState<string | null>(null);
   const [proofs, setProofs] = React.useState<ProofRow[]>([]);
-  const [addingTask, setAddingTask] = React.useState(false);
   const key = `lead:${summary.id}`;
+
 
   const patch = React.useCallback(
     async (body: LeadPatch) => {
@@ -125,7 +121,6 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     },
     [call, key, onChange, reload],
   );
-  const run = (p: Promise<unknown>, ok?: string) => p.then(() => { setNote(ok ?? null); setEditing(null); }).catch((e: unknown) => setNote(errorText(e)));
   // The whole activity log (`lib/leads/activity-log.ts`); the lead itself keeps only its last 50 events.
   const [log, setLog] = React.useState<Lead["events"] | null>(null);
   const newest = lead?.events.at(-1)?.at ?? "";
@@ -147,7 +142,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
           .then((m) => live && (setMessage(m.enquiry), setMsgKey(ref)))
           .catch(() => {});
       if (l.unread) patch({ seen: true }).catch(() => {});
-    }).catch((e: unknown) => live && !initial && setNote(errorText(e)));
+    }).catch((e: unknown) => live && !initial && onLoadError(errorText(e)));
     proofApi<{ proofs: ProofRow[] }>({ query: "?list" })
       .then((o) => live && setProofs(o.proofs.filter((p) => p.email)))
       .catch(() => {});
@@ -155,6 +150,20 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     // Once per lead: `patch` is stable for the same key.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
+
+  return { lead, message, msgKey, proofs, log, patch };
+}
+
+/** An action asked for from the ⌘K palette; `n` makes each ask new. */
+export type LeadAsk = { do: "task" | "invoice"; n: number };
+
+export function LeadDesk({ summary, initial, call, onChange, onBack, reload, templates, others, size, toProofs, ask }: { ask?: LeadAsk | null; toProofs?: (token?: string) => void; summary: LeadSummary; initial?: Lead | null; call: Call; onChange: (l: Lead) => void; onBack: () => void; reload: () => void; templates: Template[]; others: LeadSummary[]; size: Size }) {
+  const [asked, setAsked] = React.useState(false);
+  const [editing, setEditing] = React.useState<"contact" | "quote" | "remind" | "licence" | "snooze" | "merge" | "invoice" | null>(null);
+  const [note, setNote] = React.useState<string | null>(null);
+  const [addingTask, setAddingTask] = React.useState(false);
+  const { lead, message, msgKey, proofs, log, patch } = useLeadDetail({ summary, initial, call, onChange, reload, onLoadError: setNote });
+  const run = (p: Promise<unknown>, ok?: string) => p.then(() => { setNote(ok ?? null); setEditing(null); }).catch((e: unknown) => setNote(errorText(e)));
 
   const l = lead ?? summary;
   const full = lead;
