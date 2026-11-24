@@ -23,19 +23,13 @@ import { balance, isSettled, namesInvoice, type Invoice } from "./invoice";
  * already stored, and a lead that failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
 
-/** One person's address, however they spell it. A lead
-    typed gigola.julian@gmail.com whose mail came from gigolajulian@gmail.com
-    never met. Gmail ignores dots and anything after "+", so the id does too. */
-export function canonical(email: string): string {
-  const e = email.trim().toLowerCase();
-  const at = e.lastIndexOf("@");
-  const [user, domain] = [e.slice(0, at), e.slice(at + 1)];
-  if (at < 1 || (domain !== "gmail.com" && domain !== "googlemail.com")) return e;
-  return `${user.split("+")[0].replaceAll(".", "")}@gmail.com`;
-}
+/** One day in milliseconds. */
+const DAY = 864e5;
 
 export const STAGES =["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
 export type Stage = (typeof STAGES)[number];
+/** The stages of a booked job: confirmed and after, not lost. */
+export const WON: readonly Stage[] = ["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"];
 
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
@@ -43,15 +37,15 @@ export type LeadEvent = {
   kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash" | "proofs"
     // Julian's own hand (`lib/leads/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
     | "added" | "edit" | "merge" | "remind" | "quote" | "invoice"
-    // From outside or by hand (2026-11-10): Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
+    // From outside or by hand: Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
     | "payment" | "refund" | "reschedule" | "cancel" | "selects" | "invoice-paid"
-    // Julian marked it on the desk (2026-11-16), ref = "no-show:<booking id>".
+    // Julian marked it on the desk, ref = "no-show:<booking id>".
     | "no-show"
-    // The client's first download of their finals (2026-11-12): Delivered.
+    // The client's first download of their finals: Delivered.
     | "download"
     // The client signed a contract online (2026-11-15, `lib/contracts/contract.ts`), ref = "signed:<contract id>".
     | "contract"
-    // A task on the lead ticked done (2026-11-20), ref = "task:<task id>".
+    // A task on the lead ticked done, ref = "task:<task id>".
     | "task";
   /* "proofs": they opened a proof gallery, ref = its token so each gallery is one line. */
   /* "replied" / "wrote": mail between hello@ and them in Gmail, ref = the Gmail message id (`lib/leads/sync/gmail-sync.ts`). */
@@ -106,7 +100,7 @@ export type LeadPatch = {
   tasks?: Task[];
 };
 
-/* ── the shoot plan and tasks (from CRMO, Julian 2026-11-20) ──────
+/* ── the shoot plan and tasks (from CRMO, Julian) ──────
  * The desk knew the client and the date but not the shoot. A plan holds
  * the brief, up to four of his own frames as references, the Cosmos board
  * (a link, never fetched), the shot list and the call sheet. Tasks are the
@@ -336,7 +330,7 @@ const tidy = (l: Lead): Lead => {
 /** Julian: "yes, empty trash after 30 days". Days a lead keeps in the trash. */
 export const TRASH_DAYS = 30;
 /** Whole days before a trashed lead is deleted for good; 0 or less means due. */
-export const trashDaysLeft = (trashedAt: string, now: number) => Math.ceil((Date.parse(trashedAt) + TRASH_DAYS * 864e5 - now) / 864e5);
+export const trashDaysLeft = (trashedAt: string, now: number) => Math.ceil((Date.parse(trashedAt) + TRASH_DAYS * DAY - now) / DAY);
 
 /** Hours Julian promises to answer in; the site says "within a day". */
 export const REPLY_HOURS = 24;
@@ -345,7 +339,6 @@ export const NUDGE_DAYS = [3, 7, 14];
 export const NUDGES = ["Nudge 1", "Nudge 2", "Last nudge"] as const;
 /** Quiet days after the last nudge before he is asked whether it is lost. Never automatic. */
 export const LOST_DAYS = 7;
-const DAY = 864e5;
 
 /** Since when a quote has been waiting, and the nudges he has sent since. */
 export type QuoteTrail = { from: string; n: number; last?: string };
@@ -366,7 +359,7 @@ type Quoted = Pick<Lead, "stage" | "stageAt" | "snoozeUntil"> & { events?: LeadE
 /** The follow-up a quote is due, or null: three nudges at 3, 7 and 14 days, then "Mark as lost?". */
 export function quoteNudge(l: Quoted, now: number): (typeof NUDGES)[number] | "Mark as lost?" | null {
   if (l.stage !== "Quoted" || (l.snoozeUntil && Date.parse(l.snoozeUntil) > now)) return null;
-  const t = (l.events ? quoteTrail(l as Lead) : l.quiet) ?? { from: l.stageAt, n: 0 };
+  const t = (l.events ? quoteTrail({ stage: l.stage, stageAt: l.stageAt, events: l.events }) : l.quiet) ?? { from: l.stageAt, n: 0 };
   const last = t.last ? Date.parse(t.last) : 0;
   if (t.n >= NUDGES.length) return now > last + LOST_DAYS * DAY ? "Mark as lost?" : null;
   // Three days between nudges at least, so a late first one does not bring the second straight after.
@@ -377,7 +370,7 @@ export function quoteNudge(l: Quoted, now: number): (typeof NUDGES)[number] | "M
 export const LICENCE_DAYS = 60;
 /** Whether a licence is ending within LICENCE_DAYS (or has ended): time to offer a renewal. Archived leads count, trashed ones never. */
 export const renewDue = (l: Pick<Lead, "licence" | "trashedAt">, now: number) =>
-  !!l.licence && !l.trashedAt && Date.parse(`${l.licence.end}T12:00:00Z`) - LICENCE_DAYS * 864e5 <= now;
+  !!l.licence && !l.trashedAt && Date.parse(`${l.licence.end}T12:00:00Z`) - LICENCE_DAYS * DAY <= now;
 
 /** Whether a lead has waited past what was promised. Snoozed leads never are. */
 export function isLate(l: Quoted, now: number, replyHours = REPLY_HOURS): boolean {
@@ -401,7 +394,7 @@ export const PAPER_DAYS = 7;
 export function paperDue(l: Pick<Lead, "stage" | "when" | "contract" | "release">, now: number): "contract" | "release" | null {
   if (l.stage !== "Confirmed" || !l.when) return null;
   const left = Date.parse(l.when) - now;
-  if (!(left >= 0 && left <= PAPER_DAYS * 864e5)) return null;
+  if (!(left >= 0 && left <= PAPER_DAYS * DAY)) return null;
   const open = (p?: Paper) => p !== "Signed" && p !== "Not needed";
   return open(l.contract) ? "contract" : open(l.release) ? "release" : null;
 }
@@ -501,7 +494,7 @@ export type TaskRow = Task & { lead: string; name: string };
 export const TASK_DAYS = 7;
 /** Open tasks due within TASK_DAYS of `today` (YYYY-MM-DD, Pacific), late ones included, soonest first. */
 export function dueTasks<T extends Task>(tasks: T[], today: string): (T & { late: boolean })[] {
-  const end = new Date(Date.parse(`${today}T12:00:00Z`) + TASK_DAYS * 864e5).toISOString().slice(0, 10);
+  const end = new Date(Date.parse(`${today}T12:00:00Z`) + TASK_DAYS * DAY).toISOString().slice(0, 10);
   return tasks
     .filter((t) => !t.doneAt && t.due && t.due <= end)
     .map((t) => ({ ...t, late: t.due! < today }))

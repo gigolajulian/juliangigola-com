@@ -182,7 +182,7 @@ what protects this.
 #### What stops it being spammed
 
 A Server Action is a public endpoint, and this one writes to a store with a
-quota. Three things stand in front of it, in `lib/inbox.ts`:
+quota. Three things stand in front of it, in `lib/leads/enquiry.ts`:
 
 - **A five-minute cooldown per sender.** Read before anything is written, so a
   sender inside the window costs one read and no writes. Keyed on a hash of

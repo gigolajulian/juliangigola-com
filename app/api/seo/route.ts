@@ -1,7 +1,7 @@
 import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
-import { ACCOUNT, SITE_HOST, cloudflare, engineSql, searchConsole, sitePath } from "@/lib/analytics";
+import { SITE_HOST, engineSql, rumVisits, searchConsole, sitePath } from "@/lib/analytics";
 import { BEACON_DATASET } from "@/lib/beacon";
 import { json, upstreamError } from "@/lib/http";
 
@@ -16,10 +16,6 @@ import { json, upstreamError } from "@/lib/http";
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";
-
-type Rum = {
-  accounts: { rumPageloadEventsAdaptiveGroups: { sum: { visits: number }; dimensions: Record<string, string> }[] }[];
-};
 
 const MAX_PAGES = 20;
 // Only what the beacon itself would accept, so a path can go into SQL as is.
@@ -49,14 +45,7 @@ export async function GET(request: Request) {
   const date = (ms: number) => iso(ms).slice(0, 10);
   const dates = Array.from({ length: days }, (_, i) => date(now - (days - 1 - i) * 864e5));
 
-  const gql = cloudflare(key);
-  /* Headless Chrome is the automated test runs on Julian's PC. */
-  const rum = async (dims: string, from: number, to: number, limit: number) =>
-    (
-      await gql<Rum>(
-        `{viewer{accounts(filter:{accountTag:"${ACCOUNT}"}){rumPageloadEventsAdaptiveGroups(limit:${limit},filter:{datetime_geq:"${iso(from)}",datetime_lt:"${iso(to)}",userAgentBrowser_neq:"ChromeHeadless"},orderBy:[sum_visits_DESC]){sum{visits} dimensions{${dims}}}}}}`,
-      )
-    ).accounts[0].rumPageloadEventsAdaptiveGroups;
+  const rum = (dims: string, from: number, to: number, limit: number) => rumVisits(key, dims, iso(from), iso(to), limit);
 
   const start = now - days * 864e5;
   try {

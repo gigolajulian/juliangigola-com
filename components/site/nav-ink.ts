@@ -15,16 +15,25 @@ const VEIL = 0.47; // --nav-veil
 const lin = (v: number) => ((v /= 255) <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
 const lum = (c: RGB) => 0.2126 * lin(c[0]) + 0.7152 * lin(c[1]) + 0.0722 * lin(c[2]);
 const unlin = (v: number) => 255 * (v <= 0.0031308 ? v * 12.92 : 1.055 * v ** (1 / 2.4) - 0.055);
+/** Contrast of white words on a ground of luminance `l`. */
+const whiteRatio = (l: number) => 1.05 / (l + 0.05);
+/** Contrast of black words on a ground of luminance `l`. */
+const blackRatio = (l: number) => (l + 0.05) / 0.05;
+/** The spots each ink fails, under `min`:1. */
+function failCount(grounds: RGB[], min: number) {
+  let w = 0, b = 0;
+  for (const g of grounds) {
+    const l = lum(g);
+    if (whiteRatio(l) < min) w++;
+    if (blackRatio(l) < min) b++;
+  }
+  return { w, b };
+}
 /** The bar's one ink: the one that leaves the fewest spots under 4.5:1 (WCAG AA) through the words, not the one
     most stretches prefer (audit 2026-11-22, P1). The other ink takes over only once it fails clearly fewer spots,
     so a busy photo does not flip the bar back and forth. */
 export function barInk(grounds: RGB[], was: string | null): "w" | "b" {
-  let w = 0, b = 0; // spots each ink fails
-  for (const g of grounds) {
-    const l = lum(g);
-    if (1.05 / (l + 0.05) < 4.5) w++;
-    if ((l + 0.05) / 0.05 < 4.5) b++;
-  }
+  const { w, b } = failCount(grounds, 4.5);
   const lead = Math.max(1, grounds.length * 0.1); // clearly: a tenth of the spots
   if (was === "w") return w - b > lead ? "b" : "w";
   if (was === "b") return b - w > lead ? "w" : "b";
@@ -32,17 +41,13 @@ export function barInk(grounds: RGB[], was: string | null): "w" | "b" {
 }
 /** Spots the better ink still fails, at 4.5:1 or the given ratio. */
 const fewest = (grounds: RGB[], min = 4.5) => {
-  let w = 0, b = 0;
-  for (const g of grounds) {
-    const l = lum(g);
-    if (1.05 / (l + 0.05) < min) w++;
-    if ((l + 0.05) / 0.05 < min) b++;
-  }
+  const { w, b } = failCount(grounds, min);
   return Math.min(w, b);
 };
 
-let pen: CanvasRenderingContext2D | null | undefined;
-const one = () => (pen === undefined ? (pen = document.createElement("canvas").getContext("2d", { willReadFrequently: true })) : pen);
+let shared: CanvasRenderingContext2D | null | undefined;
+/** The one 2d context for colour reads, made on first use. */
+const sharedPen = () => (shared === undefined ? (shared = document.createElement("canvas").getContext("2d", { willReadFrequently: true })) : shared);
 
 /** Any CSS colour as rgb plus alpha, through a 1px canvas (the tokens are oklch). */
 const colours = new Map<string, [RGB, number]>();
@@ -50,15 +55,15 @@ function colour(css: string): [RGB, number] {
   let c = colours.get(css);
   if (c) return c;
   c = [[0, 0, 0], 0];
-  const x = one();
-  if (x && css) {
-    x.canvas.width = x.canvas.height = 1;
-    x.clearRect(0, 0, 1, 1);
-    x.fillStyle = "#0000";
-    x.fillStyle = css;
-    x.fillRect(0, 0, 1, 1);
+  const pen = sharedPen();
+  if (pen && css) {
+    pen.canvas.width = pen.canvas.height = 1;
+    pen.clearRect(0, 0, 1, 1);
+    pen.fillStyle = "#0000";
+    pen.fillStyle = css;
+    pen.fillRect(0, 0, 1, 1);
     try {
-      const d = x.getImageData(0, 0, 1, 1).data;
+      const d = pen.getImageData(0, 0, 1, 1).data;
       c = [[d[0], d[1], d[2]], d[3] / 255];
     } catch {
       return c; // not cached: the next call tries again
@@ -69,7 +74,7 @@ function colour(css: string): [RGB, number] {
 }
 
 /** A photo or film frame, shrunk to N by N. `null`: its pixels cannot be read. */
-const N = 128; // 24, then 48: a thin dark strip in a photo (a shadow the links sat on, MAC) blurred into the bright ground around it
+const N = 128; // 24, then 48: a thin dark strip in a photo (a shadow the links sat on) blurred into the bright ground around it
 const thumbs = new WeakMap<Element, { at: number; src: string; data: Uint8ClampedArray | null }>();
 /* A canvas of its own each time: a photo from a host that does not allow reading taints the canvas it is drawn
    on for good, and on the shared one every later read threw (a preview serves its photos from the live host). */
@@ -100,25 +105,20 @@ export const foreign = (src: string, el: HTMLImageElement | HTMLVideoElement) =>
 let poke = () => {};
 /** A same-host copy by photo address: null while it loads, false when it cannot be had. */
 const copies = new Map<string, Uint8ClampedArray | null | false>();
-/** Set by the last `pixel`: the photo is there but its pixels are not known yet (still loading, or its copy is). */
-let pending = false;
 /** True once a photo needed a same-host copy (a preview; the live site reads its own photos): the header then asks ahead. */
 let copied = false;
-function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | null {
+/** A photo's small copy, and `pending`: the photo is there but its pixels are not known yet (still loading, or its copy is). */
+type Thumb = { data: Uint8ClampedArray | null; pending: boolean };
+function thumb(el: HTMLImageElement | HTMLVideoElement): Thumb {
   const film = el instanceof HTMLVideoElement, src = el.currentSrc || el.src, now = performance.now();
   const had = thumbs.get(el);
-  if (had && had.src === src && (!film || now - had.at < 400)) {
-    pending = !had.data && copies.get(src) === null;
-    return had.data ?? (copies.get(src) || null);
-  }
+  if (had && had.src === src && (!film || now - had.at < 400))
+    return { data: had.data ?? (copies.get(src) || null), pending: !had.data && copies.get(src) === null };
   // not all there yet: drawn now it would read as black, and that would be kept (the load event looks again)
-  if (!film && !el.complete) {
-    pending = true;
-    return null;
-  }
+  if (!film && !el.complete) return { data: null, pending: true };
   const data = foreign(src, el) ? null : read(el);
   thumbs.set(el, { at: now, src, data });
-  if (data || film) return data;
+  if (data || film) return { data, pending: false };
   /* Unreadable: the same file from this host, without the resizer (`/cdn-cgi/image/<options>/<path>` on another
      host becomes `/<path>` here). Asked for once; the word keeps its ink until it lands. */
   const plainFile = plainSrc(src);
@@ -133,8 +133,7 @@ function thumb(el: HTMLImageElement | HTMLVideoElement): Uint8ClampedArray | nul
     // frame (MAC, previews: 218 to 311ms frames on the first pass as new photos came under the bar)
     im.decode().then(() => (copies.set(src, read(im) ?? false), poke()), () => copies.set(src, false));
   }
-  pending = copies.get(src) === null;
-  return copies.get(src) || null;
+  return { data: copies.get(src) || null, pending: copies.get(src) === null };
 }
 
 /* Where a photo is painted. The v4 hero's columns sit 48 and 80px forward under `.mt-stage`'s perspective. Chromium
@@ -194,30 +193,13 @@ function box(el: HTMLElement) {
   return r;
 }
 
-/** The colour of a photo or film at a point on screen, through its object-fit and object-position: the mean, in
-    light, of the patch `hw` by `hh` either side of the point (the stretch of a word it stands for). */
-function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number, hw = 0, hh = 0): RGB | null {
-  const nw = el instanceof HTMLVideoElement ? el.videoWidth : el.naturalWidth, nh = el instanceof HTMLVideoElement ? el.videoHeight : el.naturalHeight;
-  pending = false;
-  if (!nw || !nh) {
-    pending = el instanceof HTMLImageElement && !!(el.currentSrc || el.src); // an image that has not arrived
-    return null;
-  }
-  const data = thumb(el);
-  if (!data) return null;
-  const r = box(el), cs = getComputedStyle(el);
-  // the photo's own box on screen: the element's, or the fitted picture inside it
-  let left = r.left, top = r.top, w = r.width, h = r.height;
-  if (cs.objectFit === "cover" || cs.objectFit === "contain") {
-    const s = cs.objectFit === "cover" ? Math.max(r.width / nw, r.height / nh) : Math.min(r.width / nw, r.height / nh);
-    const [px, py] = cs.objectPosition.split(" ").map((p) => (p.endsWith("%") ? parseFloat(p) / 100 : 0.5));
-    w = nw * s;
-    h = nh * s;
-    left = r.left + (r.width - w) * (px ?? 0.5);
-    top = r.top + (r.height - h) * (py ?? 0.5);
-  }
-  const u = (x - left) / w, v = (y - top) / h;
-  if (u < 0 || u > 1 || v < 0 || v > 1) return null;
+/** A look at a photo: its colour, or null, with `pending` while its pixels are on their way. */
+type Sample = { rgb: RGB | null; pending: boolean };
+const NONE: Sample = { rgb: null, pending: false }, WAIT: Sample = { rgb: null, pending: true };
+
+/** The mean, in light, of a small copy over the patch `hw` by `hh` either side of a point, for a picture painted
+    at `left`, `top`, `w` by `h` on screen. */
+function patchMean(data: Uint8ClampedArray, left: number, top: number, w: number, h: number, x: number, y: number, hw: number, hh: number): RGB {
   const cell = (t: number) => Math.min(N - 1, Math.max(0, Math.floor(t * N)));
   const i0 = cell((x - hw - left) / w), i1 = cell((x + hw - left) / w), j0 = cell((y - hh - top) / h), j1 = cell((y + hh - top) / h);
   // at most 8 by 8 cells of the patch
@@ -234,6 +216,29 @@ function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number, hw
   return [unlin(R / k), unlin(G / k), unlin(B / k)];
 }
 
+/** The colour of a photo or film at a point on screen, through its object-fit and object-position: the mean, in
+    light, of the patch `hw` by `hh` either side of the point (the stretch of a word it stands for). */
+function pixel(el: HTMLImageElement | HTMLVideoElement, x: number, y: number, hw = 0, hh = 0): Sample {
+  const nw = el instanceof HTMLVideoElement ? el.videoWidth : el.naturalWidth, nh = el instanceof HTMLVideoElement ? el.videoHeight : el.naturalHeight;
+  if (!nw || !nh) return el instanceof HTMLImageElement && (el.currentSrc || el.src) ? WAIT : NONE; // an image that has not arrived
+  const { data, pending } = thumb(el);
+  if (!data) return pending ? WAIT : NONE;
+  const r = box(el), cs = getComputedStyle(el);
+  // the photo's own box on screen: the element's, or the fitted picture inside it
+  let left = r.left, top = r.top, w = r.width, h = r.height;
+  if (cs.objectFit === "cover" || cs.objectFit === "contain") {
+    const s = cs.objectFit === "cover" ? Math.max(r.width / nw, r.height / nh) : Math.min(r.width / nw, r.height / nh);
+    const [px, py] = cs.objectPosition.split(" ").map((p) => (p.endsWith("%") ? parseFloat(p) / 100 : 0.5));
+    w = nw * s;
+    h = nh * s;
+    left = r.left + (r.width - w) * (px ?? 0.5);
+    top = r.top + (r.height - h) * (py ?? 0.5);
+  }
+  const u = (x - left) / w, v = (y - top) / h;
+  if (u < 0 || u > 1 || v < 0 || v > 1) return NONE;
+  return { rgb: patchMean(data, left, top, w, h, x, y, hw, hh), pending: false };
+}
+
 /* The home intro fills the wall's edge columns with tiles of its own (`.mt-ix i`, intro/index.tsx): a CSS background
    photo each, in a layer the pointer passes through, so asking what is at a point never finds them. Under them the
    bar saw the page, and white words sat on a white photo at 2.9:1 (MAC SSH, #1441: home at 390, Menu at y100). So a
@@ -246,11 +251,10 @@ function tileAt(layer: Element, x: number, y: number): HTMLElement | null {
   }
   return null;
 }
-/** A tile's photo at a point, `background-size: cover` at its centre; null with `pending` set while it loads. */
-function tilePixel(t: HTMLElement, x: number, y: number, hw = 0, hh = 0): RGB | null {
-  pending = false;
+/** A tile's photo at a point, `background-size: cover` at its centre; `pending` while it loads. */
+function tilePixel(t: HTMLElement, x: number, y: number, hw = 0, hh = 0): Sample {
   const url = /url\(["']?([^"')]+)["']?\)/.exec(t.style.backgroundImage)?.[1];
-  if (!url) return null;
+  if (!url) return NONE;
   let im = tileImgs.get(url);
   if (!im) {
     im = new Image();
@@ -259,27 +263,12 @@ function tilePixel(t: HTMLElement, x: number, y: number, hw = 0, hh = 0): RGB | 
     tileImgs.set(url, im);
   }
   const nw = im.naturalWidth, nh = im.naturalHeight;
-  if (!im.complete || !nw || !nh) {
-    pending = true;
-    return null;
-  }
-  const data = thumb(im);
-  if (!data) return null;
+  if (!im.complete || !nw || !nh) return WAIT;
+  const { data, pending } = thumb(im);
+  if (!data) return pending ? WAIT : NONE;
   const r = box(t), sc = Math.max(r.width / nw, r.height / nh), w = nw * sc, h = nh * sc;
   const left = r.left + (r.width - w) / 2, top = r.top + (r.height - h) / 2;
-  const cell = (v: number) => Math.min(N - 1, Math.max(0, Math.floor(v * N)));
-  const i0 = cell((x - hw - left) / w), i1 = cell((x + hw - left) / w), j0 = cell((y - hh - top) / h), j1 = cell((y + hh - top) / h);
-  const di = Math.max(1, Math.ceil((i1 - i0 + 1) / 8)), dj = Math.max(1, Math.ceil((j1 - j0 + 1) / 8));
-  let R = 0, G = 0, B = 0, k = 0;
-  for (let j = j0; j <= j1; j += dj)
-    for (let i = i0; i <= i1; i += di) {
-      const q = (j * N + i) * 4;
-      R += lin(data[q]);
-      G += lin(data[q + 1]);
-      B += lin(data[q + 2]);
-      k++;
-    }
-  return [unlin(R / k), unlin(G / k), unlin(B / k)];
+  return { rgb: patchMean(data, left, top, w, h, x, y, hw, hh), pending: false };
 }
 
 /** `?navdbg`: what each look saw, for `window.__navink()` (MAC reads words under 3:1 that pass on Windows). Null otherwise. */
@@ -288,6 +277,31 @@ let dbg: unknown[] | null = null;
 const seen = new Map<Element, number>();
 /** Filled by `under`: the same thing's colour at another height of the same column, or null where it does not reach. */
 type Hit = { at?: (y: number) => RGB | null; unknown?: boolean };
+/** One `?navdbg` record of what `under` found at a point: an intro tile, a photo or film, or a painted box. */
+function trace(kind: "tile" | "img" | "box", el: Element, x: number, y: number, rgb: RGB | null, o = 0, pending = false) {
+  if (!dbg) return;
+  const at = { x: Math.round(x), y: Math.round(y) };
+  const shade = rgb?.map(Math.round) ?? null;
+  if (kind === "tile") dbg.push({ ...at, tile: (el as HTMLElement).style.backgroundImage.slice(-40, -2), o: +o.toFixed(2), rgb: shade, pending });
+  else if (kind === "box") dbg.push({ ...at, box: (el.className?.toString() || el.tagName).slice(0, 40), rgb: shade });
+  else {
+    const src = (el as HTMLImageElement).currentSrc;
+    const copy = copies.has(src) ? (copies.get(src) ? "in" : copies.get(src) === null ? "loading" : "failed") : "none";
+    const fitted = Object.values(box(el as HTMLElement)).map(Math.round);
+    const { left, top, width, height } = el.getBoundingClientRect();
+    dbg.push({
+      ...at,
+      img: (el instanceof HTMLImageElement ? el.currentSrc || el.src : "video").slice(-48),
+      complete: el instanceof HTMLImageElement ? el.complete : true,
+      o: +o.toFixed(2),
+      copy,
+      rgb: shade,
+      pending,
+      box: fitted,
+      rect: [left, top, width, height].map(Math.round),
+    });
+  }
+}
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
 function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw = 0, hh = 0): RGB {
   const list = hits(x, y);
@@ -307,14 +321,14 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
           seen.set(t, o);
         }
         if (o >= 0.08) {
-          const p = tilePixel(t, x, y, hw, hh);
-          dbg?.push({ x: Math.round(x), y: Math.round(y), tile: t.style.backgroundImage.slice(-40, -2), o: +o.toFixed(2), rgb: p?.map(Math.round) ?? null, pending });
+          const { rgb: p, pending } = tilePixel(t, x, y, hw, hh);
+          trace("tile", t, x, y, p, o, pending);
           if (p) {
             const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
             if (hit) {
               const r = box(t);
               hit.at = (yy) => {
-                const q = yy < r.top || yy > r.top + r.height ? null : tilePixel(t, x, yy, hw, hh);
+                const q = yy < r.top || yy > r.top + r.height ? null : tilePixel(t, x, yy, hw, hh).rgb;
                 return q && mix(q);
               };
             }
@@ -330,7 +344,7 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
        Only while that photo's pixels can be read: until then the tile is what shows, and the safer guess. */
     if (
       !(el instanceof HTMLImageElement || el instanceof HTMLVideoElement) &&
-      list.some((o) => o !== el && el.contains(o) && (o instanceof HTMLImageElement || o instanceof HTMLVideoElement) && getComputedStyle(o).visibility !== "hidden" && pixel(o, x, y, hw, hh))
+      list.some((o) => o !== el && el.contains(o) && (o instanceof HTMLImageElement || o instanceof HTMLVideoElement) && getComputedStyle(o).visibility !== "hidden" && pixel(o, x, y, hw, hh).rgb)
     )
       continue;
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
@@ -345,14 +359,14 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
         seen.set(el, o);
       }
       if (o < 0.08) continue;
-      const p = pixel(el, x, y, hw, hh);
-      dbg?.push({ x: Math.round(x), y: Math.round(y), img: (el instanceof HTMLImageElement ? el.currentSrc || el.src : "video").slice(-48), complete: el instanceof HTMLImageElement ? el.complete : true, o: +o.toFixed(2), copy: copies.has((el as HTMLImageElement).currentSrc) ? (copies.get((el as HTMLImageElement).currentSrc) ? "in" : copies.get((el as HTMLImageElement).currentSrc) === null ? "loading" : "failed") : "none", rgb: p?.map(Math.round) ?? null, pending, box: Object.values(box(el)).map(Math.round), rect: (({ left, top, width, height }) => [left, top, width, height].map(Math.round))(el.getBoundingClientRect()) });
+      const { rgb: p, pending } = pixel(el, x, y, hw, hh);
+      trace("img", el, x, y, p, o, pending);
       if (p) {
         const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
         if (hit) {
           const r = box(el);
           hit.at = (yy) => {
-            const q = yy < r.top || yy > r.top + r.height ? null : pixel(el, x, yy, hw, hh);
+            const q = yy < r.top || yy > r.top + r.height ? null : pixel(el, x, yy, hw, hh).rgb;
             return q && mix(q);
           };
         }
@@ -363,8 +377,8 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
       continue;
     }
     const [c, a] = colour(getComputedStyle(el).backgroundColor);
-    if (a > 0.5) dbg?.push({ x: Math.round(x), y: Math.round(y), box: (el.className?.toString() || el.tagName).slice(0, 40), rgb: c.map(Math.round) });
     if (a > 0.5) {
+      trace("box", el, x, y, c);
       if (hit) {
         const r = el.getBoundingClientRect();
         hit.at = (yy) => (yy < r.top || yy > r.bottom ? null : c);
@@ -461,7 +475,7 @@ function lookUnder(b: Bar, page: RGB, isTop: boolean, veiled: boolean): Looks {
       if (unknown && was) return was; // the photo's pixels are not in yet: keep the ink until they are
       const c = veiled ? veil(g, page) : g;
       if (!unknown) out.grounds.push(c), out.raw.push(g), mine.push(c);
-      const l = lum(c), white = 1.05 / (l + 0.05), black = (l + 0.05) / 0.05;
+      const l = lum(c), white = whiteRatio(l), black = blackRatio(l);
       return was === "w" && white >= 3 && white * 1.25 >= black ? "w" : was === "b" && black >= 3 && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";
     };
     let ra = "", rb = "";
@@ -529,7 +543,7 @@ function setFrost(b: Bar, fails: number, isTop: boolean) {
 function inkWords(els: HTMLElement[], own: Map<HTMLElement, RGB[]>, ink: string) {
   for (const el of els) {
     const g = own.get(el) ?? [];
-    el.dataset.cr = g.length ? Math.min(...g.map((c) => (ink === "w" ? 1.05 / (lum(c) + 0.05) : (lum(c) + 0.05) / 0.05))).toFixed(1) : "";
+    el.dataset.cr = g.length ? Math.min(...g.map((c) => (ink === "w" ? whiteRatio(lum(c)) : blackRatio(lum(c))))).toFixed(1) : "";
     if (el.dataset.ink === ink) continue;
     el.dataset.ink = ink;
     el.style.setProperty("--nav-ink", ink === "w" ? "#fff" : "#000"); // navfx.css fades the colour
@@ -549,7 +563,7 @@ function paint(b: Bar) {
   markDark(b);
   const [page] = colour(getComputedStyle(bar).getPropertyValue("--bg").trim());
   /* Over the home hero the bar has no ground, and no one ink reads on every photo: the ground comes up there
-     while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype, 2026-11-22). */
+     while a word would fall under 4.5:1 without it (Julian picked "frost" from the prototype). */
   /* The frost stays on past the hero once it is up (a "carry"): dropping it where the hero ends brought the bar's
      own ground back in from transparent and handed the ink back to the photos, so it went white, black, white with
      the wordmark and menu apart (MAC, iPhone dark, #1417). It goes only near the top of the page (setFrost). */
@@ -585,17 +599,17 @@ function paint(b: Bar) {
      top, the bar already has that ground, so a word is judged through it: where it would still fall under 6:1, the
      frost comes up there too and the ink becomes the theme's. A plain page ground never fails, so it never shows there.
      Past the top the bar's blur (24px) and saturate (1.8) pull light in from around each point, so the ground as drawn
-     can sit well above the one a look samples: judged there at 7.5:1, not 6 (MAC SSH, a4e718dd: words at 4.0 just
+     can sit well above the one a look samples: judged there at 7.5:1, not 6 (words at 4.0 just
      past the top of a project page, and /book's current link at 3.7). The look ahead reaches 64px below the bar.
      Past the top, a photo under a word whose pixels are still on their way counts as failing: the first time one slides
-     under the bar its small copy takes a few frames, and the frost waited for it (MAC SSH, 6756ca22: four words at
+     under the bar its small copy takes a few frames, and the frost waited for it (four words at
      4.0 to 4.1 for about 0.2s at the hero edge of a project page). The frost latches, so this only brings it up
      sooner; a plain page has no photo, so it never fires there. */
   const { grounds, raw, unseen } = looks;
   const fails = isTop ? (raw.length ? fewest(raw.concat(ahead), 6) : 0) : veiled && !frosted && (grounds.length || unseen) ? (unseen ? 1 : 0) || fewest(grounds.concat(ahead), 7.5) : 0;
   setFrost(b, fails, isTop);
   /* The paint that brings the frost up takes the theme's ink at once: the ink above was picked before the frost
-     was decided, so for one frame it was the photos' (MAC SSH, 79e286a3: black over the dark hero, then white). */
+     was decided, so for one frame it was the photos' (black over the dark hero, then white). */
   if (!frosted && bar.getAttribute("data-navfrost") === "" && ink !== themeInk) {
     ink = themeInk;
     b.inkAt = now;
@@ -773,7 +787,7 @@ export function inkWord(el: HTMLElement, skip: HTMLElement, page: RGB) {
     seen.clear();
     // Five points along the word, and the middle one by brightness, so a few pixels over a gutter do not decide it.
     const ls = [0.1, 0.3, 0.5, 0.7, 0.9].map((t) => lum(under(r.left + r.width * t, r.top + r.height / 2, skip, page))).sort((a, b) => a - b);
-    const white = 1.05 / (ls[2] + 0.05), black = (ls[2] + 0.05) / 0.05;
+    const white = whiteRatio(ls[2]), black = blackRatio(ls[2]);
     const was = el.dataset.ink;
     // Keep the ink it has unless the other one is clearly better, so a word does not flicker on a busy photo.
     const ink = was === "w" && white * 1.25 >= black ? "w" : was === "b" && black * 1.25 >= white ? "b" : white >= black ? "w" : "b";

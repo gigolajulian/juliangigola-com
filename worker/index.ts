@@ -11,13 +11,13 @@
  * Pacific run asks for the galleries' daily summary (`app/api/proof/daily`).
  * ─────────────────────────────────────────────────────────────── */
 
-import { lockOp } from "../lib/booking/engine";
+import { lockOp, type BookingEnv } from "../lib/booking/engine";
 import { manageLinks } from "../lib/booking/token";
 import { confirmOf, sendConfirm } from "../lib/booking/confirm";
 
 export { BookingLock } from "./booking-lock";
 
-type Env = Parameters<typeof lockOp>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"]; BOOKING_SECRET?: string; WORKER_KEY?: string; SITE?: CloudflareEnv["ASSETS"] };
+type Env = Pick<BookingEnv, "BOOKING_LOCK" | "CLIENT_EMAIL" | "BOOKING_SECRET"> & { WORKER_KEY?: string; SITE?: CloudflareEnv["ASSETS"] };
 
 /** Mails every reminder and heads-up due now, then marks it, so the next hour skips it. A failed send is marked too, so a
     flaky binding never mails anyone twice. Returns how many went out. */

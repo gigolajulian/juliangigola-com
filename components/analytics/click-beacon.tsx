@@ -21,8 +21,7 @@ export function ClickBeacon() {
   const pathname = usePathname();
 
   React.useEffect(() => {
-    const nav = navigator as Navigator & { globalPrivacyControl?: boolean };
-    if (window.top !== window || nav.webdriver || nav.globalPrivacyControl || nav.doNotTrack === "1") return;
+    if (window.top !== window || navigator.webdriver || navigator.globalPrivacyControl || navigator.doNotTrack === "1") return;
     if (/^\/(admin|api)(\/|$)/.test(location.pathname)) return;
 
     let page = key();

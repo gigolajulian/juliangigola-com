@@ -2,17 +2,16 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, looksLikeEmail } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { Calendar } from "@/components/booking/flow";
 import { dlabel } from "@/components/booking/flow";
 import { duration } from "@/lib/booking/rules";
-import { depositFor } from "@/lib/booking/paid";
+import { depositFor, takesDeposit } from "@/lib/booking/paid";
 import { clockLabel } from "@/components/booking/flow";
 import type { Shell } from "@/components/enquiry/flow";
-import { looksLikeEmail } from "@/lib/inbox";
-import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type StepsSkin } from "@/components/booking/time-picker-parts";
+import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type PickedTime, type Step, type StepsSkin } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
 import { SkyTimes, SkyWeather } from "@/components/booking/sky-times";
 import { skyOn } from "@/lib/flags/sky";
@@ -21,10 +20,65 @@ import { partOf, pacific, sunsetLabel, tone } from "@/lib/booking/sky";
 /** The quiet that ends a trackpad flick: events closer than this are still the same push. */
 const GESTURE_GAP_MS = 120;
 
+/** The stepper's steps and subtitle, by whether the session takes a deposit. */
+export function stepsCopy(paid: boolean, slug: string) {
+  const v3paid = paid || takesDeposit(slug);
+  return {
+    v3paid,
+    v3steps: v3paid ? ["Time", "You", "Deposit", "Booked"] : ["Time", "You", "Booked"],
+    // The same subtitle as the picker, so nothing below it jumps when the times arrive.
+    v3sub: v3paid ? "Studio in San Jose. I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.",
+  };
+}
+
+/* The stepper's own state and boxes. `BookSteps` is called, not mounted, so
+   it has no hooks: the picker calls this beside `usePicker` and hands it over. */
+export function useStepsLayout({ step, pick, days }: { step: Step; pick: PickedTime | null; days: Record<string, string[]> | null }) {
+  /* Option B's row of times: where a swipe on the big number began, and
+     whether the row runs past its edge, which fades it and shows the hint. */
+  const swipeX = React.useRef<number | null>(null);
+  const wheelGate = React.useRef({ at: -Infinity, owned: false });
+  /* A field's one sentence (master `check()`). */
+  const [bad, setBad] = React.useState<Record<string, string>>({});
+  // Which errored fields were empty when checked: their error shows as the placeholder (v3 `Field`, flow.tsx).
+  const [blank, setBlank] = React.useState<Record<string, boolean>>({});
+  const [stripEl, stripRef] = React.useState<HTMLDivElement | null>(null);
+  const [more, setMore] = React.useState(false);
+  const v3root = React.useRef<HTMLDivElement>(null);
+  const was = React.useRef(step);
+  React.useLayoutEffect(() => {
+    const dir = Math.sign(STEP_AT[step] - STEP_AT[was.current]);
+    was.current = step;
+    // Back to the taller Time step keeps You's scroll too; FlowShell only sees forward steps.
+    const rail = v3root.current?.querySelector<HTMLElement>(".rail");
+    if (dir < 0 && rail && rail.getBoundingClientRect().top < 64) rail.scrollIntoView({ block: "start" });
+  }, [step]);
+  /* The time picked kept in view in option B's row, and the fade and hint
+     only while times run past its edge. */
+  React.useEffect(() => {
+    // The row mounts after the times arrive (a state ref, not useRef, so this runs then).
+    const ix = stripEl;
+    if (!ix) return;
+    const on = ix.querySelector<HTMLElement>('[aria-pressed="true"]');
+    if (on && (on.offsetLeft < ix.scrollLeft || on.offsetLeft + on.offsetWidth > ix.scrollLeft + ix.clientWidth)) ix.scrollTo({ left: Math.max(0, on.offsetLeft - on.offsetWidth) });
+    const fit = () => setMore(ix.scrollLeft + ix.clientWidth < ix.scrollWidth - 4);
+    fit();
+    // The row's own box keeps its width as the times grow or the fonts land: watch the buttons too.
+    const ro = new ResizeObserver(fit);
+    ro.observe(ix);
+    for (const b of ix.children) ro.observe(b);
+    void document.fonts?.ready.then(fit);
+    return () => ro.disconnect();
+  }, [stripEl, pick?.date, pick?.min, days, step]);
+  return { swipeX, wheelGate, bad, setBad, blank, setBlank, stripRef, more, setMore, v3root };
+}
+
 /* The V3 stepper: Time, You, (Deposit), Booked. The same
    times, booking and deposit as the cards; only the look is new. */
-export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
-  const { skin, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, swipeX: swipeXRef, wheelGate, stripRef, more, setMore, paid, deposit, refs, v3root, error, bad, setBad, blank, setBlank, load, choose, today, book, refill, v3steps, v3sub, date } = c;
+export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: ReturnType<typeof useStepsLayout> }) {
+  const { skin, username, slug, tz, length, needsWhere, opt, setOpt, booked, days, view, setView, anchor, setAnchor, pick, chosen, setChosen, step, setStep, paid, deposit, refs, error, load, choose, today, book, refill, date } = c;
+  const { swipeX: swipeXRef, wheelGate, stripRef, more, setMore, v3root, bad, setBad, blank, setBlank } = l;
+  const { v3steps, v3sub } = stepsCopy(paid, slug);
   const end = pick.min + length;
   const usd = depositFor(slug);
   const range = `${clockLabel(pick.min)} to ${clockLabel(end)}`;
@@ -36,7 +90,8 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
     const price = skin.from != null ? `$${skin.from}` : "Quoted";
     return (
       <DepositStep
-        v3={(p) => shell(p)}
+        skin="v3"
+        shell={(p) => shell(p)}
         head={<div className="fig"><b>${usd}</b><span className="lbl mute">Holds {dlabel(date)}, {clockLabel(pick.min)}</span></div>}
         body={deposit}
         refs={refs}
@@ -113,7 +168,7 @@ export function BookSteps({ c }: { c: CardCtx & { skin: StepsSkin } }) {
           sub: "Your confirmation goes to this email.",
           body: (
             <>
-              {/* The photo's summary hides on phones: the day and time stay in view here (booking critique, 2026-11-04). */}
+              {/* The photo's summary hides on phones: the day and time stay in view here (booking critique). */}
               <p className="f-when lbl mute">{dlabel(date)} | {clockLabel(pick.min)} | {skin.name}</p>
               {f("name", "Name", "text", "", "name", false, true)}
               {f("email", "Email", "email", "", "email", false, true)}

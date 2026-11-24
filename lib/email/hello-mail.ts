@@ -29,7 +29,12 @@ export async function alertHello(email: CloudflareEnv["EMAIL"] | undefined, subj
   }
 }
 
-/** `alertHello`, then the mail on the lead's log once hello@ has it. */
-export async function alertAndLog(env: LeadStore & { EMAIL?: CloudflareEnv["EMAIL"] }, subject: string, lines: string[], who: { name: string; email: string } | undefined, log: { kind: string; booking: string }, attachments?: Attachment[]) {
+/** `alertHello`, then the mail on the lead's log once hello@ has it. `who` is the client it is about, `log` the line's kind and booking. */
+export async function alertAndLog(
+  env: LeadStore & { EMAIL?: CloudflareEnv["EMAIL"] },
+  subject: string,
+  lines: string[],
+  { who, log, attachments }: { who?: { name: string; email: string }; log: { kind: string; booking: string }; attachments?: Attachment[] },
+) {
   if (await alertHello(env.EMAIL, subject, lines, who, attachments)) await logMail(env, who?.email, subject, { to: "hello@", ...log });
 }

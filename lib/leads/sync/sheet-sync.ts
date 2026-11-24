@@ -9,9 +9,10 @@
  * GCAL_OAUTH needs only the `drive.file` scope (`scripts/gsc-auth.mjs cal`).
  * ─────────────────────────────────────────────────────────────── */
 import type { Sealer } from "../lead-crypto";
-import { gcalToken } from "@/lib/booking/gcal";
+import { gcalToken } from "@/lib/google";
+import { HttpError } from "@/lib/http";
 import { eventsCsv, paidTotal, readMaster, SHEET_DIRTY, type MasterEntry } from "../activity-log";
-import { csv } from "../lead-crm";
+import { leadsCsv } from "../lead-crm";
 import { everyLead } from "../lead-store";
 import type { Lead } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
@@ -32,7 +33,7 @@ export async function clientsCsv(kv: KV, s: Sealer, master?: MasterEntry[]): Pro
   for (const m of master ?? (await readMaster(kv, s))) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
   const paid: Record<string, number> = {};
   for (const l of all) if (l.id) paid[l.email] = paidTotal(byLead.get(l.id) ?? []);
-  return csv(all, paid);
+  return leadsCsv(all, paid);
 }
 
 /** Copies the desk to the Sheet when something changed or a day passed. Throws Google's status, never a token. */
@@ -51,7 +52,7 @@ export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, no
         body: JSON.stringify({ properties: { title: "JG Leads (juliangigola.com, read only)" }, sheets: TABS.map((properties) => ({ properties })) }),
       });
       id = ((await made.json().catch(() => ({}))) as { spreadsheetId?: string }).spreadsheetId ?? null;
-      if (!made.ok || !id) throw Object.assign(new Error(`Sheets create ${made.status}`), { status: made.status });
+      if (!made.ok || !id) throw new HttpError(`Sheets create ${made.status}`, made.status);
       await kv.put(SHEET_ID, id);
     }
     const master = await readMaster(kv, s);
@@ -69,7 +70,7 @@ export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, no
     });
     // Deleted from Drive: the next run makes a new one.
     if (res.status === 404) await kv.delete(SHEET_ID);
-    if (!res.ok) throw Object.assign(new Error(`Sheets ${res.status}`), { status: res.status });
+    if (!res.ok) throw new HttpError(`Sheets ${res.status}`, res.status);
     await kv.put(SHEET_AT, String(now));
     return "synced";
   } catch (e) {

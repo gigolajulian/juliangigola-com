@@ -1,7 +1,18 @@
 import { EVENTS } from "@/lib/booking/rules";
 import { depositFor, takesDeposit } from "@/lib/booking/paid";
-import { SESSION_TYPES } from "@/lib/booking/sessions";
 import { ABOUT_PHOTO } from "@/lib/home/photos";
+import { CONTENT, type SessionType } from "@/lib/content";
+
+export type { SessionType };
+
+/** The sessions as /admin sets them (`content/site.json`), in its order; it may list one the catalog below does not.
+    `from` stays null until a price is set there. */
+export const SESSION_TYPES: SessionType[] = CONTENT.sessions;
+
+/** A starting price as the service pages, /book?classic and the structured data print it: null is "On request".
+    The session cards print `priceLabel` instead, which reads differently (no thousands comma, a call's length, a deposit). */
+export const formatPrice = (from: number | null): string =>
+  from === null ? "On request" : `From $${from.toLocaleString("en-US")}`;
 
 const w = (slug: string, n: string) => `/work/${slug}/${n}.jpg`;
 
@@ -22,7 +33,7 @@ export type Session = {
       `at`: where the phone and portrait-tablet banner sits on each frame (an
       object-position), where the middle cuts the heads off. */
   photo: { d: string; l: string; m?: string; desk?: string; at?: { d?: string; l?: string } };
-  /** The enquiry type an on-request booking posts (`lib/inbox.ts`); "session" when unset. */
+  /** The enquiry type an on-request booking posts (`lib/leads/enquiry.ts`); "session" when unset. */
   type?: string;
 };
 
@@ -35,7 +46,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     includes: ["One hour, studio or location", "Two looks", "Retouched selects", "Crops for web and print"],
     turnaround: "1 week",
     cal: "juliangigola/portraits",
-    // SIAN 01, Julian's pick for the Portraits booking card (2026-11-10). Was ZOE 16.
+    // SIAN 01, Julian's pick for the Portraits booking card. Was ZOE 16.
     // Desktop gets sian/01 with 200px of her own backdrop added on top, so her face sits at the panel's middle.
     photo: { d: w("sian", "01"), l: w("sian", "01"), desk: "/v3/portraits-sian-tall.jpg", at: { d: "50% 5%", l: "50% 5%" } },
   },

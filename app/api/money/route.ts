@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { STRIPE_UNSET, stripe } from "@/lib/stripe";
 import { refuseAdmin } from "@/lib/vouch";
-import { json } from "@/lib/http";
+import { json, upstreamError } from "@/lib/http";
 
 /* ── GET /api/money: his Stripe balance and what moved it ─────────
  * The Stripe balance and its transactions.
@@ -53,8 +53,8 @@ export async function GET(request: Request) {
       more: !!list.has_more,
       txns: data.map((t) => ({ id: t.id, at: new Date(t.created * 1000).toISOString(), type: t.type, amount: t.amount, fee: t.fee, net: t.net, currency: t.currency, status: t.status, what: what(t) })),
     });
-  } catch {
-    // Stripe's status is logged by `stripe()`; the key never leaves the Worker.
-    return json({ error: "Stripe did not answer. Try again in a minute." }, 502);
+  } catch (e) {
+    // Stripe's own detail is logged by `stripe()`; the key never leaves the Worker.
+    return upstreamError("money", e, "Stripe did not answer. Try again in a minute.");
   }
 }

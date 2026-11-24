@@ -1,4 +1,4 @@
-/* The inner pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 are live for everyone (folded 2026-11-21);
+/* The inner pages plan. s1, s2, a2, m2p, foot, next, c1, s4 and p3 are live for everyone (folded);
    `:root` stands where `[data-v4pages~=key]` was, so every rule keeps the weight it had.
    Still on trial behind `?v4pages` (lib/flags/v4pages.ts): view and snd. */
 .v3 .sv-bar{display:none}
@@ -147,9 +147,9 @@ html:root .v3 .pj-next:has(.pj-stage)>span[aria-hidden]{position:relative;z-inde
 html[data-v4pages~="view"] .v3 #p-project :is(.pj-big,.pj-r){cursor:zoom-in}
 html[data-v4pages~="view"] .v3 #p-project :is(.pj-big,.pj-r):focus-visible{outline:1px solid var(--accent);outline-offset:4px}
 
-/* c1: Cover art in the site's system (components/cover/cover-page.tsx) */
+/* Cover art in the site's system (components/cover/cover-page.tsx) */
 
-/* ── c1. The page title, the home's sleeves in a grid with the /portfolio gap, the project
+/* ── The page title, the home's sleeves in a grid with the /portfolio gap, the project
    pages' ask. The sleeve, its record and the lift are the home's own rules (mtscroll.css, mt/motion/rows.css,
    which list `.cv4` beside their own scope); only what differs on a grid is here. `--u` is the home's design
    unit: a cell is a third of the window where the home's sleeve is 320 units. ── */
@@ -186,13 +186,13 @@ html:root .cv4 .mt-sleeve .disc{display:none}
   html:root .cv4 .mt-sleeve .disc::after{transform:rotate(calc(var(--o) * -200deg))}
   /* Held under the pointer the record keeps turning: the disc is one flat colour, so the turn
      shows in its sheen, one revolution in 1.8s (33 rpm), starting once the record is out. */
-  /* `[data-playing]`: its clip is playing (`?v4pages=c1,snd`). The same rule, so the turn does not jump when the sound starts. */
+  /* `[data-playing]`: its clip is playing (`?v4pages=snd`). The same rule, so the turn does not jump when the sound starts. */
   html:root .cv4 .mt-sleeve:is(.hv,[data-playing]) .disc::after{animation:cv4-spin 1.8s linear .45s infinite}
   /* The turn was hard to see: sheen .2 / .13 to .5 / .36, and a dark wedge between the two so it
      reads on a light pressing as well. */
   html:root .cv4 .mt-sleeve .disc::after{background:radial-gradient(circle,#070707 0 1.9%,rgba(255,255,255,.3) 2% 2.4%,transparent 2.5%),conic-gradient(from 18deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.5) 14deg,rgba(255,255,255,0) 34deg,rgba(0,0,0,0) 70deg,rgba(0,0,0,.3) 100deg,rgba(0,0,0,0) 130deg,rgba(255,255,255,0) 168deg,rgba(255,255,255,.36) 192deg,rgba(255,255,255,0) 216deg,rgba(0,0,0,0) 250deg,rgba(0,0,0,.3) 280deg,rgba(0,0,0,0) 310deg,rgba(255,255,255,0) 360deg)}
 }
-/* snd (`?v4pages=c1,snd`, components/cover/cover-sound.tsx): the sound line. On / off, and beside one of Apple's
+/* snd (`?v4pages=snd`, components/cover/cover-sound.tsx): the sound line. On / off, and beside one of Apple's
    previews the link to the song and the credit its terms ask for. One sits at the foot of the window over the grid,
    one on the viewer's floor. */
 .cv4s{display:flex;flex-wrap:wrap;align-items:center;gap:6px 20px;font:400 11px/1.4 var(--font-mono),ui-monospace,monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--muted-foreground)}

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeKV, FakeStore, fakeLock, reply, GOOGLE_OAUTH as OAUTH } from "./fakes";
-import { forgetToken } from "@/lib/booking/gcal";
+import { forgetToken } from "@/lib/google";
 import { BookingLock } from "@/worker/booking-lock";
 
 // Pinned clock: weekday hours, DST and the 48h refund window must not depend on the day the suite runs.

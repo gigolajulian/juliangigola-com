@@ -16,7 +16,7 @@ import { MotionLayer } from "./motion";
 import { glideTo } from "@/components/site/smooth-scroll";
 import { useBackHome } from "./back";
 
-/* The inquiry card (its dialog and form) is not in the home page's first load (audit 2026-11-22): fetched once By quote
+/* The inquiry card (its dialog and form) is not in the home page's first load (audit): fetched once By quote
    or the footer nears the screen, or after the page has loaded and gone idle, so opening it never waits; mounted the
    first time it opens and kept, so it can close with its own animation. Not React.lazy: a Suspense reveal is held about
    300ms even when the module is already here. */

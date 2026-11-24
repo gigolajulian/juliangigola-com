@@ -66,7 +66,7 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
   const back = proofUrl(publicId(p));
   const list = cardPrice(x.cents);
   const what = [x.balance ? "Shoot balance" : "", x.n ? `${x.n} extra retouched ${x.n === 1 ? "frame" : "frames"}` : ""].filter(Boolean).join(" + ");
-  // v2: the request gained payment_intent_data metadata (2026-11-11); Stripe refuses an old key with new parameters.
+  // v2: the request gained payment_intent_data metadata; Stripe refuses an old key with new parameters.
   const tag = `proof2-${p.token}-${x.cents}-${p.selects.join(".")}`;
   // One list price on both receipts; bank gets it back as a discount.
   const off = card

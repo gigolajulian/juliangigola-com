@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "@/app/api/leads/sheet/route";
-import { forgetToken } from "@/lib/booking/gcal";
+import { forgetToken } from "@/lib/google";
 import { recordLead } from "@/lib/leads/lead-store";
 import { SHEET_DIRTY } from "@/lib/leads/activity-log";
 import { SHEET_ID } from "@/lib/leads/sync/sheet-sync";

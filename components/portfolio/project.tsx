@@ -158,7 +158,7 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
             </div>
           ) : null}
         </div>
-        {/* Frames already on screen when the page opens show at once, with no fade-up (Julian, 2026-11-21); the ones
+        {/* Frames already on screen when the page opens show at once, with no fade-up (Julian); the ones
             scrolled to keep it. Inline, so it runs as the page is read: it waits for the stylesheet, so the layout is
             real, and it marks them before the first paint rather than after hydration, which on a slow phone left the
             first lead frame empty for seconds under the hero. `data-open` drops the transition (motion-plan.css). */}
@@ -176,7 +176,7 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
             </section>
           ) : null}
           {hole ? (project.bts ? <div className="pj-cr2">{credits}</div> : null) : credits}
-          {/* The page closes on an ask (critique, 2026-10-29), pre-tagged so the form opens on this kind of job. */}
+          {/* The page closes on an ask (critique), pre-tagged so the form opens on this kind of job. */}
           <div className="pj-ask">
             <div>
               <h2>Want something like this?</h2>

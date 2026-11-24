@@ -16,7 +16,7 @@ export async function stripe(key: string, path: string, form?: { [k: string]: st
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/x-www-form-urlencoded",
-      // The account default (2026-09-30) rejects payment_method_types; pin a version that keeps card-only intents.
+      // The account default rejects payment_method_types; pin a version that keeps card-only intents.
       "Stripe-Version": "2025-09-30.clover",
       ...(idempotency ? { "Idempotency-Key": idempotency } : {}),
     },

@@ -107,7 +107,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     // ("bay area music video director" is the search it answers). The other
     // one-gallery disciplines arrive below as projects, because that is what
     // they are.
-    // The discipline pages are retired (2026-10-27); Video is the one left.
+    // The discipline pages are retired; Video is the one left.
     (c) => c.slug === "video",
   ).map((c) => {
     const gallery = galleryOf(c.slug);

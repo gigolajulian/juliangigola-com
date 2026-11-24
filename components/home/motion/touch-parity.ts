@@ -1,15 +1,13 @@
-/* Phones and tablets get the desktop's motion, item by item. engine.ts sets html[data-tp-<item>] for touch-parity.css. */
-
-const TP_ITEMS = ["sink", "covers", "flip", "films", "drift", "about", "sheet", "press"] as const;
+/* Phones and tablets get the desktop's motion, item by item. The engine calls this at start: html[data-tp] for touch-parity.css. */
 
 export function touchParity() {
   const html = document.documentElement;
-  for (const k of TP_ITEMS) html.setAttribute("data-tp-" + k, "");
+  html.setAttribute("data-tp", "");
   // iOS Safari only shows :active on a page with a touchstart listener
   const noop = () => {};
   addEventListener("touchstart", noop, { passive: true });
   return () => {
-    for (const k of TP_ITEMS) html.removeAttribute("data-tp-" + k);
+    html.removeAttribute("data-tp");
     removeEventListener("touchstart", noop);
   };
 }

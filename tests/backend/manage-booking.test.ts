@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, leadOf, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "./fakes";
-import { forgetToken } from "@/lib/booking/gcal";
+import { forgetToken } from "@/lib/google";
 import { bookingToken, manageLinks, tokenOpens } from "@/lib/booking/token";
 import { BookingLock } from "@/worker/booking-lock";
 import { findBooking, saveBooking } from "@/lib/booking/engine";

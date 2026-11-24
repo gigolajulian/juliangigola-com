@@ -17,9 +17,8 @@
  * book) are written as advice, not as policy.
  */
 
-import { SESSION_TYPES, formatPrice, type SessionType } from "./sessions";
 import { RESPONSE_TIME } from "../site";
-import { isSession, SESSIONS as V3_SESSIONS } from "@/lib/booking/catalog";
+import { formatPrice, isSession, SESSION_TYPES, SESSIONS, type SessionType } from "@/lib/booking/catalog";
 import { CONTENT } from "../content";
 import { getProject, projectsIn } from "../work/work";
 import type { BookingSlug } from "./slugs";
@@ -65,7 +64,7 @@ export type BookingPage = {
   picks?: string[];
   /** Presets for the form on the Book screen.
       `cal`: the event it books ("juliangigola/event-slug"; the slug keys
-      `EVENTS` in `booking-rules.ts`), picked on the Book screen in place of the form. */
+      `EVENTS` in `lib/booking/rules.ts`), picked on the Book screen in place of the form. */
   book: { type: string; session?: string; title: string; cal?: string };
 };
 
@@ -85,7 +84,7 @@ export const PLACES = [
     `content/site.json`: "juliangigola/event-slug", a stored key, kept as is. The picker on /book reads these. Weddings, music
     and brand have a call, set on their own pages (`book.cal`). */
 export const SESSION_EVENTS: Record<string, string> = Object.fromEntries(
-  SESSION_TYPES.flatMap((t) => { const cal = isSession(t.slug) && V3_SESSIONS[t.slug].cal; return cal ? [[t.slug, cal]] : []; }),
+  SESSION_TYPES.flatMap((t) => { const cal = isSession(t.slug) && SESSIONS[t.slug].cal; return cal ? [[t.slug, cal]] : []; }),
 );
 
 /** A session's event, or nothing where it has none yet. */
@@ -149,7 +148,7 @@ const costAnswer = (s: SessionType, priced: string) =>
     ? `Quoted on request, depending on what you need. Send the details through the booking form. ${reply}`.trim()
     : priced.replace("{price}", formatPrice(s.from));
 
-const SESSIONS = { href: "/#sessions", label: "Sessions" };
+const SESSIONS_LINK = { href: "/#sessions", label: "Sessions" };
 const PORTFOLIO = { href: "/portfolio", label: "Portfolio" };
 
 /* ── the photographs ────────────────────────────────────────────── */
@@ -216,7 +215,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: `Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio lighting, more than one background and retouched selects back in ${heads.turnaround}.`,
     ...sessionFacts(heads),
     service: "Headshot photography",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: heads.includes },
       {
@@ -271,7 +270,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: "Cap and gown on campus or in the studio, at SJSU and Santa Clara University or anywhere else in the Bay Area. 90 minutes, two outfit changes and enough coverage for the family frame and the announcement.",
     ...sessionFacts(grad),
     service: "Graduation photography",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: grad.includes },
       {
@@ -336,7 +335,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: "Agency-standard digitals: clean light, no retouching, accurate to how you actually look. Everything an agency asks for, in one short session.",
     ...sessionFacts(digitals),
     service: "Model digitals",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: digitals.includes },
       {
@@ -400,7 +399,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: "One hour in the studio or on location, with direction, lighting and edited selects.",
     ...sessionFacts(portraits),
     service: "Portrait photography",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: portraits.includes },
       {
@@ -428,7 +427,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
     ],
     tiles: coversOf("portraits"),
-    // Julian's six (2026-10-24): faces in frame, from his other sets.
+    // Julian's six: faces in frame, from his other sets.
     picks: [
       "/work/sian/01.jpg",
       "/work/gilt/03.jpg",
@@ -452,7 +451,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     lead: weddings.blurb,
     ...sessionFacts(weddings),
     service: "Wedding photography",
-    back: SESSIONS,
+    back: SESSIONS_LINK,
     blocks: [
       { heading: "What's included", items: weddings.includes },
       {
@@ -609,7 +608,7 @@ export const BOOKING_PAGES: BookingPage[] = [
         a: "Usage is part of the quote: where the images run, for how long and in which territories. Say what you need in the brief.",
       },
     ],
-    // Julian's six, in his order (2026-11-15); the first is the frame beside the title.
+    // Julian's six, in his order; the first is the frame beside the title.
     tiles: framesAt([
       "/work/i-wanna-be-a-human/02.jpg",
       "/work/i-wanna-be-a-human/09.jpg",
@@ -717,6 +716,6 @@ export const BOOK_MENU: MenuItem[] = [
   callOf("music-photography", "Music & artists", "Press photos, cover art and music videos for a release, planned together so it reads as one thing."),
   callOf("fashion-photography", "Fashion & Editorial", "Editorials, lookbooks and campaign images, shot and art-directed as one story."),
   callOf("brand-photography", "Brand campaigns", "Campaign imagery from the concept and the art direction to the shoot and the retouch."),
-  // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in `EVENTS` (`booking-rules.ts`).
+  // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in `EVENTS` (`lib/booking/rules.ts`).
   { slug: "events", name: "Event coverage", blurb: "Launches, brand events, concerts and parties, shot as they happen.", group: "commission", page: "/portfolio/events", form: { type: "event" } },
 ];

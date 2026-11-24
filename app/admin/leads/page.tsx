@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1, viewportFit: "cover" };
 
-// The Astryx desk (components/leads/desk.tsx) since the original desk retired (2026-11-11).
+// The Astryx desk (components/leads/desk.tsx) since the original desk retired.
 export default function LeadsPage() {
   return (
     // `data-workbench`: no site footer; `data-lead-app`: no site header. Edge to edge: the Astryx shell lays out

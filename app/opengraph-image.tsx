@@ -5,8 +5,8 @@ export const size = CARD_SIZE;
 export const contentType = CARD_TYPE;
 export const alt = "Julian Gigola";
 
-/* One photograph, so the wordmark can take the room. Julian's pick
-   (2026-11-10): I WANNA BE A HUMAN 01, fixed so the featured order no
+/* One photograph, so the wordmark can take the room. Julian's pick:
+   I WANNA BE A HUMAN 01, fixed so the featured order no
    longer decides it. */
 const SRC = "/work/i-wanna-be-a-human/01.jpg";
 

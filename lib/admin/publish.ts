@@ -1,5 +1,5 @@
 /* ── reading and publishing the editor's draft ────────────────────
- * The network half of `components/admin/admin-editor.tsx`: read the repo
+ * The network half of `components/admin/editor/editor.tsx`: read the repo
  * when a token is pasted in, and commit the draft back. The editor keeps
  * its state; these take what they need and return what it should adopt.
  * ─────────────────────────────────────────────────────────────── */
@@ -7,7 +7,7 @@
 import { CONTENT_PATH, type SiteContent } from "@/lib/content";
 import { ADDED_PATH, isTextRef, type FrameRef } from "@/lib/work/added";
 import { adoptable, projectsFile, sameJson, type Manifest, type ProjectsFile } from "@/lib/admin/admin-payload";
-import { commitFiles, readFile, type CommitFile, TOKEN_STORE, REPO, GITHUB_API } from "@/lib/admin/admin-github";
+import { commitFiles, failureMessage, readFile, type CommitFile, TOKEN_STORE, REPO, GITHUB_API } from "@/lib/admin/admin-github";
 import type { Bts, Copy, Credit } from "@/lib/work/work-types";
 
 /**
@@ -59,8 +59,8 @@ export async function loadRepo(
 ): Promise<{ error: string } | { sha: string; content: SiteContent; repo: Draft }> {
   try {
     const res = await fetch(contentUrl, { headers: headers(t), cache: "no-store" });
-    const body = (await (res.ok ? res.json() : res.json().catch(() => ({})))) as { content: string; sha: string; message?: string };
     if (!res.ok) {
+      const message = await failureMessage(res);
       // A rejected token is not worth keeping, otherwise every visit
       // retries it and the page looks broken rather than logged out.
       if (res.status === 401) window.localStorage.removeItem(TOKEN_STORE);
@@ -70,9 +70,10 @@ export async function loadRepo(
             ? "GitHub rejected that token. It has probably expired. Make a new one and paste it in."
             : res.status === 404
               ? "Token is valid but cannot see this repo's contents. It needs Contents: read and write on juliangigola-com."
-              : `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,
+              : `GitHub said ${res.status}: ${message}`,
       };
     }
+    const body = (await res.json()) as { content: string; sha: string };
 
     // The repo is the truth, not the build this page shipped with: someone
     // may have published since, and editing the stale copy would revert it.
@@ -149,10 +150,10 @@ export async function publishDraft({
   onStatus({ kind: "working", message: "Checking for newer content…" });
   try {
     const check = await fetch(contentUrl, { headers: headers(token), cache: "no-store" });
-    const checkBody = (await (check.ok ? check.json() : check.json().catch(() => ({})))) as { content: string; sha: string; message?: string };
     if (!check.ok) {
-      return { error: `GitHub said ${check.status}: ${checkBody?.message ?? "unknown error"}` };
+      return { error: `GitHub said ${check.status}: ${await failureMessage(check)}` };
     }
+    const checkBody = (await check.json()) as { sha: string };
     if (checkBody.sha !== sha) {
       return {
         error:

@@ -12,7 +12,7 @@ export type WallTile = {
 /* Its two small copies (640px, a 300px tile on a retina screen, and a 320
    a phone's 80px tile takes at three times) are worked out where the wall
    is drawn. Sent with every tile, the session walls alone were 137KB of
-   the homepage's HTML (audit, 2026-10-14). */
+   the homepage's HTML (audit). */
 export const wallItem = ({ src, title, href }: WallTile): DriftWallItem => ({
   image: imageLoader({ src, width: 640, quality: 70 }),
   srcSet: [320, 640].map((w) => `${imageLoader({ src, width: w, quality: 70 })} ${w}w`).join(", "),

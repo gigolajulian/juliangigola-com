@@ -3,7 +3,7 @@
 import * as React from "react";
 import { creditBook } from "@/components/admin/admin-credits";
 import type { PendingUpload } from "@/components/admin/admin-frames";
-import type { AdminEditorProps, Overrides } from "@/components/admin/admin-editor-props";
+import type { AdminEditorProps, Overrides } from "@/components/admin/editor/props";
 
 export function useCreditDesk(
   projects: AdminEditorProps["projects"],

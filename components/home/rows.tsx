@@ -17,9 +17,9 @@ import { pad } from "@/lib/utils";
 /** A home cover opens on the Cover art page, in that page's viewer (`?cover=`, components/cover/cover-art-gallery.tsx). */
 export const coverHref = (slug: string) => `${projectHref("coverart")}?cover=${encodeURIComponent(slug)}`;
 
-/* A tap on a two-sided sleeve turns it over on touch (?mttp=flip, motion/rows.ts), so that tap does not also leave the page. */
+/* A tap on a two-sided sleeve turns it over on touch (motion/rows.ts), so that tap does not also leave the page. */
 function keepFlip(e: React.MouseEvent<HTMLElement>) {
-  if (e.currentTarget.hasAttribute("data-flip") && document.documentElement.hasAttribute("data-tp-flip") && !media("fine").matches) {
+  if (e.currentTarget.hasAttribute("data-flip") && document.documentElement.hasAttribute("data-tp") && !media("fine").matches) {
     e.preventDefault();
     dropSpot();
   }
@@ -77,7 +77,7 @@ export function HomeCovers() {
       cancelAnimationFrame(raf);
     };
   }, []);
-  // a layout effect: with the caption, before the paint; a frame late, the told cover showed small with its art dim on a Back (MAC on 4c809fcd)
+  // a layout effect: with the caption, before the paint; a frame late, the told cover showed small with its art dim on a Back
   React.useLayoutEffect(() => {
     row.current!.querySelectorAll(".mt-item").forEach((it, i) => it.toggleAttribute("data-on", i === cur));
   }, [cur]);

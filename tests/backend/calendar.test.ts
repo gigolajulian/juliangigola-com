@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- fakes of Google's JSON */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { forgetToken } from "@/lib/booking/gcal";
-import { busyAll, EXTRA_KEY, icsBusy } from "@/lib/booking/slots";
+import { forgetToken } from "@/lib/google";
+import { busyAll, EXTRA_KEY, icsBusy, readExtras } from "@/lib/booking/slots";
 import { FakeKV } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";
 
@@ -66,6 +66,18 @@ describe("icsBusy", () => {
       // An unknown zone name reads as Pacific.
       ["2026-11-26T17:00:00.000Z", "2026-11-27T01:00:00.000Z"],
     ]);
+  });
+});
+
+describe("readExtras", () => {
+  const kv = (v: unknown) => ({ get: async () => v });
+  it("returns the stored extras as they are and drops malformed entries", async () => {
+    const good = [{ label: "Work", src: "a@group.calendar.google.com" }];
+    expect(await readExtras(kv(good))).toEqual(good);
+    expect(await readExtras(kv([...good, null, { label: 1 }, "x"]))).toEqual(good);
+    expect(await readExtras(kv(null))).toEqual([]);
+    expect(await readExtras(kv({ label: "x" }))).toEqual([]);
+    expect(await readExtras()).toEqual([]);
   });
 });
 

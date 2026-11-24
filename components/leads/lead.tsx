@@ -34,20 +34,23 @@ import { TimeInput } from "@astryxdesign/core/TimeInput";
 import { NumberInput } from "@astryxdesign/core/NumberInput";
 import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Kbd } from "@astryxdesign/core/Kbd";
-import { References } from "@/components/admin/admin-inbox";
+import { References } from "@/components/desk/references";
 import { proofApi, type ProofRow } from "@/lib/proofs/desk";
 import { InvoiceRow, InvoiceSheetB } from "@/components/leads/invoice";
 import { ContractBlock } from "@/components/leads/contract";
 import { isSettled } from "@/lib/leads/invoice";
 import { endDay, type Size } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
-import type { Enquiry } from "@/lib/inbox";
-import { canonical, isLate,NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
+import type { Enquiry } from "@/lib/leads/enquiry";
+import { canonical } from "@/lib/leads/lead-crypto";
+import { isLate,NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashDaysLeft, WON, type Lead, type LeadPatch, type LeadSummary, type Stage } from "@/lib/leads/leads";
 import { callSheet, fillTemplate, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
-import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, nextStep, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
-import { compose, frostBar, ios, kindOf, line, mailto, glyph } from "@/components/leads/shared";
+import { ago, dateTimeLabel, type Call, DAY, dayLabel, nextStep, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
+import { adminCall, authed } from "@/lib/admin/admin-call";
+import { glyph } from "@/components/desk/chrome";
+import { compose, frostBar, ios, kindOf, line, mailto } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
 import { PlanSection, TaskSection } from "@/components/leads/plan";
@@ -453,7 +456,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
               <TaskSection tasks={full?.tasks ?? []} people={full?.people ?? []} isDisabled={!full} adding={addingTask && !!full} setAdding={setAddingTask} keys={size === "wide"} onSave={(tasks) => patch({ tasks })} />
             </Section>
 
-            {(["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"] as Stage[]).includes(l.stage) ? (
+            {WON.includes(l.stage) ? (
               <Section>
                 <VStack gap={3}>
                   <Heading level={2}>Paperwork</Heading>

@@ -1,8 +1,10 @@
-import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/rules";
+import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundShare } from "@/lib/booking/rules";
+import { TZ, whenPT } from "@/lib/time-zone";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
-import { depositPaid, recordBooking, type BookingRecord } from "@/lib/booking/engine";
-import { logMail } from "@/lib/leads/lead-store";
-import type { manageLinks } from "@/lib/booking/token";
+import { depositPaid, recordBooking, type BookingEnv, type BookingRecord } from "@/lib/booking/engine";
+import { logMail, recordLead } from "@/lib/leads/lead-store";
+import { manageLinks } from "@/lib/booking/token";
+import { alertAndLog } from "@/lib/email/hello-mail";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Every booking gets a branded "You're in." mail from
@@ -202,7 +204,7 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 export const cancelledSubject = (c: { session: string; start: string; end?: string }) => `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
 /** The client's note that a booking is cancelled, plain, from book@. A failed send is logged, never a failed cancel. Whether it went out. */
-export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree", usd = LEGACY_DEPOSIT, back = refundCents(usd, PART_SHARE) / 100): Promise<boolean> {
+export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, c: { name: string; email: string; session: string; start: string; end?: string }, refund: "refunded" | "early" | "part" | "kept" | "none" | "late" | "mine" | "mineFree", usd: number, back: number): Promise<boolean> {
   if (!mailer || !c.email) return false;
   const money = {
     refunded: `Your $${usd} deposit is refunded to your card. Banks take 5 to 10 days to show it.`,
@@ -228,7 +230,7 @@ export async function sendCancelled(mailer: CloudflareEnv["CLIENT_EMAIL"] | unde
     `defer` (the free call's `ctx.waitUntil`) runs the filing and the log in the background, the log after the
     filing so the mail lands on its row; without it each step is awaited in turn. `confirm` is built after the filing starts. */
 export async function afterBooked(
-  env: Parameters<typeof recordBooking>[0] & { CLIENT_EMAIL?: CloudflareEnv["CLIENT_EMAIL"] },
+  env: BookingEnv,
   r: BookingRecord,
   confirm: () => Promise<Confirm>,
   o: { deposit?: string; email?: string; defer?: (p: Promise<unknown>) => void } = {},
@@ -241,4 +243,15 @@ export async function afterBooked(
   const log = () => logMail(env, o.email ?? r.email, sent, { to: "client", kind: "confirm", booking: r.id });
   if (o.defer) o.defer(filed.then(log));
   else await log();
+}
+
+/** After a client moves a booking: a line on the lead, a mail to hello@ (with the refund it now earns when that
+    dropped), the client's new "You're in." with fresh links, and its log. `was`: the booking before the move. */
+export async function afterRescheduled(env: BookingEnv, r: BookingRecord, was: BookingRecord) {
+  const who = { name: r.name, email: r.email };
+  const what = [r.session, whenPT(was.start), r.name].join(", ");
+  await recordLead(env, r.email, { event: { at: new Date().toISOString(), kind: "reschedule", ref: `${r.id}:${r.start}`, note: whenPT(r.start) }, when: r.start });
+  await alertAndLog(env, `Rescheduled: ${what}`, [`${r.name} <${r.email}>`, `Moved to ${whenPT(r.start)} by the client. The calendar is updated.`, ...(r.intent && refundShare(r) <= PART_SHARE ? [refundShare(r) ? `A cancel now refunds 70% of the deposit: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.` : `The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 24 hours away.`] : [])], { who, log: { kind: "reschedule", booking: r.id } });
+  const sent = await sendConfirm(env.CLIENT_EMAIL, confirmOf(r, await manageLinks(env.BOOKING_SECRET, r)));
+  if (sent) await logMail(env, r.email, sent, { to: "client", kind: "reschedule", booking: r.id });
 }

@@ -1,7 +1,7 @@
 import * as React from "react";
 import type { gsap as G } from "gsap";
 import type { Flip as F } from "gsap/Flip";
-import { loadGsap } from "@/lib/gsap-lazy";
+import { loadGsap } from "@/lib/motion/gsap-lazy";
 
 /* The sky picker's motion (?sky): Week and Month morph into each other
    (GSAP Flip, the days keep their boxes and travel to their new place), the

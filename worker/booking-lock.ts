@@ -1,3 +1,4 @@
+import type { HoursKV } from "../lib/booking/slots";
 import { bookOwn, cancelOwn, dueHeadsUp, dueReminders, findBooking, markHeadsUp, markReminded, readHours, rescheduleOwn, writeHours, type LockOps, type Store } from "../lib/booking/engine";
 
 /* ── the booking lock: one Durable Object for hello@'s calendar ─────
@@ -12,7 +13,7 @@ export class BookingLock {
 
   constructor(
     private state: { storage: Store },
-    private env: { GCAL_OAUTH?: string; INBOX?: Parameters<typeof bookOwn>[3] },
+    private env: { GCAL_OAUTH?: string; INBOX?: HoursKV },
   ) {}
 
   /* An await inside a DO lets the next request in (fetch to Google opens

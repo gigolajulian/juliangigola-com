@@ -19,7 +19,7 @@ export function CoverPage({ releases, onwards }: { releases: CoverRelease[]; onw
             <p className="lbl mute">{releases.length} releases</p>
           </div>
         </header>
-        <CoverArtGallery releases={releases} v4 />
+        <CoverArtGallery releases={releases} />
         <div className="cv4a">
           {/* The same ask as a project page (components/portfolio/project.tsx), tagged so the form opens on Cover art. */}
           <div className="pj-ask">

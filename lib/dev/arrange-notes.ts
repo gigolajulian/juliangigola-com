@@ -3,25 +3,21 @@
    "Copy all" (`dial-copy-all.tsx`), so a paste brings them with the
    values. Dev server only. Kept for the tab's life in sessionStorage, as
    the layout panels' values are, so a reload keeps them. */
+import { sessionJson, sessionSet } from "@/lib/utils";
+
 const KEY = "jg-arrange-notes";
 
 export type Note = { card: string; photo: string; layout: string; text: string };
 
 export function readNotes(): Record<string, Note> {
-  try {
-    return JSON.parse(sessionStorage.getItem(KEY) ?? "{}");
-  } catch {
-    return {};
-  }
+  return sessionJson<Record<string, Note>>(KEY) ?? {};
 }
 
 export function writeNote(id: string, note: Note) {
   const all = readNotes();
   if (note.text.trim()) all[id] = note;
   else delete all[id];
-  try {
-    sessionStorage.setItem(KEY, JSON.stringify(all));
-  } catch {}
+  sessionSet(KEY, JSON.stringify(all));
 }
 
 /** The notes as lines for a paste; empty when there are none. */

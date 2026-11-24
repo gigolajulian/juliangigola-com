@@ -297,7 +297,7 @@
   --muted: oklch(0.235 0.003 70);
   /* 7.4:1 on the ground — captions and credits are real text, not decoration. */
   --muted-foreground: var(--dark-mute);
-  /* The footer phrase, one grey per theme. Large text, so 3:1 is the floor (light was 2.79:1 at #8f8e8a, audit 2026-11-19). */
+  /* The footer phrase, one grey per theme. Large text, so 3:1 is the floor (light was 2.79:1 at #8f8e8a, audit). */
   --phrase: #8a8a8a;
 
   /* The one accent, sampled from the teal that recurs across his own work

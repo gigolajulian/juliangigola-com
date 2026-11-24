@@ -4,6 +4,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import { DriftWall } from "@/components/drift-wall";
 import { GRIDWALL, wallFill, type Gridwall } from "@/lib/proofs/gridwall";
+import { localGet, localSet } from "@/lib/utils";
 
 /* ── the proof gate over the 404's wall (the default; ?proofwall=0 for the plain gate) ──
  * The 404's wall (`DriftWall`) under a glass card,
@@ -142,8 +143,8 @@ export function ProofWall({
     const t0 = performance.now();
     // A return visit to this gallery: no minimum for the name, and a shorter wait on the photographs.
     const seenKey = `proof-seen:${location.pathname}`;
-    const back = !!localStorage.getItem(seenKey);
-    localStorage.setItem(seenKey, "1");
+    const back = !!localGet(seenKey);
+    localSet(seenKey, "1");
     let lift = 0;
     const done = () => {
       if (gone || lift) return;

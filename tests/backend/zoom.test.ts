@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { lockScroll, pushHistory } from "@/lib/zoom";
+import { lockScroll, pushHistory } from "@/components/cover/zoom";
 
 /* Around the viewer: the page holds still under it and comes back where
    it was; the back button closes it instead of leaving the page. The

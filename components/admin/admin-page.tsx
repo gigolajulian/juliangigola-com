@@ -5,10 +5,9 @@ import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
 import { useSequence, srcOf, type DragProps, type PendingUpload } from "@/lib/admin/admin-sequence";
 import { AdminCredits } from "@/components/admin/admin-credits";
-import type { AdminProject } from "@/components/admin/admin-projects";
 import type { Copy, Credit } from "@/lib/work/work-types";
 import { cn } from "@/lib/utils";
-import type { Overrides } from "@/components/admin/admin-editor-props";
+import type { AdminProject, Overrides } from "@/components/admin/editor/props";
 import type { SetOverride } from "@/components/admin/editor/draft";
 
 /* ── the page, editable ───────────────────────────────────────────

@@ -12,6 +12,8 @@
  * lands all of it as a single commit: one push, one build.
  */
 
+import { isRecord } from "@/lib/json";
+
 /**
  * Where the editor keeps the GitHub token in the browser. Named here, not
  * in the editor, because the inbox reads it too — the token proves the
@@ -23,9 +25,12 @@ export const TOKEN_STORE = "jg-admin-token";
 /** Where the admin key is kept between visits, beside the GitHub token. The old name stays, so keys already pasted still work. */
 export const KEY_STORE = "jg-inbox-key";
 
+/** Whether a pasted key looks like one of the two GitHub token kinds /admin is set up with: classic or fine-grained. */
+export const isGithubToken = (k: string) => /^(ghp_|github_pat_)/.test(k);
+
 /** Keeps a key pasted into a desk's sign-in: a GitHub token replaces the token and drops any admin key, anything else is the admin key. */
 export function saveAdminKey(k: string) {
-  if (/^(ghp_|github_pat_)/.test(k)) {
+  if (isGithubToken(k)) {
     localStorage.setItem(TOKEN_STORE, k);
     localStorage.removeItem(KEY_STORE);
   } else localStorage.setItem(KEY_STORE, k);
@@ -76,18 +81,19 @@ export async function listDirectory(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return [];
-  const body = (await (res.ok ? res.json() : res.json().catch(() => ({})))) as { type: string; path: string }[] & {
-    message?: string;
-  };
-  if (!res.ok)
-    throw new Error(
-      `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,
-    );
+  if (!res.ok) throw new Error(`GitHub said ${res.status}: ${await failureMessage(res)}`);
+  const body = (await res.json()) as { type: string; path: string }[];
   return Array.isArray(body)
     ? body
         .filter((e) => e.type === "file")
         .map((e) => e.path)
     : [];
+}
+
+/** GitHub's message on a failed response, or "unknown error" when it sent none. */
+export async function failureMessage(res: Response): Promise<string> {
+  const e: unknown = await res.json().catch(() => null);
+  return isRecord(e) && typeof e.message === "string" ? e.message : "unknown error";
 }
 
 const headers = (token: string) => ({
@@ -115,10 +121,8 @@ async function gh<T>(
     cache: "no-store",
   });
 
-  const body = await res.json().catch(() => null);
   if (!res.ok) {
-    const detail =
-      (body as { message?: string } | null)?.message ?? "unknown error";
+    const detail = await failureMessage(res);
     throw new Error(
       res.status === 401
         ? "GitHub rejected the token. It has probably expired."
@@ -127,7 +131,7 @@ async function gh<T>(
           : `GitHub said ${res.status}: ${detail}`,
     );
   }
-  return body as T;
+  return (await res.json().catch(() => null)) as T;
 }
 
 /**
@@ -221,11 +225,8 @@ export async function readFile(
     { headers: headers(token), cache: "no-store" },
   );
   if (res.status === 404) return null;
-  const body = (await (res.ok ? res.json() : res.json().catch(() => ({})))) as { content?: string; message?: string };
-  if (!res.ok)
-    throw new Error(
-      `GitHub said ${res.status}: ${body?.message ?? "unknown error"}`,
-    );
+  if (!res.ok) throw new Error(`GitHub said ${res.status}: ${await failureMessage(res)}`);
+  const body = (await res.json()) as { content?: string };
 
   const binary = atob(String(body.content).replace(/\s/g, ""));
   return new TextDecoder().decode(

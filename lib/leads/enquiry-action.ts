@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import type { ContactState } from "@/lib/inbox";
+import type { ContactState } from "@/lib/leads/enquiry";
 import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import imageLoader from "@/image-loader";
@@ -26,7 +26,7 @@ import {
   takePicks,
   takeUploads,
   visitContext,
-} from "@/lib/inbox";
+} from "@/lib/leads/enquiry";
 
 /**
  * Handles a contact submission.
@@ -252,7 +252,7 @@ async function storeEnquiry(
     ...(uploads.length ? { files: uploads.map((f) => f.name.slice(0, 80)) } : {}),
   };
   // The summary rides along as metadata so /admin can draw the whole inbox
-  // from one request. See the note in `lib/inbox.ts`.
+  // from one request. See the note in `lib/leads/enquiry.ts`.
   const key = enquiryKey(now, id.slice(0, 8));
   await inbox.put(key, JSON.stringify(stored), {
     metadata: summary(stored),

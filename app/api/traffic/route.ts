@@ -1,7 +1,7 @@
 import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { refuseAdmin } from "@/lib/vouch";
-import { ACCOUNT, SITE_HOST, ZONE, cloudflare, searchConsole as gsc, sitePath } from "@/lib/analytics";
+import { SITE_HOST, ZONE, cloudflare, rumVisits, searchConsole as gsc, sitePath } from "@/lib/analytics";
 import { json, upstreamError } from "@/lib/http";
 
 /* ── traffic ──────────────────────────────────────────────────────
@@ -18,9 +18,8 @@ export const dynamic = "force-dynamic";
 
 type Row = { n: number; key: string };
 
-/* The two queries' answers. Each asks for one of these. */
+/* The zone query's answer. */
 type Viewer = {
-  accounts: { rumPageloadEventsAdaptiveGroups: { sum: { visits: number }; dimensions: Record<string, string> }[] }[];
   zones: { httpRequestsAdaptiveGroups: { count: number; dimensions: { userAgent: string } }[] }[];
 };
 
@@ -37,13 +36,9 @@ export async function GET(request: Request) {
   const now = new Date();
   const ago = (days: number) => new Date(now.getTime() - days * 864e5).toISOString();
 
-  /* Headless Chrome is the automated test runs on Julian's PC, so it is
-     left out of the visits. */
   const rum = async (dim: string, limit = 12): Promise<Row[]> => {
-    const v = await gql(
-      `{viewer{accounts(filter:{accountTag:"${ACCOUNT}"}){rumPageloadEventsAdaptiveGroups(limit:${limit},filter:{datetime_geq:"${ago(7)}",datetime_lt:"${now.toISOString()}",userAgentBrowser_neq:"ChromeHeadless"},orderBy:[sum_visits_DESC]){sum{visits} dimensions{${dim}}}}}}`,
-    );
-    return v.accounts[0].rumPageloadEventsAdaptiveGroups.map((g) => ({
+    const groups = await rumVisits(key, dim, ago(7), now.toISOString(), limit);
+    return groups.map((g) => ({
       n: g.sum.visits,
       key: Object.values(g.dimensions).join(" "),
     }));

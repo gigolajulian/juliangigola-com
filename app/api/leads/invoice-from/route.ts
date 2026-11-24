@@ -1,5 +1,5 @@
 import { cleanFrom, FROM_KEY, invoiceNo, invoicesTaken, type InvoiceFrom } from "@/lib/leads/invoice";
-import { gate, noSeal } from "@/lib/leads/desk-route";
+import { gate, noSeal, sealedGate } from "@/lib/leads/desk-route";
 import { bodyOf, json } from "@/lib/http";
 
 /* His details for invoices, sealed: GET them, with `?no=<YYYY-MM-DD>` also the number the next invoice on
@@ -8,10 +8,9 @@ import { bodyOf, json } from "@/lib/http";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const g = await gate(request);
+  const g = await sealedGate(request);
   if (g.error) return g.error;
   const seal = g.s;
-  if (!seal) return noSeal();
   const raw = await g.kv.get(FROM_KEY);
   const from = raw ? cleanFrom(await seal.open<InvoiceFrom>(raw)) : null;
   const date = new URL(request.url).searchParams.get("no") ?? "";

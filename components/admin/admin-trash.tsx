@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+import type { Status } from "@/lib/admin/publish";
+import { StatusLine } from "@/components/admin/status-line";
 import Image from "next/image";
 import { ADDED_PATH, TRASH_DAYS, type TrashedProject, type ManifestRead } from "@/lib/work/added";
 import {
@@ -25,12 +27,6 @@ import { cn, errorText } from "@/lib/utils";
  * deadline, which is the safer direction for the one thing here that cannot
  * be undone.
  * ─────────────────────────────────────────────────────────────── */
-
-type Status =
-  | { kind: "idle" }
-  | { kind: "working"; message: string }
-  | { kind: "error"; message: string }
-  | { kind: "done"; message: string };
 
 const DAY = 24 * 60 * 60 * 1000;
 
@@ -85,7 +81,7 @@ export function AdminTrash({
 
       onChanged(m.trash);
       setStatus({
-        kind: "done",
+        kind: "saved",
         message: `${slug} is back. Live in a couple of minutes.`,
       });
     } catch (e) {
@@ -138,7 +134,7 @@ export function AdminTrash({
 
       onChanged(m.trash);
       setStatus({
-        kind: "done",
+        kind: "saved",
         message: `Deleted ${label} and ${files.length - 1} files for good.`,
       });
     } catch (e) {
@@ -212,18 +208,7 @@ export function AdminTrash({
         runs on a schedule here.
       </p>
 
-      {status.kind !== "idle" ? (
-        <p
-          className={cn(
-            "label mt-4",
-            status.kind === "error"
-              ? "text-destructive"
-              : "text-muted-foreground",
-          )}
-        >
-          {status.message}
-        </p>
-      ) : null}
+      <StatusLine status={status} className="mt-4" />
 
       <ul className="mt-6 border-t border-border">
         {trash.map((t) => {

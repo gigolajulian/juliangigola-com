@@ -21,7 +21,7 @@ export function useCoverPreload(
      wait for a hand on the strip button, and Save-Data skips it all. */
   const warm = React.useCallback(
     (n: number) => {
-      const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+      const net = navigator.connection;
       if (view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
       for (const p of list.slice(0, n)) {
         const { props } = getImageProps({ src: p.cover, alt: "", fill: true, sizes: view === "strip" ? GRID_SIZES : STRIP_SIZES });
@@ -44,7 +44,7 @@ export function useCoverPreload(
      LOOK_CAP at a time, so covers land in order and never as a burst. It
      promotes the real <img>, so each file is fetched once at its own width. */
   React.useEffect(() => {
-    const net = (navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }).connection;
+    const net = navigator.connection;
     if (view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
     const LOOK_CAP = 3;
     let busy = 0;

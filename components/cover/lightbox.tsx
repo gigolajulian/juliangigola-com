@@ -15,7 +15,7 @@ import {
   pushHistory,
   DECODE_CAP_MS,
   type ZoomTrip,
-} from "@/lib/zoom";
+} from "@/components/cover/zoom";
 import { matches } from "@/lib/device";
 import { painted } from "@/lib/painted";
 
@@ -27,7 +27,7 @@ import { painted } from "@/lib/painted";
  * click one is the same, and it is the part with the keyboard handling
  * and the focus behaviour in it.
  *
- * The trip is `lib/zoom.ts`: the frame pressed grows into the viewer and
+ * The trip is `components/cover/zoom.ts`: the frame pressed grows into the viewer and
  * the viewer's picture shrinks back into whichever frame it now is. One
  * picture moving, on the browser's View Transitions where it has them and
  * on a FLIP transform elsewhere.
@@ -539,7 +539,7 @@ export function Lightbox({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         {/* The backdrop and the chrome start unseen and are faded by the
-            trip on their own curves (`lib/zoom.ts`). */}
+            trip on their own curves (`components/cover/zoom.ts`). */}
         <Dialog.Overlay
           data-zoom-backdrop
           className="fixed inset-0 z-50 bg-background/95"
@@ -641,7 +641,7 @@ export function Lightbox({
  * with the offset held to the overhang, so it cannot be dragged away.
  *
  * The transform goes on a wrapper of its own, between the box and the
- * picture. `lib/zoom.ts` flies the box and animates the picture inside it,
+ * picture. `components/cover/zoom.ts` flies the box and animates the picture inside it,
  * and a finished Web Animation holds whatever transform it ended on, so a
  * zoom written to either of them is set and then ignored. Measured before
  * the wrapper: scale 1.9 in state, matrix(1, 0, 0, 1, 0, 0) on screen.
@@ -854,7 +854,7 @@ function useZoom(
    the middle picture to a side and a side one to the middle, each a new
    element that paints a frame late; the copy already painted goes under
    it, so nothing is blank for that frame. */
-const paint = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) =>
+const notePainted = (src: string) => (e: React.SyntheticEvent<HTMLImageElement>) =>
   painted.set(src, e.currentTarget.currentSrc);
 /** The best copy of a frame already decoded: the viewer's, or the page's. */
 const decodedCopy = (src: string) => {
@@ -1026,7 +1026,7 @@ function Stage({
             priority
             draggable={false}
             onLoad={(e) => {
-              paint(frame.src)(e);
+              notePainted(frame.src)(e);
               setShown(frame.src);
             }}
             className="block h-full w-full object-contain"
@@ -1129,7 +1129,7 @@ function Stage({
                       width={f.width}
                       height={f.height}
                       sizes="50vw"
-                      onLoad={paint(f.src)}
+                      onLoad={notePainted(f.src)}
                       draggable={false}
                       className="absolute inset-0 block h-full w-full object-cover"
                     />

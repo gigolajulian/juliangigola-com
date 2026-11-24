@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import type { SiteContent } from "@/lib/content";
-import type { AdminProject } from "@/components/admin/admin-projects";
+import type { AdminProject } from "@/components/admin/editor/props";
 
 /* ── the preview ──────────────────────────────────────────────────
  * The draft, drawn with the site's own type and colour.

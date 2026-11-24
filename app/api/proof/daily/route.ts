@@ -18,10 +18,9 @@ export const dynamic = "force-dynamic";
 const LAST = "proofdigest:last";
 
 export async function POST(request: Request) {
-  const { env, seal: sealing, kv } = await sealedStore();
+  const { env, seal, kv } = await sealedStore();
   const denied = await refuseWorker(request, env.WORKER_KEY);
   if (denied) return denied;
-  const seal = await sealing;
   if (!kv || !seal) return json({ error: "Not set up." }, 503);
   const until = new Date().toISOString();
   const since = (await kv.get(LAST)) ?? new Date(Date.now() - 864e5).toISOString();
