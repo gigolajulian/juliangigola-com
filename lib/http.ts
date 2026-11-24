@@ -18,7 +18,7 @@ export class HttpError extends Error {
 /** The upstream status a thrown error carries, or undefined for any other failure (a network error, a bug). */
 export const statusOf = (e: unknown) => (e instanceof HttpError ? e.status : undefined);
 
-/** An upstream call failed: log it under `label`, answer 502 with `error`. */
+/** An upstream call failed: log it under `label`, answer 502 with `error` (a fixed line on public routes; admin routes pass `errorText(e)` through). */
 export function upstreamError(label: string, e: unknown, error: string) {
   console.error(label, String(e));
   return json({ error }, 502);
