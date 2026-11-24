@@ -4,7 +4,7 @@ import { amountOf, intentForm } from "@/lib/booking/deposit";
 import { CURRENCY } from "@/lib/booking/paid";
 import { openNow } from "@/lib/booking/slots";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
-import { bodyOf, json } from "@/lib/http";
+import { bodyOf, json, upstreamError } from "@/lib/http";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
@@ -30,15 +30,13 @@ export async function POST(request: Request) {
   try {
     if (!(await openNow(env.GCAL_OAUTH, b.slug, b.start, { kv: env.INBOX, hours: await liveHours(env) }))) return json({ error: "taken" }, 409);
   } catch (e) {
-    console.error("deposit calendar", String(e));
-    return json({ error: "Could not reach the calendar. Try again." }, 502);
+    return upstreamError("deposit calendar", e, "Could not reach the calendar. Try again.");
   }
 
   try {
     const pi = await stripe(env.STRIPE_SECRET_KEY, "/payment_intents", intentForm(b));
     return json({ clientSecret: pi.client_secret, intentId: pi.id, amount: amountOf(b.slug), currency: CURRENCY });
   } catch (e) {
-    console.error("deposit intent", String(e));
-    return json({ error: PAYMENTS_DOWN }, 502);
+    return upstreamError("deposit intent", e, PAYMENTS_DOWN);
   }
 }
