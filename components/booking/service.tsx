@@ -7,7 +7,7 @@ import { Doors } from "@/components/site/doors";
 import { ServiceBar } from "@/components/booking/service-bar";
 import { BOOKING_PAGES, bookingHref, type BookingPage } from "@/lib/booking/service-pages";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";
-import { SESSIONS, type SessionSlug } from "@/lib/photos-and-sessions";
+import { SESSIONS, type SessionSlug } from "@/lib/booking/catalog";
 import type { Frame } from "@/lib/work/work-types";
 
 /* JG V3 service page (leftovers sheet, card A): the title on the left with

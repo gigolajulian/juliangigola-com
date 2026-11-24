@@ -12,7 +12,7 @@ import * as project from "@/app/portfolio/[slug]/opengraph-image";
 import * as service from "@/app/[service]/opengraph-image";
 import { LINKABLE } from "@/lib/work/work";
 import { BOOKING_PAGES } from "@/lib/booking/service-pages";
-import { SESSIONS } from "@/lib/photos-and-sessions";
+import { SESSIONS } from "@/lib/booking/catalog";
 
 /* Every share card is the same 1200x630 JPEG with the site's name as its
    alt; the dynamic ones are drawn for each address the page prerenders. */

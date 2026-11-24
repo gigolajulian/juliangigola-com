@@ -11,7 +11,7 @@ import { PageFoot } from "@/components/site/foot";
 import { Calendar, DotList, dlabel, iso } from "@/components/booking/flow";
 import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
-import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/photos-and-sessions";
+import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
 import { looksLikeEmail } from "@/lib/inbox";
 import { noSubscribe } from "@/lib/utils";
 

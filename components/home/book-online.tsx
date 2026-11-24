@@ -4,7 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Duo } from "@/components/site/duo";
-import { SESSIONS } from "@/lib/photos-and-sessions";
+import { SESSIONS } from "@/lib/booking/catalog";
 import { matches } from "@/lib/device";
 import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/home/data";
 import { warmGsap } from "@/lib/gsap-lazy";
