@@ -12,8 +12,8 @@ import {
   COVER_RELEASES,
   categoryLabel,
   categoryHref,
-  categoryFrame,
 } from "@/lib/work/work";
+import { categoryFrame } from "@/lib/work/disciplines";
 import { PRESS } from "@/lib/work/press";
 import {
   ADDED,

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { NotFoundScene } from "@/components/site/not-found-scene";
 import { DriftWall } from "@/components/drift-wall";
-import { DISCIPLINES, WALL, titleCase } from "@/lib/work/work";
+import { WALL, titleCase } from "@/lib/work/work";
+import { DISCIPLINES } from "@/lib/work/disciplines";
 import { wallItem } from "@/lib/work/wall-tile";
 
 /* ── 404 ──────────────────────────────────────────────────────────
