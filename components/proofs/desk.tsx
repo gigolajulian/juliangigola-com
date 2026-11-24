@@ -30,7 +30,7 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { Slider } from "@astryxdesign/core/Slider";
 import { KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
 import { useSiteThemeRead } from "@/lib/site-theme";
-import { SignIn } from "@/components/leads/setup";
+import { SignIn } from "@/components/admin/sign-in";
 import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow } from "@/lib/proofs/desk";
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";

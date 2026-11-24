@@ -30,7 +30,7 @@ import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { StatusDot } from "@astryxdesign/core/StatusDot";
 import { Badge } from "@astryxdesign/core/Badge";
 import { Tab, TabList } from "@astryxdesign/core/TabList";
-import { SignIn } from "@/components/leads/setup";
+import { SignIn } from "@/components/admin/sign-in";
 import { LeadDesk, type LeadAsk } from "@/components/leads/lead";
 import { badge, FROST_ROOM, frostBar, GLASS, WIN_CSS, glyph } from "@/components/leads/shared";
 import { ago, aside, inboxCall, loadError, LOCKED, matches, nextStep, inFilter, type Size } from "@/lib/leads/lead-desk";
