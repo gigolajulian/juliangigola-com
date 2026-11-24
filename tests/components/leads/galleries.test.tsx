@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { Galleries } from "@/components/leads/galleries";
-import type { ProofRow } from "@/lib/proofs/desk";
+import type { ProofRow } from "@/lib/proofs/proof-desk";
 import { iso } from "./leads-fixtures";
 
 describe("Galleries", () => {

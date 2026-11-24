@@ -1,5 +1,5 @@
 import { importNotion } from "@/lib/leads/sync/notion-import";
-import { sealedGate } from "@/lib/leads/desk-route";
+import { sealedGate } from "@/lib/admin/gate";
 import { bodyOf, json } from "@/lib/http";
 import { errorText } from "@/lib/utils";
 

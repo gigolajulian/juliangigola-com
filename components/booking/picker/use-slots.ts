@@ -1,5 +1,5 @@
 import * as React from "react";
-import { takesDeposit } from "@/lib/booking/paid";
+import { takesDeposit } from "@/lib/leads/deposit-terms";
 import type { SlotsAnswer } from "@/lib/booking/slots";
 import { AHEAD } from "@/components/booking/picker/parts";
 import { localDayKey } from "@/components/booking/flow";
@@ -56,7 +56,7 @@ export function useSlots(username: string, slug: string, tz: string) {
       if (!slots?.slots) throw new Error("no times");
       // A paid event's deposit is taken here (deposit-step.tsx) where the
       // build has Stripe's key; without it, the fallback.
-      // Paid by the site's list (lib/booking/paid.ts).
+      // Paid by the site's list (lib/leads/deposit-terms.ts).
       const owes = takesDeposit(slug);
       if (owes && !process.env.NEXT_PUBLIC_STRIPE_PK) {
         setState("fallback");

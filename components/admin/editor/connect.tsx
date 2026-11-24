@@ -2,7 +2,7 @@ import * as React from "react";
 import { Orb } from "@/components/effects/orb";
 import type { Status } from "@/lib/admin/publish";
 import { inputClass } from "@/components/admin/editor/fields";
-import { REPO } from "@/lib/admin/admin-github";
+import { REPO } from "@/lib/admin/github-repo";
 import { cn } from "@/lib/utils";
 
 /* The token box and the status line under the editor (`editor.tsx`). */

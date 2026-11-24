@@ -51,7 +51,8 @@ export function openSpans(day: string, busy: { start: number; end: number }[], n
   return spans.filter(([a, z]) => z > Math.max(a, now));
 }
 
-export const calendarCall = <T,>({ query = "", ...init }: RequestInit & { query?: string } = {}) => adminCall<T>(`/api/calendar${query}`, init);
+/** A request to /api/calendar: `path` is the query ("?from=...&to=..."), "" for a POST. */
+export const calendarCall = <T = Record<string, unknown>,>({ path = "", ...init }: RequestInit & { path?: string } = {}) => adminCall<T>(`/api/calendar${path}`, init);
 
 
 const dayOf = (ms: number) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(ms);
@@ -73,7 +74,7 @@ function useRange(from: string, to: string, tick: number) {
   const [error, setError] = React.useState<string | null>(null);
   React.useEffect(() => {
     let live = true;
-    calendarCall<Month>({ query: `?from=${from}&to=${to}` }).then((o) => live && (setData(o), setError(null)), (e: unknown) => live && setError(errorText(e)));
+    calendarCall<Month>({ path: `?from=${from}&to=${to}` }).then((o) => live && (setData(o), setError(null)), (e: unknown) => live && setError(errorText(e)));
     return () => void (live = false);
   }, [from, to, tick]);
   const byDay = React.useMemo(() => {

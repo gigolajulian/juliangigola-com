@@ -1,10 +1,10 @@
 import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundShare } from "@/lib/booking/rules";
-import { TZ, whenPT } from "@/lib/time-zone";
-import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
+import { pacificFormat, whenPT } from "@/lib/time-zone";
+import { LEGACY_DEPOSIT } from "@/lib/leads/deposit-terms";
 import { depositPaid, recordBooking, type BookingEnv, type BookingRecord } from "@/lib/booking/engine";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
-import { manageLinks } from "@/lib/booking/token";
-import { alertAndLog } from "@/lib/email/hello-mail";
+import { manageLinks } from "@/lib/booking/manage-link";
+import { alertAndLog } from "@/lib/leads/hello-log";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 /* ── the client's confirmation email ──────────────────────────────
  * Every booking gets a branded "You're in." mail from
@@ -66,13 +66,12 @@ export const confirmOf = (r: BookingRecord, manage: Awaited<ReturnType<typeof ma
 });
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-const fmt = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
 
 /** "Wed, Oct 21, 4:00 to 5:00 PM PDT", Julian's time with no city. */
 export function timeRange(start: string, end?: string) {
   const s = new Date(start);
-  const day = fmt({ weekday: "short", month: "short", day: "numeric" }).format(s);
-  const time = fmt({ hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+  const day = pacificFormat({ weekday: "short", month: "short", day: "numeric" }).format(s);
+  const time = pacificFormat({ hour: "numeric", minute: "2-digit", timeZoneName: "short" });
   const e = end ? new Date(end) : null;
   /* ICU folds 1:00 AM PDT to 1:00 AM PST (the night clocks fall back) into
      one "1:00 AM PDT", so a range with no dash is written out both ends. */
@@ -90,7 +89,7 @@ export function confirmMail(c: Confirm) {
   // What an early cancel returns: 90% since the booking fee, the whole deposit on a booking made before it.
   const top = c.deposit?.fee ? "90% back" : "a full refund";
   const judged = new Date(Math.min(Date.parse(c.start), Date.parse(c.firstStart ?? c.start)) - REFUND_HOURS * 36e5).toISOString();
-  const hour = fmt({ hour: "numeric", minute: "2-digit" }).format(new Date(c.start));
+  const hour = pacificFormat({ hour: "numeric", minute: "2-digit" }).format(new Date(c.start));
   const head = remind ? (c.call ? "Talk tomorrow." : "See you tomorrow.") : soon ? "Coming up." : "You're in.";
   const lead = soon
     ? `${first(c.name)}, your ${c.session.toLowerCase().replace(/ photos$/, "")} session is on ${at}.`
@@ -106,7 +105,7 @@ export function confirmMail(c: Confirm) {
   const rows: [string, string][] = [["Session", c.session], ["When", mins > 0 ? `${at}, ${duration(mins)}` : at], ...(c.where ? [["Where", c.where] as [string, string]] : []), ["Booking", c.uid.slice(0, 8)]];
   const usd = c.deposit?.amount ?? LEGACY_DEPOSIT;
   const paid = c.deposit && {
-    rows: [["Paid", fmt({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
+    rows: [["Paid", pacificFormat({ month: "short", day: "numeric", year: "numeric" }).format(new Date(c.deposit.at))], ...(c.deposit.card ? [["Card", c.deposit.card]] : []), ["Ref", c.deposit.ref.slice(0, 11)]] as [string, string][],
     // The site's own engine refunds by Julian's rule (`refundShare`, `lib/booking/rules.ts`).
     note: remind
       ? "It is under 24 hours now, so the session can no longer be moved and a cancel keeps the deposit."
@@ -124,7 +123,7 @@ export function confirmMail(c: Confirm) {
       : `The balance is due after the shoot. Cancel 48 hours or more before for ${top}, or 24 hours or more before for 70% back. Under 24 hours it is not refunded. You can move it up to two times, until 24 hours before, and the deposit moves with it.`,
   };
   const links = c.manage;
-  const preheader = `${c.session}, ${fmt({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? ` Deposit of $${usd} received.` : ""}`;
+  const preheader = `${c.session}, ${pacificFormat({ weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(c.start)).replace(/ /g, " ")}.${c.deposit ? ` Deposit of $${usd} received.` : ""}`;
 
   const rule = "border-top:1px solid rgba(0,0,0,0.12)";
   const muted = "color:#515354";

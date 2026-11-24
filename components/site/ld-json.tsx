@@ -1,4 +1,4 @@
-import { ldJson } from "@/lib/seo";
+import { ldJson } from "@/lib/og/seo";
 
 /* ── the booking pages' structured data ───────────────────────────
  * The screens themselves are the homepage's (`app/[service]/page.tsx`).

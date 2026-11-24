@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { DEFAULT_HOURS, EVENTS, cleanHours, duration, refundCents, refundShare, windowOn } from "@/lib/booking/rules";
 import { SESSION } from "@/lib/booking/deposit";
-import { DEPOSIT_SESSIONS } from "@/lib/booking/paid";
+import { DEPOSIT_SESSIONS } from "@/lib/leads/deposit-terms";
 import { LENGTH, SESSIONS } from "@/lib/booking/catalog";
 
 /* The site's own booking rules (`lib/booking/rules.ts`): hours, the

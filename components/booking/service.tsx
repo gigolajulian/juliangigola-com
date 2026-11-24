@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { PageFoot } from "@/components/site/chrome";
+import { PageFoot } from "@/components/site/foot";
 import { BookFlow } from "@/components/booking/book";
 import { DotList } from "@/components/booking/flow";
 import { Doors } from "@/components/site/doors";

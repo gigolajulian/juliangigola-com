@@ -7,7 +7,7 @@ import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { later } from "@/lib/later";
 import imageLoader from "@/image-loader";
-import LOOKS from "@/lib/booking/picker-looks.json";
+import LOOKS from "@/lib/leads/looks.json";
 import { sha256Hex } from "@/lib/token";
 import {
   COOLDOWN_MS,

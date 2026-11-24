@@ -1,4 +1,4 @@
-import { refuseWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/admin/vouch";
 import { sealedStore } from "@/lib/kv";
 import { syncSheet } from "@/lib/leads/sync/sheet-sync";
 import { json, upstreamError } from "@/lib/http";

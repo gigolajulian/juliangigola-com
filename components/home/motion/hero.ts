@@ -14,7 +14,7 @@ const FLIP = 1300; // the idle wall's card turn, ms
 
 type Part = { el: HTMLElement; lag: number; col: number; lastY: number };
 
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; letters: HTMLElement[]; photos: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wallH: number; out: boolean; drop: number };
+type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; letters: HTMLElement[]; photos: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wallH: number; out: boolean; drop: number; toned: number; tonedY: number };
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -85,8 +85,8 @@ function grid(im: HTMLImageElement) {
   LUM.set(im, { src, g });
   return g;
 }
-let toned = 0, tonedY = -1;
-function tone(st: Pick<State, "letters" | "photos">) {
+/** The captions take the tone of the photo under each word. Throttled through `toned` and `tonedY`, the last pass and its scroll. */
+function toneCaptions(st: Pick<State, "letters" | "photos" | "toned" | "tonedY">) {
   const wallEl = st.photos[0]?.closest(".mt-wall");
   if (!st.letters.length || !wallEl) return;
   /* A pass cost 51 hit tests: 5 to 8ms at 1440, 52ms on a phone-speed CPU, and it ran every frame, idle included (measured on live).
@@ -95,9 +95,9 @@ function tone(st: Pick<State, "letters" | "photos">) {
      shortcut: a third photo lying on top of a word's middle only is missed, go back to a test a letter if a layout ever does that. */
   const now = performance.now();
   // standing still, only an idle photo swap can change what is under a letter: three passes a second cover that
-  if (now - toned < (scrollY === tonedY ? 280 : 100)) return;
-  tonedY = scrollY;
-  toned = now;
+  if (now - st.toned < (scrollY === st.tonedY ? 280 : 100)) return;
+  st.tonedY = scrollY;
+  st.toned = now;
   const rs = st.letters.map((w) => w.getBoundingClientRect());
   /* The photo a visitor sees at this point: a hit test, top first. Scanning the photo boxes took the first box in the document that held the point, and on an
      iPhone that was a photo lying under another one. The name block takes no pointer events, so it is not in the way.
@@ -183,6 +183,9 @@ const parts = (el: HTMLElement) => ({
   photos: [...el.querySelectorAll<HTMLElement>(".mt-wall .ph")],
   texts: [...el.querySelectorAll<HTMLElement>(".mt-name h1, .mt-name .mt-cap")],
   ctas: el.querySelector<HTMLElement>(".mt-name .mt-ctas"),
+  // the tone throttle, fresh per mount
+  toned: 0,
+  tonedY: -1,
 });
 
 /** Reduced motion: the engine is off and nothing moves, so the captions under the name are worked out once and again on resize. */
@@ -190,7 +193,7 @@ export function heroStill(root: HTMLElement) {
   const el = root.querySelector<HTMLElement>(".mt-hero");
   if (!el) return () => {};
   const st = parts(el);
-  const run = () => (tone(st), clearance(st, true));
+  const run = () => (toneCaptions(st), clearance(st, true));
   run();
   const ac = new AbortController();
   addEventListener("resize", run, { signal: ac.signal });
@@ -206,8 +209,6 @@ export const heroDrivers: Driver[] = [
     name: "hero",
     always: true,
     setup(el) {
-      toned = 0; // module throttle, fresh per mount
-      tonedY = -1;
       const part = (n: HTMLElement, a: number, c: number): Part => ({ el: n, lag: a, col: c, lastY: 0 });
       const st: State = {
         cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.lag) || 0, Number(n.dataset.col))),
@@ -257,7 +258,7 @@ export const heroDrivers: Driver[] = [
       // always: phones keep the wordmark out of the bar while the hero is on screen (mtscroll.css)
       addEventListener("scroll", past, { passive: true, signal: ac.signal });
       past();
-      const look = window.setInterval(() => tone(st), 300); // the idle wall swaps a photo with no frame running
+      const look = window.setInterval(() => toneCaptions(st), 300); // the idle wall swaps a photo with no frame running
       const off = () => {
         clearInterval(look);
         ac.abort();
@@ -271,7 +272,7 @@ export const heroDrivers: Driver[] = [
         [...st.cols, ...st.figs].forEach((p) => (p.el.style.transform = ""));
         if (st.name) st.name.style.cssText = "";
         park(st.ctas, false);
-        tone(st);
+        toneCaptions(st);
         clearance(st, false);
         document.documentElement.removeAttribute("data-mtdock");
       };
@@ -290,7 +291,7 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
     if (st.name) st.name.style.cssText = "";
     park(st.ctas, false);
     document.documentElement.removeAttribute("data-mt-nameout");
-    tone(st);
+    toneCaptions(st);
     clearance(st, false);
     st.sizeKey = "";
   }
@@ -324,7 +325,7 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
     /* The name holds, then rides down out of the window, the tagline and buttons sinking ahead of it (--mt-out, hero.css).
        sink() reads the ride off See the work: it is over as the button's top edge enters the window. */
     sink(st, ctx);
-    tone(st);
+    toneCaptions(st);
     clearance(st, !st.out);
     return;
   }
@@ -343,6 +344,6 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
   sink(st, ctx);
   // phones and tablets too: captions would run through the name and tagline. Only while the name is on screen.
   const on = !st.out && el.getBoundingClientRect().bottom > 0; // read before tone, as before the split
-  tone(st);
+  toneCaptions(st);
   clearance(st, on);
 }

@@ -1,8 +1,12 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, type Mock } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AsideDesk, LicencesDesk } from "@/components/leads/lists";
-import type { Call } from "@/lib/leads/lead-desk";
+import { deskCall } from "@/lib/leads/lead-desk";
 import { iso, lead } from "./leads-fixtures";
+
+vi.mock("@/lib/leads/lead-desk", async (actual) => ({ ...(await actual<typeof import("@/lib/leads/lead-desk")>()), deskCall: vi.fn() }));
+// The desk fetch, faked per test.
+const call = deskCall as unknown as Mock;
 
 describe("LicencesDesk", () => {
   it("lists leads with a licence, soonest end first", () => {
@@ -15,9 +19,9 @@ describe("LicencesDesk", () => {
 
 describe("AsideDesk", () => {
   it("empties the trash only after the second press", async () => {
-    const call = vi.fn(async () => ({})) as unknown as Call & ReturnType<typeof vi.fn>;
+    call.mockImplementation(async () => ({}));
     const done = vi.fn();
-    render(<AsideDesk leads={[lead("Gone", { trashedAt: iso })]} call={call} open={() => {}} done={done} tab="trash" setTab={() => {}} />);
+    render(<AsideDesk leads={[lead("Gone", { trashedAt: iso })]} open={() => {}} done={done} tab="trash" setTab={() => {}} />);
     fireEvent.click(screen.getByRole("button", { name: "Empty trash" }));
     expect(call).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("button", { name: "Delete for good" }));

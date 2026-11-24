@@ -4,7 +4,7 @@ import { act, fireEvent, renderHook } from "@testing-library/react";
 vi.mock("@/components/admin/admin-inbox", () => ({ unreadCount: vi.fn(async () => 3) }));
 
 import { useFullView } from "@/components/admin/editor/use-full-view";
-import { useUnread } from "@/components/admin/editor/use-unread";
+import { useUnread } from "@/components/admin/use-unread";
 import { useEditorStaging } from "@/components/admin/editor/editor-context";
 import { staging, underStaging } from "./staging";
 

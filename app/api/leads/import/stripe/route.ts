@@ -1,6 +1,6 @@
 import { importStripe } from "@/lib/leads/sync/stripe-import";
 import { STRIPE_UNSET } from "@/lib/stripe";
-import { gate } from "@/lib/leads/desk-route";
+import { gate } from "@/lib/admin/gate";
 import { bodyOf, json, upstreamError } from "@/lib/http";
 import { errorText } from "@/lib/utils";
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
-import { MOTION_SEO } from "@/lib/seo";
+import { MOTION_SEO } from "@/lib/og/seo";
 import { CONTENT } from "@/lib/content";
 import { VideoIndex } from "@/components/portfolio/video";
 
@@ -9,7 +9,7 @@ import { VideoIndex } from "@/components/portfolio/video";
  * behind it: the page is the work. */
 
 export const metadata: Metadata = {
-  // Titled for the search, from `lib/seo.ts`; the page itself still says Motion.
+  // Titled for the search, from `lib/og/seo.ts`; the page itself still says Motion.
   title: MOTION_SEO.title,
   description: MOTION_SEO.description,
   alternates: { canonical: "/portfolio/video" },

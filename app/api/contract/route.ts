@@ -1,11 +1,11 @@
-import { gate } from "@/lib/leads/desk-route";
+import { gate } from "@/lib/admin/gate";
 import { mailable } from "@/lib/leads/lead-crm";
 import type { InboxKV } from "@/lib/kv";
 import { readLead } from "@/lib/leads/lead-store";
 import { FROM_KEY, type InvoiceFrom } from "@/lib/leads/invoice";
 import { cleanContractTemplates, cleanDraft, contractOf, contractUrl, copyName, draft, fillContract, fromLines, readContract, signedCopy, writeContract, CONTRACT_TEMPLATES, UNSET } from "@/lib/contracts/contract";
 import { contractStep } from "@/lib/contracts/contract-lead";
-import { contractMail, sendClient } from "@/lib/email/proof-mail";
+import { contractMail, sendClient } from "@/lib/proofs/proof-mail";
 import { attachment } from "@/lib/proofs/delivery-serve";
 import { bodyOf, json, NO_STORE } from "@/lib/http";
 import { parseOr } from "@/lib/json";
@@ -25,6 +25,12 @@ const TEMPLATES_KEY = "leads:contract-templates";
 
 /** A contract that is there but will not open (a rotated LEADS_KEY): `logged`, then `broken()`, never "Gone". */
 const broken = () => json({ error: "That contract cannot be opened. LEADS_KEY may have changed." }, 500);
+
+/** A sealed read: its value (null when missing), or the `refused` answer when it is there but will not open, logged under `label`. */
+async function openOr<T>(label: string, read: Promise<T>, refused = broken): Promise<T | Response> {
+  const v = await read.catch(logged(label));
+  return v === undefined ? refused() : v;
+}
 
 /** The desk's gate with this route's INBOX message, then LEADS_KEY. */
 async function contractGate(request: Request) {
@@ -46,16 +52,16 @@ export async function GET(request: Request) {
   if (q.has("templates")) return json({ templates: await templates(g.kv) });
   const copy = q.get("copy");
   if (copy) {
-    const c = await readContract(g.kv, g.s, copy).catch(logged("contract copy"));
-    if (c === undefined) return broken();
+    const c = await openOr("contract copy", readContract(g.kv, g.s, copy));
+    if (c instanceof Response) return c;
     if (!c) return json({ error: "Gone." }, 404);
     // An attachment that cannot run on this origin: the client's typed name is in it.
     return new Response(signedCopy(c), { headers: { ...NO_STORE, "content-type": "text/html; charset=utf-8", "content-disposition": attachment(copyName(c)), "x-content-type-options": "nosniff", "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'" } });
   }
   const lead = q.get("lead");
   if (!lead) return json({ error: "Unknown." }, 400);
-  const c = await contractOf(g.kv, g.s, lead).catch(logged("contract of lead"));
-  if (c === undefined) return broken();
+  const c = await openOr("contract of lead", contractOf(g.kv, g.s, lead));
+  if (c instanceof Response) return c;
   return json({ contract: c, url: c ? contractUrl(c.id) : null });
 }
 
@@ -75,13 +81,13 @@ export async function POST(request: Request) {
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (typeof b?.lead !== "string") return json({ error: "Not JSON." }, 400);
-  const lead = await readLead(g.kv, g.s, b.lead).catch(logged("contract lead"));
-  if (lead === undefined) return json({ error: "That lead cannot be opened. LEADS_KEY may have changed." }, 500);
+  const lead = await openOr("contract lead", readLead(g.kv, g.s, b.lead), () => json({ error: "That lead cannot be opened. LEADS_KEY may have changed." }, 500));
+  if (lead instanceof Response) return lead;
   if (!lead) return json({ error: "Gone." }, 404);
   const t = (await templates(g.kv)).find((x) => x.id === b.template) ?? (await templates(g.kv))[0];
   if (!t) return json({ error: "Add a contract template first." }, 400);
-  const before = await contractOf(g.kv, g.s, b.lead).catch(logged("contract before new"));
-  if (before === undefined) return broken();
+  const before = await openOr("contract before new", contractOf(g.kv, g.s, b.lead));
+  if (before instanceof Response) return before;
   const email = mailable(lead.email) ? lead.email : "";
   const c = draft(before?.signed ? null : before, b.lead, { to: { name: lead.name, email }, text: fillContract(t.body, lead), template: t.id }, new Date().toISOString());
   if ("error" in c) return json(c, 409);
@@ -94,8 +100,8 @@ export async function PATCH(request: Request) {
   if (g.error) return g.error;
   const b = await bodyOf(request);
   if (!b) return json({ error: "Not JSON." }, 400);
-  const before = typeof b.id === "string" ? await readContract(g.kv, g.s, b.id).catch(logged("contract save")) : null;
-  if (before === undefined) return broken();
+  const before = typeof b.id === "string" ? await openOr("contract save", readContract(g.kv, g.s, b.id)) : null;
+  if (before instanceof Response) return before;
   if (!before) return json({ error: "Gone." }, 404);
   const d = cleanDraft(b);
   if ("error" in d) return json(d, 400);

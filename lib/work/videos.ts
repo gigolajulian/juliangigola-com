@@ -170,6 +170,49 @@ export function parseVideoUrl(
 }
 
 /**
+ * The title, and for Vimeo the poster, from the provider's oEmbed endpoint.
+ *
+ * Both endpoints are public, take no key, and are named in `connect-src`. A
+ * failure is not an error: the title comes back empty, to be typed instead.
+ */
+export async function lookupVideo(parsed: {
+  provider: Provider;
+  videoId: string;
+}): Promise<{ title: string; poster?: string }> {
+  let title = "";
+  let poster: string | undefined;
+  try {
+    const endpoint =
+      parsed.provider === "youtube"
+        ? `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(
+            `https://www.youtube.com/watch?v=${parsed.videoId}`,
+          )}`
+        : `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(
+            `https://vimeo.com/${parsed.videoId}`,
+          )}`;
+    const res = await fetch(endpoint, { cache: "no-store" });
+    if (res.ok) {
+      const body = (await res.json()) as {
+        title?: string;
+        thumbnail_url?: string;
+      };
+      title = typeof body.title === "string" ? body.title : "";
+      // Only Vimeo's is kept: YouTube's oEmbed hands back the small
+      // `hqdefault`, which `posterFor` already derives, and storing it would
+      // pin the tile to the one still rather than leaving the choice open.
+      if (
+        parsed.provider === "vimeo" &&
+        body.thumbnail_url?.startsWith("https://i.vimeocdn.com/")
+      )
+        poster = body.thumbnail_url;
+    }
+  } catch {
+    // Offline, or the provider is having a day. The link is still good.
+  }
+  return { title, poster };
+}
+
+/**
  * The stills YouTube publishes for a video, best first.
  *
  * `maxresdefault` is the uploaded thumbnail at full size and does not exist

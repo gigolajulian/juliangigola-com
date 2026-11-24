@@ -2,7 +2,7 @@
    screen owns. Client-safe: no lib/work import. Frames that need project data
    (names, ratios) are resolved on the server in `lib/home/server.ts` (`HOME_DATA`). */
 import { priceLabel, SESSIONS, type SessionSlug } from "@/lib/booking/catalog";
-import { DEPOSIT } from "@/lib/booking/paid";
+import { DEPOSIT } from "@/lib/leads/deposit-terms";
 import type { SHOOT_TYPES } from "@/lib/leads/enquiry";
 
 /** A photo with its caption: `ratio` is height / width. */
@@ -56,7 +56,7 @@ export const FILM_DRESS: Partial<Record<string, FilmDress>> = {
   "The Description": { zoom: 1.1, startSec: 34, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
 } satisfies Partial<Record<FilmTitle, FilmDress>>;
 
-/* ── Book online: the four sessions the home sells, each with its deposit (`lib/booking/paid.ts`). Model test books on /book. ── */
+/* ── Book online: the four sessions the home sells, each with its deposit (`lib/leads/deposit-terms.ts`). Model test books on /book. ── */
 export type BookRow = {
   /** The live session it books. */
   slug: Extract<SessionSlug, "portraits" | "headshots" | "graduation" | "studio-digitals">;

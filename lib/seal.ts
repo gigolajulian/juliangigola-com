@@ -12,7 +12,16 @@
  * in Node for the tests.
  * ─────────────────────────────────────────────────────────────── */
 
-import { canonical } from "@/lib/leads/canonical";
+/** One person's address, however they spell it, so the sealed id and the desk match the same person.
+    A lead typed gigola.julian@gmail.com whose mail came from gigolajulian@gmail.com never met.
+    Gmail ignores dots and anything after "+", so the id does too. Pure, so client code imports it too. */
+export function canonical(email: string): string {
+  const e = email.trim().toLowerCase();
+  const at = e.lastIndexOf("@");
+  const [user, domain] = [e.slice(0, at), e.slice(at + 1)];
+  if (at < 1 || (domain !== "gmail.com" && domain !== "googlemail.com")) return e;
+  return `${user.split("+")[0].replaceAll(".", "")}@gmail.com`;
+}
 
 const enc = new TextEncoder();
 const dec = new TextDecoder();

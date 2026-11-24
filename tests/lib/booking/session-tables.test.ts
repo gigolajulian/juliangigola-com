@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { EVENTS } from "@/lib/booking/rules";
 import { SESSION_EVENTS } from "@/lib/booking/service-pages";
 import { SESSION } from "@/lib/booking/deposit";
-import { DEPOSIT, DEPOSIT_SESSIONS, takesDeposit } from "@/lib/booking/paid";
+import { DEPOSIT, DEPOSIT_SESSIONS, takesDeposit } from "@/lib/leads/deposit-terms";
 import { LENGTH, SESSIONS } from "@/lib/booking/catalog";
 
 /* The session tables derived from `EVENTS` and `DEPOSIT_SESSIONS` give the values they

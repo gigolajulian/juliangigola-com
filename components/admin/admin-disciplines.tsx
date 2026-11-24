@@ -4,6 +4,7 @@ import * as React from "react";
 import Image from "next/image";
 import type { AdminProject } from "@/components/admin/editor/props";
 import { cn, pad } from "@/lib/utils";
+import { moveBefore } from "@/lib/admin/move-before";
 
 /* ── the disciplines ──────────────────────────────────────────────
  * Each branch of the site, its work in order, and the photograph that stands
@@ -89,20 +90,10 @@ export function AdminDisciplines({
    * the file.
    */
   const reorder = (from: string, to: string) => {
-    if (from === to) return;
-    // From the projects as currently displayed, which is the draft's order —
+    // From the projects as currently displayed, which is the draft's order,
     // not from `order`, which may name only some of them.
-    const full = projects.map((p) => p.slug);
-    const at = full.indexOf(from);
-    const onto = full.indexOf(to);
-    if (at === -1 || onto === -1) return;
-
-    full.splice(at, 1);
-    // `indexOf` again after the removal: taking the dragged project out shifts
-    // everything after it, so the index read before the splice is one too high
-    // for any forward move.
-    full.splice(full.indexOf(to) + (onto > at ? 1 : 0), 0, from);
-    onOrder(full);
+    const full = moveBefore(projects.map((p) => p.slug), from, to, (s) => s);
+    if (full) onOrder(full);
   };
 
   /* The filter, matched against a discipline's name and slug and against

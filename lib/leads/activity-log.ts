@@ -25,7 +25,7 @@ const META_MAX = 1000;
 const sig = (e: LeadEvent) => `${e.at}|${e.kind}|${e.ref ?? ""}|${e.note ?? ""}`;
 
 /** The events in `after` that `before` did not have. */
-export function fresh(before: LeadEvent[] | undefined, after: LeadEvent[]): LeadEvent[] {
+export function newEvents(before: LeadEvent[] | undefined, after: LeadEvent[]): LeadEvent[] {
   const had = new Set((before ?? []).map(sig));
   return after.filter((e) => !had.has(sig(e)));
 }
@@ -90,7 +90,7 @@ export async function readMaster(kv: KV, s: Sealer): Promise<MasterEntry[]> {
 }
 
 /** One CSV cell: quoted when it must be, and a leading = + - @ defused so a spreadsheet never runs it. */
-export const cell = (v: unknown) => {
+export const csvCell = (v: unknown) => {
   let s = v === undefined || v === null ? "" : String(v);
   if (/^[=+\-@]/.test(s)) s = `'${s}`;
   return /[",\n\r]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
@@ -99,7 +99,7 @@ export const cell = (v: unknown) => {
 /** The master log as a CSV: one row per event. */
 export function eventsCsv(rows: MasterEntry[]): string {
   const cols = ["time", "client", "email", "kind", "detail", "amount", "lead id"];
-  const body = rows.map((r) => [r.event.at, r.name, r.email.includes("@") ? r.email : "", r.event.kind, r.event.note ?? r.event.mail?.kind ?? "", r.event.amount ?? "", r.lead].map(cell).join(","));
+  const body = rows.map((r) => [r.event.at, r.name, r.email.includes("@") ? r.email : "", r.event.kind, r.event.note ?? r.event.mail?.kind ?? "", r.event.amount ?? "", r.lead].map(csvCell).join(","));
   return [cols.join(","), ...body].join("\r\n") + "\r\n";
 }
 

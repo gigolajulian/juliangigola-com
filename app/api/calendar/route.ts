@@ -3,7 +3,7 @@ import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { looksLikeEmail } from "@/lib/utils";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, instantIn, type Extra } from "@/lib/booking/slots";
-import { refuseAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/admin/vouch";
 import { bodyOf, json, statusOf, upstreamError } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────

@@ -18,7 +18,7 @@ import { Selector } from "@astryxdesign/core/Selector";
 import { SegmentedControl, SegmentedControlItem } from "@astryxdesign/core/SegmentedControl";
 import { Banner } from "@astryxdesign/core/Banner";
 import { STAGES, type Lead, type LeadSummary, type Stage } from "@/lib/leads/leads";
-import { type Call, type Size } from "@/lib/leads/lead-desk";
+import { deskCall, type Size } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 
 const SOURCES = ["Instagram DM", "Referral", "Text", "Phone call", "Email", "In person", "Other"];
@@ -36,7 +36,7 @@ export function sameAs(leads: LeadSummary[], f: { name: string; email: string; i
   });
 }
 
-export function NewLeadDesk({ call, leads, size, done, open, cancel }: { call: Call; leads: LeadSummary[]; size: Size; done: (id: string, lead: Lead) => void; open: (l: LeadSummary) => void; cancel: () => void }) {
+export function NewLeadDesk({ leads, size, done, open, cancel }: { leads: LeadSummary[]; size: Size; done: (id: string, lead: Lead) => void; open: (l: LeadSummary) => void; cancel: () => void }) {
   const [f, setF] = React.useState({ name: "", email: "", ig: "", phone: "", company: "", kind: "", stage: "Inquiry" as Stage, source: "Instagram DM", notes: "" });
   const [note, setNote] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState(false);
@@ -47,7 +47,7 @@ export function NewLeadDesk({ call, leads, size, done, open, cancel }: { call: C
   const add = () => {
     setBusy(true);
     setNote(null);
-    call<{ id: string; lead: Lead }>({ method: "POST", body: JSON.stringify(f) })
+    deskCall<{ id: string; lead: Lead }>({ method: "POST", body: JSON.stringify(f) })
       .then((o) => done(o.id, o.lead))
       .catch((err: unknown) => setNote(errorText(err)))
       .finally(() => setBusy(false));

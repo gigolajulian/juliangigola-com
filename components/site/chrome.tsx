@@ -250,9 +250,6 @@ export function FootLine() {
    the pages restyled by tokens only get it here, after `main`. */
 const OWN_FOOT = /^\/($|portfolio(\/video)?$|bts$|about$|contact(\/form)?$|book(\/|$)|portraits$|headshots$|graduation-photos(\/|$)|model-digitals$|weddings$|music-photography$|fashion-photography$|brand-photography$|admin(\/|$)|proof\/)/;
 
-/** An inner page's ending (`site/foot.tsx`), re-exported because callers import it from here. */
-export { PageFoot };
-
 /* The line stays on the private pages and the forms (booking, contract, delivery, proof, contact). */
 const LINE_ONLY = /^\/(booking|contract|delivery|proof|contact|book|admin)(\/|$)/;
 

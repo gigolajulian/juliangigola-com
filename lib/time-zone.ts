@@ -8,6 +8,9 @@ export const TZ = "America/Los_Angeles";
 export const DAY_MS = 864e5;
 export const WEEK_MS = 7 * DAY_MS;
 
+/** An en-US date format in Julian's time, with the given parts. */
+export const pacificFormat = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, ...o });
+
 /** When, in Julian's time, because that is where the sessions are. */
 export const whenPT = (iso?: string) => {
   const d = iso ? new Date(iso) : null;

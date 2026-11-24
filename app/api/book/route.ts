@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { lockOp, parseBooking, type BookResult } from "@/lib/booking/engine";
-import { manageLinks } from "@/lib/booking/token";
+import { manageLinks } from "@/lib/booking/manage-link";
 import { afterBooked, confirmOf } from "@/lib/booking/confirm";
 import { alertHello } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/time-zone";
@@ -33,12 +33,10 @@ export async function POST(request: Request) {
   const raw = await bodyOf(request);
   const parsed = parseBooking(raw, true);
   if (!parsed.ok) return json({ error: parsed.reason }, 400);
-  const b = parsed.booking;
-  const via = raw?.via === "Phone" || raw?.via === "Video" ? raw.via : undefined;
 
   let out: BookResult;
   try {
-    out = await lockOp(env, "book", { ...b, via });
+    out = await lockOp(env, "book", parsed.booking);
   } catch (e) {
     return upstreamError("book", e, "Could not reach the calendar.");
   }

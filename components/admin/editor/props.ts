@@ -1,8 +1,16 @@
 import type { SiteContent } from "@/lib/content";
-import type { PickerItem } from "@/components/admin/admin-picker";
 import type { Draft } from "@/lib/admin/publish";
 import type { TrashedProject } from "@/lib/work/added";
 import type { Bts, Credit } from "@/lib/work/work-types";
+
+/** One thing a picker offers (`admin-picker.tsx`): callers map their own data down to it. */
+export type PickerItem = {
+  slug: string;
+  name: string;
+  /** The second line: a discipline, or an artist. */
+  detail: string;
+  cover: { src: string; color: string };
+};
 
 /** A project as the editor lists it. */
 export type AdminProject = {

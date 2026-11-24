@@ -12,15 +12,17 @@ import { HttpError } from "@/lib/http";
 const TOKEN = "https://oauth2.googleapis.com/token";
 export const CALENDAR = "https://www.googleapis.com/calendar/v3";
 
-let cached: { token: string; until: number } | undefined;
+/** Access tokens by the secret they were swapped from, so one secret's token never answers for another. */
+const cached = new Map<string, { token: string; until: number }>();
 
-/** Forgets the access token, so the next call asks Google again (tests, a 401). */
-export const forgetToken = () => void (cached = undefined);
+/** Forgets the access token for `secret`, or every one when none is given, so the next call asks Google again (a 401, tests). */
+export const forgetToken = (secret?: string) => void (secret === undefined ? cached.clear() : cached.delete(secret));
 
 /** An access token for hello@'s calendar. Throws while `GCAL_OAUTH` is unset or refused. */
 export async function gcalToken(secret: string | undefined, now = Date.now()): Promise<string> {
-  if (cached && now < cached.until) return cached.token;
   if (!secret) throw new Error("GCAL_OAUTH is not set");
+  const held = cached.get(secret);
+  if (held && now < held.until) return held.token;
   const { client_id, client_secret, refresh_token } = secretJson<{ [k: string]: string }>(secret, "GCAL_OAUTH");
   const res = await fetch(TOKEN, {
     method: "POST",
@@ -30,7 +32,7 @@ export async function gcalToken(secret: string | undefined, now = Date.now()): P
   const tok = (await res.json().catch(() => ({}))) as { access_token?: string; expires_in?: number; error?: string };
   // `error` is a code such as invalid_grant: safe to log, never the token.
   if (!tok.access_token) throw new Error(`Google token refused: ${tok.error ?? res.status}`);
-  cached = { token: tok.access_token, until: now + Math.max(60, (tok.expires_in ?? 3600) - 300) * 1000 };
+  cached.set(secret, { token: tok.access_token, until: now + Math.max(60, (tok.expires_in ?? 3600) - 300) * 1000 });
   return tok.access_token;
 }
 
@@ -46,7 +48,7 @@ export async function gcal<T = { [k: string]: unknown }>(secret: string | undefi
   let res = await call();
   // A token revoked or expired early: once more with a fresh one.
   if (res.status === 401) {
-    forgetToken();
+    if (secret) forgetToken(secret);
     res = await call();
   }
   if (res.status === 204) return {} as T;

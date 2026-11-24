@@ -70,7 +70,7 @@ export function useScopeDraw(
       x.fillText(t, m + u * k * 0.82, m - v * k * 0.82 + 3),
     );
     for (const p of list) {
-      const pts = scope?.[p.s]?.p ?? [];
+      const pts = scope?.[p.slug]?.p ?? [];
       for (let i = 0; i < pts.length; i += 2) {
         const [r, g, b] = rgb(pts[i], pts[i + 1]);
         x.fillStyle = `rgba(${r},${g},${b},.75)`;

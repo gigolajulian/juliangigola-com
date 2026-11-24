@@ -4,7 +4,7 @@ import { TZ, whenPT } from "@/lib/time-zone";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { EARLY_SHARE, EVENTS, refundCents, refundShare, type Booking } from "@/lib/booking/rules";
 import { depositPaid, lockOp, parseBooking, type BookingEnv, type BookingRecord } from "@/lib/booking/engine";
-import { manageLinks } from "@/lib/booking/token";
+import { manageLinks } from "@/lib/booking/manage-link";
 
 /* ── the deposit ──────────────────────────────────────────────────
  * The paid sessions take a deposit on the
@@ -33,14 +33,15 @@ import { manageLinks } from "@/lib/booking/token";
  * not need a dependency. Test-mode keys until Julian says live.
  *
  * The deposit differs by session (`DEPOSIT` in
- * `lib/booking/paid.ts`). The charge is set here from the slug, never
+ * `lib/leads/deposit-terms.ts`). The charge is set here from the slug, never
  * from the request. What a booking paid is read off the intent and kept
  * on its record, so a refund, a mail or a log never guesses.
  * ─────────────────────────────────────────────────────────────── */
 
-import { alertAndLog, type Attachment } from "@/lib/email/hello-mail";
+import { type Attachment } from "@/lib/email/hello-mail";
+import { alertAndLog } from "@/lib/leads/hello-log";
 import { stripe } from "@/lib/stripe";
-import { CURRENCY, DEPOSIT, DEPOSIT_KIND, DEPOSIT_SESSIONS, depositFor, LEGACY_DEPOSIT, takesDeposit } from "@/lib/booking/paid";
+import { CURRENCY, DEPOSIT, DEPOSIT_KIND, DEPOSIT_SESSIONS, depositFor, LEGACY_DEPOSIT, takesDeposit } from "@/lib/leads/deposit-terms";
 import { logged } from "@/lib/utils";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
 export function amountOf(slug: string): number {

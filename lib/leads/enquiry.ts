@@ -456,7 +456,7 @@ const esc = (s: string) =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
 /** `looks`: each frame's look in the picker
-    (`lib/booking/picker-looks.json`), passed in so this module imports no
+    (`lib/leads/looks.json`), passed in so this module imports no
     JSON. `inline`: the picks attached inline as
     `cid:pick-<index>`, shown under their link in the HTML copy; one
     that would not fetch is the link alone. */

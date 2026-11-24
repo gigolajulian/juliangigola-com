@@ -1,8 +1,8 @@
 import { errorText } from "@/lib/utils";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { refuseAdmin } from "@/lib/vouch";
+import { refuseAdmin } from "@/lib/admin/vouch";
 import { SITE_HOST, engineSql, rumVisits, searchConsole, sitePath } from "@/lib/analytics";
-import { BEACON_DATASET } from "@/lib/beacon";
+import { BEACON_DATASET } from "@/lib/analytics/beacon";
 import { json, upstreamError } from "@/lib/http";
 import { DAY_MS } from "@/lib/time-zone";
 
@@ -13,7 +13,7 @@ import { DAY_MS } from "@/lib/time-zone";
  *   ?days=7|28|90   pages by day (Cloudflare visits, Google clicks and
  *                   impressions), totals against the window before, queries
  *   &map=/path      clicks and scroll depth on one page, from the site's own
- *                   beacon (`lib/beacon.ts`) in Analytics Engine
+ *                   beacon (`lib/analytics/beacon.ts`) in Analytics Engine
  * ─────────────────────────────────────────────────────────────── */
 
 export const dynamic = "force-dynamic";

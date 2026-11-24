@@ -302,40 +302,53 @@ function trace(kind: "tile" | "img" | "box", el: Element, x: number, y: number, 
     });
   }
 }
+/** How solid `el` shows: `base()` times its own opacity and every parent's up to the body. Kept in `seen` for one look. */
+function opacityOf(el: Element, base = () => 1): number {
+  let o = seen.get(el);
+  if (o === undefined) {
+    o = base();
+    for (let n: Element | null = el; n && n !== document.body; n = n.parentElement) o *= +getComputedStyle(n).opacity;
+    seen.set(el, o);
+  }
+  return o;
+}
 /** What shows at a point, under the header: the first photo, film or painted box from the top. */
 function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw = 0, hh = 0): RGB {
   const list = hits(x, y);
   const layer = document.querySelector(".mt-ix");
+  /* An intro tile or a photo read at this point by `read`, mixed over the page by its strength `o`, and `hit.at`
+     reading the same thing at other heights of its box. Null while there is nothing to read; a pending read marks
+     the hit unknown, since what is behind a photo still loading (its dark tile) is not the ground. */
+  const sampled = (el: HTMLElement, o: number, read: (y: number) => Sample): RGB | null => {
+    const { rgb: p, pending } = read(y);
+    trace(el instanceof HTMLImageElement || el instanceof HTMLVideoElement ? "img" : "tile", el, x, y, p, o, pending);
+    if (p) {
+      const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
+      if (hit) {
+        const r = box(el);
+        hit.at = (yy) => {
+          const q = yy < r.top || yy > r.top + r.height ? null : read(yy).rgb;
+          return q && mix(q);
+        };
+      }
+      return mix(p);
+    }
+    if (pending && hit) hit.unknown = true;
+    return null;
+  };
   for (const el of list) {
     if (hdr.contains(el)) continue;
     // past every photo at the point and down to what holds the intro's tiles: one of those may be painted here
     if (layer && el.contains(layer)) {
       const t = tileAt(layer, x, y);
       if (t) {
-        let o = seen.get(t);
-        if (o === undefined) {
-          // its column's veil (the `b` over the strip, lifted as the intro lands) and the layers above, as for a photo
+        // its column's veil (the `b` over the strip, lifted as the intro lands) and the layers above, as for a photo
+        const o = opacityOf(t, () => {
           const veil = t.parentElement?.querySelector(":scope > b");
-          o = 1 - (veil ? +getComputedStyle(veil).opacity : 0);
-          for (let n: Element | null = t; n && n !== document.body; n = n.parentElement) o *= +getComputedStyle(n).opacity;
-          seen.set(t, o);
-        }
-        if (o >= 0.08) {
-          const { rgb: p, pending } = tilePixel(t, x, y, hw, hh);
-          trace("tile", t, x, y, p, o, pending);
-          if (p) {
-            const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
-            if (hit) {
-              const r = box(t);
-              hit.at = (yy) => {
-                const q = yy < r.top || yy > r.top + r.height ? null : tilePixel(t, x, yy, hw, hh).rgb;
-                return q && mix(q);
-              };
-            }
-            return mix(p);
-          }
-          if (pending && hit) hit.unknown = true;
-        }
+          return 1 - (veil ? +getComputedStyle(veil).opacity : 0);
+        });
+        const c = o >= 0.08 ? sampled(t, o, (yy) => tilePixel(t, x, yy, hw, hh)) : null;
+        if (c) return c;
       }
     }
     /* A photo's own frame (the .ph tile behind a portfolio or /book image) can come first in the list, through a
@@ -350,30 +363,12 @@ function under(x: number, y: number, hdr: HTMLElement, page: RGB, hit?: Hit, hw 
     if (el instanceof HTMLImageElement || el instanceof HTMLVideoElement) {
       const cs = getComputedStyle(el);
       if (cs.visibility === "hidden") continue;
-      // how solid it is, through its parents: the v4 hero's wall thins out as it leaves, and a dark photo at
-      // half strength over a light page is a mid grey, not a dark ground
-      let o = seen.get(el);
-      if (o === undefined) {
-        o = 1;
-        for (let n: Element | null = el; n && n !== document.body; n = n.parentElement) o *= +getComputedStyle(n).opacity; // the hero stage, ten levels up, is what dims
-        seen.set(el, o);
-      }
+      // how solid it is, through its parents: the v4 hero's wall thins out as it leaves (the hero stage, ten
+      // levels up, is what dims), and a dark photo at half strength over a light page is a mid grey, not a dark ground
+      const o = opacityOf(el);
       if (o < 0.08) continue;
-      const { rgb: p, pending } = pixel(el, x, y, hw, hh);
-      trace("img", el, x, y, p, o, pending);
-      if (p) {
-        const s = o, mix = (q: RGB) => (s > 0.97 ? q : (q.map((v, i) => v * s + page[i] * (1 - s)) as RGB));
-        if (hit) {
-          const r = box(el);
-          hit.at = (yy) => {
-            const q = yy < r.top || yy > r.top + r.height ? null : pixel(el, x, yy, hw, hh).rgb;
-            return q && mix(q);
-          };
-        }
-        return mix(p);
-      }
-      // a photo is there and its pixels are on their way: what is behind it (its dark tile) is not the ground
-      if (pending && hit) hit.unknown = true;
+      const c = sampled(el, o, (yy) => pixel(el, x, yy, hw, hh));
+      if (c) return c;
       continue;
     }
     const [c, a] = colour(getComputedStyle(el).backgroundColor);

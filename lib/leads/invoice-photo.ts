@@ -16,7 +16,7 @@ const MARK = { x: 26.8, y: 32.7, w: 128, h: 20 };
 const RES = 3;
 
 /** Where the photo sits in a box of bw x bh: its size and offset. */
-export function place(iw: number, ih: number, bw: number, bh: number, c: Crop) {
+export function coverFit(iw: number, ih: number, bw: number, bh: number, c: Crop) {
   const s = Math.max(bw / iw, bh / ih) * c.z, w = iw * s, h = ih * s;
   return { w, h, left: -(w - bw) * c.x, top: -(h - bh) * c.y };
 }
@@ -49,7 +49,7 @@ function draw(img: HTMLImageElement, c: Crop, k: number) {
   const cv = document.createElement("canvas");
   cv.width = Math.round(COL.w * k); cv.height = Math.round(COL.h * k);
   const ctx = cv.getContext("2d", { willReadFrequently: true })!;
-  const p = place(img.naturalWidth, img.naturalHeight, cv.width, cv.height, c);
+  const p = coverFit(img.naturalWidth, img.naturalHeight, cv.width, cv.height, c);
   ctx.drawImage(img, p.left, p.top, p.w, p.h);
   return { cv, ctx, tone: toneOf(ctx, k) };
 }

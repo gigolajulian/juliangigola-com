@@ -1,8 +1,8 @@
-import { refuseWorker } from "@/lib/vouch";
+import { refuseWorker } from "@/lib/admin/vouch";
 import { sealedStore } from "@/lib/kv";
 import type { Proof } from "@/lib/proofs/proof-model";
 import { listProofs, readProof } from "@/lib/proofs/proof-store";
-import { digestMail } from "@/lib/email/proof-mail";
+import { digestMail } from "@/lib/proofs/proof-mail";
 import { alertHello } from "@/lib/email/hello-mail";
 import { json } from "@/lib/http";
 import { DAY_MS } from "@/lib/time-zone";

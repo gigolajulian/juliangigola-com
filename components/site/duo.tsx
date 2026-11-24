@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { CLIENT_MARKS } from "@/lib/clients-data";
+import { CLIENT_MARKS } from "@/lib/work/clients-data";
 import { projectHref } from "@/lib/work/project-href";
 
 /* A photo slot with its dark and light frame. Both are rendered and the
