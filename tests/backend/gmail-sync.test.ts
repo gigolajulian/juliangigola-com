@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { CURSOR, mailChanges, syncGmail, type Msg } from "@/lib/leads/sync/gmail-sync";
 import { forgetToken } from "@/lib/booking/gcal";
-import { canonical, fold, leadStoreKey, type Lead } from "@/lib/leads/leads";
+import { applyLeadEvent, canonical, leadStoreKey, type Lead } from "@/lib/leads/leads";
 import { recordLead, writeLead } from "@/lib/leads/lead-store";
 import { sealer } from "@/lib/leads/lead-crypto";
 
@@ -14,25 +14,25 @@ const msg = (id: string, labels: string[], from: string, to: string, subject = "
   payload: { headers: [{ name: "From", value: from }, { name: "To", value: to }, { name: "Subject", value: subject }] },
 });
 
-describe("fold, Gmail kinds", () => {
-  const inquiry = () => fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" });
+describe("applyLeadEvent, Gmail kinds", () => {
+  const inquiry = () => applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" });
 
   it("his reply moves an Inquiry to Replied and off Needs me, once per message", () => {
-    const l = fold(inquiry(), email, { event: { at: at(2), kind: "replied", ref: "g1", note: "Re: portraits" } });
+    const l = applyLeadEvent(inquiry(), email, { event: { at: at(2), kind: "replied", ref: "g1", note: "Re: portraits" } });
     expect(l).toMatchObject({ stage: "Replied", stageAt: at(2), unread: false, lastAt: at(1) });
-    expect(fold(l, email, { event: { at: at(2), kind: "replied", ref: "g1" } })).toBe(l);
+    expect(applyLeadEvent(l, email, { event: { at: at(2), kind: "replied", ref: "g1" } })).toBe(l);
   });
 
   it("his reply never moves a later stage back", () => {
-    let l = fold(inquiry(), email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
-    l = fold(l, email, { event: { at: at(3), kind: "replied", ref: "g1" } });
+    let l = applyLeadEvent(inquiry(), email, { event: { at: at(2), kind: "stage" }, stage: "Quoted" });
+    l = applyLeadEvent(l, email, { event: { at: at(3), kind: "replied", ref: "g1" } });
     expect(l).toMatchObject({ stage: "Quoted", stageAt: at(2) });
   });
 
   it("their answer is news: unread, unsnoozed, out of Archived, stage kept", () => {
-    let l = fold(inquiry(), email, { event: { at: at(2), kind: "replied", ref: "g1" } });
-    l = fold(l, email, { event: { at: at(3), kind: "archive" }, on: true });
-    l = fold(l, email, { event: { at: at(4), kind: "wrote", ref: "g2" } });
+    let l = applyLeadEvent(inquiry(), email, { event: { at: at(2), kind: "replied", ref: "g1" } });
+    l = applyLeadEvent(l, email, { event: { at: at(3), kind: "archive" }, on: true });
+    l = applyLeadEvent(l, email, { event: { at: at(4), kind: "wrote", ref: "g2" } });
     expect(l).toMatchObject({ stage: "Replied", unread: true, lastAt: at(4) });
     expect(l.archivedAt).toBeUndefined();
   });
@@ -64,7 +64,7 @@ describe("mailChanges", () => {
 
 describe("invoice sent", () => {
   const billed = (): Lead => ({
-    ...fold(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" }),
+    ...applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" }),
     invoices: [{ no: "1126", date: "2026-11-12", lines: [{ desc: "Portraits", qty: 1, rate: 450 }], paid: 100, at: "2026-11-12T20:00:00Z" }, { no: "1126-2", date: "2026-11-12", lines: [{ desc: "Prints", qty: 1, rate: 90 }], paid: 0, at: "2026-11-12T21:00:00Z" }],
   });
   const sent = (subject: string, filename?: string): Msg => {
@@ -74,21 +74,21 @@ describe("invoice sent", () => {
 
   it("a sent mail naming the invoice in its subject marks it Sent and logs it, once", () => {
     const [{ c }] = mailChanges(sent("Invoice 1126, Portraits"));
-    const l = fold(billed(), email, c);
+    const l = applyLeadEvent(billed(), email, c);
     expect(l.invoices!.map((v) => v.sentAt)).toEqual([at(5), undefined]);
     expect(l.events.at(-1)).toMatchObject({ kind: "invoice", note: "1126 sent", ref: "g9" });
-    expect(fold(l, email, c)).toBe(l);
+    expect(applyLeadEvent(l, email, c)).toBe(l);
   });
 
   it("reads the attachment's name when the subject does not say", () => {
     const [{ c }] = mailChanges(sent("Thanks again", "INVOICE 1126-2 - MAYA.pdf"));
-    expect(fold(billed(), email, c).invoices!.map((v) => v.sentAt)).toEqual([undefined, at(5)]);
+    expect(applyLeadEvent(billed(), email, c).invoices!.map((v) => v.sentAt)).toEqual([undefined, at(5)]);
   });
 
   it("an ordinary reply sends nothing", () => {
     const [{ c }] = mailChanges(sent("Re: portraits"));
     expect(c.mailed).toBeUndefined();
-    expect(fold(billed(), email, c).invoices!.every((v) => !v.sentAt)).toBe(true);
+    expect(applyLeadEvent(billed(), email, c).invoices!.every((v) => !v.sentAt)).toBe(true);
   });
 });
 
@@ -195,7 +195,7 @@ describe("syncGmail", () => {
     const e = env();
     const s = (await sealer(LEADS_KEY))!;
     // A lead from the form, stored under an id from before dots were ignored.
-    await writeLead(kv() as never, s, "old", fold(null, "gigola.julian@gmail.com", { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Test" }));
+    await writeLead(kv() as never, s, "old", applyLeadEvent(null, "gigola.julian@gmail.com", { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Test" }));
     const [a, b] = [MAIL.a, MAIL.b];
     MAIL.a = msg("a", ["SENT"], "hello@juliangigola.com", "gigolajulian@gmail.com");
     MAIL.b = msg("b", ["INBOX"], "Test <GigolaJulian+x@googlemail.com>", "hello@juliangigola.com");

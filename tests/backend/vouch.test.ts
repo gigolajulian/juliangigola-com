@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/lib/vouch";
-import { AdminError, isLocked, loadError, LOCKED } from "@/lib/leads/lead-desk";
+import { AdminError, isLocked, loadErrorText, LOCKED } from "@/lib/leads/lead-desk";
 import { SCOPED, githubToken, reply } from "./fakes";
 
 /* The gate on /api/inbox, /api/traffic and /api/seo: a token passes only
@@ -91,8 +91,8 @@ describe("refuseAdmin and the desks' lock", () => {
 
   it("any 401 shows sign-in on a desk, whichever message the route gave", () => {
     expect(isLocked(new AdminError("GitHub did not accept that token for this repository.", 401))).toBe(true);
-    expect(loadError(new AdminError("GitHub did not accept that token for this repository.", 401))).toBe(LOCKED);
+    expect(loadErrorText(new AdminError("GitHub did not accept that token for this repository.", 401))).toBe(LOCKED);
     expect(isLocked(new AdminError("Gone.", 404))).toBe(false);
-    expect(loadError(new AdminError("Gone.", 404))).toBe("Gone.");
+    expect(loadErrorText(new AdminError("Gone.", 404))).toBe("Gone.");
   });
 });

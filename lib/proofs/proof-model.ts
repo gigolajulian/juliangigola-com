@@ -299,7 +299,7 @@ export function extras(selected: number, included: number, price: number) {
 export const cardPrice = (cents: number) => (cents > 0 ? Math.ceil((cents + 30) / 0.971 / 100) * 100 : 0);
 
 /** What is still to pay at Send: the shoot balance first, then extra frames. A reopened gallery keeps what was already paid. */
-export function owed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | "balance">) {
+export function amountOwed(p: Pick<Proof, "selects" | "included" | "price" | "paid" | "balance">) {
   let left = p.paid?.amount ?? 0;
   const bal = Math.max(0, (p.balance ?? 0) * 100 - left);
   left = Math.max(0, left - (p.balance ?? 0) * 100);

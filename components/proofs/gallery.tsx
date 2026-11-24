@@ -160,7 +160,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   const n = selects.length;
   const extra = Math.max(0, n - included);
-  // Same sums as owed() in lib/proofs: the shoot balance first, then extras; a reopened gallery owes only what is new.
+  // Same sums as amountOwed() in lib/proofs: the shoot balance first, then extras; a reopened gallery owes only what is new.
   const balDue = Math.max(0, balance * 100 - initial.paid) / 100;
   const paidPastBal = Math.max(0, initial.paid - balance * 100);
   const due = balDue + Math.max(0, extra - (price ? Math.floor(paidPastBal / (price * 100)) : 0)) * price;

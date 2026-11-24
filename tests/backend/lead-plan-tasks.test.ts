@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sealer } from "@/lib/leads/lead-crypto";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
-import { dueTasks, fold, leadSummary, leadStoreKey, type Lead } from "@/lib/leads/leads";
+import { dueTasks, applyLeadEvent, leadSummary, leadStoreKey, type Lead } from "@/lib/leads/leads";
 import { callSheet, cleanPlan, cleanTasks, merge } from "@/lib/leads/lead-crm";
 import { FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "./fakes";
 
@@ -25,7 +25,7 @@ beforeEach(() => {
 
 async function seed(extra: Partial<Lead> = {}) {
   const id = await s.id(EMAIL);
-  const lead: Lead = { ...fold(null, EMAIL, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Nadia Okafor" }), people: [RIO], ...extra };
+  const lead: Lead = { ...applyLeadEvent(null, EMAIL, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Nadia Okafor" }), people: [RIO], ...extra };
   await writeLead(kv as never, s, id, lead);
   return { id, key: `lead:${id}` };
 }
@@ -122,8 +122,8 @@ describe("plan and tasks in the record", () => {
   });
 
   it("merge keeps both records' tasks and this one's plan", () => {
-    const a = { ...fold(null, EMAIL, { event: { at: at(1), kind: "inquiry" } }), tasks: [{ id: "a", text: "One" }], plan: { brief: "Mine" } };
-    const b = { ...fold(null, "other@example.com", { event: { at: at(2), kind: "inquiry" } }), tasks: [{ id: "b", text: "Two" }], plan: { brief: "Theirs" } };
+    const a = { ...applyLeadEvent(null, EMAIL, { event: { at: at(1), kind: "inquiry" } }), tasks: [{ id: "a", text: "One" }], plan: { brief: "Mine" } };
+    const b = { ...applyLeadEvent(null, "other@example.com", { event: { at: at(2), kind: "inquiry" } }), tasks: [{ id: "b", text: "Two" }], plan: { brief: "Theirs" } };
     const m = merge(a, b, at(3));
     expect(m.tasks?.map((t) => t.id)).toEqual(["a", "b"]);
     expect(m.plan).toEqual({ brief: "Mine" });

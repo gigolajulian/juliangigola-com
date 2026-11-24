@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { patchLead } from "../../lib/leads/lead-patch";
 import { sealer } from "../../lib/leads/lead-crypto";
 import { readLead, writeLead } from "../../lib/leads/lead-store";
-import { fold, type Lead } from "../../lib/leads/leads";
+import { applyLeadEvent, type Lead } from "../../lib/leads/leads";
 import { FakeKV, LEADS_KEY } from "./fakes";
 
 /* patchLead called directly: what each field does to the stored lead, what
@@ -19,7 +19,7 @@ beforeEach(async () => {
   kv = new FakeKV();
   id = await s.id(EMAIL);
   key = `lead:${id}`;
-  const lead: Lead = fold(null, EMAIL, { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya Ortiz" });
+  const lead: Lead = applyLeadEvent(null, EMAIL, { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya Ortiz" });
   await writeLead(kv as never, s, id, lead);
   kv.puts = [];
 });

@@ -3,7 +3,7 @@
 import { sealer, type Sealer } from "./lead-crypto";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, forgetLog, fresh } from "./activity-log";
-import { canonical, fold,leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
+import { canonical, applyLeadEvent, leadStoreKey, leadSummary, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
 import type { InboxKV } from "@/lib/kv";
 
 type KV = InboxKV;
@@ -173,7 +173,7 @@ export async function recordLead(env: LeadStore, email: string, c: Change): Prom
     const s = await seal;
     // Mail from the art director lands on the client's lead (`findLead`).
     const { id, lead: before } = await findLead(env.INBOX, s, email);
-    const after = fold(before, email, c);
+    const after = applyLeadEvent(before, email, c);
     if (after === before) return { status: "same" };
     await writeLead(env.INBOX, s, id, after, before);
     // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).

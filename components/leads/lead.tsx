@@ -46,7 +46,7 @@ import { canonical, isLate,NUDGES, PAPER, quoteNudge, REMIND_MAX, STAGES, trashD
 import { callSheet, fillTemplate, mailable, TEMPLATES, type Template } from "@/lib/leads/lead-crm";
 import { leadKey, typingIn } from "@/lib/leads/lead-keys";
 import { balance, depositOfLead, subtotal, usd } from "@/lib/leads/invoice";
-import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, nextStep, now, renew, snoozed } from "@/lib/leads/lead-desk";
+import { adminCall, ago, dateTimeLabel, authed, type Call, DAY, dayLabel, nextStep, now, needsRenewal, isSnoozed } from "@/lib/leads/lead-desk";
 import { compose, frostBar, ios, kindOf, line, mailto, glyph } from "@/components/leads/shared";
 import { People } from "@/components/leads/people";
 import { Galleries } from "@/components/leads/galleries";
@@ -175,12 +175,12 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const late = isLate(l, now());
   const step = nextStep(l);
   const nudge = templates.find((t) => t.id === `nudge${NUDGES.indexOf(quoteNudge(l, now()) as (typeof NUDGES)[number]) + 1}`);
-  const renewT = templates.find((x) => x.id === "renew") ?? TEMPLATES.find((x) => x.id === "renew")!;
+  const renewTemplate = templates.find((x) => x.id === "renew") ?? TEMPLATES.find((x) => x.id === "renew")!;
   const replyHref = mail(l.email, `Re: your ${l.kind ?? "shoot"} inquiry`, `Hi ${first},\n\n`);
   const bookHref = mail(l.email, "Booking a time", `Hi ${first},\n\nYou can pick a time here: https://juliangigola.com/book\n\n`);
   // The one filled button: the nudge or renewal when one is due, the call sheet once booked with a plan, else Reply.
   const sheet = full?.plan && l.when && l.stage === "Confirmed" ? callSheet(full) : null;
-  const lead1 = !mailOk ? null : renew(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fillTemplate(renewT.subject, l), fillTemplate(renewT.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
+  const primaryAction = !mailOk ? null : needsRenewal(l) ? { label: "Renew licence", win: "Keep the licence", href: mail(l.email, fillTemplate(renewTemplate.subject, l), fillTemplate(renewTemplate.body, l)) } : nudge && late ? { label: `Send ${nudge.name}`, win: "Land the booking", href: mail(l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)) } : sheet ? { label: "Send call sheet", win: "Set the day", href: mail(sheet.to, sheet.subject, sheet.body) } : null;
 
   const snoozeFor = (d: number) => run(patch({ snoozeUntil: new Date(now() + d * DAY).toISOString() }), "Snoozed.");
   const archive = () => run(patch({ archive: !l.archivedAt }), l.archivedAt ? "Back in the list." : "Archived.");
@@ -212,7 +212,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
     { label: "3 days", onClick: () => snoozeFor(3) },
     { label: "1 week", onClick: () => snoozeFor(7) },
     { label: "Pick a date", onClick: () => setEditing("snooze") },
-    ...(snoozed(l) ? [{ type: "divider" as const }, { label: "Unsnooze", onClick: () => run(patch({ snoozeUntil: "" }), "Unsnoozed.") }] : []),
+    ...(isSnoozed(l) ? [{ type: "divider" as const }, { label: "Unsnooze", onClick: () => run(patch({ snoozeUntil: "" }), "Unsnoozed.") }] : []),
   ];
   // The booking the site made for them (`ref` = its id), while it stands: cancel it before it starts, or mark a no-show after.
   // shortcut: the latest booking only; a lead with two live bookings needs a picker here.
@@ -246,9 +246,9 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
   const usable = templates.filter((t) => t.id !== "renew" || l.licence);
   const reply = mailOk ? (
     <HStack gap={2} wrap="wrap">
-      {lead1 ? <Win label={lead1.label} win={lead1.win} href={lead1.href} onClick={() => setAsked(true)} /> : null}
+      {primaryAction ? <Win label={primaryAction.label} win={primaryAction.win} href={primaryAction.href} onClick={() => setAsked(true)} /> : null}
       <a ref={replyLink} href={replyHref} target="_blank" rel="noreferrer" hidden aria-hidden="true" tabIndex={-1} onClick={() => setAsked(true)} />
-      <Button label="Reply in Gmail" variant={lead1 ? "secondary" : "primary"} icon={<Icon icon={MailGlyph} />} href={replyHref} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} />
+      <Button label="Reply in Gmail" variant={primaryAction ? "secondary" : "primary"} icon={<Icon icon={MailGlyph} />} href={replyHref} target="_blank" rel="noreferrer" onClick={() => setAsked(true)} />
       <DropdownMenu
         button={{ label: "Template", variant: "secondary" }}
         items={[
@@ -327,7 +327,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             <HStack gap={2} vAlign="center">
               <Button label="Leads" variant="ghost" size="sm" icon={<Icon icon={BackGlyph} />} onClick={onBack} />
               <StackItem size="fill" />
-              {phoneSize ? null : <DropdownMenu button={{ label: snoozed(l) ? `Snoozed to ${dayLabel(l.snoozeUntil!)}` : "Snooze", variant: "ghost", size: "sm", icon: <Icon icon={ClockGlyph} /> }} alignment="end" items={snoozeItems} />}
+              {phoneSize ? null : <DropdownMenu button={{ label: isSnoozed(l) ? `Snoozed to ${dayLabel(l.snoozeUntil!)}` : "Snooze", variant: "ghost", size: "sm", icon: <Icon icon={ClockGlyph} /> }} alignment="end" items={snoozeItems} />}
               {phoneSize || l.stage === "Lost" ? null : <Button label="Mark as lost" variant="ghost" size="sm" onClick={() => setStage("Lost")} />}
               {more}
             </HStack>
@@ -351,7 +351,7 @@ export function LeadDesk({ summary, initial, call, onChange, onBack, reload, tem
             {note ? <Text type="code" size="sm" color="secondary" role="status">{note}</Text> : null}
             {l.trashedAt ? <Banner status="warning" title="In the trash" description={`Deleted for good in ${Math.max(1, trashDaysLeft(l.trashedAt, now()))} days unless recovered.`} endContent={<Button label="Recover" variant="secondary" size="sm" onClick={() => run(patch({ trash: false }), "Recovered.")} />} /> : null}
             {l.flags?.includes("stuck") ? <Banner status="error" title="A deposit was paid but not booked" description="Refund or rebook it in Stripe, or send the booking link." endContent={full?.deposit ? <Button label="Open Stripe" variant="secondary" size="sm" href={full.deposit} target="_blank" rel="noreferrer" /> : undefined} /> : null}
-            {renew(l) && l.licence ? <Banner status="info" title={`Licence ends ${endDay(l.licence.end)}`} description={l.licence.use} /> : null}
+            {needsRenewal(l) && l.licence ? <Banner status="info" title={`Licence ends ${endDay(l.licence.end)}`} description={l.licence.use} /> : null}
             {asked && l.stage === "Inquiry" ? <Banner status="info" title="Sent it?" endContent={<Button label="Mark as Replied" variant="secondary" size="sm" onClick={() => run(patch({ stage: "Replied" }).then(() => setAsked(false)))} />} /> : null}
             {editing === "snooze" ? (
               <Banner status="info" title="Snooze until" isDismissable onDismiss={() => setEditing(null)}

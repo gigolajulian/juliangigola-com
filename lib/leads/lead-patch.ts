@@ -6,7 +6,7 @@
 import { json } from "@/lib/http";
 import type { InboxKV as KV } from "@/lib/kv";
 import type { Sealer } from "@/lib/leads/lead-crypto";
-import { fold, PAPER, REMIND_MAX, STAGES, type Lead, type LeadPatch, type Paper, type Stage } from "@/lib/leads/leads";
+import { applyLeadEvent, PAPER, REMIND_MAX, STAGES, type Lead, type LeadPatch, type Paper, type Stage } from "@/lib/leads/leads";
 import { buryLead, hasPerson, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
 import { adoptLog } from "@/lib/leads/activity-log";
 import { notionPaper, notionStage } from "@/lib/leads/sync/notion-lead";
@@ -15,7 +15,7 @@ import { balance, cleanInvoice, invoiceCountKey, invoiceNo, invoicesTaken, usd }
 
 /**
  * A lead changed by hand: its stage, a snooze (an ISO time, or "" to wake
- * it), opened (`seen`) or marked unread (`seen: false`). Stage and snooze go through `fold`, so they land
+ * it), opened (`seen`) or marked unread (`seen: false`). Stage and snooze go through `applyLeadEvent`, so they land
  * on the timeline like everything else.
  */
 export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, unknown>, notion?: string): Promise<Response> {
@@ -68,7 +68,7 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
   let from: Lead = lead;
   const at = new Date().toISOString();
   if (stage) {
-    lead = fold(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
+    lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "stage", note: stage }, stage: stage as Stage });
     // Mirrored to the Notion board; a Notion failure never blocks the desk.
     const page = await notionStage(notion, lead.email, stage as Stage, lead.notion);
     if (page) lead.notion = page;
@@ -79,9 +79,9 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
     const page = await notionPaper(notion, lead.email, paper, lead.notion);
     if (page) lead.notion = page;
   }
-  if (snoozeUntil !== undefined) lead = fold(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
-  if (typeof archive === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
-  if (typeof trash === "boolean") lead = fold(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
+  if (snoozeUntil !== undefined) lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
+  if (typeof archive === "boolean") lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
+  if (typeof trash === "boolean") lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
   // Opened (true), or marked unread again by hand (false).
   if (typeof seen === "boolean") lead = { ...lead, unread: !seen };
   // His own words and numbers (`lib/leads/lead-crm.ts`).

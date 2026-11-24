@@ -241,7 +241,7 @@ export type Change = {
 
 /** One event folded into a lead. Returns the lead unchanged when the event
     was already folded in (a webhook retry carries the same ref). */
-export function fold(lead: Lead | null, email: string, c: Change): Lead {
+export function applyLeadEvent(lead: Lead | null, email: string, c: Change): Lead {
   const { event } = c;
   if (lead && event.ref && lead.events.some((e) => e.kind === event.kind && e.ref === event.ref)) return lead;
 
@@ -459,7 +459,7 @@ export function backfillLead(lead: Lead | null, email: string, rows: InboxRow[])
   if (!add.length) return null;
   if (!lead) {
     let built: Lead | null = null;
-    for (const c of add) built = fold(built, email, c);
+    for (const c of add) built = applyLeadEvent(built, email, c);
     const unread = sorted.some((r) => !r.read);
     // Julian: "import read ones as replied". All read means he dealt with it.
     return { ...built!, unread, ...(!unread && built!.stage === "Inquiry" ? { stage: "Replied" as const } : {}) };

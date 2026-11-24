@@ -35,7 +35,7 @@ import { proofApi, cardCrop, pastCloseDate, cropAt, proofStatus, type ProofRow }
 import { ActivityDesk } from "@/components/proofs/activity";
 import { Timeline } from "@/components/proofs/timeline";
 import { useClock } from "@/components/proofs/use-clock";
-import { loadError, LOCKED, stampPT } from "@/lib/leads/lead-desk";
+import { loadErrorText, LOCKED, stampPT } from "@/lib/leads/lead-desk";
 import { errorText } from "@/lib/utils";
 import { extras, publicId, remindState, THUMB_W, type CardCrop } from "@/lib/proofs/proof-model";
 
@@ -64,7 +64,7 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
-    proofApi<{ proofs: ProofRow[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadError(e)));
+    proofApi<{ proofs: ProofRow[] }>({ query: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadErrorText(e)));
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.
