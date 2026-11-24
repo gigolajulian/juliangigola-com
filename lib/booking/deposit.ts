@@ -39,10 +39,10 @@ import { manageLinks } from "@/lib/booking/token";
 
 import { alertAndLog, type Attachment } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
-import { DEPOSIT, LEGACY_DEPOSIT, PAID, isPaid } from "@/lib/booking/paid";
+import { DEPOSIT, LEGACY_DEPOSIT, DEPOSIT_SESSIONS, takesDeposit } from "@/lib/booking/paid";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
 export function amountOf(slug: string): number {
-  if (!isPaid(slug)) throw new Error("Not a paid session.");
+  if (!takesDeposit(slug)) throw new Error("Not a paid session.");
   return DEPOSIT[slug] * 100;
 }
 export const CURRENCY = "usd";
@@ -56,7 +56,7 @@ export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: {
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
 /** Each paid event's name, as its rule titles it. */
-export const SESSION: { [slug: string]: string } = Object.fromEntries(PAID.map((s) => [s, EVENTS[s].title]));
+export const SESSION: { [slug: string]: string } = Object.fromEntries(DEPOSIT_SESSIONS.map((s) => [s, EVENTS[s].title]));
 
 /** The intent in Stripe's dashboard, test or live as the key is. */
 export const dashboardLink = (intent: string, key: string) =>
@@ -193,7 +193,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
 export async function bookDeposit(env: Env, intent: string, metadata: { [k: string]: string } | undefined, cents?: number): Promise<Status> {
   const parsed = fromMetadata(metadata);
   // What the intent took, from Stripe; unset, the session's own deposit.
-  const usd = cents !== undefined ? cents / 100 : parsed.ok && isPaid(parsed.booking.slug) ? DEPOSIT[parsed.booking.slug] : LEGACY_DEPOSIT;
+  const usd = cents !== undefined ? cents / 100 : parsed.ok && takesDeposit(parsed.booking.slug) ? DEPOSIT[parsed.booking.slug] : LEGACY_DEPOSIT;
   const key = recordKey(intent);
   const seen = await env.INBOX.get(key);
   if (seen) {

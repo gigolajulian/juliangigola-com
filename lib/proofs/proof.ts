@@ -234,7 +234,7 @@ export function newToken(): string {
 }
 const B36 = "0123456789abcdefghijklmnopqrstuvwxyz";
 /** 4 base36 characters, uniform: the part of a date id nobody can guess. */
-export function tail(): string {
+export function randomIdTail(): string {
   let out = "";
   while (out.length < 4) {
     for (const b of crypto.getRandomValues(new Uint8Array(8))) {
@@ -250,7 +250,7 @@ export const proofDay = (t: Date | number = new Date()) => {
 };
 const DATE_ID = /^(\d{8})-(\d{2})-[0-9a-z]{4}$/;
 /** `MMDDYYYY-NN-xxxx`: the next free counter for that day among `taken` ids (storage tokens and aliases). shortcut: caps at 99 a day, widen the counter if that is ever reached. */
-export function proofId(day: string, taken: Iterable<string>, rand = tail()): string {
+export function proofId(day: string, taken: Iterable<string>, rand = randomIdTail()): string {
   let n = 0;
   for (const t of taken) {
     const m = DATE_ID.exec(t);

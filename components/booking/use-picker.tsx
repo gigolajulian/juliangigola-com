@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import type { DepositBody } from "@/components/booking/deposit-step";
-import { isPaid } from "@/lib/booking/paid";
+import { takesDeposit } from "@/lib/booking/paid";
 import { ORB_ROUND } from "@/components/effects/orb";
 import { TZ } from "@/lib/booking/rules";
 import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Slot, type Step, type StepsSkin } from "@/components/booking/time-picker-parts";
@@ -218,7 +218,7 @@ export function usePicker({ path, title, className, skin, onPicked, startView }:
     }
   }, []);
   /* JG V3: the steps around anything that is not the picker itself. */
-  const v3paid = paid || isPaid(slug);
+  const v3paid = paid || takesDeposit(slug);
   const v3steps = v3paid ? ["Time", "You", "Deposit", "Booked"] : ["Time", "You", "Booked"];
   // The same subtitle as the picker, so nothing below it jumps when the times arrive.
   const v3sub = v3paid ? "Studio in San Jose. I travel across the Bay Area." : "15 minutes, phone or video. Bring your dates and references.";

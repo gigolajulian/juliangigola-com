@@ -1,7 +1,7 @@
 import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, TZ, type Booking, type Hours } from "@/lib/booking/rules";
 import { gcal } from "@/lib/booking/gcal";
 import { bookingEnquiry, enquiryKey, looksLikeEmail, summary } from "@/lib/inbox";
-import { isPaid, LEGACY_DEPOSIT } from "@/lib/booking/paid";
+import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/sync/notion-lead";
 import { openNow, type KV } from "@/lib/booking/slots";
@@ -68,7 +68,7 @@ export type Parsed = { ok: true; booking: Booking } | { ok: false; reason: strin
 export function parseBooking(raw: unknown, call = false): Parsed {
   const b = (raw ?? {}) as { [k: string]: unknown };
   const slug = cap(b.slug);
-  if (call ? !EVENTS[slug]?.call : !isPaid(slug)) return { ok: false, reason: call ? "Not a call." : "Not a paid session." };
+  if (call ? !EVENTS[slug]?.call : !takesDeposit(slug)) return { ok: false, reason: call ? "Not a call." : "Not a paid session." };
   const start = cap(b.start);
   const t = Date.parse(start);
   if (!start || isNaN(t) || t < Date.now()) return { ok: false, reason: "Pick a time." };

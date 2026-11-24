@@ -135,7 +135,7 @@ export function FlowShell({
     a dot rides at the end of every item but the last, so a line may end on
     a dot but never starts with one or splits an item, and `.run` keeps the
     last line from holding a lone item. */
-export function Run({ items, className = "" }: { items: string[]; className?: string }) {
+export function DotList({ items, className = "" }: { items: string[]; className?: string }) {
   return (
     <p className={`run ${className}`}>
       {items.map((x, i) => (
@@ -212,7 +212,7 @@ export const clockLabel = (m: number) => {
   const h = Math.floor(m / 60) % 24;
   return `${((h + 11) % 12) + 1}:${pad(m % 60)} ${h < 12 ? "AM" : "PM"}`;
 };
-export const WD = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 export const iso = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 /** The month's cells, Monday first, blanks before the 1st. */
 export const monthCells = (base: Date) => {
@@ -266,7 +266,7 @@ export function Calendar({
         </span>
       </div>
       <div className={`cal lbl ${view}`}>
-        {WD.map((w) => (
+        {WEEKDAYS.map((w) => (
           <span key={w} className="wd">{w}</span>
         ))}
         {cells.map((t, k) => {

@@ -4,7 +4,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
 vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
 
-import { Calendar, Failed, Field, FlowShell, Hidden, Run, checkYou, first, clockLabel, iso, monthCells, weekCells } from "@/components/booking/flow";
+import { Calendar, Failed, Field, FlowShell, Hidden, DotList, checkYou, first, clockLabel, iso, monthCells, weekCells } from "@/components/booking/flow";
 
 describe("flow helpers", () => {
   it("formats dates and times", () => {
@@ -30,8 +30,8 @@ describe("flow helpers", () => {
 });
 
 describe("flow parts", () => {
-  it("Run puts a dot after every item but the last", () => {
-    render(<Run items={["One", "Two"]} />);
+  it("DotList puts a dot after every item but the last", () => {
+    render(<DotList items={["One", "Two"]} />);
     expect(screen.getByText("One ·")).toBeTruthy();
     expect(screen.getByText("Two")).toBeTruthy();
   });

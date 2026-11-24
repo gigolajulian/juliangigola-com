@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { adoptable, projectsFile, same, tidySequence, withOverride, type Manifest } from "@/lib/admin/admin-payload";
+import { adoptable, projectsFile, sameJson, tidySequence, withOverride, type Manifest } from "@/lib/admin/admin-payload";
 
 /* What /admin commits as `content/projects.json` (`lib/admin/admin-payload.ts`),
    and how it reads the file back. */
@@ -55,9 +55,9 @@ describe("projectsFile", () => {
 
 describe("same", () => {
   it("ignores key order and undefined, not array order", () => {
-    expect(same({ a: 1, b: { c: 2, d: 3 } }, { b: { d: 3, c: 2 }, a: 1 })).toBe(true);
-    expect(same({ a: 1, role: undefined }, { a: 1 })).toBe(true);
-    expect(same([1, 2], [2, 1])).toBe(false);
+    expect(sameJson({ a: 1, b: { c: 2, d: 3 } }, { b: { d: 3, c: 2 }, a: 1 })).toBe(true);
+    expect(sameJson({ a: 1, role: undefined }, { a: 1 })).toBe(true);
+    expect(sameJson([1, 2], [2, 1])).toBe(false);
   });
 });
 
