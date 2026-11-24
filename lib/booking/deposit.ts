@@ -39,20 +39,12 @@ import { manageLinks } from "@/lib/booking/token";
 
 import { alertAndLog, type Attachment } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
-import { DEPOSIT, LEGACY_DEPOSIT, DEPOSIT_SESSIONS, takesDeposit } from "@/lib/booking/paid";
+import { CURRENCY, DEPOSIT, DEPOSIT_KIND, DEPOSIT_SESSIONS, LEGACY_DEPOSIT, takesDeposit } from "@/lib/booking/paid";
 /** The charge in cents for a session. Throws on a slug that takes no deposit: `parseBooking` lets none through. */
 export function amountOf(slug: string): number {
   if (!takesDeposit(slug)) throw new Error("Not a paid session.");
   return DEPOSIT[slug] * 100;
 }
-export const CURRENCY = "usd";
-export const DEPOSIT_KIND = "deposit";
-
-/** Whether a paid intent is one of the site's deposits, not any other payment on the account.
-    Any session's amount passes, not only its own slug's: an intent made at the old $100 just
-    before a price change must still book, or it sits paid and unbooked. */
-export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
-  pi.metadata?.kind === DEPOSIT_KIND && [...Object.values(DEPOSIT), LEGACY_DEPOSIT].some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
 /** Each paid event's name, as its rule titles it. */

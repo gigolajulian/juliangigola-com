@@ -1,6 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { liveHours, parseBooking } from "@/lib/booking/engine";
-import { amountOf, CURRENCY, intentForm } from "@/lib/booking/deposit";
+import { amountOf, intentForm } from "@/lib/booking/deposit";
+import { CURRENCY } from "@/lib/booking/paid";
 import { openNow } from "@/lib/booking/slots";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
 import { bodyOf, json } from "@/lib/http";

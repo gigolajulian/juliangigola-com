@@ -13,3 +13,11 @@ export const DEPOSIT: Record<PaidSlug, number> = { portraits: 250, headshots: 20
 export const LEGACY_DEPOSIT = 100;
 /** For a slug held as a plain string (a card's event slug). Never the site's own "studio-digitals": that one is `digitals` here. */
 export const depositFor = (slug: string) => (takesDeposit(slug) ? DEPOSIT[slug] : LEGACY_DEPOSIT);
+export const CURRENCY = "usd";
+export const DEPOSIT_KIND = "deposit";
+
+/** Whether a paid intent is one of the site's deposits, not any other payment on the account.
+    Any session's amount passes, not only its own slug's: an intent made at the old $100 just
+    before a price change must still book, or it sits paid and unbooked. */
+export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
+  pi.metadata?.kind === DEPOSIT_KIND && [...Object.values(DEPOSIT), LEGACY_DEPOSIT].some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
