@@ -17,7 +17,7 @@ import {
   takeUploads,
   visitContext,
   waitPhrase,
-} from "@/lib/inbox";
+} from "@/lib/leads/enquiry";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The inbox's pure half: keys, validation, the cooldown and the copy. */

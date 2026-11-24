@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CHIP_TYPE, QUOTE_OPTS } from "@/lib/home/data";
 import { clamp, progress, smooth, progressBetween } from "@/components/home/motion/engine";
-import { SHOOT_TYPES } from "@/lib/inbox";
+import { SHOOT_TYPES } from "@/lib/leads/enquiry";
 
 /* The server files any type it does not know as "other" without a word, so a renamed chip or a mistyped
    shoot type would lose the lead's category quietly. */

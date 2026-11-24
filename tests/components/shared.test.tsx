@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { kindOf, label, mailto } from "@/components/leads/shared";
-import { adminCall, centsLabel, matches, dollarsLabel, nextStep, inFilter } from "@/lib/leads/lead-desk";
+import { centsLabel, matches, dollarsLabel, nextStep, inFilter } from "@/lib/leads/lead-desk";
+import { adminCall } from "@/lib/admin/admin-call";
 import type { LeadSummary } from "@/lib/leads/leads";
 
 describe("adminCall", () => {

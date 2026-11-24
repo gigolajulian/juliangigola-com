@@ -1,7 +1,8 @@
 import { refuseAdmin } from "@/lib/vouch";
 import { sealedStore } from "@/lib/kv";
 import { copiesFor, dropProofOpens, recordLead } from "@/lib/leads/lead-store";
-import { cardKey, closesAt, cleanSettings, DEFAULTS, isEmail, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, publicId, remindState, shootDay, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import { cardKey, closesAt, cleanSettings, DEFAULTS, DELIVERY_DAYS, finalKeys, frameKey, frameKeys, aliasKey, isDateId, isFrameId, isModel, isStrongId, isToken, publicId, remindState, shootDay, viewerKey, type Proof } from "@/lib/proofs/proof-model";
+import { isEmail } from "@/lib/utils";
 import { forDesk, hashPass, listProofs, nextProofId, readProof, writeProof } from "@/lib/proofs/proof-store";
 import { deliveryMail, deliveryUrl, proofMail, proofUrl, reminderMail, sendClient, subjectOr } from "@/lib/email/proof-mail";
 import { MAX_FINAL, storeFinal } from "@/lib/proofs/delivery";

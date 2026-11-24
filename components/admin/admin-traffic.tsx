@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { AdminError, adminCall, authed } from "@/lib/leads/lead-desk";
+import { AdminError, adminCall, authed } from "@/lib/admin/admin-call";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * Who came to the site this week and from where, read from Cloudflare by

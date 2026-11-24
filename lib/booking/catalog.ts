@@ -22,7 +22,7 @@ export type Session = {
       `at`: where the phone and portrait-tablet banner sits on each frame (an
       object-position), where the middle cuts the heads off. */
   photo: { d: string; l: string; m?: string; desk?: string; at?: { d?: string; l?: string } };
-  /** The enquiry type an on-request booking posts (`lib/inbox.ts`); "session" when unset. */
+  /** The enquiry type an on-request booking posts (`lib/leads/enquiry.ts`); "session" when unset. */
   type?: string;
 };
 

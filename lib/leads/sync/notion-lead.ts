@@ -1,4 +1,4 @@
-import type { Enquiry } from "@/lib/inbox";
+import type { Enquiry } from "@/lib/leads/enquiry";
 import type { Paper, Stage } from "@/lib/leads/leads";
 
 /* ── leads into Notion ────────────────────────────────────────────

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { pushHistory } from "@/lib/zoom";
+import { pushHistory } from "@/components/cover/zoom";
 
 describe("pushHistory", () => {
   it("closes the viewer on the back button, once", () => {

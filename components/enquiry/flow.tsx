@@ -2,9 +2,8 @@ import * as React from "react";
 import Image from "next/image";
 import { INITIAL, submitOrKeep } from "@/components/enquiry/submit";
 import { trailContext } from "@/components/analytics/visit-trail";
-import type { ContactState } from "@/lib/inbox";
-import { looksLikeEmail } from "@/lib/inbox";
-import { pad } from "@/lib/utils";
+import type { ContactState } from "@/lib/leads/enquiry";
+import { looksLikeEmail, pad } from "@/lib/utils";
 
 /* JG V3 stepper ("one stepper" for booking and inquiry): the
    step rail, the head, the body, the action bar, and the sticky photo with

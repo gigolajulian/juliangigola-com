@@ -5,7 +5,7 @@ import { ProgressBar } from "@astryxdesign/core/ProgressBar";
 import { Eyebrow } from "@/components/leads/desk-nav";
 import { Next } from "@/components/leads/row";
 import { ago, nextStep } from "@/lib/leads/lead-desk";
-import { TZ } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
 import { shootTag, STAGES, type LeadSummary, type Stage as StageName } from "@/lib/leads/leads";
 
 const ROAD: readonly StageName[] = STAGES.filter((s) => s !== "Lost");

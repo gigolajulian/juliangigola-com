@@ -17,7 +17,7 @@
  * `proofalias:<id>` key; its old public link stops.
  * ─────────────────────────────────────────────────────────────── */
 
-import { looksLikeEmail } from "@/lib/inbox";
+import { isEmail } from "@/lib/utils";
 
 export type ProofFrame = {
   /** Short id, stable across publishes: the Lightroom photo's remote id. */
@@ -144,7 +144,6 @@ export type Viewer = {
 /** Kept per address so a busy gallery stays well under KV's value size. */
 const MAX_EVENTS = 400;
 
-export const isEmail = (v: unknown): v is string => typeof v === "string" && v.length <= 200 && looksLikeEmail(v.trim());
 /** A reserved test address (RFC 2606/6761: example.com/net/org, .test, .invalid, .example, .localhost): QA at a gallery's gate, never a client. */
 export const isTestEmail = (v: string) => /@(?:[^@\s]+\.)?(?:example\.(?:com|net|org)|[^@\s]+\.(?:test|invalid|example|localhost))$/i.test(v.trim());
 export const viewerKey = (email: string) => email.trim().toLowerCase();
@@ -219,17 +218,6 @@ export const DELIVERY_DAYS = 60;
 /** Every derived file a frame can have in R2, for deletes. */
 export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id), thumbKey(token, id, true), thumbKey(token, id, false)];
 
-const B62 = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-/** 16 base62 characters from the platform's CSPRNG (rejection sampling keeps it uniform). Older galleries only; new ones get `proofId`. */
-export function newToken(): string {
-  let out = "";
-  while (out.length < 16) {
-    for (const b of crypto.getRandomValues(new Uint8Array(24))) {
-      if (b < 248 && out.length < 16) out += B62[b % 62];
-    }
-  }
-  return out;
-}
 const B36 = "0123456789abcdefghijklmnopqrstuvwxyz";
 /** 4 base36 characters, uniform: the part of a date id nobody can guess. */
 export function randomIdTail(): string {

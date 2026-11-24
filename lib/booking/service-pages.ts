@@ -65,7 +65,7 @@ export type BookingPage = {
   picks?: string[];
   /** Presets for the form on the Book screen.
       `cal`: the event it books ("juliangigola/event-slug"; the slug keys
-      `EVENTS` in `booking-rules.ts`), picked on the Book screen in place of the form. */
+      `EVENTS` in `lib/booking/rules.ts`), picked on the Book screen in place of the form. */
   book: { type: string; session?: string; title: string; cal?: string };
 };
 
@@ -717,6 +717,6 @@ export const BOOK_MENU: MenuItem[] = [
   callOf("music-photography", "Music & artists", "Press photos, cover art and music videos for a release, planned together so it reads as one thing."),
   callOf("fashion-photography", "Fashion & Editorial", "Editorials, lookbooks and campaign images, shot and art-directed as one story."),
   callOf("brand-photography", "Brand campaigns", "Campaign imagery from the concept and the art direction to the shoot and the retouch."),
-  // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in `EVENTS` (`booking-rules.ts`).
+  // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in `EVENTS` (`lib/booking/rules.ts`).
   { slug: "events", name: "Event coverage", blurb: "Launches, brand events, concerts and parties, shot as they happen.", group: "commission", page: "/portfolio/events", form: { type: "event" } },
 ];

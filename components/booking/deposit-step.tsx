@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { warmGsap, withGsap } from "@/lib/gsap-lazy";
+import { warmGsap, withGsap } from "@/lib/motion/gsap-lazy";
 import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/booking/paid";
 import type { Status } from "@/lib/booking/deposit";

@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
-import { TZ } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
 import { depositFor } from "@/lib/booking/paid";
 import { AHEAD, DAYS, iso, minutesOf, MONTHS, forgetTimes, STEP_AT, WEEKDAYS, WHERE, clock, zone } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";

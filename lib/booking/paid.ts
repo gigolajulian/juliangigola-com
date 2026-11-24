@@ -1,4 +1,4 @@
-/** The event slugs (`EVENTS`, `booking-rules.ts`) that take a deposit on the site.
+/** The event slugs (`EVENTS`, `lib/booking/rules.ts`) that take a deposit on the site.
     This list decides it; `/api/slots` says nothing of a price.
     Client-safe, no server imports. */
 export const DEPOSIT_SESSIONS = ["portraits", "headshots", "graduation", "digitals", "model-test"] as const;

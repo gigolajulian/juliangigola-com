@@ -1,6 +1,6 @@
 "use client";
 
-import { loadGsap } from "@/lib/gsap-lazy";
+import { loadGsap } from "@/lib/motion/gsap-lazy";
 import * as React from "react";
 import Image from "next/image";
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";

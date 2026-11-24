@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { summary, enquiry, enquiryKey } from "@/lib/inbox";
+import { summary, enquiry, enquiryKey } from "@/lib/leads/enquiry";
 import { FakeKV, LEADS_KEY, SCOPED, githubToken, reply, INBOX_KEY as KEY } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";
 

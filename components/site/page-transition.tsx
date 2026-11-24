@@ -165,7 +165,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       else delete root.dataset.navSide;
     };
     // The photo viewer keeps an entry in the history so the back button
-    // closes it (`lib/zoom.ts`); that pop is not a page leaving. Read by
+    // closes it (`components/cover/zoom.ts`); that pop is not a page leaving. Read by
     // the path, not by the viewer's flag: closing it with Esc or Close
     // takes the flag down before its own `history.back()` pops, and the
     // root was left saying "out" for ten seconds.

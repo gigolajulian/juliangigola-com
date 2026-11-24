@@ -9,7 +9,7 @@ vi.mock("gsap", () => {
   return { gsap: { to: () => {} } };
 });
 // Relative import: the coverage scanner resolves `@/` under src/, which this repo does not have.
-const { warmGsap, withGsap } = await import("../../lib/gsap-lazy");
+const { warmGsap, withGsap } = await import("../../lib/motion/gsap-lazy");
 
 describe("gsap-lazy", () => {
   it("queues a call until gsap loads, then runs later calls synchronously", async () => {

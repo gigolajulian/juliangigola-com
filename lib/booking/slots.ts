@@ -1,5 +1,6 @@
-import { DEFAULT_HOURS, EVENTS, TZ, windowOn, type Hours, type Rule } from "@/lib/booking/rules";
-import { gcal } from "@/lib/booking/gcal";
+import { DEFAULT_HOURS, EVENTS, windowOn, type Hours, type Rule } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
+import { gcal } from "@/lib/google";
 import { sha256Hex } from "@/lib/utils";
 
 /* ── open times, from hello@'s free/busy ──────────────────────────

@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { AdminInbox, References, unreadCount } from "@/components/admin/admin-inbox";
 import { KEY_STORE, TOKEN_STORE } from "@/lib/admin/admin-github";
-import type { Enquiry } from "@/lib/inbox";
+import type { Enquiry } from "@/lib/leads/enquiry";
 
 afterEach(() => {
   vi.unstubAllGlobals();

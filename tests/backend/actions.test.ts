@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { COOLDOWN_MS, DAILY_CAP, dayKey } from "@/lib/inbox";
+import { COOLDOWN_MS, DAILY_CAP, dayKey } from "@/lib/leads/enquiry";
 import { FakeEmail, FakeKV, reply } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";
 

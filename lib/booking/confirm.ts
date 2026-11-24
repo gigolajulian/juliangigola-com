@@ -1,4 +1,5 @@
-import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare, TZ } from "@/lib/booking/rules";
+import { duration, EARLY_SHARE, PART_SHARE, REFUND_HOURS, refundCents, refundShare } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
 import { LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { depositPaid, recordBooking, type BookingRecord } from "@/lib/booking/engine";
 import { logMail } from "@/lib/leads/lead-store";

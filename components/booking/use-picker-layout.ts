@@ -1,5 +1,5 @@
 import * as React from "react";
-import { warmGsap, withGsap } from "@/lib/gsap-lazy";
+import { warmGsap, withGsap } from "@/lib/motion/gsap-lazy";
 import { iso, STEP_AT, type PickedTime, type Step } from "@/components/booking/time-picker-parts";
 import { sessionGet, sessionSet } from "@/lib/utils";
 

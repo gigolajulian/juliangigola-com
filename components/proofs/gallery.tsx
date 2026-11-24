@@ -4,12 +4,11 @@ import * as React from "react";
 import Link from "next/link";
 import { useClock } from "@/components/proofs/use-clock";
 import { cardPrice, closingSoon, lookStarts, shotOrder, THUMB_W, type PublicProof } from "@/lib/proofs/proof-model";
-import { looksLikeEmail } from "@/lib/inbox";
 import { ProofWall } from "@/components/proofs/wall";
 import { ProofCursor } from "@/components/proofs/cursor";
 import { gridwallFor } from "@/lib/proofs/gridwall";
 import { qflag } from "@/lib/flags/query";
-import { noSubscribe } from "@/lib/utils";
+import { looksLikeEmail, noSubscribe } from "@/lib/utils";
 import { postJson } from "@/lib/http";
 
 /* ── the client's gallery ─────────────────────────────────────────

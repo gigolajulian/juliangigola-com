@@ -3,7 +3,7 @@ import { lockOp, parseBooking, type BookResult } from "@/lib/booking/engine";
 import { manageLinks } from "@/lib/booking/token";
 import { afterBooked, confirmOf } from "@/lib/booking/confirm";
 import { alertHello } from "@/lib/email/hello-mail";
-import { whenPT } from "@/lib/inbox";
+import { whenPT } from "@/lib/time-zone";
 import { bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
 
 // A booked call answers { id, start, end, where }; errors answer { error: string }, as every other booking route does.

@@ -1,7 +1,7 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { TZ } from "@/lib/booking/rules";
-import { gcal } from "@/lib/booking/gcal";
-import { looksLikeEmail } from "@/lib/inbox";
+import { TZ } from "@/lib/time-zone";
+import { gcal } from "@/lib/google";
+import { looksLikeEmail } from "@/lib/utils";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, zoned, type Extra } from "@/lib/booking/slots";
 import { refuseAdmin } from "@/lib/vouch";
 import { bodyOf, json, upstreamError } from "@/lib/http";

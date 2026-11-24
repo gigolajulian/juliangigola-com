@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { notionPaper, notionStage, paperProperties, toNotion } from "@/lib/leads/sync/notion-lead";
-import type { Enquiry } from "@/lib/inbox";
+import type { Enquiry } from "@/lib/leads/enquiry";
 
 type Call = { url: string; method: string; body: { properties?: Record<string, unknown>; filter?: unknown } };
 /** A fake Notion: the query finds `row` (or fails), writes answer 200. */

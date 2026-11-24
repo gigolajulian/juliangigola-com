@@ -458,11 +458,11 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-11-15: Julian's own subject for a proof or delivery mail: one line, control characters out, 150 at most; empty keeps the default.
 - 2026-11-15: ── contracts: the link to sign, and the signed copy ──
 
-### lib/gather.ts
+### lib/motion/gather.ts
 - 2026-10-14: photos gather in from outside the page. Walls stream by column. Project frames slide in from the right.
 - 2026-10-15: the 404 wall builds up row by row.
 
-### lib/inbox.ts
+### lib/leads/enquiry.ts
 - 2026-10-14: more to go on without more to fill in (visit trail, referrer, device, city).
 - 2026-11-10: nobody gets turned away, so a@b.c passes.
 
@@ -774,7 +774,7 @@ reported; a quote after "Julian:" is his wording, as the comment had it.
 - `components/strip/wheel.ts`: An open dialog keeps its own wheel: the reference picker sits in the form, so inside the strip, and its photographs could not be scrolled. (Julian)
 - `components/work-shell.tsx`: Preview (`?cards`): each discipline drawn as one card, its name and its projects (`globals.css`, `data-cards`).
 - `lib/deck.ts`: Dealt again once the galleries' walls are laid out (`strip-relaid`, `strip.tsx`) or held-back sections arrive: from Event coverage on, the first wall, every chapter stood somewhere else than the deal had measured, and the stack stopped working there. (Julian)
-- `lib/inbox.ts`: `inline`: the picks attached inline as `cid:pick-<index>`, shown under their link in the HTML copy; one that would not fetch is the link alone. (Julian)
+- `lib/leads/enquiry.ts`: `inline`: the picks attached inline as `cid:pick-<index>`, shown under their link in the HTML copy; one that would not fetch is the link alone. (Julian)
 
 ### 2026-10-07
 

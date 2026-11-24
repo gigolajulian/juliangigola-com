@@ -1,5 +1,5 @@
 import type { gsap as GSAP } from "gsap";
-import { loadGsap } from "@/lib/gsap-lazy";
+import { loadGsap } from "@/lib/motion/gsap-lazy";
 
 /* GSAP loads with the first gather (`gatherWhenSeen`), never up front: the
    root 404 draws a wall, so anything it imports statically ships with every

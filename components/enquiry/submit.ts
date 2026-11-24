@@ -1,5 +1,5 @@
 import { submitEnquiry } from "@/lib/leads/enquiry-action";
-import type { ContactState } from "@/lib/inbox";
+import type { ContactState } from "@/lib/leads/enquiry";
 
 export const INITIAL: ContactState = { status: "idle" };
 

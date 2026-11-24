@@ -3,7 +3,7 @@
    (names, ratios) are resolved on the server in `lib/home/server.ts` (`HOME_DATA`). */
 import { priceLabel, SESSIONS, type SessionSlug } from "@/lib/booking/catalog";
 import { DEPOSIT } from "@/lib/booking/paid";
-import type { SHOOT_TYPES } from "@/lib/inbox";
+import type { SHOOT_TYPES } from "@/lib/leads/enquiry";
 
 /** A photo with its caption: `r` is height / width. */
 export type HomeFrame = { src: string; name: string; meta: string; slug: string; r: number };
@@ -85,7 +85,7 @@ export const QUOTE_OPTS: QuoteOpt[] = [
   { key: "fashion", name: "Fashion", holds: ["Editorial"], detail: "Stories for print and online.", chips: [], call: "/book/editorial", type: "editorial", photo: "/work/threshold/05.jpg" },
   { key: "weddings", name: "Weddings", holds: ["Full day", "Couples, engagements"], detail: "", chips: ["Wedding", "Couples", "Engagement"], call: "/book/weddings", photo: "/work/weddings/02.jpg" },
 ];
-/** The enquiry type each chip posts (lib/inbox.ts SHOOT_TYPES). */
+/** The enquiry type each chip posts (lib/leads/enquiry.ts SHOOT_TYPES). */
 export const CHIP_TYPE: Record<string, (typeof SHOOT_TYPES)[number]> = {
   "Cover art": "coverart",
   "Artist presskit": "presskit",

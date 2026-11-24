@@ -20,10 +20,12 @@ import { List, ListItem } from "@astryxdesign/core/List";
 import { Calendar, type DateRange, type ISODateString } from "@astryxdesign/core/Calendar";
 import { Token } from "@astryxdesign/core/Token";
 import { Divider } from "@astryxdesign/core/Divider";
-import { EVENTS, HOURS, TZ } from "@/lib/booking/rules";
+import { EVENTS, HOURS } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
 import { startsFor, zoned } from "@/lib/booking/slots";
 import type { LeadSummary } from "@/lib/leads/leads";
-import { adminCall, type Size } from "@/lib/leads/lead-desk";
+import { type Size } from "@/lib/leads/lead-desk";
+import { adminCall } from "@/lib/admin/admin-call";
 import { errorText } from "@/lib/utils";
 
 /* The calendar's data and day maths, from the retired classic desk. */

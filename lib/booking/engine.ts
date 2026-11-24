@@ -1,6 +1,8 @@
-import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, TZ, type Booking, type Hours } from "@/lib/booking/rules";
-import { gcal } from "@/lib/booking/gcal";
-import { bookingEnquiry, enquiryKey, looksLikeEmail, summary } from "@/lib/inbox";
+import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, type Booking, type Hours } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
+import { gcal } from "@/lib/google";
+import { bookingEnquiry, enquiryKey, summary } from "@/lib/leads/enquiry";
+import { looksLikeEmail } from "@/lib/utils";
 import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/booking/paid";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
 import { toNotion } from "@/lib/leads/sync/notion-lead";

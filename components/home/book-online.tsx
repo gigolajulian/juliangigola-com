@@ -7,7 +7,7 @@ import { Duo } from "@/components/site/duo";
 import { SESSIONS } from "@/lib/booking/catalog";
 import { matches } from "@/lib/device";
 import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/home/data";
-import { warmGsap } from "@/lib/gsap-lazy";
+import { warmGsap } from "@/lib/motion/gsap-lazy";
 import { useNextOpen } from "./next-open";
 import { CardsCtx } from "./ctx";
 

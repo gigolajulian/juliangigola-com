@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { cn, looksLikeEmail } from "@/lib/utils";
 import { DepositStep } from "@/components/booking/deposit-step";
 import { ReferencePicks } from "@/components/reference-picks";
 import { Calendar } from "@/components/booking/flow";
@@ -11,7 +11,6 @@ import { duration } from "@/lib/booking/rules";
 import { depositFor } from "@/lib/booking/paid";
 import { clockLabel } from "@/components/booking/flow";
 import type { Shell } from "@/components/enquiry/flow";
-import { looksLikeEmail } from "@/lib/inbox";
 import { AHEAD, fromIso, iso, minutesOf, forgetTimes, STEP_AT, WHERE, clock, type StepsSkin } from "@/components/booking/time-picker-parts";
 import type { CardCtx } from "@/components/booking/use-picker";
 import { SkyTimes, SkyWeather } from "@/components/booking/sky-times";

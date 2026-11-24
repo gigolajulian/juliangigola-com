@@ -2,10 +2,11 @@
 
 import * as React from "react";
 import Image from "next/image";
-import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/inbox";
+import { contextLines, replyLink, type Enquiry, type Summary } from "@/lib/leads/enquiry";
 import { cn, errorText } from "@/lib/utils";
 import { credentials, KEY_STORE, saveAdminKey, TOKEN_STORE } from "@/lib/admin/admin-github";
-import { adminCall, isLocked } from "@/lib/leads/lead-desk";
+import { isLocked } from "@/lib/leads/lead-desk";
+import { adminCall } from "@/lib/admin/admin-call";
 
 /* ── the inbox ────────────────────────────────────────────────────
  * Enquiries from the contact form, which now has somewhere to put them.
@@ -107,7 +108,7 @@ export function AdminInbox({
    * Reading one value out of `localStorage` on mount and then fetching with
    * it is what an effect is for — the alternative, seeding state from
    * `localStorage` during render, is a hydration mismatch, because the server
-   * has no browser to read. The same exemption `admin-editor.tsx` takes for
+   * has no browser to read. The same exemption `editor/editor.tsx` takes for
    * the GitHub token, for the same reason. */
   // Opens on its own: with a pasted key if there is one, otherwise with the
   // GitHub token — which is the usual case, and means the tab just works.

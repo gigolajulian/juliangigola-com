@@ -4,7 +4,7 @@ import * as React from "react";
 import type { DepositBody } from "@/components/booking/deposit-step";
 import { takesDeposit } from "@/lib/booking/paid";
 import { ORB_ROUND } from "@/components/effects/orb";
-import { TZ } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
 import { e164, fromIso, minutesOf, forgetTimes, WHERE, type PickedTime, type Step, type StepsSkin } from "@/components/booking/time-picker-parts";
 import { byCodeUnit } from "@/lib/utils";
 import { clockHere } from "@/components/booking/picker-dates";

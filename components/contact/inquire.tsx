@@ -134,7 +134,7 @@ const STEPS = [
 const KINDS = ["Brand campaign", "Editorial", "Cover art", "Artist presskit", "Music video", "Event coverage", "Other"];
 const WHEN = ["This month", "Next month", "Later this year", "Flexible"];
 const BUDGET = ["Under $2k", "$2k to $5k", "$5k to $10k", "$10k and up", "Not sure yet"];
-/* The inbox's shoot types (lib/inbox.ts SHOOT_TYPES). */
+/* The inbox's shoot types (lib/leads/enquiry.ts SHOOT_TYPES). */
 const TYPE: Record<string, string> = { "Brand campaign": "campaign", Editorial: "editorial", "Cover art": "coverart", "Artist presskit": "presskit", "Music video": "video", "Event coverage": "event" };
 
 export function CommissionForm() {

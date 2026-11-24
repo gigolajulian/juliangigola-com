@@ -17,7 +17,11 @@
  * cooldown arithmetic, so `scripts/check-inbox.mjs` can run the real
  * functions. The binding itself is touched in `lib/leads/enquiry-action.ts` and
  * `app/api/inbox/route.ts` (the enquiries; the leads are under `app/api/leads`).
+ * Its two imports are plain modules too: the script maps `@/` for them.
  * ─────────────────────────────────────────────────────────────── */
+
+import { whenPT } from "@/lib/time-zone";
+import { looksLikeEmail } from "@/lib/utils";
 
 /** What the contact form gets back from `submitEnquiry` (`lib/leads/enquiry-action.ts`). */
 export type ContactState = {
@@ -260,14 +264,6 @@ export const MAX = {
 } as const;
 
 /**
- * The one email rule every form and route uses. Deliberately loose: the only
- * thing worth rejecting is what cannot be an address.
- * Nobody gets turned away, so a one-letter ending like a@b.c passes too.
- */
-export const looksLikeEmail = (value: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
-
-/**
  * Whether a sender may write, and if not, how long they have to wait.
  *
  * `wrote` is the timestamp KV has for them, or null for a sender it has never
@@ -389,22 +385,6 @@ export type NewBooking = {
   attendees?: { name?: string; email?: string }[];
 };
 
-/** When, in Julian's time, because that is where the sessions are. */
-export const whenPT = (iso?: string) => {
-  const d = iso ? new Date(iso) : null;
-  return d && !isNaN(+d)
-    ? new Intl.DateTimeFormat("en-US", {
-        timeZone: "America/Los_Angeles", // booking-rules TZ; no imports here, scripts/check-inbox.mjs runs this file in plain Node
-        weekday: "short",
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit",
-        timeZoneName: "short",
-      }).format(d)
-    : "";
-};
-
 export function bookingEnquiry(p: NewBooking, at: number, id: string): Enquiry {
   const who = p.attendees?.[0] ?? {};
   const message = [
@@ -484,8 +464,8 @@ const esc = (s: string) =>
   s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
 /** `looks`: each frame's look in the picker
-    (`lib/picker-looks.json`), passed in so this module stays free of
-    imports. `inline`: the picks attached inline as
+    (`lib/picker-looks.json`), passed in so this module imports no
+    JSON. `inline`: the picks attached inline as
     `cid:pick-<index>`, shown under their link in the HTML copy; one
     that would not fetch is the link alone. */
 export const emailCopy = (

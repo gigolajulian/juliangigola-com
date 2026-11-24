@@ -5,7 +5,7 @@
  * Never sent from Lightroom: only when he hits Send in /admin Leads.
  * ─────────────────────────────────────────────────────────────── */
 
-import { TZ } from "@/lib/booking/rules";
+import { TZ } from "@/lib/time-zone";
 import { NAME_INK, NAME_W } from "@/lib/email/email-logo";
 import { SIG_DARK, SIG_HTML, SIG_TEXT } from "@/lib/email/email-signature";
 import { extras, isTestEmail, publicId, shotOrder, type Proof, type ViewerEvent } from "@/lib/proofs/proof-model";

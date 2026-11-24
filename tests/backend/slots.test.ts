@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { cleanHours, EVENTS } from "@/lib/booking/rules";
-import { forgetToken } from "@/lib/booking/gcal";
+import { forgetToken } from "@/lib/google";
 import { localIso, startsFor, zoned } from "@/lib/booking/slots";
 
 /* The site's own open times (`lib/booking/slots.ts`, `app/api/slots`): the rules,

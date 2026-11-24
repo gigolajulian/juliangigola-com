@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any -- fakes of Google's JSON */
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { forgetToken } from "@/lib/booking/gcal";
+import { forgetToken } from "@/lib/google";
 import { busyAll, EXTRA_KEY, icsBusy } from "@/lib/booking/slots";
 import { FakeKV } from "./fakes";
 import { byCodeUnit } from "@/lib/utils";

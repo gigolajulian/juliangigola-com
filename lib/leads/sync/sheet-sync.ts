@@ -9,7 +9,7 @@
  * GCAL_OAUTH needs only the `drive.file` scope (`scripts/gsc-auth.mjs cal`).
  * ─────────────────────────────────────────────────────────────── */
 import type { Sealer } from "../lead-crypto";
-import { gcalToken } from "@/lib/booking/gcal";
+import { gcalToken } from "@/lib/google";
 import { eventsCsv, paidTotal, readMaster, SHEET_DIRTY, type MasterEntry } from "../activity-log";
 import { csv } from "../lead-crm";
 import { everyLead } from "../lead-store";

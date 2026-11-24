@@ -1,4 +1,4 @@
-/* ── hello@'s Google Calendar, for the site's own booking engine ─────
+/* ── hello@'s Google APIs: the booking engine's calendar, the lead desk's Gmail and Sheet ──
  * It reads and writes hello@'s calendar through one
  * Workspace OAuth client, Internal, consented once as hello@
  * (`node scripts/gsc-auth.mjs <client.json> cal`). The refresh token lives

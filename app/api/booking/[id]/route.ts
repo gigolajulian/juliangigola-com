@@ -7,7 +7,7 @@ import { confirmOf, sendConfirm } from "@/lib/booking/confirm";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { cancelBooking } from "@/lib/booking/deposit";
 import { alertAndLog } from "@/lib/email/hello-mail";
-import { whenPT } from "@/lib/inbox";
+import { whenPT } from "@/lib/time-zone";
 import { bodyOf, json, taken, upstreamError } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
