@@ -20,7 +20,8 @@ export const metadata: Metadata = {
 export default async function ContractPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { seal, kv } = await sealedStore();
-  const c = kv && seal ? await readContract(kv, await seal, id) : null;
+  // One that will not open (a rotated LEADS_KEY) shows the same not-available note, logged.
+  const c = kv && seal ? await readContract(kv, await seal, id).catch((e: unknown) => (console.error("contract page open", String(e)), null)) : null;
   if (!c?.sentAt) {
     return (
       <main className="grid min-h-svh place-items-center px-6 font-mono text-[13px] text-muted-foreground">

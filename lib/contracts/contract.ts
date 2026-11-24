@@ -132,16 +132,11 @@ export async function sign(c: Contract, by: { name: unknown; email: unknown; agr
 }
 
 
-/** One contract, opened. Null for a malformed id, a missing record, and also one that cannot be opened (a rotated LEADS_KEY), unlike `readLead`, which throws. */
+/** One contract, opened. Null for a malformed id or a missing record; throws when the record is there but cannot be opened (a rotated LEADS_KEY), like `readLead`. */
 export async function readContract(kv: KV, s: Seal, id: string): Promise<Contract | null> {
   if (!isContractId(id)) return null;
   const raw = await kv.get(contractKey(id));
-  if (!raw) return null;
-  try {
-    return await s.open<Contract>(raw);
-  } catch {
-    return null;
-  }
+  return raw ? s.open<Contract>(raw) : null;
 }
 
 /** Sealed whole; the lead's pointer is plain (an id, never a name). */

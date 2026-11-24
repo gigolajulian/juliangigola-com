@@ -17,7 +17,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const { env, seal, kv } = await sealedStore();
   if (!kv || !seal) return json({ error: "This contract is not available." }, 404);
   const s = await seal;
-  const draft = await readContract(kv, s, (await params).id);
+  const draft = await readContract(kv, s, (await params).id).catch((e: unknown) => (console.error("contract sign open", String(e)), undefined));
+  // Same words to the client either way; the status says it is broken, not missing.
+  if (draft === undefined) return json({ error: "This contract is not available." }, 500);
   if (!draft || !draft.sentAt) return json({ error: "This contract is not available." }, 404);
   if (!(await env.DEPOSIT_LIMIT.limit({ key: `sign:${request.headers.get("cf-connecting-ip") ?? "unknown"}` })).success) return json({ error: "Too many tries. Wait a minute." }, 429);
   const b = (await bodyOf(request)) ?? {};
