@@ -8,7 +8,7 @@ import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { cancelBooking } from "@/lib/booking/deposit";
 import { alertAndLog } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/inbox";
-import { bodyOf, json } from "@/lib/http";
+import { bodyOf, json, upstreamError } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
@@ -40,8 +40,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     else if (body.action === "reschedule" && typeof body.start === "string") out = await lockOp(env, "reschedule", { id, start: body.start });
     else return json({ error: "Nothing to do." }, 400);
   } catch (e) {
-    console.error("booking change", String(e));
-    return json({ error: "Could not reach the calendar. Try again." }, 502);
+    return upstreamError("booking change", e, "Could not reach the calendar. Try again.");
   }
   if (!out.ok) return json({ error: SAY[out.reason][1] }, SAY[out.reason][0]);
 
@@ -89,8 +88,7 @@ async function cancelMine(env: DeskEnv, id: string) {
   try {
     out = await lockOp(env, "cancel", id);
   } catch (e) {
-    console.error("desk cancel", String(e));
-    return json({ error: "Could not reach the calendar. Try again." }, 502);
+    return upstreamError("desk cancel", e, "Could not reach the calendar. Try again.");
   }
   if (!out.ok) return json({ error: SAY[out.reason][1] }, SAY[out.reason][0]);
   const { record: r, was } = out;

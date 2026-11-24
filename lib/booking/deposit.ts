@@ -224,7 +224,7 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     // "Still confirming"; it must never turn a booking into a refund.
     const form: { [k: string]: string } = { "metadata[outcome]": r.status };
     if (r.booking) Object.assign(form, { "metadata[cal_uid]": r.booking.uid, "metadata[cal_start]": r.booking.start });
-    await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${intent}`, form).catch(() => {});
+    await stripe(env.STRIPE_SECRET_KEY, `/payment_intents/${intent}`, form).catch((e: unknown) => console.error("deposit metadata", r.status, String(e)));
   };
   await put({ status: "booking" });
 
