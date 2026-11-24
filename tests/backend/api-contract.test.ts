@@ -75,7 +75,9 @@ describe("/api/contract", () => {
     expect(await readContract(kv as never, await seal(), "B".repeat(16))).toBeNull();
     kv.data.get(`contract:${c.id}`)!.value = "not-sealed";
     await expect(readContract(kv as never, await seal(), c.id)).rejects.toThrow();
+    // vitest 4 reuses an earlier test's console spy, so count from here
     const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    log.mockClear();
     for (const res of [
       await GET(admin("GET", undefined, `?lead=${LEAD}`)),
       await GET(admin("GET", undefined, `?copy=${c.id}`)),
