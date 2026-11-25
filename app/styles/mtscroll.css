@@ -36,7 +36,9 @@
 /* ── Hero wall (3.2) ── */
 [data-mtscroll] .mt-hero .mt-stage{position:relative;height:calc(2640 * var(--u))}
 [data-mtscroll] .mt-wall{position:absolute;inset:0}
-[data-mtscroll] .mt-col{position:absolute;top:calc(var(--top) * var(--u));left:calc(50% + (65 - 720 + var(--c) * 453) * var(--u));width:calc(403 * var(--u));display:grid;row-gap:calc(96 * var(--u));will-change:transform}
+[data-mtscroll] .mt-col{position:absolute;top:calc(var(--top) * var(--u));left:calc(50% + (65 - 720 + var(--c) * 453) * var(--u));width:calc(403 * var(--u));display:grid;row-gap:calc(96 * var(--u))}
+/* a layer only while the hero is within a screen of view (engine.ts sets data-mt-near), as rows.css does, and through the intro, whose .mt-col::after stacks inside it */
+[data-mtscroll] .mt-hero[data-mt-near] .mt-col,html[data-mt-intro] .mt-hero .mt-col{will-change:transform}
 [data-mtscroll] .mt-col figure{position:relative;margin:0;height:calc(504 * var(--u))}
 [data-mtscroll] .mt-col figure.xr{display:none}
 [data-mtscroll] .mt-col .ph{position:absolute;inset:0;overflow:hidden;background:var(--card)}
