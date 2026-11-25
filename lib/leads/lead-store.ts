@@ -104,21 +104,19 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
   return moved;
 }
 
-/** Every lead's summary from the list's metadata, newest first, each with its id.
-    Trash empties itself: 30 days after it went in, a lead goes for good.
-    The list is the only reader, so it is the one place that checks. A summary that will not open is logged and left out. */
-export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<LeadSummary[]> {
+/** Every lead's summary from the list's metadata, newest first, each with its id, read only. A lead 30 days in
+    the trash is left out and its id given in `expired`, for the caller to bury (`buryLead`). A summary that will
+    not open is logged and left out. */
+export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<{ leads: LeadSummary[]; expired: string[] }> {
   const leads: LeadSummary[] = [];
+  const expired: string[] = [];
   for await (const k of everyKey<{ s?: string }>(kv, LEAD_PREFIX)) {
     const one = k.metadata?.s ? await openSummary(seal, k.name, k.metadata.s) : null;
     if (!one) continue;
-    if (one.trashedAt && trashDaysLeft(one.trashedAt, now) <= 0) {
-      await buryLead(kv, seal, leadIdOf(k.name));
-      continue;
-    }
-    leads.push({ ...one, id: leadIdOf(k.name) });
+    if (one.trashedAt && trashDaysLeft(one.trashedAt, now) <= 0) expired.push(leadIdOf(k.name));
+    else leads.push({ ...one, id: leadIdOf(k.name) });
   }
-  return leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+  return { leads: leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt)), expired };
 }
 
 /** The ids of every lead in the trash, from the list's metadata. */
