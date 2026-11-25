@@ -32,7 +32,7 @@ const warmFlow = () =>
 function RowPhoto({ r, on, sizes }: { r: BookRow; on: boolean; sizes: string }) {
   const p = SESSIONS[r.slug].photo;
   return (
-    <span className={on ? "duo on" : "duo"} style={{ "--at": r.pos } as React.CSSProperties}>
+    <span className={on ? "duo on" : "duo"} aria-hidden={on ? undefined : true} style={{ "--at": r.pos } as React.CSSProperties}>
       <Duo dark={p.d} light={p.l} alt={`${r.name} sample`} sizes={sizes} />
     </span>
   );
@@ -221,7 +221,8 @@ export function BookOnline({
               <Image
                 key={src}
                 src={src}
-                alt={`${x.name} sample ${k + 2}`}
+                alt={i === shownIdx && shot === k + 1 ? `${x.name} sample ${k + 2}` : ""}
+                aria-hidden={i === shownIdx && shot === k + 1 ? undefined : true}
                 fill
                 sizes="(max-width: 1023px) 100vw, 42vw"
                 className={i === shownIdx && shot === k + 1 ? "qp on" : "qp"}

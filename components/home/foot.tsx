@@ -18,8 +18,9 @@ const EVERY = 5000; // a new still every 5s
 /** The still behind the footer and the one after it. The list is one landscape
     frame per project from /canvas.json (a tall frame crops badly in a wide
     footer), fetched when the still first shows; it changes every 5s while it
-    is on screen. Phones hide the still, so nothing is fetched there. If the list fails, the one still stays. */
-function useStills(ref: React.RefObject<HTMLElement | null>) {
+    is on screen and holds while the pointer is over the footer or focus is in it
+    (WCAG 2.2.2). Phones hide the still, so nothing is fetched there. If the list fails, the one still stays. */
+function useStills(ref: React.RefObject<HTMLElement | null>, held: boolean) {
   const [list, setList] = React.useState([STILL]);
   const [on, setOn] = React.useState(false);
   React.useEffect(() => {
@@ -33,7 +34,7 @@ function useStills(ref: React.RefObject<HTMLElement | null>) {
     io.observe(ref.current!);
     return () => io.disconnect();
   }, [ref]);
-  const i = useEvery(on && list.length >= 2, list.length);
+  const i = useEvery(on && !held && list.length >= 2, list.length);
   return list.length < 2 ? [list[0]] : [list[i], list[(i + 1) % list.length]];
 }
 
@@ -77,11 +78,20 @@ function Phrase({ copy }: { copy?: boolean }) {
 export function HomeFoot() {
   const cards = React.useContext(CardsCtx);
   const wall = React.useRef<HTMLDivElement>(null);
-  const stills = useStills(wall);
+  const [held, setHeld] = React.useState(false);
+  const stills = useStills(wall, held);
   const year = new Date().getFullYear();
   const time = useLocalTime();
   return (
-    <footer id="contact" className="mt-foot" data-mt="foot">
+    <footer
+      id="contact"
+      className="mt-foot"
+      data-mt="foot"
+      onPointerEnter={(e) => e.pointerType === "mouse" && setHeld(true)}
+      onPointerLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setHeld(false)}
+    >
       <div className="mt-stage">
         {/* one still behind the links, dimmed by the scrim.
             The next still sits under it unseen, so it is loaded by the time it shows. */}

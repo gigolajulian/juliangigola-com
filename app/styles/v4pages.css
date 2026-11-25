@@ -40,6 +40,7 @@ html[data-theme="light"]:root:root #p-service{--sv-dim:color-mix(in srgb,var(--i
 :root .v3 .ab-logos h2{flex:none}
 :root .v3 .lg-row{display:block;flex:1;min-width:0;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
 :root .v3 .lg-row::-webkit-scrollbar{display:none}
+:root .v3 .lg-row:focus-visible{-webkit-mask:none;mask:none;outline-offset:-1px}
 :root .v3 .ab-logos .lg{display:flex;align-items:center;width:max-content;will-change:transform;backface-visibility:hidden}
 :root .v3 .ab-logos .lg>div{flex:none;height:auto;padding:13px 44px}
 :root .v3 .ab-logos .lg .mk{transform:none;color:var(--band-mk)}

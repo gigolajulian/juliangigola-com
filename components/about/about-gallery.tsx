@@ -28,17 +28,21 @@ const FRAMES = [
   },
 ];
 
+/* It holds still while the pointer is over it or focus is inside it, and a pick
+   (tick, click or swipe) stops the turning for good: the visitor has taken over
+   (WCAG 2.2.2). */
 export function AboutGallery() {
   const [i, setI] = React.useState(0);
-  const [round, setRound] = React.useState(0);
+  const [held, setHeld] = React.useState(false);
+  const [picked, setPicked] = React.useState(false);
   React.useEffect(() => {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (held || picked || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const t = setInterval(() => setI((n) => (n + 1) % FRAMES.length), 6000);
     return () => clearInterval(t);
-  }, [round]);
+  }, [held, picked]);
   const pick = (n: number) => {
     setI(n);
-    setRound((r) => r + 1);
+    setPicked(true);
   };
   const from = React.useRef<{ x: number; y: number } | null>(null);
   const start = (e: React.TouchEvent) => {
@@ -56,7 +60,13 @@ export function AboutGallery() {
     pick((i + (dx < 0 ? 1 : FRAMES.length - 1)) % FRAMES.length);
   };
   return (
-    <figure className="ab-photo">
+    <figure
+      className="ab-photo"
+      onPointerEnter={(e) => e.pointerType === "mouse" && setHeld(true)}
+      onPointerLeave={() => setHeld(false)}
+      onFocus={() => setHeld(true)}
+      onBlur={(e) => !e.currentTarget.contains(e.relatedTarget) && setHeld(false)}
+    >
       <div
         className="ab-frame"
         onClick={() => pick((i + 1) % FRAMES.length)}
@@ -68,7 +78,8 @@ export function AboutGallery() {
           <Image
             key={f.src}
             src={f.src}
-            alt={f.alt}
+            alt={n === i ? f.alt : ""}
+            aria-hidden={n === i ? undefined : true}
             width={f.w}
             height={f.h}
             sizes="(max-width: 800px) 100vw, 40vw"
@@ -82,7 +93,14 @@ export function AboutGallery() {
         <span>{FRAMES[i].cap}</span>
         <span className="ticks">
           {FRAMES.map((_, n) => (
-            <button key={n} type="button" className={n === i ? "on" : undefined} aria-label={`Photo ${n + 1}`} onClick={() => pick(n)} />
+            <button
+              key={n}
+              type="button"
+              className={n === i ? "on" : undefined}
+              aria-label={`Photo ${n + 1}`}
+              aria-pressed={n === i}
+              onClick={() => pick(n)}
+            />
           ))}
         </span>
       </figcaption>

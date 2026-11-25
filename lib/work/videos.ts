@@ -265,6 +265,17 @@ export const captionsOff = (w: Window | null | undefined) =>
     { event: "command", func: "setOption", args: ["captions", "track", {}] },
   ]);
 
+/** The film player's captions button: YouTube loads its captions module (the film's default track),
+    Vimeo turns on its English track. A film with no captions shows none either way. */
+export const captionsOn = (w: Window | null | undefined, provider: Provider) =>
+  say(
+    w,
+    provider === "youtube"
+      ? [{ event: "command", func: "loadModule", args: ["captions"] }]
+      : [{ method: "enableTextTrack", value: { language: "en", kind: "captions" } }],
+  );
+export const vimeoCaptionsOff = (w: Window | null | undefined) => say(w, [{ method: "disableTextTrack" }]);
+
 /** Vimeo: ask the player to report playback. It only answers once it is really playing, so a block page or an
     error inside the frame (Vimeo's "couldn't verify the security of your connection") never counts as a film.
     Captions go off here too: Vimeo shows them when the visitor's own Vimeo setting has them on. */

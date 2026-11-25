@@ -483,11 +483,21 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
               aria-label="Time"
               aria-valuetext={clockLabel(pick.min)}
               data-scrub=""
+              /* A spinbutton: Up and Right go later, Down and Left earlier, Home and End to the day's first and last time. */
               onKeyDown={(e) => {
-                if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-                  e.preventDefault();
-                  stepTime(e.key === "ArrowRight" ? 1 : -1);
-                }
+                const dir =
+                  e.key === "ArrowRight" || e.key === "ArrowUp"
+                    ? 1
+                    : e.key === "ArrowLeft" || e.key === "ArrowDown"
+                      ? -1
+                      : e.key === "Home"
+                        ? -at0
+                        : e.key === "End"
+                          ? times.length - 1 - at0
+                          : null;
+                if (dir === null) return;
+                e.preventDefault();
+                if (dir) stepTime(dir);
               }}
               onPointerDown={(e) => {
                 swipeXRef.current = e.clientX;
