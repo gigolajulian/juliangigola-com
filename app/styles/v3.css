@@ -1818,7 +1818,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .rail a{display:block;color:inherit;margin-top:-10px;padding:10px 0 8px}
 .v3 .pk-row{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
 .v3 .pk-c{display:flex;flex-direction:column;min-width:0}
-.v3 .pk-ph{position:relative;display:block;aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--line)}
+.v3 .pk-ph{position:relative;display:block;aspect-ratio:4/5;border-radius:4px;overflow:hidden}
 .v3 .pk-ph img{object-fit:cover}
 .v3 .pk-c h2{margin:22px 0 0;font:900 clamp(1.5rem,2.4vw,2.125rem)/.95 var(--display);letter-spacing:-.05em;white-space:nowrap}
 .v3 .pk-c h2 span{display:block;margin-top:8px;font-size:.5em;font-weight:800;letter-spacing:-.02em;color:var(--mute)}
