@@ -252,13 +252,11 @@ const csp = [
   // The two players, and only as an embed. `frame-ancestors 'self'` above
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
-  // calendar.google.com: the old /book picker's appointment schedules. That
-  // picker is gone; the entry stays until Julian drops it.
   // Stripe's Payment Element for the $100 deposit (`lib/booking/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.
   // `w.soundcloud.com`: SoundCloud's player, for a cover whose song is only there (`components/cover/cover-sound.tsx`).
-  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com https://w.soundcloud.com",
+  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com https://w.soundcloud.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
