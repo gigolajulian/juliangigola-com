@@ -1,5 +1,5 @@
 diff --git a/lib/admin/vouch.ts b/lib/admin/vouch.ts
-index c11a33f5..47cac1ac 100644
+index c83b2c86..2ff6ff78 100644
 --- a/lib/admin/vouch.ts
 +++ b/lib/admin/vouch.ts
 @@ -113,7 +113,8 @@ export function authorised(request: Request, expected?: string) {

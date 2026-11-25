@@ -1,8 +1,8 @@
 diff --git a/lib/admin/vouch.ts b/lib/admin/vouch.ts
-index c11a33f5..623ddba0 100644
+index c83b2c86..09a191a8 100644
 --- a/lib/admin/vouch.ts
 +++ b/lib/admin/vouch.ts
-@@ -73,7 +73,7 @@ async function vouch(token: string): Promise<boolean> {
+@@ -74,7 +74,7 @@ async function vouch(token: string): Promise<boolean> {
    let ok: boolean;
    if (classic) {
      const scopes = (res.headers.get("x-oauth-scopes") ?? "").split(",").map((s) => s.trim());

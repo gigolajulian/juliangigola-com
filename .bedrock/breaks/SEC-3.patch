@@ -1,8 +1,8 @@
 diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
-index 31d84155..ca1fe267 100644
+index 5e1bc278..445aeb70 100644
 --- a/.github/workflows/ci.yml
 +++ b/.github/workflows/ci.yml
-@@ -39,6 +39,7 @@ jobs:
+@@ -43,6 +43,7 @@ jobs:
            node-version: 22
            cache: npm
        - run: npm ci

@@ -1,13 +1,13 @@
 diff --git a/lib/leads/enquiry.ts b/lib/leads/enquiry.ts
-index ca015596..e395eaa8 100644
+index 8f9afb0f..fe1ec2e9 100644
 --- a/lib/leads/enquiry.ts
 +++ b/lib/leads/enquiry.ts
-@@ -453,7 +453,7 @@ const subjectOf = (e: Enquiry) => {
+@@ -431,7 +431,7 @@ const subjectOf = (e: Enquiry) => {
+   return [`${type} inquiry`, e.name, job].filter(Boolean).join(" · ");
  };
  
- const esc = (s: string) =>
--  s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
-+  s.replace(/[&"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+-const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
++const esc = (s: string) => s.replace(/[&"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
  
  /** `looks`: each frame's look in the picker
      (`lib/leads/looks.json`), passed in so this module imports no

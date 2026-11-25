@@ -1,8 +1,8 @@
 diff --git a/lib/leads/enquiry.ts b/lib/leads/enquiry.ts
-index ca015596..6469557a 100644
+index 8f9afb0f..df2e414e 100644
 --- a/lib/leads/enquiry.ts
 +++ b/lib/leads/enquiry.ts
-@@ -152,7 +152,7 @@ export const takePicks = (raw: string): string[] =>
+@@ -153,7 +153,7 @@ export const takePicks = (raw: string): string[] =>
    raw
      // A multipart form sends its line breaks as CRLF.
      .split(/\r?\n/)

@@ -85,7 +85,7 @@
  },
  "REL-7": {
   "file": ".github/workflows/ci.yml",
-  "find": "permissions:\n  contents: read\n",
-  "replace": ""
+  "find": "  contents: read",
+  "replace": "  contents: write"
  }
 }

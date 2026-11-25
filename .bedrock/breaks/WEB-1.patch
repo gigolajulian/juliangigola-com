@@ -1,8 +1,8 @@
 diff --git a/next.config.ts b/next.config.ts
-index da6cea9c..f66cf67d 100644
+index 7a184ea4..bc3877db 100644
 --- a/next.config.ts
 +++ b/next.config.ts
-@@ -220,7 +220,7 @@ const __impeccableLiveDev =
+@@ -215,7 +215,7 @@ const __impeccableLiveDev = process.env.NODE_ENV === "development" ? " http://lo
  const csp = [
    "default-src 'self'",
    "base-uri 'self'",

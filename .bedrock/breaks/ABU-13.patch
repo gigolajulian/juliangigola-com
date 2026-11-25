@@ -1,8 +1,8 @@
 diff --git a/lib/leads/enquiry-action.ts b/lib/leads/enquiry-action.ts
-index 7978d3bf..d5106a8f 100644
+index 2b94d0a2..1ddb0b48 100644
 --- a/lib/leads/enquiry-action.ts
 +++ b/lib/leads/enquiry-action.ts
-@@ -212,7 +212,7 @@ async function rateLimit(
+@@ -202,7 +202,7 @@ async function rateLimit(
     * because KV cannot be asked how many keys it holds without listing them
     * all, which is the expensive thing being avoided. */
    const today = Number((await inbox.get(dayKey(now))) ?? 0);

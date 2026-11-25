@@ -1,5 +1,5 @@
 diff --git a/lib/booking/deposit.ts b/lib/booking/deposit.ts
-index 945b2f19..a2b460d8 100644
+index 41d8fe9f..f7c40520 100644
 --- a/lib/booking/deposit.ts
 +++ b/lib/booking/deposit.ts
 @@ -103,7 +103,7 @@ export async function verifyStripe(body: string, header: string, secret: string,

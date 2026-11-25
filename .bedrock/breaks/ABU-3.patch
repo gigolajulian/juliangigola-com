@@ -1,5 +1,5 @@
 diff --git a/lib/http.ts b/lib/http.ts
-index 06daddda..2f0014ea 100644
+index 85ab26f5..236c8b76 100644
 --- a/lib/http.ts
 +++ b/lib/http.ts
 @@ -33,7 +33,7 @@ export async function limited(limiter: { limit(o: { key: string }): Promise<{ su
