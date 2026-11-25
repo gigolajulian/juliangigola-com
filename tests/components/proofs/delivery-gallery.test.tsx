@@ -64,14 +64,14 @@ describe("DeliveryGallery", () => {
     enter(" a@b.co ");
     expect(await screen.findByRole("button", { name: "Download all · 12 MB" })).toBeTruthy();
     expect(screen.getAllByRole("button", { name: /^Open photo/ })).toHaveLength(3);
-    expect(bodies()).toEqual([["/api/proof/d1", { action: "track", email: "a@b.co", kind: "open" }]]);
+    expect(bodies()).toEqual([["/api/proof/d1/track", { email: "a@b.co", kind: "open" }]]);
   });
 
   it("Download all is logged, then reads Downloaded and stays so in this browser", async () => {
     render(<DeliveryGallery id="d1" initial={delivery()} />);
     enter();
     fireEvent.click(await screen.findByRole("button", { name: "Download all · 12 MB" }));
-    expect(bodies()[1]).toEqual(["/api/proof/d1", { action: "track", email: "a@b.co", kind: "download", id: "all" }]);
+    expect(bodies()[1]).toEqual(["/api/proof/d1/track", { email: "a@b.co", kind: "download", id: "all" }]);
     expect(screen.getByRole("button", { name: /^Downloaded · / })).toBeTruthy();
     expect(Object.keys(JSON.parse(localStorage.getItem("dlv-done:d1:a@b.co")!))).toEqual(["all"]);
   });
@@ -84,7 +84,7 @@ describe("DeliveryGallery", () => {
     fireEvent.keyDown(window, { key: "ArrowLeft" });
     expect(screen.getByRole("dialog", { name: "Photo 3" })).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Save" }));
-    expect(bodies().at(-1)).toEqual(["/api/proof/d1", { action: "track", email: "a@b.co", kind: "download", id: "c" }]);
+    expect(bodies().at(-1)).toEqual(["/api/proof/d1/track", { email: "a@b.co", kind: "download", id: "c" }]);
     fireEvent.keyDown(window, { key: "Escape" });
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
@@ -100,7 +100,7 @@ describe("DeliveryGallery", () => {
     expect(screen.getByRole("heading", { name: "SUBJECT2" })).toBeTruthy();
     expect(screen.getAllByRole("button", { name: /^Open photo/ })).toHaveLength(2);
     fireEvent.click(screen.getByRole("button", { name: "Download zip · 8 MB" }));
-    expect(bodies().at(-1)).toEqual(["/api/proof/d1", { action: "track", email: "a@b.co", kind: "download", id: "M2" }]);
+    expect(bodies().at(-1)).toEqual(["/api/proof/d1/track", { email: "a@b.co", kind: "download", id: "M2" }]);
     fireEvent.click(screen.getByRole("button", { name: "ALL PHOTOS" }));
     expect(screen.getAllByRole("button", { name: /^Open photo/ })).toHaveLength(3);
   });

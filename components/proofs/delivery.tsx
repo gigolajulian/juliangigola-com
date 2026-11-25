@@ -139,10 +139,10 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
 
   const track = React.useCallback(
     (b: Record<string, unknown>) =>
-      fetch(`/api/proof/${id}`, {
+      fetch(`/api/proof/${id}/track`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: "track", ...b }),
+        body: JSON.stringify(b),
         keepalive: true,
       }).catch(() => {}),
     [id],

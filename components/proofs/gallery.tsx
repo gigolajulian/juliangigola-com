@@ -37,6 +37,8 @@ const EMAIL_STORE = "proof-email";
 const isEmail = (v: string) => looksLikeEmail(v.trim());
 
 type Step = null | "review" | "done";
+/** The gallery's POST jobs, one route each under `/api/proof/[token]/`. */
+type Job = "track" | "send";
 
 // The gate as the grid's own wall (components/proofs/wall.tsx) by default;
 // `?proofwall=0` for the plain gate. Read on the client only.
@@ -223,7 +225,7 @@ function useLookTracking({
   token: string;
   email: string | null;
   ready: boolean;
-  post: (b: Record<string, unknown>) => Promise<unknown>;
+  post: (job: Job, b: Record<string, unknown>) => Promise<unknown>;
   view: "all" | "selects";
   step: Step;
   open: number | null;
@@ -250,11 +252,11 @@ function useLookTracking({
       }
       const seconds = document.visibilityState === "visible" || beacon ? (now - shown.current) / 1000 : 0;
       shown.current = now;
-      const body = { action: "track", email, looks: looks.current, seconds };
+      const body = { email, looks: looks.current, seconds };
       looks.current = {};
       if (!seconds && !Object.keys(body.looks).length) return;
-      if (beacon) navigator.sendBeacon?.(`/api/proof/${token}`, JSON.stringify(body));
-      else void post(body);
+      if (beacon) navigator.sendBeacon?.(`/api/proof/${token}/track`, JSON.stringify(body));
+      else void post("track", body);
     };
     const io = new IntersectionObserver(
       (es) => {
@@ -358,7 +360,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
   // One array for the wall: a new one every render rebuilt the wall under its own landing (its columns and fades reset).
   const wallFrames = React.useMemo(() => frames.map((f) => ({ src: thumbOf(token, f.id), w: f.w, h: f.h })), [frames, token]);
 
-  const post = React.useCallback(<T,>(b: Record<string, unknown>) => postJson<T>(`/api/proof/${token}`, b), [token]);
+  const post = React.useCallback(<T,>(job: Job, b: Record<string, unknown>) => postJson<T>(`/api/proof/${token}/${job}`, b), [token]);
 
   // Sign in every visit, the browser's autofill fills it. Clears the address older builds kept.
   // Back from Stripe in the same tab (paid, cancelled or failed): the address it left, so they are not asked again.
@@ -372,7 +374,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   async function enter(address: string, name?: string) {
     setEmail(address);
-    const r = await post<{ picks?: string[] }>({ action: "track", email: address, kind: "open", name });
+    const r = await post<{ picks?: string[] }>("track", { email: address, kind: "open", name });
     if (!initial.submitted && r.ok && r.data?.picks) setSelects(r.data.picks);
     setReady(true);
   }
@@ -381,7 +383,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
 
   const review = () => {
     setStep("review");
-    if (email) void post({ action: "track", email, kind: "review" });
+    if (email) void post("track", { email, kind: "review" });
   };
   const finish = (done: Sent) => {
     setSent(done);
@@ -840,7 +842,7 @@ function Checkout({
   shown: boolean;
   overlay: React.RefObject<HTMLDivElement | null>;
   setStep: (s: Step) => void;
-  post: <T>(b: Record<string, unknown>) => ReturnType<typeof postJson<T>>;
+  post: <T>(job: Job, b: Record<string, unknown>) => ReturnType<typeof postJson<T>>;
   token: string;
   email: string | null;
   selects: string[];
@@ -870,7 +872,7 @@ function Checkout({
     setBusy(true);
     setVia(method);
     setError(null);
-    const r = await post<{ checkout?: string; done?: boolean; paid?: number; submittedAt?: string | null; mailed?: boolean }>({
+    const r = await post<{ checkout?: string; done?: boolean; paid?: number; submittedAt?: string | null; mailed?: boolean }>("send", {
       email,
       selects,
       method,
