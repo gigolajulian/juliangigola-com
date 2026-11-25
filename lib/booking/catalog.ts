@@ -70,7 +70,8 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     includes: ["90 minutes on location", "Two outfit changes", "Edited gallery", "Print release"],
     turnaround: "1 week",
     cal: "juliangigola/graduation",
-    photo: { d: "/work/graduation/cover.jpg", l: w("graduation", "06"), at: { d: "50% 12%" } },
+    // Julian's picks, 2026-11-24: one main frame per session, the same in both themes.
+    photo: { d: w("graduation", "01"), l: w("graduation", "01"), at: { d: "50% 15%", l: "50% 15%" } },
   },
   headshots: {
     slug: "headshots",
@@ -81,7 +82,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     includes: ["Studio lighting", "Multiple backgrounds", "Retouched selects", "Crops for web and print"],
     turnaround: "3 business days",
     cal: "juliangigola/headshots",
-    photo: { d: "/v3/headshots-cover.jpg", l: "/v3/headshots-03.jpg" },
+    photo: { d: w("headshots", "04"), l: w("headshots", "04"), at: { d: "50% 30%", l: "50% 30%" } },
   },
   "studio-digitals": {
     slug: "studio-digitals",
@@ -111,7 +112,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     from: null,
     includes: ["Full-day coverage", "Second shooter available", "Edited gallery", "Print release"],
     turnaround: "4 weeks",
-    photo: { d: w("weddings", "02"), l: w("weddings", "07") },
+    photo: { d: w("weddings", "02"), l: w("weddings", "02") },
   },
   consultation: {
     slug: "consultation",
