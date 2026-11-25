@@ -60,7 +60,7 @@ describe("ManageBooking", () => {
     render(<ManageBooking booking={{ ...booking, start: new Date(Date.now() + 10 * 36e5).toISOString() }} token="t" open="reschedule" />);
     expect(screen.queryByText("picker")).toBeNull();
     expect(screen.queryByRole("button", { name: "Reschedule" })).toBeNull();
-    expect(screen.getByText(/under 24 hours before your session, so it can no longer be moved/)).toBeTruthy();
+    expect(screen.getByText(/Your session is less than 24 hours away, so it can no longer be moved/)).toBeTruthy();
   });
 
   it("says why a cancel was refused instead of calling every 409 a taken time", async () => {
