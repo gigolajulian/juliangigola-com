@@ -121,16 +121,20 @@ const getList = (S: (typeof SESSIONS)[SessionSlug]) => {
   ];
 };
 
+const LEAD = { name: "Session", href: "/book" };
 /** `tabs`: false where the page is already about one booking (the service pages). */
 export function BookFlow({
   slug,
   tabs = true,
   h1 = false,
+  lead = false,
   startView,
 }: {
   slug: SessionSlug;
   tabs?: boolean;
   h1?: boolean;
+  /** /book: the package cards were step 01, first in the rail. */
+  lead?: boolean;
   startView?: "week" | "month";
 }) {
   const S = SESSIONS[slug];
@@ -163,6 +167,7 @@ export function BookFlow({
     <FlowShell
       {...p}
       h1={h1}
+      lead={lead ? LEAD : undefined}
       body={
         p.at === 1 ? (
           <>
@@ -217,14 +222,30 @@ function markKeyed(x: SessionSlug) {
 export function SessionBook({ slug }: { slug: SessionSlug }) {
   // the tab flag as read for this slug: a ref, since React's dev double effect would read it twice
   const fromTab = React.useRef<{ slug: SessionSlug; tab: boolean } | null>(null);
+  const page = React.useRef<HTMLElement>(null);
   /* Reached by a move inside the site (the header's Book a session), the
      cover's script never runs: React runs no script it inserts. So it goes
      up here too, before the page paints; on a full load the script has put
      it up already and this does nothing. */
   React.useLayoutEffect(() => {
     if (fromTab.current?.slug !== slug) {
-      fromTab.current = { slug, tab: tabbed };
+      /* Reached from a package card (`data-nav-step`, page-transition.tsx): the page comes in from
+         the right as the cards leave to the left, and no cover goes up over it. By script, since the root attribute
+         is gone before a CSS animation keyed on it would end. */
+      const step = "navStep" in document.documentElement.dataset;
+      fromTab.current = { slug, tab: tabbed || step };
       tabbed = false;
+      if (step && !matchMedia("(prefers-reduced-motion: reduce)").matches)
+        page.current?.animate(
+          [
+            { opacity: 0, translate: "7vw 0" },
+            { opacity: 1, translate: "0 0" },
+          ],
+          {
+            duration: 400,
+            easing: "cubic-bezier(0.32, 0.72, 0, 1)",
+          },
+        );
     }
     if (SESSIONS[slug].cal && !fromTab.current.tab) mountCover();
   }, [slug]);
@@ -236,8 +257,8 @@ export function SessionBook({ slug }: { slug: SessionSlug }) {
   );
   return (
     <div className="v3 contents">
-      <section className="v3page" id="p-flow">
-        <BookFlow slug={slug} h1 />
+      <section ref={page} className="v3page" id="p-flow">
+        <BookFlow slug={slug} h1 lead />
       </section>
       <PageFoot bare />
       {/* the booking wait's cover, up before the page paints (jg-cover.ts); only where there is a calendar to wait for; after the page, so the calendar's box is there to cover */}
