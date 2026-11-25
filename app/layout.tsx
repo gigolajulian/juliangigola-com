@@ -199,7 +199,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             __html: V4PAGES_HEAD,
           }}
         />
-        {/* `data-sky`: the time picker in the hour's light, on trial (lib/flags/sky-flag.ts). */}
+        {/* `data-sky`: the time picker in the hour's light, on unless `?sky=0` (lib/flags/sky-flag.ts). */}
         <script dangerouslySetInnerHTML={{ __html: SKY_HEAD }} />
       </head>
       <body className="min-h-full flex flex-col">
