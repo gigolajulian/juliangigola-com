@@ -21,7 +21,7 @@ html[data-mt-motion] .mt-cm-grid figure:nth-child(4) { --c: 3; }
 
 /* Cover art: each sleeve comes in from the right edge of the screen, then its record slides out of it and keeps turning with the
    scroll, left to right. --q is the row's progress from the section's --in; the light on the record stays put (its ::after turns back). */
-html[data-mt-motion] .mt-cv-sleeve { --q: clamp(0, calc((var(--in, 1) - .2) * 1.6), 1); --si: clamp(0, calc(var(--q) * 2.4 - var(--c, 0) * .2), 1); --o: clamp(0, calc(var(--q) * 1.9 - .55 - var(--c, 0) * .22), 1); --r: calc(var(--o) * 200 + var(--p, .5) * 250 * var(--tw, 1)); translate: calc((1 - var(--si)) * 100vw) 0; transition: translate .5s cubic-bezier(.23, 1, .32, 1); }
+html[data-mt-motion] .mt-cv-sleeve { --q: clamp(0, calc((var(--in, 1) - .2) * 1.6), 1); --si: clamp(0, calc(var(--q) * 2.4 - var(--c, 0) * .2), 1); /* the record comes out as the sleeve lands, then goes back in by the time the block is settled at the top */ --o: calc(clamp(0, calc(var(--q) * 1.9 - .55 - var(--c, 0) * .22), 1) * (1 - clamp(0, calc((var(--in, 1) - .85) * 6.67), 1))); --r: calc(var(--o) * 200 + var(--p, .5) * 250 * var(--tw, 1)); translate: calc((1 - var(--si)) * 100vw) 0; transition: translate .5s cubic-bezier(.23, 1, .32, 1); }
 html[data-mt-motion] .mt-cv-sleeve:nth-child(2) { --c: 1; --tw: 1.25; }
 html[data-mt-motion] .mt-cv-sleeve:nth-child(3) { --c: 2; }
 html[data-mt-motion] .mt-cv-sleeve:nth-child(4) { --c: 3; --tw: 1.25; }
