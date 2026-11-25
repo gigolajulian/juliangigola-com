@@ -32,8 +32,13 @@ describe("TimePicker", () => {
       "fetch",
       vi.fn(async () => new Response(JSON.stringify(answer))),
     );
+    /* jsdom stamps frames seconds behind performance.now(), so J and G's count
+       (jg-load.tsx) could start negative and end on 99.99999999999999, never
+       100: the picker stayed held and CI timed out. Frames on one clock. */
+    vi.stubGlobal("requestAnimationFrame", (cb: FrameRequestCallback) => setTimeout(() => cb(performance.now()), 16));
+    vi.stubGlobal("cancelAnimationFrame", (id: ReturnType<typeof setTimeout>) => clearTimeout(id));
     const { container } = render(<TimePicker path="julian/portraits-c" title="Pick a time" fallback={<p>Email me</p>} />);
-    await vi.waitFor(() => expect(container.querySelector(".ed-mhead")).toBeTruthy(), { timeout: 5000 });
+    await vi.waitFor(() => expect(container.querySelector(".ed-mhead")).toBeTruthy(), { timeout: 3000 });
     expect([...container.querySelectorAll(".ed-mhead span")].map((x) => x.textContent)).toEqual([
       "MON",
       "TUE",
