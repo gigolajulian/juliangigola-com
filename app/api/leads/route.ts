@@ -1,7 +1,7 @@
 import { buryLead, findLead, leadSummaries, openLead, trashedIds, UNOPENABLE, writeLead } from "@/lib/leads/lead-store";
 import { manualLead } from "@/lib/leads/lead-crm";
 import { patchLead } from "@/lib/leads/lead-patch";
-import { gate, noSeal, sealedGate } from "@/lib/admin/gate";
+import { sealedGate } from "@/lib/admin/gate";
 import { bodyOf, json } from "@/lib/http";
 import { logged } from "@/lib/utils";
 
@@ -37,24 +37,22 @@ export async function GET(request: Request) {
 }
 
 export async function PATCH(request: Request) {
-  const g = await gate(request);
+  const g = await sealedGate(request);
   if (g.error) return g.error;
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
   if (typeof given.id !== "string" || !given.id) return json({ error: "Unknown." }, 400);
   const seal = g.s;
-  if (!seal) return noSeal();
   const r = await patchLead(g.kv, seal, given, g.notion);
   return "error" in r ? json({ error: r.error }, r.status) : json({ lead: r.lead });
 }
 
 export async function POST(request: Request) {
-  const g = await gate(request);
+  const g = await sealedGate(request);
   if (g.error) return g.error;
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
   const seal = g.s;
-  if (!seal) return noSeal();
   const lead = manualLead(given, new Date().toISOString());
   if ("error" in lead) return json(lead, 400);
   const id = await seal.id(lead.email);
