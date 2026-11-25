@@ -1,4 +1,5 @@
 import { HttpError } from "@/lib/http";
+import { outbound } from "@/lib/net";
 
 const STRIPE = "https://api.stripe.com/v1";
 
@@ -11,8 +12,10 @@ export const STRIPE_UNSET = "Stripe is not connected (STRIPE_SECRET_KEY).";
 
 /** A call to Stripe's API: a form-encoded POST, or a GET without a form. */
 export async function stripe(key: string, path: string, form?: { [k: string]: string }, idempotency?: string) {
-  const res = await fetch(`${STRIPE}${path}`, {
+  const res = await outbound(`${STRIPE}${path}`, {
     method: form ? "POST" : "GET",
+    // A write repeats safely only with its idempotency key; Stripe then answers the first result again.
+    retry: !form || !!idempotency,
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/x-www-form-urlencoded",

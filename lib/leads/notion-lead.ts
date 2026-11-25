@@ -2,6 +2,7 @@ import type { Enquiry } from "@/lib/leads/enquiry";
 import type { Paper, Stage } from "@/lib/leads/leads";
 import { HttpError } from "@/lib/http";
 import { alertLater } from "@/lib/email/error-alert";
+import { outbound } from "@/lib/net";
 
 /* ── leads into Notion ────────────────────────────────────────────
  * Every enquiry and booking also lands as a row on the Business
@@ -64,11 +65,11 @@ export function leadProperties({ stored, status, kind, calUid, shootDate }: Noti
 
 const API = "https://api.notion.com/v1";
 const notion = (token: string, path: string, method: string, body: unknown) =>
-  fetch(API + path, {
+  outbound(API + path, {
     method,
     headers: { Authorization: `Bearer ${token}`, "Notion-Version": "2022-06-28", "Content-Type": "application/json" },
     body: JSON.stringify(body),
-    signal: AbortSignal.timeout(4000),
+    timeoutMs: 4000,
   });
 
 /** Finished projects keep their row as it was; a past client starts a new one. */

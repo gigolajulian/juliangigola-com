@@ -41,6 +41,7 @@ export default defineConfig({
           include: ["tests/backend/**/*.test.ts", "tests/lib/**/*.test.ts"],
           exclude: [...configDefaults.exclude, ...FRONTEND_LIB],
           environment: "node",
+          setupFiles: ["tests/backend/setup.ts"],
         },
       },
       {

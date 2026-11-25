@@ -1,6 +1,7 @@
 import { isGithubToken, REPO } from "@/lib/admin/github-repo";
 import { json } from "@/lib/http";
 import { sha256Hex } from "@/lib/token";
+import { outbound } from "@/lib/net";
 
 /* ── the key the editor already has ───────────────────────────────
  * Whoever can push to the repository publishes the site, so a GitHub token
@@ -40,9 +41,8 @@ const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`;
 // Bounded, and closed on failure: a slow GitHub must not hang the gate
 // open, and an unreachable one must not open it.
 const ask = (token: string, path = "", init: RequestInit = {}) =>
-  fetch(API + path, {
+  outbound(API + path, {
     ...init,
-    signal: AbortSignal.timeout(8000),
     headers: {
       authorization: `Bearer ${token}`,
       accept: "application/vnd.github+json",

@@ -17,6 +17,7 @@ import { everyLead } from "../lead-store";
 import type { Lead } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
 import { DAY_MS } from "@/lib/time-zone";
+import { outbound } from "@/lib/net";
 
 const SHEETS = "https://sheets.googleapis.com/v4/spreadsheets";
 export const SHEET_ID = "sheet:id";
@@ -46,7 +47,7 @@ export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, no
     const headers = { authorization: `Bearer ${await gcalToken(oauth)}`, "content-type": "application/json" };
     let id = await kv.get(SHEET_ID);
     if (!id) {
-      const made = await fetch(SHEETS, {
+      const made = await outbound(SHEETS, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -60,7 +61,7 @@ export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, no
     }
     const master = await readMaster(kv, s);
     const data = [await clientsCsv(kv, s, master), eventsCsv(master)];
-    const res = await fetch(`${SHEETS}/${id}:batchUpdate`, {
+    const res = await outbound(`${SHEETS}/${id}:batchUpdate`, {
       method: "POST",
       headers,
       body: JSON.stringify({

@@ -19,6 +19,7 @@ import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type HoursKV } from "@/lib/booking/slots";
 import { HttpError, statusOf } from "@/lib/http";
 import { asRecord } from "@/lib/json";
+import { outbound } from "@/lib/net";
 
 const MINUTE_MS = 6e4;
 const HOUR_MS = 36e5;
@@ -417,11 +418,16 @@ export type LockOps = {
   get: [string, { record: BookingRecord | null }];
 };
 
+/** The longest a lock call may take: a booking inserts a Calendar event inside it. */
+const LOCK_MS = 25_000;
+
 /** One call to the one lock (`worker/booking-lock.ts`). Throws when it is missing or fails. */
 export async function lockOp<K extends keyof LockOps>(env: LockEnv, op: K, arg: LockOps[K][0]): Promise<LockOps[K][1]> {
   const ns = env.BOOKING_LOCK;
   if (!ns) throw new Error("BOOKING_LOCK is not bound");
-  const res = await ns.get(ns.idFromName("hello@")).fetch("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }) });
+  const stub = ns.get(ns.idFromName("hello@"));
+  // A timeout throws like any lock error: deposit's ask-again path (#1512) handles a lost answer, so no retry here.
+  const res = await outbound("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }), timeoutMs: LOCK_MS }, (u, i) => stub.fetch(String(u), i));
   if (!res.ok) {
     // A failing lock may answer plain text: keep the status when the body is not JSON.
     const out = (await res.json().catch(() => ({}))) as { error?: string };

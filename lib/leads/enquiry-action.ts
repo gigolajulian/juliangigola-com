@@ -28,6 +28,7 @@ import {
   takeUploads,
   visitContext,
 } from "@/lib/leads/enquiry";
+import { outbound } from "@/lib/net";
 
 /**
  * Handles a contact submission.
@@ -370,7 +371,7 @@ async function pickAttachments(picks: string[], assets?: { fetch: typeof fetch }
         const path = sized.replace(/^(?:https?:\/\/[^/]+)?\/cdn-cgi\/image\/[^/]+\//, "");
         const signal = AbortSignal.timeout(8000);
         const res = /^https?:/.test(path)
-          ? await fetch(path, {
+          ? await outbound(path, {
               signal,
               cf: { image: { width: 1600, quality: 82 } },
             } as RequestInit)
