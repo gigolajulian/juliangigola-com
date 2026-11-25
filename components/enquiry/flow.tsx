@@ -257,7 +257,7 @@ export function Field({
 export const checkYou = (name: string, email: string) => {
   const err: Record<string, string> = {};
   if (!name.trim()) err.name = "Add your name";
-  if (!looksLikeEmail(email.trim())) err.email = "Email looks incomplete";
+  if (!looksLikeEmail(email.trim())) err.email = "That email does not look right";
   return err;
 };
 

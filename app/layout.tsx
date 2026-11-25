@@ -112,7 +112,7 @@ export const metadata: Metadata = {
     template: "%s | Julian Gigola",
   },
   description:
-    "Photographer and creative director based in the San Francisco Bay Area. Fashion editorial, commercial campaigns and artist development. Available worldwide.",
+    "Photographer and creative director based in the San Francisco Bay Area. Fashion editorials, brand campaigns, cover art and music videos. Available worldwide.",
   openGraph: {
     type: "website",
     siteName: "Julian Gigola",
