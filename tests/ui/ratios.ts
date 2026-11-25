@@ -73,11 +73,19 @@ export async function upright(page: Page, r: Ratio, browserName: string): Promis
 /** Errors the page throws or logs. Third parties' own noise is left out. */
 export function errorsOn(page: Page): string[] {
   const out: string[] = [];
-  page.on("pageerror", (e) => out.push(`pageerror: ${e.message.slice(0, 200)}`));
+  page.on("pageerror", (e) => {
+    /* A view transition the browser skipped. React drops this one itself, but only on the exact old
+       message, and Playwright 1.65's Chromium appends ". Viewport size changed" (React's own ready
+       handler reports it, no app code sees it). shortcut: drop when React's filter matches a prefix. */
+    if (e.message.startsWith("Transition was aborted because of invalid state")) return;
+    out.push(`pageerror: ${e.message.slice(0, 200)}`);
+  });
   page.on("console", (m) => {
     if (m.type() !== "error") return;
     const t = m.text();
     if (/cal\.com|cloudflareinsights|Failed to load resource/i.test(t)) return;
+    // Firefox (Playwright 1.65) logs errors from inside the YouTube embed's own frame, e.g. its "PREF" cookie.
+    if (/\{file: "https:\/\/www\.youtube(-nocookie)?\.com\//.test(t)) return;
     /* CI's Linux runners have no GPU, so headless Firefox there has no
        WebGL and says so. The page carries on without it. */
     if (/unable to create webgl context/i.test(t)) return;
