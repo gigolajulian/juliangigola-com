@@ -374,6 +374,8 @@ export const BOOKING_PAGES: BookingPage[] = [
       "/work/abril/02.jpg",
       "/work/mya/06.jpg",
       "/work/mya/05.jpg",
+      "/work/jenin/03.jpg",
+      "/work/jenin/05.jpg",
     ],
     book: { type: "session", session: digitals.name, title: "Book digitals", cal: "juliangigola/digitals" },
   },

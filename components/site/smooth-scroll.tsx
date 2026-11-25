@@ -17,7 +17,7 @@ export function scrollTop(glide = false) {
     live.scrollTo(
       0,
       glide
-        ? { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true }
+        ? { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true, userData: { goal: 0 } }
         : { immediate: true, force: true },
     );
   else scrollTo({ top: 0, behavior: glide ? "smooth" : "instant" });
@@ -36,7 +36,13 @@ export function glideTo(y: number, done: () => void) {
     return end();
   }
   if (live)
-    live.scrollTo(y, { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true, onComplete: end });
+    live.scrollTo(y, {
+      duration: 1.2,
+      easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2),
+      force: true,
+      onComplete: end,
+      userData: { goal: y },
+    });
   else {
     scrollTo({ top: y, behavior: "smooth" });
     addEventListener("scrollend", end, { once: true });
@@ -54,8 +60,10 @@ export function jumpTo(y: number) {
   } else scrollTo(0, y);
 }
 
-/** Where the page is headed: Lenis's target while it glides, the scroll itself otherwise. */
-export const scrollGoal = () => live?.targetScroll ?? scrollY;
+/** Where the page is headed: a timed glide's end (Lenis moves its targetScroll along with it, so a held row's snap took the glide
+ *  for a stop when a frame ran late, and cut the trip to the footer short), Lenis's target while it lerps, the scroll itself otherwise.
+ *  `goal` lives in Lenis's userData, which its next scrollTo of any kind replaces. */
+export const scrollGoal = (): number => (live?.userData as { goal?: number } | undefined)?.goal ?? live?.targetScroll ?? scrollY;
 
 /** Heads for `y` on a soft lerp that the next wheel or touch takes over (no lock): the held rows settle on an item with it (mt/motion/rows.ts).
  *  A lerp, not a timed glide: it carries on from the speed the page already has, where a timed ease stopped and started again (Julian: "smoother"). */
