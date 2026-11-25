@@ -61,8 +61,9 @@ describe("notify setting", () => {
 
 describe("track limits", () => {
   it("keeps at most 100 addresses on one gallery, and a new one past that makes no lead or mail", async () => {
-    const viewers = Object.fromEntries(Array.from({ length: 100 }, (_, i) => [`v${i}`, { events: [] }]));
-    await writeProof(kv as never, await seal(), base({ notify: "each", viewers } as Partial<Proof>));
+    const v = { first: "2026-11-01T00:00:00Z", last: "2026-11-01T00:00:00Z", visits: 1, seconds: 0, devices: [], places: [], picks: [], looks: {}, events: [] };
+    const viewers = Object.fromEntries(Array.from({ length: 100 }, (_, i) => [`v${i}`, v]));
+    await writeProof(kv as never, await seal(), base({ notify: "each", viewers }));
     expect((await open("new@gmail.com")).status).toBe(200);
     const after = (await readProof(kv as never, await seal(), TOKEN))!;
     expect(Object.keys(after.viewers ?? {})).toHaveLength(100);

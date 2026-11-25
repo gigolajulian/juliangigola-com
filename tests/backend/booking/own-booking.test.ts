@@ -99,9 +99,27 @@ describe("POST /api/book (a free call)", () => {
     expect(inserts[0].body).toMatchObject({ summary: "Editorial call: QA Test", attendees: [{ email: "qa@example.com" }] });
     expect(store.data.get(`b:${out.id}`)).toMatchObject({ eventId: "ev1", email: "qa@example.com", call: true });
     await settled();
-    expect(kv.json(kv.puts[0])).toMatchObject({ type: "booking", name: "QA Test" });
+    expect(kv.json(kv.puts.find((k) => !k.startsWith("callcap:"))!)).toMatchObject({ type: "booking", name: "QA Test" });
     expect(client.sent).toHaveLength(1);
     expect(String(client.sent[0].html)).not.toContain("cal.com");
+  });
+
+  it("keeps no Where on a call, so a stranger's text never reaches the client's mail", async () => {
+    const res = await post({ ...CALL, via: "Phone", where: "Win a prize at example.net" });
+    expect(res.status).toBe(200);
+    await settled();
+    expect(String(client.sent[0].html)).not.toContain("example.net");
+    expect(inserts[0].body).not.toHaveProperty("location");
+  });
+
+  it("books two calls a day per address, then answers 429 without touching the calendar", async () => {
+    const at = (h: number) => new Date(Date.parse(START) + h * 3600e3).toISOString();
+    expect((await post({ ...CALL, start: at(0) })).status).toBe(200);
+    expect((await post({ ...CALL, start: at(1) })).status).toBe(200);
+    const third = await post({ ...CALL, start: at(2), email: "QA@example.com" });
+    expect(third.status).toBe(429);
+    expect(inserts).toHaveLength(2);
+    expect((await post({ ...CALL, start: at(2), email: "someone-else@example.com" })).status).toBe(200);
   });
 
   it("gives one of two tabs on the same time the booking, the other a 409", async () => {
