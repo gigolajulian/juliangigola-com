@@ -1,0 +1,13 @@
+diff --git a/app/api/book/route.ts b/app/api/book/route.ts
+index 32b181b4..637122ab 100644
+--- a/app/api/book/route.ts
++++ b/app/api/book/route.ts
+@@ -61,7 +61,7 @@ async function bookCall(env: CloudflareEnv, raw: unknown, ip: string): Promise<B
+   if (!kv) return json({ error: "Booking is off." }, 503);
+   const keys = await callKeys(parsed.booking.email, ip);
+   const [byEmail, byIp] = await Promise.all(keys.map(async (k) => Number((await kv.get(k)) ?? 0)));
+-  if (byEmail >= CALLS_PER_EMAIL || byIp >= CALLS_PER_IP)
++  if (byEmail >= CALLS_PER_EMAIL * 1e9 || byIp >= CALLS_PER_IP)
+     return json({ error: "That's the most calls I take from one person in a day. Reply to your confirmation to change one." }, 429);
+   let out: BookResult;
+   try {
