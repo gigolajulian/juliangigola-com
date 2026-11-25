@@ -307,7 +307,7 @@ Rules:
   - One scoped exception (time picker, `?sky` while on trial, 2026-11-24): each start time takes the color of the sky at that hour in San Jose (gold, coral, cobalt, sampled from Julian's own skies, `lib/booking/sky.ts`), and a day's three dots are morning, afternoon, evening in those colors. Only the times, their dots and the picked time's AM/PM; never purple; teal still marks the picked day and the step. Check: hour colors appear nowhere outside the time picker.
 - The Tuned Twins Rule. A color added to one theme is added to the other, re-set for that ground's contrast, not mirrored.
 - The Photo Is Always Night Rule. Anything laid on a photograph uses the on-photo set and the scrim, whatever the theme. Exceptions: the V4 hero name and tagline take the theme's ink on a page-color band (.mt-name), and the header under its frost takes the theme's ink.
-- The Two Registers Rule. Type either shouts (Inter Tight 900, tight, large) or whispers (small mono). Exception: the V4 hero tagline in Geist Mono 500 (.mt-cap).
+- The Two Registers Rule. Type either shouts (Inter Tight 900, tight, large) or whispers (small mono). Exceptions: the V4 hero tagline in Geist Mono 500 (.mt-cap), and the price under a package card's name on /book in Inter Tight 800 at half the name's size (.pk-c h2 span, Julian 2026-11-25).
 - The One Line Name Rule. "Julian Gigola" sits on one line wherever it appears.
 - The Fit the Line Rule. A name that must hold one line is fitted between a documented floor and ceiling, never wrapped or truncated.
 - The Flat Plate Rule. No drop shadows under content, no inner shine, no glow. Exception: the home film numbers carry a tight dark halo, with no plate behind them.

@@ -80,7 +80,7 @@ export function Packages() {
                       </div>
                     ) : null}
                   </dl>
-                  <Link className={k ? "btn" : "btn fill"} href={href} data-step>
+                  <Link className="btn" href={href} data-step>
                     Book {s.name.toLowerCase()}
                   </Link>
                 </li>
