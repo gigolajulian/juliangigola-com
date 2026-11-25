@@ -229,7 +229,7 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
   const back = () => history.back();
   const keys = (e: React.KeyboardEvent) => {
     poke();
-    if ((e.target as HTMLElement).closest("button, input")) return;
+    if ((e.target as HTMLElement).closest("button, input") || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === " " || e.key === "k") {
       e.preventDefault();
       toggle();
