@@ -16,7 +16,7 @@ import {
   type Proof,
 } from "@/lib/proofs/proof-model";
 import { isEmail } from "@/lib/utils";
-import { checkPass, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
+import { checkPass, guardOf, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
 import { bodyOf, json, limited, upstreamError } from "@/lib/http";
 import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/proofs/proof-mail";
@@ -39,7 +39,7 @@ const unopenable = () => json({ error: "This gallery cannot be opened right now.
 async function load(token: string, request: Request) {
   const { env, seal, kv } = await sealedStore();
   if (!kv || !seal || !isToken(token)) return null;
-  const proof = await readPublic(kv, seal, token);
+  const proof = await readPublic(kv, seal, token, guardOf(env, request.headers));
   if (proof === undefined) return unopenable();
   return proof && !(await shutReason(proof, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv, seal, proof } : null;
 }
@@ -48,7 +48,7 @@ async function load(token: string, request: Request) {
 async function unlock(token: string, request: Request, password: unknown) {
   const { env, seal, kv } = await sealedStore();
   if (!kv || !seal || !isToken(token)) return json({ error: "This gallery closed." }, 404);
-  const p = await readPublic(kv, seal, token);
+  const p = await readPublic(kv, seal, token, guardOf(env, request.headers));
   if (p === undefined) return unopenable();
   const why = await shutReason(p, null, env.LEADS_KEY);
   if (!p || (why && why !== "locked")) return json({ error: why === "offline" ? "This gallery is offline." : "This gallery closed." }, 404);
@@ -67,8 +67,12 @@ async function unlock(token: string, request: Request, password: unknown) {
 }
 
 /** The gallery with one visitor's record updated. shortcut: read, change, write is not atomic, so two people picking in the same second can drop one log line; a Durable Object if that ever matters. */
+/** Addresses one gallery keeps: a real shoot has a handful, so past this a new address is a script minting leads. */
+const MAX_VIEWERS = 100;
+
 function withVisit(p: Proof, email: string, e: Parameters<typeof withViewerEvent>[2]): Proof {
   const k = viewerKey(email);
+  if (!p.viewers?.[k] && Object.keys(p.viewers ?? {}).length >= MAX_VIEWERS) return p;
   return { ...p, viewers: { ...p.viewers, [k]: withViewerEvent(p.viewers?.[k], new Date().toISOString(), e) } };
 }
 
@@ -86,7 +90,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
   const slow = await limited(g.env.DOWNLOAD_LIMIT, "selects", request);
   if (slow) return slow;
   if (g.proof.submittedAt) return json({ error: "Selects are already in." }, 409);
-  const b = (await bodyOf(request)) ?? {};
+  const b = (await bodyOf(request, 256 * 1024)) ?? {};
   if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
   const selects = cleanSelects(b.selects, g.proof.frames);
   const next = {
@@ -100,13 +104,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const b = (await bodyOf(request)) ?? {};
+  const b = (await bodyOf(request, 256 * 1024)) ?? {};
   if (b.action === "unlock") return unlock(token, request, b.password);
   const g = await load(token, request);
   if (!g) return json({ error: "This gallery closed." }, 404);
   if (g instanceof Response) return g;
 
   if (b.action === "track") {
+    const busy = await limited(g.env.DOWNLOAD_LIMIT, "track", request);
+    if (busy) return busy;
     if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
     // "download" (a delivery's Save or Download all) names the final, "all" for the zip, or a model ("M04") for its zip.
     const dl =
@@ -136,7 +142,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
         event: { at: next.firstDownloadAt!, kind: "download", ref: g.proof.token, note: g.proof.name },
       });
     // "each": hello@ hears of an open or a download as it happens, once per address per half hour (opens) or ten minutes (downloads).
-    const mailed = kind === "open" || kind === "download" ? kind : null;
+    // Past MAX_VIEWERS a new address is not kept: no mail, no lead.
+    const kept = !!next.viewers?.[viewerKey(b.email)];
+    const mailed = kept && (kind === "open" || kind === "download") ? kind : null;
     if (
       mailed &&
       g.proof.notify === "each" &&
@@ -148,7 +156,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
       await later(alertHello(g.env.EMAIL, a.subject, a.lines));
     }
     // A test address opening the gate (QA) stays in the gallery's own log, not on the desk as a lead.
-    if (kind === "open" && !isTestEmail(b.email))
+    if (kind === "open" && kept && !isTestEmail(b.email))
       await recordLead(g.env, b.email, {
         event: {
           at: new Date().toISOString(),

@@ -28,10 +28,13 @@ async function loadIntent(key: string, id: string): Promise<Intent | "missing" |
   }
 }
 
-export async function GET(_request: Request, ctx: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!isIntentId(id)) return json({ error: "Unknown deposit." }, 404);
   const { env } = await getCloudflareContext({ async: true });
+  // Each poll asks Stripe; the card's own poll is 20 tries a second apart.
+  const busy = await limited(env.DOWNLOAD_LIMIT, "poll", request);
+  if (busy) return busy;
   if (!env.STRIPE_SECRET_KEY) return json({ status: "pending" });
   const pi = await loadIntent(env.STRIPE_SECRET_KEY, id);
   if (pi === "missing") return json({ error: "Unknown deposit." }, 404);

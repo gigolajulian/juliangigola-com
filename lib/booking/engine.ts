@@ -109,8 +109,9 @@ export function parseBooking(raw: unknown, call = false): Parsed {
     where: cap(b.where) || undefined,
     notes: cap(b.notes) || undefined,
   };
-  // A free call also says how it is held; anything else there is no choice.
-  if (call) return { ok: true, booking: { ...booking, via: b.via === "Phone" || b.via === "Video" ? b.via : undefined } };
+  // A free call also says how it is held; anything else there is no choice. It has no place (the picker never asks,
+  // `slots` answers where: false), so none is kept: a stranger's text never reaches the client's mail as "Where".
+  if (call) return { ok: true, booking: { ...booking, where: undefined, via: b.via === "Phone" || b.via === "Video" ? b.via : undefined } };
   return { ok: true, booking };
 }
 

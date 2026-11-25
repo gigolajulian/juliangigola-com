@@ -5,7 +5,7 @@ import { checkPaid, finalize, recheckTransfer } from "@/lib/proofs/submit";
 import { PAYMENTS_DOWN } from "@/lib/stripe";
 import { headers } from "next/headers";
 import { coverFrame, isToken, publicView } from "@/lib/proofs/proof-model";
-import { readPublic, shutReason, writeProof } from "@/lib/proofs/proof-store";
+import { guardOf, readPublic, shutReason, writeProof } from "@/lib/proofs/proof-store";
 import { PassGate, Shut } from "@/components/proofs/pass-gate";
 import { ProofGallery } from "@/components/proofs/gallery";
 import { CARD } from "@/lib/proofs/watermark";
@@ -28,8 +28,8 @@ const base: Metadata = {
 /** The link preview when the gallery is pasted into a text, DM or email: a card of the page's header and its first frame, watermarked. Never the client's name or address. */
 export async function generateMetadata({ params }: { params: Promise<{ token: string }> }): Promise<Metadata> {
   const { token } = await params;
-  const { seal, kv } = await sealedStore();
-  const p = isToken(token) && kv && seal ? await readPublic(kv, seal, token) : null;
+  const { env, seal, kv } = await sealedStore();
+  const p = isToken(token) && kv && seal ? await readPublic(kv, seal, token, guardOf(env, await headers())) : null;
   const f = p && coverFrame(p);
   if (!f) return base;
   // The URL carries the frame and crop, so a new pick is a new URL and no app shows a stale preview.
@@ -55,7 +55,7 @@ export default async function ProofPage({
   const { paid } = await searchParams;
   const { env, seal: s, kv } = await sealedStore();
   if (!isToken(token) || !kv || !s) return <Shut />;
-  let p = await readPublic(kv, s, token);
+  let p = await readPublic(kv, s, token, guardOf(env, await headers()));
   // Delivered: the same shoot id now opens the finals.
   if (p?.deliveredAt) redirect(`/delivery/${token}`);
   // Offline or behind a password: nothing of the gallery is rendered until the gate's cookie is right.
