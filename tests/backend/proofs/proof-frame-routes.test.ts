@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sealer } from "@/lib/seal";
 import type { Proof } from "@/lib/proofs/proof-model";
 import { writeProof } from "@/lib/proofs/proof-store";
+import { proofKey } from "@/lib/proofs/proof-model";
 import { FakeKV, LEADS_KEY } from "../fakes";
 
 /* /proof/<token>/f/<id> and /proof/<token>/card: a proof frame and the
@@ -93,6 +94,17 @@ describe("/proof/[token]/f/[id]", () => {
   it("is a 404 without the bindings", async () => {
     ctx.env = { INBOX: kv, LEADS_KEY };
     expect((await getFrame("a")).status).toBe(404);
+  });
+});
+
+describe("a gallery that will not open", () => {
+  it("answers 404 on the frame and the card, logged, never a thrown error", async () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    kv.data.get(proofKey(TOKEN))!.value = "not-sealed";
+    expect((await getFrame("a")).status).toBe(404);
+    expect((await getCard()).status).toBe(404);
+    expect(errors).toHaveBeenCalledWith("proof open", TOKEN, expect.any(String));
+    errors.mockRestore();
   });
 });
 

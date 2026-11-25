@@ -43,7 +43,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
   const [back, setBack] = React.useState(0);
   const usd = b.deposit ?? LEGACY_DEPOSIT;
   const past = Date.parse(b.start) <= now;
-  const share = refundShare({ intent: b.paid ? "x" : undefined, start: b.start, firstStart: b.firstStart, fee: b.fee }, now);
+  const share = b.paid ? refundShare({ start: b.start, firstStart: b.firstStart, fee: b.fee }, now) : 0;
   const top = b.fee ? "90% back" : "a full refund";
   const movable = (b.moves ?? 0) < MAX_MOVES && Date.parse(b.start) - now >= MOVE_HOURS * 36e5;
   const part = refundCents(usd, share) / 100;
