@@ -23,7 +23,7 @@ const req = (method: string, body?: unknown, key = KEY) =>
 beforeEach(() => {
   forgetToken();
   vi.setSystemTime(Date.parse("2026-11-11T18:00:00Z"));
-  ctx.env = {
+  ctx.env = { DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
     GCAL_OAUTH: OAUTH,
     INBOX_KEY: KEY,
     BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })),

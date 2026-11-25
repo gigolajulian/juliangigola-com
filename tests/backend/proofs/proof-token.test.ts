@@ -42,7 +42,7 @@ beforeEach(async () => {
   await writeProof(kv as never, await seal(), p as Proof);
   session = { id: "cs_test_x", status: "complete", payment_status: "paid", amount_total: 1500, metadata: { proof: TOKEN } };
   vi.stubGlobal("fetch", async (url: string) => {
-    if (url.endsWith("/checkout/sessions/cs_test_x")) return reply(session);
+    if (url.includes("/checkout/sessions/cs_test_x?expand")) return reply(session);
     throw new Error(`unexpected fetch ${url}`);
   });
 });

@@ -1,6 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { parseBeacon } from "@/lib/analytics/beacon";
-import { NO_STORE } from "@/lib/http";
+import { NO_STORE, textOf } from "@/lib/http";
 
 /* ── beacon ───────────────────────────────────────────────────────
  * Where `click-beacon.tsx` sends a page view's clicks and scroll depth.
@@ -14,8 +14,8 @@ export const dynamic = "force-dynamic";
 const done = () => new Response(null, { status: 204, headers: NO_STORE });
 
 export async function POST(request: Request) {
-  const text = await request.text();
-  if (text.length > 8_000) return done();
+  const text = await textOf(request, 8_000);
+  if (text === null) return done();
   let b;
   try {
     b = parseBeacon(JSON.parse(text));

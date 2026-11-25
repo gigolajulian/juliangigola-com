@@ -69,6 +69,7 @@ beforeEach(() => {
   ctx.env = {
     INBOX: new FakeKV(),
     PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) },
+    DOWNLOAD_LIMIT: { limit: async () => ({ success: allowed }) },
     STRIPE_SECRET_KEY: "sk_test_x",
     STRIPE_WEBHOOK_SECRET: WHSEC,
     EMAIL: { send: async (m: Mail) => void mails.push(m) },
