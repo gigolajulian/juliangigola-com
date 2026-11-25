@@ -95,7 +95,7 @@ export async function submitEnquiry(_prev: ContactState, formData: FormData): Pr
       status: "error",
       errors,
       values,
-      message: "Please check the fields marked below.",
+      message: "Check the fields marked below.",
     };
   }
 

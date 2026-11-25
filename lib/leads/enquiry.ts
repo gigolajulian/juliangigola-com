@@ -289,15 +289,15 @@ export function waitPhrase(seconds: number): string {
 export function problems(values: { name: string; email: string; message: string }): Record<string, string> {
   const errors: Record<string, string> = {};
 
-  if (!values.name) errors.name = "Please add your name.";
+  if (!values.name) errors.name = "Add your name.";
   else if (values.name.length > MAX.name) errors.name = "That is longer than the form can send.";
 
-  if (!values.email) errors.email = "Please add an email so I can reply.";
-  else if (!looksLikeEmail(values.email)) errors.email = "That does not look like an email address.";
+  if (!values.email) errors.email = "Add an email so I can reply.";
+  else if (!looksLikeEmail(values.email)) errors.email = "That email does not look right.";
   else if (values.email.length > MAX.email) errors.email = "That is longer than the form can send.";
 
-  if (!values.message) errors.message = "Please say a little about the project.";
-  else if (values.message.length > MAX.message) errors.message = "Please trim this a little.";
+  if (!values.message) errors.message = "Say a little about the project.";
+  else if (values.message.length > MAX.message) errors.message = "Trim this a little.";
 
   return errors;
 }
