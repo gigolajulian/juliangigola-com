@@ -50,6 +50,8 @@ export function amountOf(slug: string): number {
 }
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
+/** The wait before the lock is asked again after an error. */
+export const RETRY_MS = 1000;
 /** Each paid event's name, as its rule titles it. */
 export const SESSION: { [slug: string]: string } = Object.fromEntries(DEPOSIT_SESSIONS.map((s) => [s, EVENTS[s].title]));
 
@@ -163,7 +165,7 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   // A refund after an error is not a taken time: say what broke.
   const next =
     broke && status === "refunded"
-      ? `The booking failed on an error (${broke}), so Stripe refunded them. Nothing is booked.`
+      ? `The booking failed on an error (${broke}), so Stripe refunded them. Check Calendar for an event the error may have left.`
       : NEXT[status];
   const lines = [who ? `${who.name} <${who.email}>` : "Unknown client", next, `Stripe: ${link}`];
   if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
@@ -259,11 +261,20 @@ export async function bookDeposit(
     const want = parsed.booking;
     // The site's engine rechecks and books in one step, inside its lock.
     // Only the booking itself may end in a refund: a step after it never undoes a booked time.
-    const own = await lockOp(env, "book", { ...want, intent, deposit: usd }).catch((e: unknown) => {
-      broke = String(e);
-      console.error("deposit book", broke);
-      return null;
-    });
+    // An error can come after the lock booked (its answer lost on the way back), so it is asked once more before
+    // any refund: a book by intent returns the booking it already made (`bookOwn`) instead of booking twice.
+    const book = () => lockOp(env, "book", { ...want, intent, deposit: usd });
+    const own = await book()
+      .catch(async (e: unknown) => {
+        console.error("deposit book", String(e));
+        await new Promise((go) => setTimeout(go, RETRY_MS));
+        return book();
+      })
+      .catch((e: unknown) => {
+        broke = String(e);
+        console.error("deposit book again", broke);
+        return null;
+      });
     if (own?.ok) {
       const booking = own.record;
       await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });

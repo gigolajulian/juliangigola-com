@@ -20,7 +20,7 @@ const background = vi.hoisted(() => [] as Promise<unknown>[]);
 vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx, (p) => background.push(p)));
 const settled = () => Promise.all(background.splice(0));
 const { POST: book } = await import("@/app/api/book/route");
-const { bookDeposit } = await import("@/lib/booking/deposit");
+const { bookDeposit, RETRY_MS } = await import("@/lib/booking/deposit");
 
 // Wednesday 10 AM Pacific, a week out.
 const now = Date.now();
@@ -209,5 +209,26 @@ describe("bookDeposit (a paid session on the site's engine)", () => {
     const text = String(mail.sent[0].text);
     expect(text).toContain("lock down");
     expect(text).not.toContain("The time was gone");
+  });
+
+  it("asks the lock again after an error, and keeps a booking it made instead of refunding", async () => {
+    const real = env().BOOKING_LOCK as unknown as { idFromName(n: string): unknown; get(id: unknown): { fetch(url: string, init?: RequestInit): Promise<Response> } };
+    let calls = 0;
+    // The first answer is lost after the lock booked: the retry finds the booking by its intent.
+    const flaky = {
+      idFromName: (n: string) => real.idFromName(n),
+      get: (id: unknown) => ({
+        fetch: async (url: string, init?: RequestInit) => {
+          const res = await real.get(id).fetch(url, init);
+          if (++calls === 1) throw new Error("answer lost");
+          return res;
+        },
+      }),
+    };
+    const t = performance.now();
+    expect(await bookDeposit({ ...env(), BOOKING_LOCK: flaky as never }, "pi_TEST1234567890", META)).toBe("booked");
+    expect(performance.now() - t).toBeGreaterThanOrEqual(RETRY_MS - 50);
+    expect(inserts).toHaveLength(1);
+    expect(stripeCalls.some((u) => u.endsWith("/refunds"))).toBe(false);
   });
 });
