@@ -10,6 +10,7 @@ import {
   markReminded,
   readHours,
   rescheduleOwn,
+  takeQuota,
   writeHours,
   type LockOps,
   type Store,
@@ -56,6 +57,7 @@ export class BookingLock {
       hours: async () => ({ hours: await readHours(store) }),
       // Checked by the route (`cleanHours`); queued so no booking reads half of it.
       setHours: (hours) => this.serial(async () => (await writeHours(store, hours), { hours })),
+      take: ({ key, day, cap }) => this.serial(() => takeQuota(store, String(key), String(day), Number(cap))),
       get: async (id) => ({ record: (await findBooking(store, String(id))) ?? null }),
     };
   }

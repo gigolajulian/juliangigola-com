@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { readFileSync } from "node:fs";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // `work`, not `work-data`. The generated manifest is every project the old
 // site ever had; `work.ts` is the set actually published, with hidden ones
@@ -7,6 +8,10 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // would have got, because it looks like the site meant to take them there.
 import { LINKABLE, CATEGORIES, LISTINGS, categoryHref } from "./lib/work/work";
 import { BOOKING_SLUGS } from "./lib/booking/slugs";
+
+/** The site's one version (version.json; package.json's stays out of commits), checked against RELEASES.md and the tags
+    by scripts/check-version.mjs. */
+const SITE_VERSION: string = JSON.parse(readFileSync("version.json", "utf8")).version;
 
 /**
  * The old site published every project at the site root — `/wired-magazine`,
@@ -317,9 +322,10 @@ const LEADS_HOST = "leads.juliangigola.com";
 const nextConfig: NextConfig = {
   // `next dev` refuses its scripts to other hosts; these two are the same app.
   allowedDevOrigins: [ADMIN_HOST, LEADS_HOST],
-  // The build stamp `/api/build` reports (Workers Builds sets the sha).
+  // The build stamp `/api/build` reports (Workers Builds sets the sha), and the one version line (REL-9).
   env: {
     BUILD_SHA: process.env.WORKERS_CI_COMMIT_SHA ?? "local",
+    BUILD_VERSION: SITE_VERSION,
     NEXT_PUBLIC_IMAGE_CDN_ORIGIN: IMAGE_CDN_ORIGIN,
   },
   // Hides the floating dev badge that sits over the bottom-left corner of
@@ -412,7 +418,11 @@ const nextConfig: NextConfig = {
       { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
       // Last, so it overrides the site-wide Permissions-Policy: no payment on the private pages or the admin hosts.
       ...NO_PAYMENT_PATHS.map((source) => ({ source, headers: [{ key: "Permissions-Policy", value: NO_PAYMENT }] })),
-      ...[ADMIN_HOST, LEADS_HOST].map((value) => ({ source: "/:path*", has: [{ type: "host" as const, value }], headers: [{ key: "Permissions-Policy", value: NO_PAYMENT }] })),
+      ...[ADMIN_HOST, LEADS_HOST].map((value) => ({
+        source: "/:path*",
+        has: [{ type: "host" as const, value }],
+        headers: [{ key: "Permissions-Policy", value: NO_PAYMENT }],
+      })),
     ];
   },
 

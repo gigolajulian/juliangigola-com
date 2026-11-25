@@ -57,13 +57,15 @@ describe("worker.ts fetch", () => {
 describe("GET /api/build", () => {
   it("answers the baked-in commit", async () => {
     vi.stubEnv("BUILD_SHA", "abc1234");
+    vi.stubEnv("BUILD_VERSION", "3.0.418");
     const res = build();
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ sha: "abc1234" });
+    expect(await res.json()).toEqual({ sha: "abc1234", version: "3.0.418" });
   });
 
   it("says local when no commit was baked in", async () => {
     vi.stubEnv("BUILD_SHA", undefined);
-    expect(await build().json()).toEqual({ sha: "local" });
+    vi.stubEnv("BUILD_VERSION", undefined);
+    expect(await build().json()).toEqual({ sha: "local", version: "local" });
   });
 });

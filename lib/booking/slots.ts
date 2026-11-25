@@ -4,6 +4,7 @@ import { gcal } from "@/lib/google";
 import { sha256Hex } from "@/lib/token";
 import { HttpError } from "@/lib/http";
 import { pad } from "@/lib/utils";
+import { outbound } from "@/lib/net";
 
 /* ── open times, from hello@'s free/busy ──────────────────────────
  * The rules (`lib/booking/rules.ts`) say when Julian works; Google's
@@ -184,7 +185,7 @@ async function readFeed(src: string) {
     feeds.set(src, { at: Date.now(), busy: Promise.resolve(busy) });
     return busy;
   }
-  const res = await fetch(src.replace(/^webcal:/i, "https:"), { signal: AbortSignal.timeout(FEED_MS) });
+  const res = await outbound(src.replace(/^webcal:/i, "https:"), { timeoutMs: FEED_MS });
   if (!res.ok) throw new HttpError(`ICS ${res.status}`, res.status);
   const busy = icsBusy(await res.text());
   feeds.set(src, { at: Date.now(), busy: Promise.resolve(busy) });

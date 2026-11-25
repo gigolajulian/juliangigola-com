@@ -23,7 +23,10 @@ beforeEach(() => {
   busy = [];
   shifts = [];
   asked = [];
-  ctx.env = { DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) }, GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
+  ctx.env = {
+    DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
+    GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }),
+  };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
     if (url.includes("/events?")) return Response.json({ items: shifts });
@@ -103,6 +106,15 @@ describe("startsFor", () => {
     expect(instantIn(2026, 3, 7, 600)).toBe(Date.parse("2026-03-07T18:00:00Z"));
     expect(localIso(Date.parse("2026-03-08T17:00:00Z"), "Europe/Paris")).toBe("2026-03-08T18:00:00+01:00");
   });
+
+  it("follows the clocks back when daylight time ends", () => {
+    // Sunday 2026-11-01, the day PST starts: 10 AM is UTC-8, the day before UTC-7.
+    expect(instantIn(2026, 11, 1, 600)).toBe(Date.parse("2026-11-01T18:00:00Z"));
+    expect(instantIn(2026, 10, 31, 600)).toBe(Date.parse("2026-10-31T17:00:00Z"));
+    // Paris fell back a week earlier, so for that week the gap is eight hours, not nine.
+    expect(localIso(Date.parse("2026-10-27T17:00:00Z"), "Europe/Paris")).toBe("2026-10-27T18:00:00+01:00");
+    expect(localIso(Date.parse("2026-11-02T18:00:00Z"), "America/Los_Angeles")).toBe("2026-11-02T10:00:00-08:00");
+  });
 });
 
 describe("GET /api/slots", () => {
@@ -115,6 +127,20 @@ describe("GET /api/slots", () => {
     expect(r).toMatchObject({ title: "Portraits", length: 60, where: true });
     expect(r.slots["2026-11-18"][0]).toBe("2026-11-18T15:00:00-05:00");
     expect(Object.keys(r.slots)).toEqual(["2026-11-18"]);
+    vi.useRealTimers();
+  });
+
+  it("keeps the same Pacific hours on both sides of the clocks going back", async () => {
+    vi.setSystemTime(Date.parse("2026-10-20T18:00:00Z"));
+    busy = [];
+    const first = async (day: string) =>
+      (await (await get(`slug=portraits&start=${day}&end=${day}&timeZone=UTC`)).json()).slots[day]?.[0] as string;
+    const [before, after] = [await first("2026-10-28"), await first("2026-11-04")];
+    expect(localIso(Date.parse(before), "America/Los_Angeles").slice(11, 16)).toBe(
+      localIso(Date.parse(after), "America/Los_Angeles").slice(11, 16),
+    );
+    // The same wall time is an hour later in UTC once PST starts.
+    expect(Date.parse(after) - Date.parse("2026-11-04T00:00:00Z") - (Date.parse(before) - Date.parse("2026-10-28T00:00:00Z"))).toBe(3600e3);
     vi.useRealTimers();
   });
 

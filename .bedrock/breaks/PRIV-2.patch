@@ -1,0 +1,13 @@
+diff --git a/lib/scrub.ts b/lib/scrub.ts
+index cfde6a37..e0726400 100644
+--- a/lib/scrub.ts
++++ b/lib/scrub.ts
+@@ -13,7 +13,7 @@ const PHONE = /(?<![\w-])(?:\+1[ .-]?)?\(?\d{3}\)?[ .-]?\d{3}[ .-]?\d{4}(?![\w-]
+ const SECRET = /\b(?:sk|rk|pk|whsec)_(?:live|test)_\w+|\bgh[pousr]_\w{20,}|\bgithub_pat_\w+|\bBearer\s+[\w.~+/=-]+/g;
+ 
+ /** The text with addresses, phone numbers and keys masked. */
+-export const scrub = (text: string) => text.replace(SECRET, "[secret]").replace(EMAIL, "[email]").replace(PHONE, "[phone]");
++export const scrub = (text: string) => text.replace(SECRET, "[secret]").replace(EMAIL, (m) => m).replace(PHONE, "[phone]");
+ 
+ const clean = (v: unknown): unknown =>
+   typeof v === "string" ? scrub(v) : v instanceof Error ? scrub(`${v.name}: ${v.message}`) : v;

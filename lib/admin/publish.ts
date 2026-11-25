@@ -11,6 +11,7 @@ import { commitFiles, failureMessage, readFile, type CommitFile, TOKEN_STORE } f
 import { GITHUB_API, REPO } from "@/lib/admin/github-repo";
 import type { Bts, Copy, Credit } from "@/lib/work/work-types";
 import { localRemove } from "@/lib/storage";
+import { outbound } from "@/lib/net";
 
 /**
  * The manifest half of the draft, as the editor holds it.
@@ -72,7 +73,7 @@ export async function loadRepo(
   baseline: Draft,
 ): Promise<{ error: string } | { sha: string; content: SiteContent; repo: Draft }> {
   try {
-    const res = await fetch(contentUrl, { headers: headers(t), cache: "no-store" });
+    const res = await outbound(contentUrl, { headers: headers(t), cache: "no-store" });
     if (!res.ok) {
       const message = await failureMessage(res);
       // A rejected token is not worth keeping, otherwise every visit
@@ -161,7 +162,7 @@ export async function publishDraft({
 }): Promise<{ error: string } | { sha: string | null; written: Draft }> {
   onStatus({ kind: "working", message: "Checking for newer content…" });
   try {
-    const check = await fetch(contentUrl, { headers: headers(token), cache: "no-store" });
+    const check = await outbound(contentUrl, { headers: headers(token), cache: "no-store" });
     if (!check.ok) {
       return { error: `GitHub said ${check.status}: ${await failureMessage(check)}` };
     }
@@ -260,7 +261,7 @@ export async function publishDraft({
 
     // Re-read so a second publish in the same session compares against what
     // is now in the repo rather than against the SHA we just replaced.
-    const after = await fetch(contentUrl, { headers: headers(token), cache: "no-store" });
+    const after = await outbound(contentUrl, { headers: headers(token), cache: "no-store" });
     return { sha: (await after.json())?.sha ?? null, written };
   } catch (e) {
     return {

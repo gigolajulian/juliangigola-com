@@ -28,6 +28,8 @@ import {
   takeUploads,
   visitContext,
 } from "@/lib/leads/enquiry";
+import { outbound } from "@/lib/net";
+import { lockOp, type LockEnv } from "@/lib/booking/engine";
 
 /**
  * Handles a contact submission.
@@ -121,7 +123,7 @@ export async function submitEnquiry(_prev: ContactState, formData: FormData): Pr
     const day = new Date(now).toISOString().slice(0, 10);
     const hash = await senderHash(await headers(), day);
 
-    const gate = await rateLimit(inbox, hash, now, values, mailto);
+    const gate = await rateLimit(inbox, hash, now, values, mailto, env);
     if ("refused" in gate) return gate.refused;
 
     const country = typeof cf?.country === "string" ? cf.country : undefined;
@@ -170,6 +172,19 @@ function mailtoFor(type: string, values: Values): string {
   return `mailto:${TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
+/** The day's count from the booking lock, taken and counted in one step so two sends at once cannot both pass the
+    last place. Null when there is no lock or it cannot answer (a Worker not yet deployed with `take`): the KV count,
+    racy but still a ceiling, stands in, so the form never opens wider than before. */
+async function quotaFromLock(lock: LockEnv | undefined, now: number) {
+  if (!lock?.BOOKING_LOCK) return null;
+  try {
+    return await lockOp(lock, "take", { key: "contact", day: new Date(now).toISOString().slice(0, 10), cap: DAILY_CAP });
+  } catch (e) {
+    console.error("contact: quota from KV", String(e));
+    return null;
+  }
+}
+
 /** The cooldown, then the daily ceiling. Either refuses, or hands back today's count. */
 async function rateLimit(
   inbox: Inbox,
@@ -177,6 +192,7 @@ async function rateLimit(
   now: number,
   values: Values,
   mailto: string,
+  lock?: LockEnv,
 ): Promise<{ refused: ContactState } | { today: number }> {
   /* The cooldown. One enquiry per sender every five minutes.
    *
@@ -201,8 +217,9 @@ async function rateLimit(
    * address; this is what stands behind it. Counted rather than measured
    * because KV cannot be asked how many keys it holds without listing them
    * all, which is the expensive thing being avoided. */
-  const today = Number((await inbox.get(dayKey(now))) ?? 0);
-  if (today >= DAILY_CAP) {
+  const held = await quotaFromLock(lock, now);
+  const today = held ? held.count : Number((await inbox.get(dayKey(now))) ?? 0);
+  if (held ? !held.ok : today >= DAILY_CAP) {
     return {
       refused: {
         status: "unconfigured",
@@ -370,7 +387,7 @@ async function pickAttachments(picks: string[], assets?: { fetch: typeof fetch }
         const path = sized.replace(/^(?:https?:\/\/[^/]+)?\/cdn-cgi\/image\/[^/]+\//, "");
         const signal = AbortSignal.timeout(8000);
         const res = /^https?:/.test(path)
-          ? await fetch(path, {
+          ? await outbound(path, {
               signal,
               cf: { image: { width: 1600, quality: 82 } },
             } as RequestInit)

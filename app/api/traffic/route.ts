@@ -4,6 +4,7 @@ import { refuseAdmin } from "@/lib/admin/vouch";
 import { SITE_HOST, ZONE, cloudflare, rumVisits, searchConsole as gsc, sitePath } from "@/lib/analytics";
 import { HttpError, json, upstreamError } from "@/lib/http";
 import { DAY_MS } from "@/lib/time-zone";
+import { outbound } from "@/lib/net";
 
 /* ── traffic ──────────────────────────────────────────────────────
  * The numbers behind /admin's Traffic tab, from Cloudflare's own analytics:
@@ -127,7 +128,7 @@ async function bingWebmaster(key?: string) {
   if (!key) return { error: "Bing Webmaster Tools not connected yet." };
   try {
     const call = async (method: string) => {
-      const res = await fetch(
+      const res = await outbound(
         `https://ssl.bing.com/webmaster/api.svc/json/${method}?siteUrl=${encodeURIComponent("https://juliangigola.com/")}&apikey=${encodeURIComponent(key.trim())}`,
       );
       const text = await res.text();

@@ -25,7 +25,8 @@ export async function alertHello(
     });
     return true;
   } catch (e) {
-    console.error("hello mail", subject.split(":")[0], String(e));
+    // The error only: its heading can name the client.
+    console.error("hello mail", String(e));
     // Images can push a mail past the size limit: the mail matters more, so it goes again without them.
     if (attachments.length)
       return alertHello(

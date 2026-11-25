@@ -17,8 +17,12 @@ import { lockOp, type BookingEnv } from "../lib/booking/engine";
 import { manageLinks } from "../lib/booking/manage-link";
 import { confirmOf, sendConfirm } from "../lib/booking/confirm";
 import { TZ } from "../lib/time-zone";
+import { scrubConsole } from "../lib/scrub";
 
 export { BookingLock } from "./booking-lock";
+
+// Logs carry no addresses, phone numbers or keys (`lib/scrub.ts`).
+scrubConsole();
 
 type Env = Pick<BookingEnv, "BOOKING_LOCK" | "CLIENT_EMAIL" | "BOOKING_SECRET"> & { WORKER_KEY?: string; SITE?: CloudflareEnv["ASSETS"] };
 
