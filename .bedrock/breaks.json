@@ -25,6 +25,16 @@
     "file": "lib/booking/manage-link.ts",
     "find": "enc.encode(`${id}.${m[1]}`)",
     "replace": "enc.encode(`${m[1]}`)"
+   },
+   {
+    "file": "lib/proofs/proof-store.ts",
+    "find": "const passMsg = (p: Pick<Proof, \"token\" | \"pass\">) => enc(`${p.token}:${p.pass?.hash}`);",
+    "replace": "const passMsg = (p: Pick<Proof, \"token\" | \"pass\">) => enc(`gallery:${p.pass ? \"set\" : \"\"}`);"
+   },
+   {
+    "file": "lib/proofs/proof-store.ts",
+    "find": ".find((c) => c.startsWith(`${name}=`))",
+    "replace": ".find((c) => c.startsWith(\"gp_\"))"
    }
   ]
  },
@@ -117,5 +127,20 @@
   "file": "lib/proofs/submit.ts",
   "find": "if (charge && (charge.refunded || (charge.amount_refunded ?? 0) > 0)) return null;",
   "replace": "if (charge && charge.refunded && false) return null;"
+ },
+ "ABU-1": {
+  "file": "lib/http.ts",
+  "find": "return (await limiter.limit({ key: `${kind}:t:${target}` })).success ? null : tooMany();",
+  "replace": "return (await limiter.limit({ key: `${kind}:t:${target}` })).success || target ? null : tooMany();"
+ },
+ "OBS-1": {
+  "file": "lib/email/error-alert.ts",
+  "find": "    await alertHello(env.EMAIL, `Site error: ${label}`, [",
+  "replace": "    if (!label) await alertHello(env.EMAIL, `Site error: ${label}`, ["
+ },
+ "DATA-2": {
+  "file": "instrumentation.ts",
+  "find": "  await reportError(`${request.method} ${context.routePath ?? \"unknown route\"}`, err);",
+  "replace": "  void reportError;"
  }
 }

@@ -1,0 +1,13 @@
+diff --git a/lib/http.ts b/lib/http.ts
+index 4f29e7b2..bad68f14 100644
+--- a/lib/http.ts
++++ b/lib/http.ts
+@@ -43,7 +43,7 @@ export async function limited(limiter: Limiter, kind: string, request: Request,
+ 
+ /** The same limit on `target` alone, for a target known only once the body is read. */
+ export async function limitedFor(limiter: Limiter, kind: string, target: string) {
+-  return (await limiter.limit({ key: `${kind}:t:${target}` })).success ? null : tooMany();
++  return (await limiter.limit({ key: `${kind}:t:${target}` })).success || target ? null : tooMany();
+ }
+ 
+ function tooMany() {

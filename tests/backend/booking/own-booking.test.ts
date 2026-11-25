@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY } from "../fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, refusesTargets } from "../fakes";
 import { readLog } from "@/lib/leads/activity-log";
 import { sealer } from "@/lib/seal";
 import { forgetToken } from "@/lib/google";
@@ -97,6 +97,14 @@ beforeEach(() => {
 const post = (body: unknown) => book(new Request("https://juliangigola.com/api/book", { method: "POST", body: JSON.stringify(body) }));
 
 describe("POST /api/book (a free call)", () => {
+  it("limits per target: many addresses booking calls for one email meet one limit", async () => {
+    const lim = refusesTargets();
+    ctx.env.PUBLIC_WRITE_LIMIT = lim;
+    expect((await post(CALL)).status).toBe(429);
+    expect(lim.keys.some((k) => k.startsWith("book:t:"))).toBe(true);
+    expect(inserts).toEqual([]);
+  });
+
   it("inserts the event with no Google mail, keeps the record, files it and mails the client", async () => {
     const res = await post(CALL);
     expect(res.status).toBe(200);
