@@ -57,7 +57,10 @@ export async function textOf(request: Request, max: number): Promise<string | nu
   }
   const all = new Uint8Array(size);
   let at = 0;
-  for (const p of parts) (all.set(p, at), (at += p.byteLength));
+  for (const p of parts) {
+    all.set(p, at);
+    at += p.byteLength;
+  }
   return new TextDecoder().decode(all);
 }
 
