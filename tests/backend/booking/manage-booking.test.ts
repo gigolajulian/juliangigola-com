@@ -190,6 +190,16 @@ describe("cancel", () => {
     expect(String(client.sent.at(-1)!.text)).toContain("not refunded");
   });
 
+  it("with no Stripe key, a refund owed is a refund by hand, never a kept deposit", async () => {
+    const { id, t } = await paid(wednesday(7));
+    delete (ctx.env as { STRIPE_SECRET_KEY?: string }).STRIPE_SECRET_KEY;
+    const res = await post(id, { t, action: "cancel" });
+    expect(await res.json()).toMatchObject({ refunded: false, back: 0, record: { cancelled: true } });
+    expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
+    expect(String(mail.sent.at(-1)!.text)).toContain("The refund FAILED: refund $225 by hand in Stripe.");
+    expect(String(client.sent.at(-1)!.text)).toContain("I'll send it by hand");
+  });
+
   it("names the figure to refund by hand when a 70% refund fails", async () => {
     const start = wednesday(7);
     const { id, t } = await paid(start);

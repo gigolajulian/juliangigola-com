@@ -344,7 +344,8 @@ export async function cancelBooking(
   const who = { name: r.name, email: r.email };
   const key = env.STRIPE_SECRET_KEY;
   const refund = r.intent && key && o.refund ? { ...o.refund, key } : undefined;
-  let refunded: boolean | undefined;
+  // A refund owed with no key to send it is a failed refund (by hand), never "kept".
+  let refunded: boolean | undefined = r.intent && o.refund && !key ? false : undefined;
   if (refund)
     refunded = await stripe(refund.key, "/refunds", refund.form, refund.ref).then(
       () => true,
