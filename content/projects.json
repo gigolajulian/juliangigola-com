@@ -2918,7 +2918,7 @@
     },
     {
       "slug": "tonights-the-night",
-      "name": "TONIGHTS THE NIGHT",
+      "name": "TONIGHT'S THE NIGHT",
       "categorySlug": "editorial",
       "credits": [
         {
@@ -6464,6 +6464,16 @@
         "role": "BTS",
         "name": "Mark Tsui",
         "instagram": "lightbender_mark"
+      },
+      {
+        "role": "Creative direction",
+        "name": "Lilia Mercedes",
+        "instagram": "lilia.mercedes"
+      },
+      {
+        "role": "Hair & makeup",
+        "name": "Lilia Mercedes",
+        "instagram": "lilia.mercedes"
       }
     ],
     "stratus-lookbook-vol-1": [
@@ -6476,6 +6486,11 @@
         "role": "Model",
         "name": "Anya Fam",
         "instagram": "rice666s"
+      },
+      {
+        "role": "Model",
+        "name": "Preston",
+        "instagram": "preston.xyz"
       },
       {
         "role": "Photographer",

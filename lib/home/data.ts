@@ -186,9 +186,9 @@ export const QUOTE_OPTS: QuoteOpt[] = [
   {
     key: "music",
     name: "Music",
-    holds: ["Cover art", "Artist presskits", "Music videos"],
+    holds: ["Cover art", "Artist press kits", "Music videos"],
     detail: "Artwork, press and video for a release. Concept to final files.",
-    chips: ["Cover art", "Artist presskit", "Music video"],
+    chips: ["Cover art", "Artist press kit", "Music video"],
     call: "/book/music-photography",
     photo: "/work/valgur/02.jpg",
   },
@@ -215,7 +215,7 @@ export const QUOTE_OPTS: QuoteOpt[] = [
 /** The enquiry type each chip posts (lib/leads/enquiry.ts SHOOT_TYPES). */
 export const CHIP_TYPE: Record<string, (typeof SHOOT_TYPES)[number]> = {
   "Cover art": "coverart",
-  "Artist presskit": "presskit",
+  "Artist press kit": "presskit",
   "Music video": "video",
   Editorial: "editorial",
   "Brand campaign": "campaign",

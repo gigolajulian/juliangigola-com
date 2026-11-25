@@ -224,7 +224,7 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
           <div className="pj-ask">
             <div>
               <h2>Want something like this?</h2>
-              <p className="mute">Tell me what you have in mind and I&apos;ll come back with an approach and a quote.</p>
+              <p className="mute">Tell me what you have in mind and I&apos;ll reply with an approach and a quote.</p>
             </div>
             <Link
               className="btn fill"

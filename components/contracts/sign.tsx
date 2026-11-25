@@ -41,7 +41,7 @@ export function ContractSign({ id, initial }: { id: string; initial: PublicContr
             ? "Sign in the box."
             : !isEmail(email)
               ? "That email does not look right."
-              : "Tick I agree to sign.",
+              : 'Check "I agree" to sign.',
       );
     setBusy(true);
     setErr(null);

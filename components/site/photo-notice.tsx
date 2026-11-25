@@ -230,7 +230,7 @@ export function PhotoNotice() {
       {/* Said once per raise; the lines below stay through the fade out. */}
       {shown ? (
         <span className="sr-only">
-          This photo{raised?.slug ? `, ${raised.slug},` : ""} is Copyright &copy; {year} Julian Gigola. All rights reserved.
+          This photo{raised?.slug ? `, ${raised.slug},` : ""} is copyright &copy; {year} Julian Gigola. All rights reserved.
         </span>
       ) : null}
       {/* In a box of its own, so nothing that styles an icon's direct

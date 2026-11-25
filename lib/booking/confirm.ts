@@ -123,16 +123,16 @@ export function confirmMail(c: Confirm) {
     ] as [string, string][],
     // The site's own engine refunds by Julian's rule (`refundShare`, `lib/booking/rules.ts`).
     note: remind
-      ? "It is under 24 hours now, so the session can no longer be moved and a cancel keeps the deposit."
+      ? "It is under 24 hours now, so the session can no longer be moved and a cancellation keeps the deposit."
       : soon
-        ? `Until ${timeRange(judged)} you can cancel for ${top}. After that a cancel returns 70%, and nothing in the last 24 hours.`
+        ? `Until ${timeRange(judged)} you can cancel for ${top}. After that a cancellation returns 70%, and nothing in the last 24 hours.`
         : c.firstStart && c.firstStart !== c.start
           ? `The balance is due after the shoot. The deposit moved with the new date. ${(() => {
-              const share = refundShare({ intent: "x", start: c.start, firstStart: c.firstStart, fee: c.deposit?.fee });
+              const share = refundShare({ start: c.start, firstStart: c.firstStart, fee: c.deposit?.fee });
               return share >= EARLY_SHARE
-                ? `A cancel is judged by the time you first booked, ${timeRange(c.firstStart)}: ${top} 48 hours or more before it, 70% back 24 hours or more before, nothing after.`
+                ? `A cancellation is judged by the time you first booked, ${timeRange(c.firstStart)}: ${top} 48 hours or more before it, 70% back 24 hours or more before, nothing after.`
                 : share === PART_SHARE
-                  ? `A cancel now refunds 70% of it: the time you first booked, ${timeRange(c.firstStart)}, was under 48 hours away.`
+                  ? `A cancellation now refunds 70% of it: the time you first booked, ${timeRange(c.firstStart)}, was under 48 hours away.`
                   : `It is no longer refundable: the time you first booked, ${timeRange(c.firstStart)}, was under 24 hours away.`;
             })()}`
           : `The balance is due after the shoot. Cancel 48 hours or more before for ${top}, or 24 hours or more before for 70% back. Under 24 hours it is not refunded. You can move it up to two times, until 24 hours before, and the deposit moves with it.`,
@@ -230,7 +230,7 @@ export async function sendConfirm(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefi
 
 /** The cancel note's subject, for the lead desk's log too. */
 export const cancelledSubject = (c: { session: string; start: string; end?: string }) =>
-  `Cancelled: ${c.session}, ${timeRange(c.start, c.end)}`;
+  `Canceled: ${c.session}, ${timeRange(c.start, c.end)}`;
 
 /** What the cancel note says about the money: which line, the deposit in dollars and the dollars that went back. */
 export type CancelMoney = {
@@ -259,7 +259,7 @@ export async function sendCancelled(
   const text = [
     `Hi ${first(c.name)},`,
     "",
-    `Your ${c.session.toLowerCase()} on ${timeRange(c.start, c.end)} is cancelled.`,
+    `Your ${c.session.toLowerCase()} on ${timeRange(c.start, c.end)} is canceled.`,
     money,
     "",
     `Book another time: ${SITE}/book`,
@@ -310,7 +310,7 @@ export async function afterRescheduled(env: BookingEnv, r: BookingRecord, was: B
       ...(r.intent && refundShare(r) <= PART_SHARE
         ? [
             refundShare(r)
-              ? `A cancel now refunds 70% of the deposit: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.`
+              ? `A cancellation now refunds 70% of the deposit: first booked for ${whenPT(r.firstStart ?? r.start)}, under 48 hours away.`
               : `The deposit is no longer refundable: first booked for ${whenPT(r.firstStart ?? r.start)}, under 24 hours away.`,
           ]
         : []),

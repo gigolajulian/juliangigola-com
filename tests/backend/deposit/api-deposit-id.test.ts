@@ -16,7 +16,7 @@ let kv: FakeKV;
 beforeEach(() => {
   kv = new FakeKV();
   intent = { amount: 10000, currency: "usd", metadata: { kind: "deposit" } };
-  ctx.env = { INBOX: kv, STRIPE_SECRET_KEY: "sk_test_x", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) } };
+  ctx.env = { DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) }, INBOX: kv, STRIPE_SECRET_KEY: "sk_test_x", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) } };
   vi.stubGlobal("fetch", async (u: string) =>
     u.endsWith(`/payment_intents/${PI}`) ? reply({ id: PI, ...intent }) : reply({ error: {} }, 404),
   );
@@ -68,5 +68,16 @@ describe("PUT /api/deposit/[id]", () => {
     const out = await res.json();
     expect(out.picks).toBe(1);
     expect(kv.puts.length).toBe(out.files + 1);
+  });
+});
+
+describe("GET /api/deposit/[id] limit", () => {
+  it("answers 429 past the limiter, before asking Stripe", async () => {
+    ctx.env.DOWNLOAD_LIMIT = { limit: async () => ({ success: false }) };
+    const asked = vi.fn();
+    vi.stubGlobal("fetch", asked);
+    const res = await GET(new Request(`https://juliangigola.com/api/deposit/${PI}`), { params: Promise.resolve({ id: PI }) });
+    expect(res.status).toBe(429);
+    expect(asked).not.toHaveBeenCalled();
   });
 });

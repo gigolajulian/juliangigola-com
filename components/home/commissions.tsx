@@ -90,7 +90,7 @@ export function HomeCommissions({ frames }: { frames: HomeFrame[] }) {
         ))}
       </div>
       <div className="mt-logos lbl">
-        <span className="mute">Published and commissioned by</span>
+        <span className="mute">Commissioned and published by</span>
         {/* Native sideways row (its touch and reduced-motion form); the drift adds a transform to .mt-logos-track. */}
         <div className="mt-logos-row" role="group" tabIndex={0} aria-label="Clients">
           <div className="mt-logos-track">

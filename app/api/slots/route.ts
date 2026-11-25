@@ -3,7 +3,7 @@ import { liveHours } from "@/lib/booking/engine";
 import { EVENTS } from "@/lib/booking/rules";
 import { localIso, openStarts, type SlotsAnswer } from "@/lib/booking/slots";
 import { TZ, DAY_MS } from "@/lib/time-zone";
-import { json, upstreamError } from "@/lib/http";
+import { json, limited, upstreamError } from "@/lib/http";
 
 /* ── open times for the picker, from the site's own engine ────────
  * GET /api/slots?slug=portraits&start=2026-11-04&end=2027-03-04&timeZone=...
@@ -43,6 +43,9 @@ export async function GET(request: Request) {
   const key = new Request(`https://slots-cache.invalid/v2/${slug}/${start}/${end}/${encodeURIComponent(tz)}`);
   const kept = cache && !q.has("fresh") ? await cache.match(key).catch(() => undefined) : undefined;
   if (kept) return json(await kept.json());
+  // Past the cache every answer asks Google: limited per address, as a picker never comes near 60 a minute.
+  const busy = await limited(env.DOWNLOAD_LIMIT, "slots", request);
+  if (busy) return busy;
   // The visitor's days, widened by a day each side for any zone; capped at 130 days.
   const from = Date.parse(`${start}T00:00:00Z`) - DAY_MS;
   const to = Math.min(Date.parse(`${end}T00:00:00Z`) + 2 * DAY_MS, from + 130 * DAY_MS);

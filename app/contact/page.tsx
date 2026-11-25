@@ -4,9 +4,9 @@ import { Contact } from "@/components/contact/inquire";
 
 export const metadata: Metadata = {
   title: "Inquire",
-  description: "Start a project or book a consultation. Campaigns, editorial, cover art and presskits, in the San Francisco Bay Area.",
+  description: "Start a project or book a consultation. Campaigns, editorial, cover art and press kits, in the San Francisco Bay Area.",
   alternates: { canonical: "/contact" },
-  ...shareOg("Inquire", "Start a project or book a consultation: campaigns, editorial, cover art and presskits in the Bay Area."),
+  ...shareOg("Inquire", "Start a project or book a consultation: campaigns, editorial, cover art and press kits in the Bay Area."),
 };
 
 export default function ContactPage() {

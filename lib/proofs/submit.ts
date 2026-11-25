@@ -119,8 +119,12 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
 /** A Checkout session that is paid, for this gallery, for at least what the selects cost now. */
 export async function paidFor(key: string, p: Proof, session: string): Promise<Proof["paid"] | null> {
   // A session already counted in `paid` never pays again, even replayed after a reopen.
-  if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session) || session === p.paid?.session) return null;
-  const s = await stripe(key, `/checkout/sessions/${session}`);
+  const counted = p.paid ? (p.paid.sessions ?? [p.paid.session]) : [];
+  if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session) || counted.includes(session)) return null;
+  // The charge comes along, so a refunded payment is seen: Checkout keeps saying "paid" after a refund.
+  const s = await stripe(key, `/checkout/sessions/${session}?expand[]=payment_intent.latest_charge`);
+  const charge = (s.payment_intent as { latest_charge?: { amount_refunded?: number; refunded?: boolean } } | null)?.latest_charge;
+  if (charge && (charge.refunded || (charge.amount_refunded ?? 0) > 0)) return null;
   const meta = s.metadata as Record<string, string> | undefined;
   // A bank payment comes back complete but unpaid: accepted, settling in about 4 business days. The selects lock now; recheckTransfer() follows it.
   const bank = s.status === "complete" && s.payment_status === "unpaid";
@@ -132,6 +136,7 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
   // A card payment carries Stripe's fee on top: only what was owed counts toward the balance and extras.
   return {
     session,
+    sessions: [...counted, session],
     amount: (p.paid?.amount ?? 0) + Math.min(total, amountOwed(p).cents),
     at: new Date().toISOString(),
     ...(bank ? { pending: true } : {}),

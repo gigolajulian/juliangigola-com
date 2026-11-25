@@ -23,7 +23,7 @@ beforeEach(() => {
   busy = [];
   shifts = [];
   asked = [];
-  ctx.env = { GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
+  ctx.env = { DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) }, GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
     if (url.includes("/events?")) return Response.json({ items: shifts });

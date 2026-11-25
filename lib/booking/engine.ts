@@ -109,8 +109,9 @@ export function parseBooking(raw: unknown, call = false): Parsed {
     where: cap(b.where) || undefined,
     notes: cap(b.notes) || undefined,
   };
-  // A free call also says how it is held; anything else there is no choice.
-  if (call) return { ok: true, booking: { ...booking, via: b.via === "Phone" || b.via === "Video" ? b.via : undefined } };
+  // A free call also says how it is held; anything else there is no choice. It has no place (the picker never asks,
+  // `slots` answers where: false), so none is kept: a stranger's text never reaches the client's mail as "Where".
+  if (call) return { ok: true, booking: { ...booking, where: undefined, via: b.via === "Phone" || b.via === "Video" ? b.via : undefined } };
   return { ok: true, booking };
 }
 
@@ -223,8 +224,17 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     ...(b.intent ? { fee: BOOKING_FEE } : {}),
     at: new Date().toISOString(),
   };
-  await saveBooking(store, record);
-  if (b.intent) await store.put(intentKey(b.intent), id);
+  try {
+    // The intent first: a record without it would be booked again by the deposit's retry.
+    if (b.intent) await store.put(intentKey(b.intent), id);
+    await saveBooking(store, record);
+  } catch (e) {
+    // Unsaved, the event would hold the time against the retry and stay after the refund: take it off again.
+    await gcal(secret, `/calendars/primary/events/${encodeURIComponent(ev.id)}?sendUpdates=none`, { method: "DELETE" }).catch(
+      (d: unknown) => console.error("booking event left after a failed save", ev.id, String(d)),
+    );
+    throw e;
+  }
   return { ok: true, record };
 }
 

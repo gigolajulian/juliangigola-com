@@ -1,6 +1,6 @@
 import { sealedStore } from "@/lib/kv";
 import { isToken } from "@/lib/proofs/proof-model";
-import { readPublic } from "@/lib/proofs/proof-store";
+import { guardOf, readPublic } from "@/lib/proofs/proof-store";
 import { shareCard } from "@/lib/proofs/watermark";
 import { logged } from "@/lib/utils";
 
@@ -11,7 +11,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   const { token } = await params;
   const { env, seal, kv } = await sealedStore();
   if (!isToken(token) || !kv || !env.PROOFS || !seal) return new Response("Not found", { status: 404 });
-  const p = await readPublic(kv, seal, token);
+  const p = await readPublic(kv, seal, token, guardOf(env, request.headers));
   if (!p) return new Response("Not found", { status: 404 });
   const c = await shareCard(env, p, request.url).catch(logged("proof card"));
   if (c === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
