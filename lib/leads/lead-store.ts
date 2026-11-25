@@ -10,7 +10,9 @@ import {
   leadIdOf,
   leadStoreKey,
   leadSummary,
+  LEAD_VERSION,
   trashDaysLeft,
+  upgradeLead,
   type Change,
   type Lead,
   type LeadSummary,
@@ -21,6 +23,7 @@ import { mailable } from "./lead-crm";
 import { everyKey, type InboxKV as KV } from "@/lib/kv";
 import { logged } from "@/lib/utils";
 import { later } from "@/lib/later";
+import { alertLater } from "@/lib/email/error-alert";
 
 /** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
 export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
@@ -28,7 +31,7 @@ export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
 /** One lead, opened. Null when it is not there; throws when it cannot be opened (a rotated LEADS_KEY). */
 export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | null> {
   const raw = await kv.get(leadStoreKey(id));
-  return raw ? s.open<Lead>(raw) : null;
+  return raw ? upgradeLead(await s.open<Lead>(raw)) : null;
 }
 
 /** What a route answers, with status 500, for a lead that is there but will not open (a rotated LEADS_KEY). */
@@ -39,12 +42,19 @@ export const openLead = (kv: KV, s: Sealer, id: string, label = "lead open"): Pr
   readLead(kv, s, id).catch(logged(label, id));
 
 /** Every lead, opened in full: for the numbers and the export, never the list.
-    A lead that will not open (a rotated LEADS_KEY) is logged and left out, so one bad record never fails the rest. */
-export async function everyLead(inbox: KV, seal: Sealer) {
+    A lead that will not open (a rotated LEADS_KEY, a newer build's shape) is logged, mailed to hello@ and left out, so
+    one bad record never fails the rest. `strict` throws instead: a copy that replaces the whole Sheet must not drop rows. */
+export async function everyLead(inbox: KV, seal: Sealer, { strict = false } = {}) {
   const out: (Lead & { id: string })[] = [];
+  let skipped = 0;
   for await (const k of everyKey(inbox, LEAD_PREFIX)) {
     const l = await openLead(inbox, seal, leadIdOf(k.name), "lead skipped");
     if (l) out.push(Object.assign(l, { id: leadIdOf(k.name) }));
+    else if (l === undefined) skipped++;
+  }
+  if (skipped) {
+    await alertLater("leads skipped", `${skipped} lead(s) would not open`);
+    if (strict) throw new Error(`${skipped} lead(s) would not open; not copied`);
   }
   return out;
 }
@@ -68,7 +78,8 @@ const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
     The summary shrinks until it fits, so a long CJK name and message never
     make the put throw and the lead go unrecorded.
     `from`: the lead before this write (null for a new one); its new events go to the activity log. Left out (a move, a backfill), nothing is logged. */
-export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?: Lead | null): Promise<void> {
+export async function writeLead(kv: KV, s: Sealer, id: string, given: Lead, from?: Lead | null): Promise<void> {
+  const lead = { ...given, v: LEAD_VERSION };
   let summary = leadSummary(lead);
   let meta = await s.seal(summary);
   for (const cut of SHRINK) {

@@ -17,6 +17,7 @@ import { everyLead } from "../lead-store";
 import type { Lead } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
 import { DAY_MS } from "@/lib/time-zone";
+import { outbound } from "@/lib/net";
 
 const SHEETS = "https://sheets.googleapis.com/v4/spreadsheets";
 export const SHEET_ID = "sheet:id";
@@ -27,8 +28,8 @@ const TABS = [
 ];
 
 /** The Clients CSV, with what each client paid from one pass over the master log. */
-export async function clientsCsv(kv: KV, s: Sealer, master?: MasterEntry[]): Promise<string> {
-  const all = await everyLead(kv, s);
+export async function clientsCsv(kv: KV, s: Sealer, master?: MasterEntry[], strict = false): Promise<string> {
+  const all = await everyLead(kv, s, { strict });
   const byLead = new Map<string, Lead["events"]>();
   for (const m of master ?? (await readMaster(kv, s))) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
   const paid: Record<string, number> = {};
@@ -46,7 +47,7 @@ export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, no
     const headers = { authorization: `Bearer ${await gcalToken(oauth)}`, "content-type": "application/json" };
     let id = await kv.get(SHEET_ID);
     if (!id) {
-      const made = await fetch(SHEETS, {
+      const made = await outbound(SHEETS, {
         method: "POST",
         headers,
         body: JSON.stringify({
@@ -59,8 +60,9 @@ export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, no
       await kv.put(SHEET_ID, id);
     }
     const master = await readMaster(kv, s);
-    const data = [await clientsCsv(kv, s, master), eventsCsv(master)];
-    const res = await fetch(`${SHEETS}/${id}:batchUpdate`, {
+    // Strict: the paste replaces the whole tab, so a lead that will not open stops the copy rather than vanish from it.
+    const data = [await clientsCsv(kv, s, master, true), eventsCsv(master)];
+    const res = await outbound(`${SHEETS}/${id}:batchUpdate`, {
       method: "POST",
       headers,
       body: JSON.stringify({

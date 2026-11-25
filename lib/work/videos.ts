@@ -175,7 +175,8 @@ export async function lookupVideo(parsed: { provider: Provider; videoId: string 
       parsed.provider === "youtube"
         ? `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${parsed.videoId}`)}`
         : `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(`https://vimeo.com/${parsed.videoId}`)}`;
-    const res = await fetch(endpoint, { cache: "no-store" });
+    // Plain fetch with its own timeout: scripts/check-videos.mjs runs this file under bare node, where "@/lib" does not resolve.
+    const res = await fetch(endpoint, { cache: "no-store", signal: AbortSignal.timeout(8000) });
     if (res.ok) {
       const body = (await res.json()) as {
         title?: string;

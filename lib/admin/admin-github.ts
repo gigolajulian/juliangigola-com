@@ -16,6 +16,7 @@ import { isRecord } from "@/lib/json";
 import { HttpError } from "@/lib/http";
 import { localGet, localRemove, localSet } from "@/lib/storage";
 import { GITHUB_API, isGithubToken, REPO } from "@/lib/admin/github-repo";
+import { outbound } from "@/lib/net";
 
 /**
  * Where the editor keeps the GitHub token in the browser. Named here, not
@@ -65,7 +66,7 @@ export type CommitFile = {
 
 /** Lists file paths under a directory at the branch head. Empty if absent. */
 export async function listDirectory(token: string, path: string): Promise<string[]> {
-  const res = await fetch(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`, {
+  const res = await outbound(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`, {
     headers: headers(token),
     cache: "no-store",
   });
@@ -95,7 +96,7 @@ const headers = (token: string) => ({
  * again from the new head.
  */
 async function gh<T>(token: string, path: string, init?: { method?: string; body?: unknown }): Promise<T> {
-  const res = await fetch(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}${path}`, {
+  const res = await outbound(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}${path}`, {
     method: init?.method ?? "GET",
     headers: { ...headers(token), "Content-Type": "application/json" },
     body: init?.body ? JSON.stringify(init.body) : undefined,
@@ -193,7 +194,7 @@ export async function commitFiles({
 
 /** Reads a text file at the branch head. `null` when it does not exist yet. */
 export async function readFile(token: string, path: string): Promise<string | null> {
-  const res = await fetch(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`, {
+  const res = await outbound(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`, {
     headers: headers(token),
     cache: "no-store",
   });

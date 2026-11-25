@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { COOLDOWN_MS, DAILY_CAP, dayKey } from "@/lib/leads/enquiry";
-import { FakeEmail, FakeKV, reply } from "../../backend/fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, reply } from "../../backend/fakes";
+import { BookingLock } from "@/worker/booking-lock";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The contact form's server action (`lib/leads/enquiry-action.ts`). Its one
@@ -105,6 +106,27 @@ describe("submitEnquiry", () => {
     const res = await send();
     expect(res.status).toBe("unconfigured");
     expect(res.mailto).toBeTruthy();
+    expect(msgs()).toEqual([]);
+  });
+
+  it("lets one of two sends at once take the last place of the day, through the booking lock", async () => {
+    const storage = new FakeStore();
+    await storage.put("quota:contact", { day: new Date().toISOString().slice(0, 10), count: DAILY_CAP - 1 });
+    ctx.env.BOOKING_LOCK = fakeLock(new BookingLock({ storage } as never, {}));
+    // Two senders, so the cooldown passes both: only the quota stands between them.
+    const ips = ["198.51.100.1", "198.51.100.2"];
+    const keep = ctx.ip;
+    Object.defineProperty(ctx, "ip", { get: () => ips.shift() ?? keep, configurable: true });
+    const both = await Promise.all([send(), send({ ...GOOD, email: "other@example.com" })]);
+    Object.defineProperty(ctx, "ip", { value: keep, writable: true, configurable: true });
+    expect(both.map((r) => r.status).sort()).toEqual(["sent", "unconfigured"]);
+    expect(msgs()).toHaveLength(1);
+  });
+
+  it("falls back to the day count when the lock has no quota yet, and still stops at the cap", async () => {
+    ctx.env.BOOKING_LOCK = fakeLock({ fetch: async () => Response.json({ error: "unknown op" }, { status: 400 }) });
+    await kv.put(dayKey(Date.now()), String(DAILY_CAP));
+    expect((await send()).status).toBe("unconfigured");
     expect(msgs()).toEqual([]);
   });
 

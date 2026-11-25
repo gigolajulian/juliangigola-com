@@ -1,0 +1,26 @@
+diff --git a/app/styles/v3.css b/app/styles/v3.css
+index 5f7fcbcb..8a2da9b5 100644
+--- a/app/styles/v3.css
++++ b/app/styles/v3.css
+@@ -363,7 +363,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
+ .v3 .f-photo .ph{position:relative;flex:1;min-height:0;border-radius:4px;overflow:hidden;background:var(--card)}
+ .v3 .f-photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+ .v3 .f-photo .cap{display:flex;flex-direction:column;gap:14px}
+-.v3 .f-photo .cap b{font:900 3rem/.9 var(--display);letter-spacing:-.05em;overflow-wrap:anywhere;hyphens:auto}
++.v3 .f-photo .cap b{font:900 3rem/.9 var(--display);letter-spacing:-.05em}
+ .v3 .f-photo dl{margin:0;border-top:1px solid var(--line)}
+ .v3 .f-photo dl div{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--line)}
+ .v3 .f-photo dt{color:var(--mute)}
+diff --git a/components/booking/book-times.tsx b/components/booking/book-times.tsx
+index 1477a5b3..29efc76e 100644
+--- a/components/booking/book-times.tsx
++++ b/components/booking/book-times.tsx
+@@ -35,7 +35,7 @@ function TimesDown({ title, retry, again }: { title: string; retry: () => void;
+         </Link>
+         <a
+           href={`mailto:${EMAIL}`}
+-          className="text-sm normal-case text-muted-foreground underline decoration-border underline-offset-4 max-w-full [overflow-wrap:anywhere] hoverable:hover:decoration-current"
++          className="text-sm normal-case text-muted-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-current"
+         >
+           {EMAIL}
+         </a>

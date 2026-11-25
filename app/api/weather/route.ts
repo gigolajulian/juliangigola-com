@@ -1,4 +1,5 @@
 import { HttpError, upstreamError } from "@/lib/http";
+import { outbound } from "@/lib/net";
 
 /* ── San Jose's hourly forecast, for the sky picker's weather row ──
  * GET /api/weather answers Open-Meteo's `hourly` block as is: { time, temperature_2m, weather_code },
@@ -21,7 +22,7 @@ export async function GET() {
   const kept = await cache?.match(key).catch(() => undefined);
   if (kept) return Response.json(await kept.json(), { headers: HEADERS });
   try {
-    const res = await fetch(SOURCE);
+    const res = await outbound(SOURCE);
     if (!res.ok) throw new HttpError(`open-meteo ${res.status}`, res.status);
     const { hourly } = (await res.json()) as { hourly: unknown };
     await cache?.put(key, Response.json(hourly, { headers: { "cache-control": "max-age=3600" } })).catch(() => {});

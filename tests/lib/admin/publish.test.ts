@@ -59,8 +59,8 @@ describe("loadRepo", () => {
     expect(await loadRepo("tok", empty())).toEqual({ error: "GitHub said 403: slow down" });
   });
 
-  it("says GitHub is unreachable instead of throwing", async () => {
-    fetch.mockRejectedValueOnce(new TypeError("offline"));
+  it("says GitHub is unreachable instead of throwing, after its retries", async () => {
+    for (let i = 0; i < 3; i++) fetch.mockRejectedValueOnce(new TypeError("offline"));
     expect(await loadRepo("tok", empty())).toEqual({ error: "Could not reach GitHub: TypeError: offline" });
   });
 });

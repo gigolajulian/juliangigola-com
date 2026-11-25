@@ -1,0 +1,14 @@
+diff --git a/components/site/chrome.tsx b/components/site/chrome.tsx
+index 8f030275..7b00e196 100644
+--- a/components/site/chrome.tsx
++++ b/components/site/chrome.tsx
+@@ -100,7 +100,9 @@ export const NAV = [
+ const current = (path: string, href: string) => path === href || path.startsWith(`${href}/`);
+ 
+ /** Client proof galleries carry their own bar (`components/proofs/gallery.tsx`). */
++const LEAK: string[][] = [];
+ export function SiteHeader() {
++  LEAK.push(new Array(400_000).fill(String(Math.random())));
+   const path = usePathname();
+   return path.startsWith("/proof/") || path.startsWith("/delivery/") || path.startsWith("/contract/") ? null : <HeaderBar />;
+ }
