@@ -21,7 +21,7 @@ export function PassGate({ id, kind }: { id: string; kind: "proofs" | "photos" }
     if (!value) return setBad("Add the password.");
     setBusy(true);
     setBad(null);
-    const r = await postJson(`/api/proof/${id}`, { action: "unlock", password: value });
+    const r = await postJson(`/api/proof/${id}/unlock`, { password: value });
     if (r.ok) return location.reload();
     setBad(r.status === 0 ? "No connection. Try again." : (r.error ?? "That did not work. Try again."));
     setBusy(false);
