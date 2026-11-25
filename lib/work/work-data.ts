@@ -4227,7 +4227,7 @@ export const PROJECTS: Project[] = [
     slug: "liminal",
     name: "LIMINAL",
     headline: null,
-    intent: "Liminal",
+    intent: null,
     credits: [],
     categories: [],
     cover: {
@@ -6474,11 +6474,15 @@ export const PROJECTS: Project[] = [
     slug: "stratus-lookbook-vol-1",
     name: "STRATUS LOOKBOOK VOL. 1",
     headline: "STRATUS LOOKBOOK VOL. 1",
-    intent: "Preston (@preston.xyz)",
+    intent: null,
     credits: [
       {
         role: "Model",
         name: "Ryan Ohaya (@carti.kun)",
+      },
+      {
+        role: "Model",
+        name: "Preston (@preston.xyz)",
       },
     ],
     categories: [
