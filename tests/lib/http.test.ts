@@ -68,7 +68,10 @@ describe("bodyOf's size cap", () => {
   });
 
   it("stops reading a streamed body once it passes the cap", async () => {
-    expect(await bodyOf(streamed(SMALL_BODY + 1), SMALL_BODY)).toBeNull();
+    // Valid JSON past the cap (leading spaces, then an object), so only the cap can make it null.
+    const tail = new TextEncoder().encode('{"a":1}');
+    const valid = post(new ReadableStream({ start(c) { c.enqueue(new Uint8Array(SMALL_BODY).fill(32)); c.enqueue(tail); c.close(); } }), {});
+    expect(await bodyOf(valid, SMALL_BODY)).toBeNull();
     expect(await textOf(streamed(10), 100)).toBe(" ".repeat(10));
   });
 });
