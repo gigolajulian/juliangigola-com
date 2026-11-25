@@ -103,6 +103,24 @@ describe("authorised and fromWorker", () => {
 });
 
 describe("refuseAdmin and the desks' lock", () => {
+  it("asks GitHub again before any write, so a revoked token stops changing things at once", async () => {
+    const token = githubToken();
+    let revoked = false;
+    let asked = 0;
+    vi.stubGlobal("fetch", async () => (asked++, revoked ? reply({ message: "Bad credentials" }, 401) : reply(PUSH, 200, SCOPED)));
+    const req = (method: string) =>
+      new Request("https://juliangigola.com/api/leads", { method, headers: { authorization: `Bearer ${token}` } });
+    expect(await refuseAdmin(req("GET"))).toBeNull();
+    revoked = true;
+    // A read inside the five minutes is still let in from the cache; a write asks GitHub and is refused.
+    expect(await refuseAdmin(req("GET"))).toBeNull();
+    expect(asked).toBe(1);
+    expect((await refuseAdmin(req("POST")))?.status).toBe(401);
+    expect((await refuseAdmin(req("DELETE")))?.status).toBe(401);
+    // And the refusal ends the cached read too.
+    expect((await refuseAdmin(req("GET")))?.status).toBe(401);
+  });
+
   it("lets the key in, and tells a missing key from a refused token in one 401", async () => {
     expect(await refuseAdmin(req({ "x-admin-key": "k1" }), "k1")).toBeNull();
     const none = (await refuseAdmin(req({}), "k1"))!;
