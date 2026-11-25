@@ -11,3 +11,16 @@ index 867fd0bd..40cf417a 100644
      html:root .v3 #p-work .wgrid:not(.square) .wt .ph { view-timeline: --v4p3 block; }
      html:root .v3 #p-work .wgrid:not(.square) .wt .ph > img { scale: 1.18; }
      html:root .v3 #p-work .wgrid:not(.square) .wt[data-v4d] .ph > img { animation: v4p3-drift linear both !important; animation-timeline: --v4p3 !important; }
+diff --git a/components/portfolio/drift.tsx b/components/portfolio/drift.tsx
+index 031a359c..060f22e6 100644
+--- a/components/portfolio/drift.tsx
++++ b/components/portfolio/drift.tsx
+@@ -26,7 +26,7 @@ export function Drift({ k }: { k: string }) {
+   React.useEffect(() => {
+     if (
+       !CSS.supports("animation-timeline: view()") ||
+-      !matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches
++      !matchMedia("(hover: hover) and (pointer: fine)").matches
+     )
+       return;
+     const grid = document.querySelector<HTMLElement>("#p-work .wgrid");
