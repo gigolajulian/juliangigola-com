@@ -19,22 +19,44 @@
   X-Frame-Options: SAMEORIGIN
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")
   Cross-Origin-Opener-Policy: same-origin
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Robots-Tag: noai, noimageai
   TDM-Reservation: 1
   TDM-Policy: https://juliangigola.com/legal#terms
 
+# No payment on the private pages (`next.config.ts` NO_PAYMENT_PATHS). `!` drops the `/*` value first; the
+# site-wide one lets Stripe's frame show Apple Pay and Google Pay on the deposit step.
+/admin
+  ! Permissions-Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+/admin/*
+  ! Permissions-Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+/proof/*
+  ! Permissions-Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+/delivery/*
+  ! Permissions-Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
 # /visit is unlisted: Julian sends the link to clients, search engines leave it
 # out. Cloudflare joins this with the `/*` X-Robots-Tag above.
 /visit
   X-Robots-Tag: noindex, nofollow
+  ! Permissions-Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
 
 # /client/<name> holds unlisted preview pages sent to one client (static
 # files: index.html, marked images). Same rule as /visit.
 /client/*
   X-Robots-Tag: noindex, nofollow, noimageindex
+  ! Permissions-Policy
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
   Cache-Control: public, max-age=3600
 
 # Caching, for the same responses.
