@@ -1793,14 +1793,14 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .sky-ruler [data-slot]{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;min-height:44px;padding:12px 0 10px;background:none;border:0;color:var(--ink);font:inherit;cursor:pointer}
 .v3 .sky-ruler [data-slot] i{display:none}
 .v3 .sky-ruler [data-slot] b{font-size:clamp(.8125rem,1.2vw,1rem);font-weight:500;line-height:1;transition:translate 150ms var(--ease-out-strong)}
-.v3 .sky-ruler [data-slot] small{font-size:10px;letter-spacing:.08em;opacity:0}
+.v3 .sky-ruler [data-slot] small{font-size:11px;letter-spacing:.08em;opacity:0}
 .v3 .sky-ruler [data-slot]:is(:first-child,[aria-pressed="true"]) small{opacity:1}
 .v3 .sky-ruler [data-slot]::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--tone);opacity:.4;transform-origin:0 50%;transition:height 150ms,top 150ms,opacity 150ms;animation:sky-seg 400ms var(--ease-out-strong) backwards;animation-delay:calc(var(--i) * 40ms)}
 .v3 .sky-ruler [data-slot].in::before{opacity:.75}
 .v3 .sky-ruler [data-slot][aria-pressed="true"]{color:var(--tone)}
 .v3 .sky-ruler [data-slot][aria-pressed="true"]::before{opacity:1;height:8px;top:-2px}
 @media (hover:hover){.v3 .sky-ruler [data-slot]:hover::before{opacity:1;height:8px;top:-2px}.v3 .sky-ruler [data-slot]:hover b{translate:0 -2px}}
-.v3 .sky-ruler .rl{padding-top:8px;border-top:1px solid var(--line);font-size:10px;letter-spacing:.12em;color:var(--mute);line-height:1.35}
+.v3 .sky-ruler .rl{padding-top:8px;border-top:1px solid var(--line);font-size:11px;letter-spacing:.12em;color:var(--mute);line-height:1.35}
 .v3 .sky-ruler .rl+.rl{padding-left:6px;border-left:1px solid var(--line)}
 @keyframes sky-seg{from{transform:scaleX(0)}}
 @media (prefers-reduced-motion:reduce){.v3 :is(.sky-rows,.sky-ruler) :is(*,*::before){animation:none;transition:none}}
@@ -1808,7 +1808,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 :root[data-sky] .v3 .fig.scrub .ap{color:var(--tone);font-size:clamp(1.25rem,2vw,1.875rem);opacity:1}
 .v3 .sky-meta{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:10px clamp(20px,3vw,36px);margin:4px 0 0}
 .v3 .sky-meta>div{display:flex;flex-direction:column;gap:4px}
-.v3 .sky-meta dt{font-size:10px;letter-spacing:.14em}
+.v3 .sky-meta dt{font-size:11px;letter-spacing:.14em}
 .v3 .sky-meta dd{margin:0;text-transform:none;letter-spacing:.02em}
 @media (min-width:1700px){:root[data-sky] .v3 .f-body:has(>.f-in>.cal){grid-template-columns:minmax(0,1fr);grid-template-areas:"tabs" "top" "cal" "times" "fig";grid-template-rows:none}
 :root[data-sky] .v3 .f-in>:is(.sky-rows,.sky-ruler){grid-area:times}}
