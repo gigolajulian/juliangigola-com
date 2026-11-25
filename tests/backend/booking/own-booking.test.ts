@@ -40,6 +40,7 @@ const CALL = {
 let busy: { start: string; end: string }[];
 let inserts: { url: string; body: Record<string, unknown> }[];
 let stripeCalls: string[];
+let deletes: string[];
 let kv: FakeKV;
 let store: FakeStore;
 let client: FakeEmail;
@@ -50,6 +51,7 @@ beforeEach(() => {
   busy = [];
   inserts = [];
   stripeCalls = [];
+  deletes = [];
   kv = new FakeKV();
   store = new FakeStore();
   client = new FakeEmail();
@@ -71,6 +73,13 @@ beforeEach(() => {
     await new Promise((go) => setTimeout(go, 5));
     if (url.includes("/events?q=")) return Response.json({ items: [] });
     if (url.includes("/freeBusy")) return Response.json({ calendars: { primary: { busy } } });
+    if (init?.method === "DELETE") {
+      // An event taken off the calendar frees its time again.
+      const ev = inserts.findIndex((_, i) => url.includes(`/events/ev${i + 1}?`));
+      if (ev >= 0) busy = busy.filter((x) => x.start !== (inserts[ev].body.start as { dateTime: string }).dateTime);
+      deletes.push(url);
+      return new Response(null, { status: 204 });
+    }
     if (url.includes("/events")) {
       const body = JSON.parse(String(init?.body));
       inserts.push({ url, body });
@@ -212,7 +221,10 @@ describe("bookDeposit (a paid session on the site's engine)", () => {
   });
 
   it("asks the lock again after an error, and keeps a booking it made instead of refunding", async () => {
-    const real = env().BOOKING_LOCK as unknown as { idFromName(n: string): unknown; get(id: unknown): { fetch(url: string, init?: RequestInit): Promise<Response> } };
+    const real = env().BOOKING_LOCK as unknown as {
+      idFromName(n: string): unknown;
+      get(id: unknown): { fetch(url: string, init?: RequestInit): Promise<Response> };
+    };
     let calls = 0;
     // The first answer is lost after the lock booked: the retry finds the booking by its intent.
     const flaky = {
@@ -229,6 +241,23 @@ describe("bookDeposit (a paid session on the site's engine)", () => {
     expect(await bookDeposit({ ...env(), BOOKING_LOCK: flaky as never }, "pi_TEST1234567890", META)).toBe("booked");
     expect(performance.now() - t).toBeGreaterThanOrEqual(RETRY_MS - 50);
     expect(inserts).toHaveLength(1);
+    expect(stripeCalls.some((u) => u.endsWith("/refunds"))).toBe(false);
+  });
+
+  it("takes its own event off the calendar when the record cannot be saved, so the retry books it", async () => {
+    // The lock's store refuses the first booking record, after Google made the event.
+    const put = store.put.bind(store);
+    let refused = false;
+    store.put = async (k: string, v: unknown) => {
+      if (k.startsWith("b:") && !refused) {
+        refused = true;
+        throw new Error("storage down");
+      }
+      return put(k, v);
+    };
+    expect(await bookDeposit(env(), "pi_TEST1234567890", META)).toBe("booked");
+    expect(deletes).toEqual([expect.stringContaining("/events/ev1?")]);
+    expect(inserts).toHaveLength(2);
     expect(stripeCalls.some((u) => u.endsWith("/refunds"))).toBe(false);
   });
 });
