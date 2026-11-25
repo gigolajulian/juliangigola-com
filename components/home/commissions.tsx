@@ -3,7 +3,6 @@
 import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Marks } from "@/components/site/duo";
 import { projectHref } from "@/lib/work/project-href";
 import type { HomeFrame } from "@/lib/home/data";
 import { pad } from "@/lib/utils";
@@ -88,21 +87,6 @@ export function HomeCommissions({ frames }: { frames: HomeFrame[] }) {
             ))}
           </div>
         ))}
-      </div>
-      <div className="mt-logos lbl">
-        <span className="mute">Commissioned and published by</span>
-        {/* Native sideways row (its touch and reduced-motion form); the drift adds a transform to .mt-logos-track. */}
-        <div className="mt-logos-row" role="group" tabIndex={0} aria-label="Clients">
-          <div className="mt-logos-track">
-            <span className="set">
-              <Marks />
-            </span>
-            {/* The endless loop's second copy, shown by the drift (MOTION-HOOKS.md). */}
-            <span className="set" data-copy aria-hidden>
-              <Marks hidden />
-            </span>
-          </div>
-        </div>
       </div>
     </section>
   );

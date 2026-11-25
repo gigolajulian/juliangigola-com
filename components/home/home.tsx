@@ -117,7 +117,7 @@ export function Home({ data }: { data: HomeData }) {
       <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
         <HomeHero frames={data.hero} extras={data.extras} />
         {/* order: About, Commissions, By quote, Motion, Sessions, then Cover art */}
-        <HomeAbout disciplines={data.disciplines} />
+        <HomeAbout />
         <HomeCommissions frames={data.commissions} />
         <ByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
         <HomeFilms films={data.films} />

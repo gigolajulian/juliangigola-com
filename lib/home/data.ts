@@ -256,6 +256,7 @@ export const DISCIPLINES = [
 export const ABOUT_SENTENCE = "I help emerging labels, musicians and technology brands find the image that feels most like them.";
 export const ABOUT_FACTS: [string, string][] = [
   ["Shooting", "12 years"],
-  ["Based in", "SF Bay Area"],
   ["Roles", "Photo / AD / Director"],
+  ["Based in", "SF Bay Area"],
+  ["Travel", "Worldwide"],
 ];

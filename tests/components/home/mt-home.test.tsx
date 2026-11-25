@@ -17,7 +17,7 @@ describe("v4 home", () => {
   it("renders every screen once, in page order", () => {
     render(<Home data={HOME_DATA} />);
     const names = [...document.querySelectorAll("[data-mt]")].map((s) => s.getAttribute("data-mt"));
-    expect(names).toEqual(["hero", "motion", "covers", "about", "book", "quote", "comm", "foot"]);
+    expect(names).toEqual(["hero", "about", "comm", "quote", "motion", "book", "covers", "foot"]);
     expect(document.querySelectorAll("h1").length).toBe(1);
   });
 

@@ -1,82 +1,44 @@
-"use client";
-
-import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { Marks } from "@/components/site/duo";
 import { ABOUT_FACTS, ABOUT_SENTENCE } from "@/lib/home/data";
-import { pad } from "@/lib/utils";
 
-/* Spec 3.9: one screen. The sentence is one paragraph; the per-word spans
-   (`--w`) and the wordmark's per-letter spans (`--j`) are for the motion pass. */
-const WORDMARK = "Julian Gigola";
-
-/* Keyboard: the footer's wall rises over "More about me" as About leaves the screen, and a Tab that landed there left
-   the focused button under the footer's scrim. If something covers it, About comes back to the top of the screen. */
-function uncoverOnFocus(e: React.FocusEvent<HTMLAnchorElement>) {
-  const a = e.currentTarget;
-  requestAnimationFrame(() => {
-    if (document.activeElement !== a || !a.matches(":focus-visible")) return;
-    const r = a.getBoundingClientRect();
-    const over = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-    const sec = a.closest("section");
-    if (sec && over && !a.contains(over)) scrollTo({ top: sec.getBoundingClientRect().top + scrollY });
-  });
-}
-
-export function HomeAbout({ disciplines }: { disciplines: string[] }) {
-  const words = ABOUT_SENTENCE.split(" ");
+/* The statement, straight after the hero: who I work for in one sentence, the facts, my portrait, and the clients
+   as one row of marks. Keeps the `#about` anchor the header and the /about redirect land on. */
+export function HomeAbout() {
   return (
     <section id="about" className="mt-about" aria-label="About" data-mt="about">
-      <div className="mt-stage">
-        <figure className="mt-ab-ph">
-          <Image src="/about/julian-studio.jpg" alt="Julian Gigola at the tether station on set" fill sizes="100vw" />
-        </figure>
-        <p className="mt-wordmark" aria-hidden>
-          {[...WORDMARK].map((ch, j) => (
-            <span key={j} style={{ "--j": j } as React.CSSProperties}>
-              {ch === " " ? " " : ch}
-            </span>
-          ))}
-        </p>
-        <div className="mt-frame">
-          <div className="mt-ab-col">
-            <p className="lbl mute mt-label">About</p>
-            <p className="mt-say" style={{ "--n": words.length } as React.CSSProperties}>
-              {words.map((w, i) => (
-                <React.Fragment key={i}>
-                  <span style={{ "--w": i } as React.CSSProperties}>{w}</span>
-                  {i < words.length - 1 ? " " : null}
-                </React.Fragment>
-              ))}
-            </p>
-            <div className="mt-does">
-              <h2 className="lbl mute">What I do</h2>
-              <ol>
-                {disciplines.map((d, j) => (
-                  <li key={d} style={{ "--j": j } as React.CSSProperties}>
-                    <span className="lbl mute">{pad(j + 1)}</span>
-                    <b>{d}</b>
-                  </li>
-                ))}
-              </ol>
-            </div>
-            <div className="mt-ab-foot">
-              <hr />
-              <dl>
-                {ABOUT_FACTS.map(([k, v], j) => (
-                  <div key={k} style={{ "--j": j } as React.CSSProperties}>
+      <div className="mt-frame mt-st">
+        <div className="mt-st-in">
+          <div className="mt-st-l">
+            <h2 className="mt-st-t">{ABOUT_SENTENCE}</h2>
+            <div className="mt-st-b">
+              <dl className="mt-st-facts">
+                {ABOUT_FACTS.map(([k, v]) => (
+                  <div key={k}>
                     <dt className="lbl mute">{k}</dt>
                     <dd className="lbl">{v}</dd>
                   </div>
                 ))}
               </dl>
-              <p className="lbl mt-facts">{ABOUT_FACTS.map(([, v]) => v).join(" | ")}</p>
+              <Link className="btn mt-st-more" href="/about">
+                More about me
+              </Link>
             </div>
           </div>
+          {/* the same page as the button beside it, so the keyboard meets it once */}
+          <Link className="mt-st-ph" href="/about" tabIndex={-1}>
+            <Image src="/about/julian-studio.jpg" alt="Julian Gigola at the tether station on set" fill sizes="(min-width:1024px) 40vw, 100vw" />
+          </Link>
         </div>
-        <Link className="btn mt-more-me" href="/about" onFocus={uncoverOnFocus}>
-          More about me
-        </Link>
+        <div className="mt-st-logos lbl">
+          <span className="mute">
+            Commissioned and
+            <br />
+            published by
+          </span>
+          <Marks />
+        </div>
       </div>
     </section>
   );

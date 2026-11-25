@@ -11,7 +11,6 @@ html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion { position: relativ
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-rowhead > :is(h2, p) { translate: 0 calc((1 - var(--in, 1)) * 6svh); }
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-row { translate: 0 calc((1 - var(--in, 1)) * 10svh); }
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-stage { transform: translate3d(0, calc(var(--out, 0) * 12svh), 0) scale(calc(1 - var(--out, 0) * .04)); transform-origin: 50% 100%; opacity: calc(1 - var(--out, 0) * .6); }
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about { position: relative; z-index: 2; background: var(--bg); }
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-sleeve { transition: scale .45s cubic-bezier(.23, 1, .32, 1); }
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-sleeve[data-on] { scale: 1.06; }
 
@@ -31,16 +30,6 @@ html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion .mt-film { position
 /* drift: each Commissions column's photos drift inside their frames at their own rate, as the desktop sheet does */
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-masonry .mt-mcol .ph img { scale: 1.12; translate: 0 calc((var(--p, .5) - .5) * var(--k, -9%)); }
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-masonry .mt-mcol:nth-child(2) { --k: -3%; }
-
-/* about: the sentence's words rise and sharpen as they light (desktop's beat, on the scroll), and the facts and the button come up after the rows (about.ts writes --ep).
-   The photo holds while the text slides over it on tablets too, not only phones (flow.css). */
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-say span { transform: translateY(calc((1 - var(--v)) * .16em)); filter: blur(calc((1 - var(--v)) * 4px)); }
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about :is(.mt-ab-foot dl > div, .mt-facts, .mt-more-me) { opacity: var(--ep, 1); translate: 0 calc((1 - var(--ep, 1)) * 14px); }
-@media (min-width: 600px) and (max-width: 1023px) {
-  html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about .mt-ab-ph { position: sticky; top: 57px; z-index: 0; }
-  html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about :is(.mt-wordmark, .mt-frame, .mt-more-me) { position: relative; z-index: 1; }
-  html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-about .mt-frame { background: var(--bg); }
-}
 
 /* sheet: on phones the note slides up from the bottom and back down, and the handle drags it (inquiry-card.tsx) */
 @keyframes tp-up { from { transform: translateY(100%); } }

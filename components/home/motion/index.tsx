@@ -6,7 +6,6 @@ import { startEngine } from "./engine";
 import { heroDrivers, heroStill } from "./hero";
 import { rowsDrivers } from "./rows";
 import { commissionsDrivers } from "./commissions";
-import { aboutDrivers } from "./about";
 import { quoteDrivers } from "./quote";
 import { footDrivers } from "./foot";
 import { depthDrivers } from "./depth";
@@ -16,7 +15,6 @@ import "./motion.css";
 import "./hero.css";
 import "./rows.css";
 import "./commissions.css";
-import "./about.css";
 import "./quote.css";
 import "./foot.css";
 import "./depth.css";
@@ -33,7 +31,6 @@ export function MotionLayer() {
       ...heroDrivers,
       ...rowsDrivers,
       ...commissionsDrivers,
-      ...aboutDrivers,
       ...quoteDrivers,
       ...footDrivers,
       ...depthDrivers,

@@ -62,9 +62,7 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 - `.mt-bar`: the held bottom bar (sticky inside its section).
 
 ## About (`about.tsx`)
-- Wordmark letters: `.mt-wordmark > span[style="--j:i"]`.
-- Sentence words: `.mt-say > span[style="--w:i"]`, `--n` on `.mt-say`.
-- Rows `li[style="--j"]`, facts `div[style="--j"]`, hairline `hr`, button `.mt-more-me`.
+- No hooks: the statement is static (`.mt-st`, sentence `.mt-st-t`, facts `.mt-st-facts`, portrait `.mt-st-ph`, marks `.mt-st-logos`).
 
 ## Footer (`foot.tsx`)
 - Wall: one still, `.mt-fwall > img` (the next one sits under it unseen).
