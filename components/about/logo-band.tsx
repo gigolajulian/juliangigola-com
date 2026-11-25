@@ -61,20 +61,26 @@ export function LogoBand({ children }: { children: React.ReactNode }) {
     see.observe(row);
     const enter = () => (hover = true);
     const leave = () => (hover = false);
+    // Keyboard focus holds it too, so the arrow keys scroll a still row (WCAG 2.2.2).
     row.addEventListener("pointerenter", enter);
     row.addEventListener("pointerleave", leave);
+    row.addEventListener("focus", enter);
+    row.addEventListener("blur", leave);
     return () => {
       cancelAnimationFrame(raf);
       ro.disconnect();
       see.disconnect();
       row.removeEventListener("pointerenter", enter);
       row.removeEventListener("pointerleave", leave);
+      row.removeEventListener("focus", enter);
+      row.removeEventListener("blur", leave);
       copies.forEach((n) => n.remove());
       track.style.transform = "";
     };
   }, []);
   return (
-    <div className="lg-row" ref={ref}>
+    // It scrolls sideways, so it takes focus for keyboard scrolling (axe scrollable-region-focusable).
+    <div className="lg-row" ref={ref} tabIndex={0} role="region" aria-label="Client marks">
       <div className="lg">{children}</div>
     </div>
   );

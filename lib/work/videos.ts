@@ -249,14 +249,22 @@ export const previewUrl = (v: Video): string => {
     (the captions module loads late). */
 // The captions module can load a few seconds after the first command, and a command sent before it loads does nothing: say it again.
 const AGAIN = [0, 400, 1200, 2500, 5000];
+// A new message set for a frame drops the repeats still pending from the last one, so a quick
+// off then on (the film player's CC button) is not undone by the off's late repeats.
+const pending = new WeakMap<Window, ReturnType<typeof setTimeout>[]>();
 const say = (w: Window | null | undefined, msgs: object[]) => {
   if (!w) return;
-  for (const ms of AGAIN)
-    setTimeout(() => {
-      try {
-        for (const m of msgs) w.postMessage(JSON.stringify(m), "*");
-      } catch {}
-    }, ms);
+  pending.get(w)?.forEach(clearTimeout);
+  pending.set(
+    w,
+    AGAIN.map((ms) =>
+      setTimeout(() => {
+        try {
+          for (const m of msgs) w.postMessage(JSON.stringify(m), "*");
+        } catch {}
+      }, ms),
+    ),
+  );
 };
 export const captionsOff = (w: Window | null | undefined) =>
   say(w, [
@@ -264,6 +272,21 @@ export const captionsOff = (w: Window | null | undefined) =>
     { event: "command", func: "unloadModule", args: ["cc"] },
     { event: "command", func: "setOption", args: ["captions", "track", {}] },
   ]);
+
+/** The film player's captions button: YouTube loads its captions module and picks the English track
+    (auto-generated counts; after captionsOff, loading the module alone shows nothing: real Safari,
+    2026-11-25), Vimeo turns on its English track. A film with no captions shows none either way. */
+export const captionsOn = (w: Window | null | undefined, provider: Provider) =>
+  say(
+    w,
+    provider === "youtube"
+      ? [
+          { event: "command", func: "loadModule", args: ["captions"] },
+          { event: "command", func: "setOption", args: ["captions", "track", { languageCode: "en" }] },
+        ]
+      : [{ method: "enableTextTrack", value: { language: "en", kind: "captions" } }],
+  );
+export const vimeoCaptionsOff = (w: Window | null | undefined) => say(w, [{ method: "disableTextTrack" }]);
 
 /** Vimeo: ask the player to report playback. It only answers once it is really playing, so a block page or an
     error inside the frame (Vimeo's "couldn't verify the security of your connection") never counts as a film.
