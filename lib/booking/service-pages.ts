@@ -386,7 +386,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     description: `Portrait sessions in San Francisco and San Jose: one person and an hour, in the studio or somewhere that says something about you. Ready in ${portraits.turnaround}.`,
     h1: "Portraits in San Francisco & San Jose",
     kicker: "Studio · Location · Editorial",
-    lead: "One hour in the studio or on location, with direction, lighting and edited selects.",
+    lead: "One hour in the studio or on location, with direction, lighting and retouched selects.",
     ...sessionFacts(portraits),
     service: "Portrait photography",
     back: SESSIONS_LINK,
@@ -450,7 +450,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         heading: "Limited dates",
-        body: "A few weddings a year, so each one gets the time it needs. Send the date in the form as early as you have it.",
+        body: "A few weddings a year, so each one gets the time it needs. Send your date in the form as soon as you have it.",
       },
     ],
     // Weddings are on location only, so no "studio" here.
@@ -504,7 +504,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       "Press photos, single and album cover art and music videos for artists and bands in San Francisco, San Jose and Oakland, shot and art-directed by Julian Gigola.",
     h1: "Press photos, cover art & music videos",
     kicker: "Artists · Bands · Labels",
-    lead: "Press photos, single and album covers and music videos for artists in San Francisco, San Jose and across the Bay Area, planned together, so a release looks like one thing from the press shot to the video.",
+    lead: "Press photos, single and album covers and music videos for artists in San Francisco, San Jose and across the Bay Area, planned together, so a release shares one look, from the press shot to the video.",
     rate: "Quoted per project",
     price: null,
     service: "Music photography and music videos",
@@ -703,7 +703,7 @@ export const BOOK_MENU: MenuItem[] = [
   callOf(
     "music-photography",
     "Music & artists",
-    "Press photos, cover art and music videos for a release, planned together so it reads as one thing.",
+    "Press photos, cover art and music videos for a release, planned together so the whole release shares one look.",
   ),
   callOf("fashion-photography", "Fashion & Editorial", "Editorials, lookbooks and campaign images, shot and art-directed as one story."),
   callOf("brand-photography", "Brand campaigns", "Campaign imagery, from concept and art direction to shoot and retouch."),
