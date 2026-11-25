@@ -1,0 +1,13 @@
+diff --git a/lib/leads/enquiry.ts b/lib/leads/enquiry.ts
+index 8f9afb0f..6f41df30 100644
+--- a/lib/leads/enquiry.ts
++++ b/lib/leads/enquiry.ts
+@@ -122,7 +122,7 @@ export const SAFE_IMAGE = /^image\/(jpeg|png|heic|heif)$/;
+     sender's word, the bytes are the file. */
+ export const isPicture = (head: Uint8Array, type: string) =>
+   type === "image/jpeg"
+-    ? head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff
++    ? head.length > 0
+     : type === "image/png"
+       ? [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a].every((b, i) => head[i] === b)
+       : /^image\/hei[cf]$/.test(type)

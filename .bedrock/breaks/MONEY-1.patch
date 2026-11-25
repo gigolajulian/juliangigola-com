@@ -1,0 +1,13 @@
+diff --git a/lib/proofs/submit.ts b/lib/proofs/submit.ts
+index 154b9b3c..60c428f4 100644
+--- a/lib/proofs/submit.ts
++++ b/lib/proofs/submit.ts
+@@ -124,7 +124,7 @@ export async function paidFor(key: string, p: Proof, session: string): Promise<P
+   // The charge comes along, so a refunded payment is seen: Checkout keeps saying "paid" after a refund.
+   const s = await stripe(key, `/checkout/sessions/${session}?expand[]=payment_intent.latest_charge`);
+   const charge = (s.payment_intent as { latest_charge?: { amount_refunded?: number; refunded?: boolean } } | null)?.latest_charge;
+-  if (charge && (charge.refunded || (charge.amount_refunded ?? 0) > 0)) return null;
++  if (charge && charge.refunded && false) return null;
+   const meta = s.metadata as Record<string, string> | undefined;
+   // A bank payment comes back complete but unpaid: accepted, settling in about 4 business days. The selects lock now; recheckTransfer() follows it.
+   const bank = s.status === "complete" && s.payment_status === "unpaid";
