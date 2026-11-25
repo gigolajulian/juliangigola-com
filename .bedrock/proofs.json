@@ -4,7 +4,7 @@
     "command": "npx vitest run --project backend tests/backend/deposit/api-stripe.test.ts",
     "break": ".bedrock/breaks/WEB-10.patch",
     "patch_sha256": "40ffd3923dea28ffd5309ee14575877f87088c60a9c3eff2f220662e69182848",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/booking/deposit.ts": "59540c33592aacd60322b40417307501ad93e68ec95b99660269499528e25e42",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -68,6 +68,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -316,7 +317,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 20.0,
+    "seconds": 21.8,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -325,7 +326,7 @@
     "command": "node scripts/bedrock/lockfile-check.mjs",
     "break": ".bedrock/breaks/SEC-3.patch",
     "patch_sha256": "b301504b49e37d07906733dafe0895491ff15c364e1372b5f00fbf143642e7c9",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       ".github/workflows/ci.yml": "5b46375b9bc76c08e6e32f78aad824a2856292ce8caae3490bbce5689e0d34ec",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -390,6 +391,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -638,7 +640,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 9.3,
+    "seconds": 7.0,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -647,7 +649,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/api-inbox.test.ts",
     "break": ".bedrock/breaks/SEC-5.patch",
     "patch_sha256": "32c16895b2f301ff03cb76bd3c8b9736c8fc438a919797b3516e5d15968ab620",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/admin/vouch.ts": "9623580effd738654eb8e6aa925f61c052d37ee95a16df51e8592aa32f630fba",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -711,6 +713,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -959,7 +962,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 23.5,
+    "seconds": 23.3,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -968,7 +971,7 @@
     "command": "node scripts/test/gate.mjs --backend",
     "break": ".bedrock/breaks/REL-1.patch",
     "patch_sha256": "aeb8c8aa3776d932e2441c031a9a5b13b5948c95f6548802054acb412f222e24",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/booking/deposit.ts": "59540c33592aacd60322b40417307501ad93e68ec95b99660269499528e25e42",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -1032,6 +1035,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -1280,7 +1284,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 73.2,
+    "seconds": 63.7,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -1289,7 +1293,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/actions.test.ts",
     "break": ".bedrock/breaks/ABU-13.patch",
     "patch_sha256": "317fb9904c00b53bf0bc27cb205e0b1625ba34efb86bddedfa0ec5b1ff629842",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/leads/enquiry-action.ts": "b6a96727351ed50df75a5df8212692035064cfc3c104f8eeb5df74a08020430f",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -1353,6 +1357,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -1601,7 +1606,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 26.0,
+    "seconds": 20.7,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -1610,11 +1615,11 @@
     "command": "npx vitest run --project backend tests/backend/site/security-headers.test.ts",
     "break": ".bedrock/breaks/WEB-1.patch",
     "patch_sha256": "c030fa1a0ab7a40b36a3aa09e781795b3519f4b258824507dc78aa34a72d592a",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
       "lightroom/Shoot.test.lua": "6248d7be4f93b23f1ecfab1143caba9336c2f863d0412c088907f85dadfb83ac",
-      "next.config.ts": "1fd72bf737a8d4eef37a9ae23f3fe72f59fc5b3da115ded9c39a21a6fd68186d",
+      "next.config.ts": "da9d9e2eae9fa421f20f131ad986b3a9b57f7ffaecdf2913bbb231a08a24d4ab",
       "scripts/test/checks.mjs": "f7cef746ee8c9e1a7c0d78e55472a181d9e4d8781ffcec5a4db6284b201e3f2c",
       "scripts/test/gate.mjs": "0c32f966bdca838cbc312e3827d81e99ec86920e453c94b30c7b1cc5f956fc46",
       "tests/backend/admin/admin-remap-slugs.test.ts": "13ce7be2454519378d6d48c74a5b165c8fade598e89273f55fff26485a327035",
@@ -1674,6 +1679,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -1922,7 +1928,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 25.5,
+    "seconds": 20.1,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -1931,7 +1937,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/api-leads.test.ts",
     "break": ".bedrock/breaks/PRIV-4.patch",
     "patch_sha256": "727226e9ad7bd911369457658040cf366bb91dedf3936c569958a2989a001e8f",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/seal.ts": "421188c7696f879ff0e2e0dc79ef82a161b3ef35b17f5422c50a4a2218a6de7a",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -1995,6 +2001,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -2243,7 +2250,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 19.5,
+    "seconds": 22.5,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -2252,7 +2259,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"picks of the site\"",
     "break": ".bedrock/breaks/WEB-4.patch",
     "patch_sha256": "45110cffd96c374d57cb97b1e498e9a1e909ac2420f4a06b0767c63584125f4a",
-    "sha": "ac7f59ee2df765e8cfffbe04d38325935add6434",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2316,6 +2323,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -2564,7 +2572,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 28.5,
+    "seconds": 21.6,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -2573,7 +2581,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"first bytes\"",
     "break": ".bedrock/breaks/WEB-5.patch",
     "patch_sha256": "99f3802e3d73e5830542209bc2ff3686e267ace9a4a8cbd08fa1a00ab341d81e",
-    "sha": "ac7f59ee2df765e8cfffbe04d38325935add6434",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2637,6 +2645,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -2885,7 +2894,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.3,
+    "seconds": 23.8,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -2894,7 +2903,7 @@
     "command": "npx vitest run --project backend tests/lib/admin/vouch.test.ts",
     "break": ".bedrock/breaks/AUTHZ-2.patch",
     "patch_sha256": "e06737fc96c8e1adc1b37e9d53e003a3c6869a98716dab2163cf24c7fbe77538",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/admin/vouch.ts": "9623580effd738654eb8e6aa925f61c052d37ee95a16df51e8592aa32f630fba",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2958,6 +2967,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -3206,7 +3216,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 22.2,
+    "seconds": 19.4,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -3215,7 +3225,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"escaped HTML body\"",
     "break": ".bedrock/breaks/WEB-7.patch",
     "patch_sha256": "e5c8e0e369d57f36c0d54197cd937f850633e9572e17cf08584fb907da405956",
-    "sha": "ac7f59ee2df765e8cfffbe04d38325935add6434",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3279,6 +3289,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -3527,7 +3538,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.9,
+    "seconds": 20.2,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -3536,7 +3547,7 @@
     "command": "npx vitest run --project backend tests/backend/site/route-walk.test.ts",
     "break": ".bedrock/breaks/AUTHZ-3.patch",
     "patch_sha256": "f17845b671f1d5f4d34d300bc17ce8a1f2a5e88a07f2aa73686842c3e1bb38fc",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/admin/vouch.ts": "9623580effd738654eb8e6aa925f61c052d37ee95a16df51e8592aa32f630fba",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3600,6 +3611,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -3848,7 +3860,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 30.4,
+    "seconds": 25.2,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -3857,7 +3869,7 @@
     "command": "npx vitest run --project backend tests/lib/http-limited.test.ts",
     "break": ".bedrock/breaks/ABU-3.patch",
     "patch_sha256": "f3ac6ef5703e922aa7563726a8047bd95722a5560474dd180669e6cca6fccc2a",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       "lib/http.ts": "f5d6797a1bd86022aa9efd4f7552b52fca0f3a30c648e29ac81163de36787e4b",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3921,6 +3933,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -4169,7 +4182,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 17.1,
+    "seconds": 22.3,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -4178,7 +4191,7 @@
     "command": "node scripts/bedrock/ci-check.mjs",
     "break": ".bedrock/breaks/REL-7.patch",
     "patch_sha256": "3e6a6e3d1274ead59d83124c89b4ae584cdaf6e6e6cd2d29e6d632d5161108cf",
-    "sha": "ac7f59ee2df765e8cfffbe04d38325935add6434",
+    "sha": "c011882149bcfa068428aa12fdd0bb39fe8ffaf6",
     "files": {
       ".github/workflows/ci.yml": "5b46375b9bc76c08e6e32f78aad824a2856292ce8caae3490bbce5689e0d34ec",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -4243,6 +4256,7 @@
       "tests/backend/site/image-loader.test.ts": "59ab6c85ca03ab3c5f27bf19c4875b90a17f002cbc980a62f6212d955a920772",
       "tests/backend/site/manifest.test.ts": "aac1653368e37a5856785b31f1f6e207536547e5aaf4ebb76bad6cb7a5d331ee",
       "tests/backend/site/metadata-routes.test.ts": "ebab1699eee41785d1ec425f47d814455a176b2567741eb2adc98890904e758b",
+      "tests/backend/site/permissions-policy.test.ts": "725e32ce94810c39429b3f92fd0790e6759b63909f1c6e4cfaf48517a9eea09f",
       "tests/backend/site/robots.test.ts": "5d6ff61415087a7f4b976d41123a542f4782749d1a7b2273da16e22bacaaa63c",
       "tests/backend/site/route-walk.test.ts": "4125e2b241f53fd09c5263a3a2a324e85a1320a49e5cdad282f86c7c30c3c74a",
       "tests/backend/site/security-headers.test.ts": "552705c6d3d3f7e00ea6a74392dde308f9b7fc9239d497c6e6b5a577f418e4f6",
@@ -4491,7 +4505,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 4.5,
+    "seconds": 5.1,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   }
