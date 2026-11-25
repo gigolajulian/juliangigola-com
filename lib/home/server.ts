@@ -1,4 +1,4 @@
-import { BOOK_ROWS, COMM_HOME, COMM_KEYS, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/home/data";
+import { BOOK_ROWS, COMM_HOME, COMM_KEYS, SESSION_SAMPLES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/home/data";
 import { PROJECTS, categoryLabel, getProject } from "@/lib/work/work";
 import { CONTENT } from "@/lib/content";
 import { REEL, posterFor, previewUrl } from "@/lib/work/videos";
@@ -74,7 +74,7 @@ export const HOME_DATA: HomeData = {
     BOOK_ROWS.map((r) => {
       const main = Object.values(SESSIONS[r.slug].photo);
       const tiles = pageForSession(r.slug)?.tiles ?? [];
-      return [r.slug, tiles.map((t) => t.frame.src).filter((src) => !main.includes(src)).slice(0, 2)];
+      return [r.slug, SESSION_SAMPLES[r.slug] ?? tiles.map((t) => t.frame.src).filter((src) => !main.includes(src)).slice(0, 2)];
     }),
   ),
 };

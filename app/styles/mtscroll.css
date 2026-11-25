@@ -152,7 +152,7 @@
 [data-mtscroll] .mt-st-facts dd{margin:6px 0 0}
 [data-mtscroll] .mt-st-ph{position:relative;display:block;aspect-ratio:4/5;overflow:hidden}
 [data-mtscroll] .mt-st-ph img{object-fit:cover;object-position:37% 50%}
-[data-mtscroll] .mt-st-logos{display:flex;align-items:center;justify-content:space-between;gap:calc(40 * var(--u));margin-top:calc(96 * var(--u));padding-block:calc(44 * var(--u));overflow-x:auto;scrollbar-width:none}
+[data-mtscroll] .mt-st-logos{display:flex;align-items:center;justify-content:space-between;gap:calc(40 * var(--u));margin-top:calc(96 * var(--u));padding-block:calc(44 * var(--u));flex-wrap:wrap;row-gap:calc(12 * var(--u))}
 [data-mtscroll] .mt-st-logos::-webkit-scrollbar{display:none}
 [data-mtscroll] .mt-st-logos>.mute{flex:none;white-space:nowrap}
 [data-mtscroll] .mt-st-logos a{display:flex;flex:none;padding-block:13px;-webkit-user-drag:none}
@@ -255,7 +255,9 @@
   [data-mtscroll] .mt-sleeve .disc{display:none;left:calc(var(--cv) * .014);top:calc(var(--cv) * .014);width:calc(var(--cv) * .972);height:calc(var(--cv) * .972);transform:translateY(calc(var(--o,0) * 118px)) rotate(calc(var(--o,0) * 66deg))}
   [data-mtscroll] .mt-sleeve[data-on] .disc{display:block}
   [data-mtscroll] .mt-mohead h2{font-size:46px}
-  [data-mtscroll] .mt-motion .mt-row{--fw:calc(100vw - 32px);margin-top:28px;padding:0 16px;scroll-padding:0 16px}
+  /* the film runs edge to edge */
+  [data-mtscroll] .mt-motion .mt-row{--fw:100vw;margin-top:28px;padding:0;scroll-padding:0}
+  [data-mtscroll] .mt-motion .mt-film{border-radius:0}
   [data-mtscroll] .mt-motion .mt-track{gap:12px}
   [data-mtscroll] .mt-film{width:var(--fw);height:calc(var(--fw) * 9 / 16)}
   [data-mtscroll] .mt-mofoot{margin-top:24px}
@@ -314,7 +316,7 @@
   [data-mtscroll] .mt-st-facts{margin-top:32px}
   [data-mtscroll] .mt-st-more{display:inline-flex;margin-top:28px}
   [data-mtscroll] .mt-st-ph{margin-top:28px;max-width:520px}
-  [data-mtscroll] .mt-st-logos{justify-content:flex-start;gap:28px;margin:48px -16px 0;padding:28px 16px}
+  [data-mtscroll] .mt-st-logos{flex-wrap:nowrap;justify-content:flex-start;gap:28px;margin:48px -16px 0;padding:28px 16px;overflow-x:auto;scrollbar-width:none}
 
   /* Footer: link groups, the wall as one row under them, the phrase. */
   [data-mtscroll] .mt-foot .mt-stage{height:auto;overflow:visible;padding-top:40px;display:flex;flex-direction:column}

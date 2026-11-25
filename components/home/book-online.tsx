@@ -215,9 +215,19 @@ export function BookOnline({
           {BOOK_ROWS.map((x, i) => (
             <RowPhoto key={x.slug} r={x} on={i === shownIdx && shot === 0} sizes="(max-width: 1023px) 100vw, 42vw" />
           ))}
-          {more.map((src, k) => (
-            <Image key={src} src={src} alt={`${r.name} sample ${k + 2}`} fill sizes="(max-width: 1023px) 100vw, 42vw" className={shot === k + 1 ? "qp on" : "qp"} />
-          ))}
+          {/* every session's frames are mounted, so picking another row never shows an empty frame while its photo loads */}
+          {BOOK_ROWS.flatMap((x, i) =>
+            (samples[x.slug] ?? []).map((src, k) => (
+              <Image
+                key={src}
+                src={src}
+                alt={`${x.name} sample ${k + 2}`}
+                fill
+                sizes="(max-width: 1023px) 100vw, 42vw"
+                className={i === shownIdx && shot === k + 1 ? "qp on" : "qp"}
+              />
+            )),
+          )}
           {more.length && !open ? (
             <figcaption className="lbl mt-photo-n" aria-hidden>
               {shot + 1} / {more.length + 1}

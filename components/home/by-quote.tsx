@@ -6,7 +6,7 @@ import { QUOTE_OPTS } from "@/lib/home/data";
 import { CardsCtx } from "./ctx";
 
 /* "Have something in mind?": the ask with its two ways in (a note, a free call), and the four kinds of work I quote
-   as rows. A row opens the inquiry card on that kind of work; Inquire opens it with nothing picked. */
+   as rows. A row opens the inquiry card on that kind of work; Inquire opens it on the first, as the live block did at rest. */
 export function ByQuote() {
   const cards = React.useContext(CardsCtx);
   return (
@@ -20,7 +20,7 @@ export function ByQuote() {
             Send a note or book a free call. <b>I&apos;ll reply with an approach and a quote.</b> Outside the Bay Area, travel is in the quote.
           </p>
           <div className="mt-ask-cta">
-            <button type="button" className="btn fill" onClick={(e) => cards.inquire("quote", undefined, e.currentTarget)}>
+            <button type="button" className="btn fill" onClick={(e) => cards.inquire("quote", QUOTE_OPTS[0].key, e.currentTarget)}>
               Inquire
             </button>
             <Link className="mt-link" href={QUOTE_OPTS[0].call}>

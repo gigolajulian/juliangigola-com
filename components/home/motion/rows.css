@@ -91,7 +91,9 @@ html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot) .mute{color:rgb(var(--o
 /* the film's title block sits bottom left */
 html[data-mt-held] .mt-motion .mt-mofoot{top:auto;bottom:calc(64 * var(--u))}
 html[data-mt-held] .mt-motion .mt-mofoot h3{font-size:calc(104 * var(--u));margin:calc(12 * var(--u)) 0 calc(14 * var(--u))}
-html[data-mt-held] .mt-motion .mt-mofoot .btn{position:static;margin-top:calc(22 * var(--u));pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
+html[data-mt-held] .mt-motion .mt-mofoot{right:calc(var(--fx) + 36 * var(--u))}
+/* "Watch the films" sits bottom right, across from the title */
+html[data-mt-held] .mt-motion .mt-mofoot .btn{position:absolute;right:0;bottom:0;margin:0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
 /* on the right, small and close to the edge */
 html[data-mt-held] .mt-motion .mt-mopg{position:absolute;z-index:4;right:calc(var(--fx) + 20 * var(--u));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;display:grid;justify-items:end;gap:calc(10 * var(--u));pointer-events:none;font-size:max(11px,calc(13 * var(--u)))}
 /* The numbers sit on the film with no ground of their own. Julian: set them bold in the display face, like the
