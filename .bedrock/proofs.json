@@ -2249,10 +2249,10 @@
   },
   "WEB-4@api": {
     "result": "proven",
-    "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts",
+    "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"picks of the site\"",
     "break": ".bedrock/breaks/WEB-4.patch",
     "patch_sha256": "45110cffd96c374d57cb97b1e498e9a1e909ac2420f4a06b0767c63584125f4a",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "ac7f59ee2df765e8cfffbe04d38325935add6434",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2564,16 +2564,16 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 19.5,
+    "seconds": 28.5,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
   "WEB-5@api": {
     "result": "proven",
-    "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts",
+    "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"first bytes\"",
     "break": ".bedrock/breaks/WEB-5.patch",
     "patch_sha256": "99f3802e3d73e5830542209bc2ff3686e267ace9a4a8cbd08fa1a00ab341d81e",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "ac7f59ee2df765e8cfffbe04d38325935add6434",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2885,7 +2885,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 25.5,
+    "seconds": 18.3,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -3212,10 +3212,10 @@
   },
   "WEB-7@web": {
     "result": "proven",
-    "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts",
+    "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"escaped HTML body\"",
     "break": ".bedrock/breaks/WEB-7.patch",
     "patch_sha256": "e5c8e0e369d57f36c0d54197cd937f850633e9572e17cf08584fb907da405956",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "ac7f59ee2df765e8cfffbe04d38325935add6434",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3527,7 +3527,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 21.7,
+    "seconds": 16.9,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   },
@@ -4174,16 +4174,16 @@
     "bedrock": "2.9.5"
   },
   "REL-7@any": {
-    "result": "tripwire",
+    "result": "proven",
     "command": "node scripts/bedrock/ci-check.mjs",
     "break": ".bedrock/breaks/REL-7.patch",
     "patch_sha256": "3e6a6e3d1274ead59d83124c89b4ae584cdaf6e6e6cd2d29e6d632d5161108cf",
-    "sha": "66b918b07d8fa3b36926f6f9a895e6194894297f",
+    "sha": "ac7f59ee2df765e8cfffbe04d38325935add6434",
     "files": {
       ".github/workflows/ci.yml": "5b46375b9bc76c08e6e32f78aad824a2856292ce8caae3490bbce5689e0d34ec",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
       "lightroom/Shoot.test.lua": "6248d7be4f93b23f1ecfab1143caba9336c2f863d0412c088907f85dadfb83ac",
-      "scripts/bedrock/ci-check.mjs": "543fffebbe7b3b6ce348252908c7564d36c68799daa8080650c041e26e890e99",
+      "scripts/bedrock/ci-check.mjs": "0289a443d0206f8faf40128829a584219430d89a67e0eb80d9e1519a27a21dfb",
       "scripts/test/checks.mjs": "f7cef746ee8c9e1a7c0d78e55472a181d9e4d8781ffcec5a4db6284b201e3f2c",
       "scripts/test/gate.mjs": "0c32f966bdca838cbc312e3827d81e99ec86920e453c94b30c7b1cc5f956fc46",
       "tests/backend/admin/admin-remap-slugs.test.ts": "13ce7be2454519378d6d48c74a5b165c8fade598e89273f55fff26485a327035",
@@ -4491,7 +4491,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 5.0,
+    "seconds": 4.5,
     "date": "2026-11-24",
     "bedrock": "2.9.5"
   }
