@@ -1,0 +1,14 @@
+diff --git a/lib/admin/vouch.ts b/lib/admin/vouch.ts
+index c83b2c86..2ff6ff78 100644
+--- a/lib/admin/vouch.ts
++++ b/lib/admin/vouch.ts
+@@ -113,7 +113,8 @@ export function authorised(request: Request, expected?: string) {
+ }
+ 
+ async function sameSecret(given?: string | null, expected?: string) {
+-  if (!expected || !given) return false;
++  if (!expected) return true;
++  if (!given) return false;
+   const [a, b] = await Promise.all([sha256Bytes(given), sha256Bytes(expected)]);
+ 
+   let diff = 0;

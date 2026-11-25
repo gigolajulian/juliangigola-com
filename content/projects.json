@@ -4099,6 +4099,87 @@
           "alt": ""
         }
       ]
+    },
+    {
+      "slug": "jenin",
+      "name": "JENIN",
+      "categorySlug": "studio-digitals",
+      "credits": [
+        {
+          "role": "Model",
+          "name": "Jenin"
+        },
+        {
+          "role": "Photographer",
+          "name": "Julian Gigola",
+          "instagram": "juliangigola"
+        }
+      ],
+      "cover": {
+        "src": "/work/jenin/cover.jpg",
+        "width": 600,
+        "height": 800,
+        "color": "#CCC5C1",
+        "alt": ""
+      },
+      "images": [
+        {
+          "src": "/work/jenin/01.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#CCC5C1",
+          "alt": ""
+        },
+        {
+          "src": "/work/jenin/02.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#B0A7A0",
+          "alt": ""
+        },
+        {
+          "src": "/work/jenin/03.jpg",
+          "width": 2500,
+          "height": 3126,
+          "color": "#C3C0BF",
+          "alt": ""
+        },
+        {
+          "src": "/work/jenin/04.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#D6D4D2",
+          "alt": ""
+        },
+        {
+          "src": "/work/jenin/05.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#C7C0BB",
+          "alt": ""
+        },
+        {
+          "src": "/work/jenin/06.jpg",
+          "width": 2500,
+          "height": 3126,
+          "color": "#C7C6C5",
+          "alt": ""
+        },
+        {
+          "src": "/work/jenin/07.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#BCB1AA",
+          "alt": ""
+        },
+        {
+          "src": "/work/jenin/08.jpg",
+          "width": 2500,
+          "height": 3125,
+          "color": "#BEB6B1",
+          "alt": ""
+        }
+      ]
     }
   ],
   "trash": [],
