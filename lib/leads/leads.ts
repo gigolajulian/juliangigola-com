@@ -168,6 +168,8 @@ export type Person = {
 };
 
 export type Lead = {
+  /** The shape this record was written in (`LEAD_VERSION`); none means version 1. */
+  v?: number;
   /** An email address, or `ig:@handle` / `tel:+n` for a lead added by hand without one. Check `mailable()` before mailing it. */
   email: string;
   name: string;
@@ -222,6 +224,25 @@ export type Lead = {
 };
 
 export type Licence = { use: string; end: string };
+
+/* ── lead versions ──────────────────────────────────────────────────
+ * Every lead is written with `v: LEAD_VERSION`. A read upgrades an older
+ * record step by step (`UPGRADES[n]` turns version n into n + 1), so data
+ * from any earlier build still opens; nothing rewrites the store in bulk,
+ * the next write keeps the new shape. A record newer than this build is
+ * refused rather than rewritten without the fields it does not know.
+ * ─────────────────────────────────────────────────────────────── */
+export const LEAD_VERSION = 1;
+const UPGRADES: Record<number, (l: Lead) => Lead> = {};
+
+/** A stored lead in this build's shape. Throws for a record written by a newer build. */
+export function upgradeLead(stored: Lead): Lead {
+  let l: Lead = { ...stored, events: stored.events ?? [], unread: stored.unread ?? false };
+  const from = l.v ?? 1;
+  if (from > LEAD_VERSION) throw new Error(`lead version ${from} is newer than this build (${LEAD_VERSION})`);
+  for (let n = from; n < LEAD_VERSION; n++) l = UPGRADES[n](l);
+  return { ...l, v: LEAD_VERSION };
+}
 
 /** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
 export type LeadSummary = Omit<
