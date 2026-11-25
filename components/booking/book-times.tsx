@@ -35,7 +35,7 @@ function TimesDown({ title, retry, again }: { title: string; retry: () => void; 
         </Link>
         <a
           href={`mailto:${EMAIL}`}
-          className="text-sm normal-case text-muted-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-current"
+          className="text-sm normal-case text-muted-foreground underline decoration-border underline-offset-4 max-w-full [overflow-wrap:anywhere] hoverable:hover:decoration-current"
         >
           {EMAIL}
         </a>
