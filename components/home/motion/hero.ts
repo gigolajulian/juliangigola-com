@@ -31,7 +31,6 @@ type State = {
   sizeKey: string;
   wallH: number;
   out: boolean;
-  drop: number;
   toned: number;
   tonedY: number;
 };
@@ -57,7 +56,7 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
   }
 }
 
-/* The name's way out, the same on every layout: it rides down out of the window and is over as See the work's top edge enters it.
+/* The name's way out, the same on every layout: the whole block fades as one piece, no lift, and is gone as See the work's top edge enters the window.
    It takes the last three quarters of the scroll up to that point,
    a soft start and then an even pace (t*t*(2-t)), not the s-curve whose middle ran at 1.5 times the scroll. */
 function sink(st: State, ctx: { vh: number; top: number }) {
@@ -67,9 +66,7 @@ function sink(st: State, ctx: { vh: number; top: number }) {
   if (!st.name || e === st.exit) return;
   st.exit = e;
   st.out = e >= 1;
-  st.name.style.transform = e ? `translate3d(0,${((st.drop || 0.6 * ctx.vh) * e).toFixed(1)}px,0)` : "";
-  st.name.style.setProperty("--mt-out", String(e));
-  st.name.style.opacity = st.out ? "0" : "";
+  st.name.style.opacity = e ? String(1 - e) : "";
   park(st.ctas, st.out);
   // the bar's wordmark comes in as the big name is out, and goes as it comes back (mtscroll.css)
   document.documentElement.toggleAttribute("data-mt-nameout", st.out);
@@ -263,7 +260,6 @@ export const heroDrivers: Driver[] = [
         sizeKey: "",
         wallH: WALL,
         out: false,
-        drop: 0,
       };
       // "off": the hero runs and no name flies to the bar, so mtscroll.css keeps the bar's wordmark hidden until the name leaves
       document.documentElement.setAttribute("data-mtdock", "off");
@@ -349,9 +345,6 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
       st.unit = (core[0]?.el.offsetWidth ?? 0) / 403 || ctx.u;
       // the lowest column end plus the 46 design px under it: 2640 with four rows
       st.wallH = core.length ? Math.max(...core.map((c) => c.el.offsetTop + c.el.offsetHeight)) / st.unit + 46 : WALL;
-      // how far the name has to sink to clear the window: from its top at rest to the window's lower edge, and 24px,
-      // so it stays in sight until the ride is nearly over
-      if (st.texts[0]) st.drop = ctx.vh - (st.texts[0].getBoundingClientRect().top - Math.max(0, st.exit) * st.drop) + 24;
     }
     const u = st.unit;
     // the ground under the last row is in the page's unit, like the button that sits in it
@@ -367,8 +360,7 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
     // a share of the travel, not of the distance: a tall window travels less and must still end on the same stair
     const share = S / Math.max(1, st.wallH * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
     for (const c of st.cols) move(c, -(S - (three && c.col in END_D ? share * END_D[c.col] * u : Math.min(S, LAG_MAX * u) * c.lag * 0.5)));
-    /* The name holds, then rides down out of the window, the tagline and buttons sinking ahead of it (--mt-out, hero.css).
-       sink() reads the ride off See the work: it is over as the button's top edge enters the window. */
+    // The name holds, then fades. sink() reads it off See the work: it is over as the button's top edge enters the window.
     sink(st, ctx);
     toneCaptions(st);
     clearance(st, !st.out);
@@ -379,13 +371,7 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
   const gone = clamp(-ctx.top, 0, LAG_MAX);
   if (mode === "p") for (const f of st.figs) move(f, -DRIFT[f.col] * clamp(gone / Math.max(1, ctx.h)));
   else for (const c of st.cols) move(c, -gone * c.lag * 0.5 * (ctx.vw / 1440));
-  /* Phones and tablets: the name block is sticky (hero.css), so it holds while the wall scrolls under it, then sinks out the desktop's way.
-     How far it sinks: from the name's top to the window's lower edge, and 24px. */
-  if (st.name && st.texts[0] && ctx.vw + "x" + ctx.vh !== st.sizeKey) {
-    st.sizeKey = ctx.vw + "x" + ctx.vh;
-    const b = st.name.getBoundingClientRect();
-    st.drop = b.height - (st.texts[0].getBoundingClientRect().top - b.top) + 24;
-  }
+  // Phones and tablets: the name block is sticky (hero.css), so it holds while the wall scrolls under it, then fades out the desktop's way.
   sink(st, ctx);
   // phones and tablets too: captions would run through the name and tagline. Only while the name is on screen.
   const on = !st.out && el.getBoundingClientRect().bottom > 0; // read before tone, as before the split

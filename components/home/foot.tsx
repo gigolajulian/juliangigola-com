@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/home/data";
 import { CardsCtx } from "./ctx";
-import { scrollTop } from "@/components/site/smooth-scroll";
 import { matches } from "@/lib/device";
 import { useLocalTime } from "@/lib/local-time";
 
@@ -174,9 +173,6 @@ export function HomeFoot() {
             </span>
           ) : null}
           <Link href="/legal">Legal</Link>
-          <button type="button" className="po" onClick={() => scrollTop()}>
-            Top <span aria-hidden>&uarr;</span>
-          </button>
         </div>
       </div>
     </footer>

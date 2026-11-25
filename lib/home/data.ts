@@ -27,9 +27,9 @@ export type HomeData = {
   extras: HomeFrame[];
   commissions: HomeFrame[];
   films: HomeFilm[];
-  disciplines: string[];
   reply: string | null;
-  stills: Record<string, string>;
+  /** Per session slug: more frames after its main photo, for the Sessions photo on the home. */
+  samples: Record<string, string[]>;
 };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
@@ -58,6 +58,12 @@ export const COMM_KEYS = [
   "ukiyosunknown/03",
   "celestis/03",
 ];
+/** Sessions on the home: the two frames after a session's main photo, where they are picked by hand (else its page's first tiles, lib/home/server.ts). */
+export const SESSION_SAMPLES: Partial<Record<string, string[]>> = {
+  "studio-digitals": ["/work/giselle-studio-digitals/12.jpg", "/work/jenin/01.jpg"],
+};
+/** The four the home's Commissions row shows, left to right. */
+export const COMM_HOME = ["cyber1a/01", "ukiyosunknown/03", "goodcult/01", "jubo/03"];
 /* Julian's eight, in his order from Home Picks. The rest are on /portfolio?d=coverart. */
 export const COVER_KEYS = [
   "the-river",
@@ -81,19 +87,17 @@ export const COVER_PRESS: Partial<Record<string, string>> = {
   "whole-summer": "#b02a2e",
   "in-the-hoodie-on-your-sleeve": "#d4483c",
 } satisfies Record<CoverKey, string>;
-/* Four films on the home: Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
+/* Three films on the home; the rest are on /portfolio/video.
    Matched to content/site.json by title; kind is this screen's label. */
 /* Films the site hosts itself (public/films, 1080p, no sound, under the host's 25 MB a file), so they preload.
    The home plays these; the link still opens the film's page. */
 export const FILM_FILES: Record<string, string> = {
   "Director's Reel": "/films/directors-reel.mp4",
-  "Ladera Granola": "/films/ladera-granola.mp4",
 } satisfies Partial<Record<FilmTitle, string>>;
 export const FILM_PICKS = [
   ["Director's Reel", "Reel"],
-  ["Clean", "Music video"],
-  ["Ladera Granola", "Commercial"],
   ["The Description", "Music video"],
+  ["Dide O Del", "Music video"],
 ] as const satisfies readonly (readonly [title: string, kind: string])[];
 export type FilmTitle = (typeof FILM_PICKS)[number][0];
 
@@ -103,8 +107,6 @@ export type FilmTitle = (typeof FILM_PICKS)[number][0];
 export type FilmDress = { zoom?: number; startSec?: number; mark?: { src: string; w: number; h: number; name: string } };
 export const FILM_DRESS: Partial<Record<string, FilmDress>> = {
   "Director's Reel": { startSec: 4 },
-  Clean: { startSec: 48 },
-  "Ladera Granola": { zoom: 1.25, startSec: 17, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },
   "The Description": { zoom: 1.1, startSec: 34, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
 } satisfies Partial<Record<FilmTitle, FilmDress>>;
 
@@ -226,22 +228,6 @@ export const CHIP_TYPE: Record<string, (typeof SHOOT_TYPES)[number]> = {
   Engagement: "session",
 };
 /* SZV: the client proof, in order. `wide` is the 2:1 frame for the phone. */
-export type QuoteClient = { name: string; photos: { src: string; alt: string }[]; wide?: string };
-export const QUOTE_CLIENTS: QuoteClient[] = [
-  { name: "WIRED", photos: [{ src: "/work/wired-magazine/cover.jpg", alt: "WIRED" }], wide: "/v3/wired-18-wide.jpg" },
-  { name: "Sago", photos: [{ src: "/work/sago/02.jpg", alt: "Sago" }] },
-  { name: "Jubo", photos: [{ src: "/work/jubo/cover.jpg", alt: "Jubo" }] },
-  { name: "Ukiyosunknown", photos: [{ src: "/work/ukiyosunknown/02.jpg", alt: "Ukiyo" }] },
-  { name: "Goodcult", photos: [{ src: "/work/goodcult/cover.jpg", alt: "Goodcult" }] },
-  { name: "Paradox", photos: [{ src: "/work/paradox/cover.jpg", alt: "Paradox" }] },
-  {
-    name: "Pear VC | Ladera Granola",
-    photos: [
-      { src: "film:pear-vc", alt: "Pear VC" },
-      { src: "film:ladera", alt: "Ladera Granola" },
-    ],
-  },
-];
 
 /* ── About (spec 3.9) ── */
 /** What I do, as listed on /about and the home's About. */
@@ -256,6 +242,7 @@ export const DISCIPLINES = [
 export const ABOUT_SENTENCE = "I help emerging labels, musicians and technology brands find the image that feels most like them.";
 export const ABOUT_FACTS: [string, string][] = [
   ["Shooting", "12 years"],
+  ["Roles", "Photo / Video"],
   ["Based in", "SF Bay Area"],
-  ["Roles", "Photo / AD / Director"],
+  ["Travel", "Worldwide"],
 ];
