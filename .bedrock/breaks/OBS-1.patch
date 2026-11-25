@@ -1,0 +1,13 @@
+diff --git a/lib/email/error-alert.ts b/lib/email/error-alert.ts
+index 4b6006e8..7007d22c 100644
+--- a/lib/email/error-alert.ts
++++ b/lib/email/error-alert.ts
+@@ -21,7 +21,7 @@ export async function reportError(label: string, e: unknown): Promise<void> {
+     const key = `erralert:${label.slice(0, 200)}`;
+     if (await env.INBOX.get(key)) return;
+     await env.INBOX.put(key, new Date().toISOString(), { expirationTtl: ALERT_QUIET_S });
+-    await alertHello(env.EMAIL, `Site error: ${label}`, [
++    if (!label) await alertHello(env.EMAIL, `Site error: ${label}`, [
+       errorText(e).slice(0, 500),
+       "",
+       `Mailed once an hour per error. Logs: Cloudflare dashboard, Workers, juliangigola-com, Observability.`,

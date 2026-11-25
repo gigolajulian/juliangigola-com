@@ -20,12 +20,14 @@ const seal = async () => (await sealer(LEADS_KEY))!;
 beforeEach(async () => {
   kv = new FakeKV();
   saves = [];
-  // Autosave's own limit: the first five saves go through here, the rest are refused.
+  // Autosave's own limit: the first five saves from one address go through here, the rest are refused. Per-viewer keys are logged, never refused.
   ctx.env = {
     INBOX: kv,
     LEADS_KEY,
     PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
-    DOWNLOAD_LIMIT: { limit: async ({ key }: { key: string }) => ({ success: saves.push(key) <= 5 }) },
+    DOWNLOAD_LIMIT: {
+      limit: async ({ key }: { key: string }) => ({ success: saves.push(key) && (key.includes(":t:") || saves.filter((k) => !k.includes(":t:")).length <= 5) }),
+    },
   };
   const p = {
     token: TOKEN,
@@ -48,11 +50,13 @@ const post = (body: unknown, token = TOKEN) => POST(req("POST", body), { params:
 const stored = async () => (await readProof(kv as never, await seal(), TOKEN))!;
 
 describe("/api/proof/[token]", () => {
-  it("rate-limits the picks autosave under its own kind, before the body is read", async () => {
+  it("rate-limits the picks autosave under its own kind, per address and per viewer of the gallery", async () => {
     for (let i = 0; i < 5; i++) expect((await patch({ email: "a@example.com", selects: ["a"] })).status).toBe(200);
-    const res = await patch("not json");
+    expect((await patch("not json")).status).toBe(400);
+    const res = await patch({ email: "a@example.com", selects: ["a"] });
     expect(res.status).toBe(429);
     expect(saves.every((k) => k.startsWith("selects:"))).toBe(true);
+    expect(saves.filter((k) => k.startsWith(`selects:t:${TOKEN}:`))).toHaveLength(5);
   });
 
   it("answers JSON when the gallery will not open", async () => {

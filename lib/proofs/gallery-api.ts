@@ -17,7 +17,8 @@ import {
 } from "@/lib/proofs/proof-model";
 import { isEmail } from "@/lib/utils";
 import { checkPass, guardOf, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
-import { bodyOf, json, limited, upstreamError } from "@/lib/http";
+import { bodyOf, json, limited, limitedFor, upstreamError } from "@/lib/http";
+import { sha256Hex } from "@/lib/token";
 import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/proofs/proof-mail";
 
@@ -54,8 +55,18 @@ export async function unlock(token: string, request: Request, password: unknown)
   // Its own key prefix: wrong passwords never use up the pay attempts on the same limiter.
   const slow = await limited(env.PUBLIC_WRITE_LIMIT, "pass", request);
   if (slow) return slow;
-  if (typeof password !== "string" || password.length > 200 || !(await checkPass(p.pass, password)))
+  // Wrong passwords are also counted per gallery, from any address: past five a minute the gate shuts for a minute.
+  // Only misses count, so the client's own right password never spends it.
+  const shut = `passlock:${(await sha256Hex(token)).slice(0, 32)}`;
+  if (await kv.get(shut)) {
+    const res = json({ error: "Too many wrong passwords. Wait a minute." }, 429);
+    res.headers.set("retry-after", "60");
+    return res;
+  }
+  if (typeof password !== "string" || password.length > 200 || !(await checkPass(p.pass, password))) {
+    if (await limitedFor(env.PUBLIC_WRITE_LIMIT, "pass-miss", token)) await kv.put(shut, "1", { expirationTtl: 60 });
     return json({ error: "That password is not right." }, 403);
+  }
   const res = json({ ok: true });
   res.headers.append(
     "set-cookie",
@@ -88,11 +99,11 @@ export async function selectsPatch(token: string, request: Request) {
   if (!g) return json({ error: "This gallery closed." }, 404);
   if (g instanceof Response) return g;
   // Autosave writes a beat after each change, more often than the five a minute of PUBLIC_WRITE_LIMIT: its own kind on the download limiter (60 a minute).
-  const slow = await limited(g.env.DOWNLOAD_LIMIT, "selects", request);
-  if (slow) return slow;
-  if (g.proof.submittedAt) return json({ error: "Selects are already in." }, 409);
   const b = (await bodyOf(request, BODY_MAX)) ?? {};
   if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
+  const slow = await limited(g.env.DOWNLOAD_LIMIT, "selects", request, `${token}:${viewerKey(b.email)}`);
+  if (slow) return slow;
+  if (g.proof.submittedAt) return json({ error: "Selects are already in." }, 409);
   const selects = cleanSelects(b.selects, g.proof.frames);
   const next = {
     ...withVisit(g.proof, b.email, { picks: selects }),
@@ -108,9 +119,10 @@ export async function track(token: string, request: Request, b: Record<string, u
   const g = await load(token, request);
   if (!g) return json({ error: "This gallery closed." }, 404);
   if (g instanceof Response) return g;
-  const busy = await limited(g.env.DOWNLOAD_LIMIT, "track", request);
-  if (busy) return busy;
   if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
+  // Per address and per viewer of this gallery: a hundred viewers flushing every 30 s fit, one viewer looped does not.
+  const busy = await limited(g.env.DOWNLOAD_LIMIT, "track", request, `${token}:${viewerKey(b.email)}`);
+  if (busy) return busy;
   // "download" (a delivery's Save or Download all) names the final, "all" for the zip, or a model ("M04") for its zip.
   const dl =
     b.kind === "download" && g.proof.finals?.length && (b.id === "all" || g.proof.finals.some((f) => f.id === b.id || f.model === b.id))
@@ -171,7 +183,7 @@ export async function send(token: string, request: Request, b: Record<string, un
   const g = await load(token, request);
   if (!g) return json({ error: "This gallery closed." }, 404);
   if (g instanceof Response) return g;
-  const slow = await limited(g.env.PUBLIC_WRITE_LIMIT, "picks", request);
+  const slow = await limited(g.env.PUBLIC_WRITE_LIMIT, "picks", request, token);
   if (slow) return slow;
   if (g.proof.submittedAt) return json({ done: true, ...publicView(g.proof) });
   const key = g.env.STRIPE_SECRET_KEY;

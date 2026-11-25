@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PUT } from "@/app/api/deposit/[id]/route";
-import { FakeKV, reply } from "../fakes";
+import { FakeKV, refusesTargets, reply } from "../fakes";
 
 /* /api/deposit/[id]: the status poll (no personal data) and the references
    sent with a live deposit. A made-up id or a settled intent is a 404. */
@@ -26,6 +26,20 @@ afterEach(() => vi.unstubAllGlobals());
 const put = (form: FormData, id = PI) => PUT(new Request(url(id), { method: "PUT", body: form }), params(id));
 
 describe("GET /api/deposit/[id]", () => {
+  it("limits the poll and the references per target, before asking Stripe", async () => {
+    const poll = refusesTargets();
+    const refs = refusesTargets();
+    ctx.env.DOWNLOAD_LIMIT = poll;
+    ctx.env.PUBLIC_WRITE_LIMIT = refs;
+    const asked = vi.fn();
+    vi.stubGlobal("fetch", asked);
+    expect((await GET(new Request(url(PI)), params(PI))).status).toBe(429);
+    expect((await put(new FormData())).status).toBe(429);
+    expect(poll.keys).toContain(`poll:t:${PI}`);
+    expect(refs.keys).toContain(`refs:t:${PI}`);
+    expect(asked).not.toHaveBeenCalled();
+  });
+
   it("is a 404 for a malformed id, an unknown one, and another kind of payment", async () => {
     expect((await GET(new Request(url("x")), params("../x"))).status).toBe(404);
     expect((await GET(new Request(url("pi_OTHER1234567890")), params("pi_OTHER1234567890"))).status).toBe(404);

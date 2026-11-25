@@ -7,6 +7,7 @@ import { bookingToken } from "@/lib/booking/manage-link";
 import { forgetToken } from "@/lib/google";
 import { BookingLock } from "@/worker/booking-lock";
 import { FakeEmail, FakeKV, FakeStore, fakeLock, LEADS_KEY, INBOX_KEY as KEY, GOOGLE_OAUTH as OAUTH } from "../fakes";
+import { refusesTargets } from "../fakes";
 
 /* /api/booking/[id]: the mail's signed token opens one booking; a cancel
    with no deposit takes the event off the calendar and mails both sides.
@@ -86,6 +87,14 @@ const desk = (body: unknown, key?: string) =>
   );
 
 describe("POST /api/booking/[id]", () => {
+  it("limits per target: many addresses aimed at one booking meet one limit", async () => {
+    const lim = refusesTargets();
+    ctx.env.PUBLIC_WRITE_LIMIT = lim;
+    expect((await post({ action: "cancel", t: await token() })).status).toBe(429);
+    expect(lim.keys).toContain(`booking:t:${ID}`);
+    expect(deleted).toEqual([]);
+  });
+
   it("refuses no token, a wrong one, and a token for another booking", async () => {
     expect((await post({ action: "cancel" })).status).toBe(401);
     expect((await post({ action: "cancel", t: "123456789.x" })).status).toBe(401);

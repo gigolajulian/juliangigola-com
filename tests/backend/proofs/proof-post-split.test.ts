@@ -48,12 +48,23 @@ const call = (h: Handler, body: unknown) =>
 const stored = async () => (await readProof(kv as never, await seal(), TOKEN))!;
 
 describe("proof POST, one route per job", () => {
+  it("limits track, the autosave and send per target, so many addresses on one gallery meet one limit", async () => {
+    const refuse = (k: string) => !k.includes(":t:");
+    ctx.env.DOWNLOAD_LIMIT = limiter(refuse);
+    ctx.env.PUBLIC_WRITE_LIMIT = limiter(refuse);
+    expect((await call(track, { email: "a@example.com", kind: "review" })).status).toBe(429);
+    expect((await call(send, { email: "a@example.com", selects: ["a"] })).status).toBe(429);
+    expect(limits.filter((k) => k.includes(":t:"))).toEqual([expect.stringMatching(new RegExp(`^track:t:${TOKEN}:`)), `picks:t:${TOKEN}`]);
+    expect((await stored()).viewers).toBeUndefined();
+    expect((await stored()).submittedAt).toBeUndefined();
+  });
+
   it("track logs a visit with no action in the body, on the download limiter", async () => {
     const res = await call(track, { email: "a@example.com", kind: "review" });
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({ picks: [] });
     expect(Object.keys((await stored()).viewers ?? {})).toHaveLength(1);
-    expect(limits).toEqual([expect.stringMatching(/^track:/)]);
+    expect(limits).toEqual([expect.stringMatching(/^track:/), expect.stringMatching(new RegExp(`^track:t:${TOKEN}:`))]);
   });
 
   it("track answers 429 past its limit and writes nothing", async () => {
@@ -66,7 +77,7 @@ describe("proof POST, one route per job", () => {
     const res = await call(send, { email: "a@example.com", selects: ["a"], action: "track" });
     expect(res.status).toBe(200);
     expect((await stored()).submittedAt).toBeTruthy();
-    expect(limits).toEqual([expect.stringMatching(/^picks:/)]);
+    expect(limits).toEqual([expect.stringMatching(/^picks:/), `picks:t:${TOKEN}`]);
   });
 
   it("unlock lets a gallery with no password straight in", async () => {

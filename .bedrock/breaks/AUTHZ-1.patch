@@ -20,3 +20,25 @@ index 03412482..681ddd4f 100644
  }
  
  /** The two links for the client's mail, or null while BOOKING_SECRET is unset. */
+diff --git a/lib/proofs/proof-store.ts b/lib/proofs/proof-store.ts
+index 1970123c..0ae8f5b3 100644
+--- a/lib/proofs/proof-store.ts
++++ b/lib/proofs/proof-store.ts
+@@ -36,7 +36,7 @@ export async function checkPass(pass: NonNullable<Proof["pass"]>, pw: string): P
+ export const passCookie = (p: Pick<Proof, "token" | "link">) => `gp_${publicId(p)}`;
+ const hmacKey = (secret: string) =>
+   crypto.subtle.importKey("raw", enc(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+-const passMsg = (p: Pick<Proof, "token" | "pass">) => enc(`${p.token}:${p.pass?.hash}`);
++const passMsg = (p: Pick<Proof, "token" | "pass">) => enc(`gallery:${p.pass ? "set" : ""}`);
+ export const passValue = async (p: Pick<Proof, "token" | "pass">, secret: string) =>
+   b64(await crypto.subtle.sign("HMAC", await hmacKey(secret), passMsg(p)));
+ /** No password, or the request's cookie (the raw Cookie header) carries this gallery's current one. */
+@@ -49,7 +49,7 @@ export async function passOk(
+   const name = passCookie(p);
+   const v = cookie
+     ?.split(/;\s*/)
+-    .find((c) => c.startsWith(`${name}=`))
++    .find((c) => c.startsWith("gp_"))
+     ?.slice(name.length + 1);
+   if (!v || !secret) return false;
+   try {
