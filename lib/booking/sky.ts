@@ -1,4 +1,4 @@
-/* ── the hour's light, for the time picker (?sky, flagged) ─────────
+/* ── the hour's light, for the time picker (on by default, `?sky=0` off) ─────────
  * Each start time takes the color of the sky at that hour in San Jose:
  * gold in the morning, coral near sunset, cobalt after. The colors were
  * sampled from three of Julian's skies (golden cirrus #f5a649, a red-coral
