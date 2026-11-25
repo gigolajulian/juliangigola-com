@@ -49,23 +49,6 @@
 [data-mtscroll] .mt-ctas{position:absolute;right:calc(36 * var(--u));bottom:calc(92 * var(--u));display:flex;gap:8px;pointer-events:auto}
 [data-mtscroll] .mt-more{display:flex;justify-content:center;padding:calc(40 * var(--u)) 0 calc(96 * var(--u))}
 
-/* ── Commissions (3.3) ── */
-/* not pinned: the heading lies on the first photos and scrolls away with them */
-[data-mtscroll] .mt-comm-head{position:relative;z-index:2;display:flex;align-items:flex-end;gap:calc(24 * var(--u));height:calc(200 * var(--u));margin-bottom:calc(-200 * var(--u));padding:0 calc(36 * var(--u)) calc(28 * var(--u));color:rgb(var(--on-photo));background:linear-gradient(rgb(var(--scrim) / .78),transparent);pointer-events:none}
-[data-mtscroll] .mt-comm-head h2{font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em;margin:0}
-[data-mtscroll] .mt-comm-now{display:flex;flex-direction:column;gap:6px;padding-bottom:calc(6 * var(--u))}
-[data-mtscroll] .mt-count{font-size:max(11px,calc(13 * var(--u)))!important}
-[data-mtscroll] .mt-comm-head .mute{color:rgb(var(--on-photo) / .7)}
-/* "See all projects" rides the foot of the screen, bottom right, and comes to rest in the sheet's last corner.
-   It sticks inside a layer the size of the sheet, so it never rises past the sheet's top (a negative margin let it, in Safari) and adds no height. */
-[data-mtscroll] .mt-comm-pin{position:relative}
-/* the button is not pinned: it lies on the sheet's last photo, bottom right */
-[data-mtscroll] .mt-comm-foot{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-end;pointer-events:none}
-[data-mtscroll] .mt-comm-all{height:32px;padding:0 14px;margin:0 calc(64 * var(--u)) calc(64 * var(--u)) 0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo));text-shadow:0 0 2px rgb(0 0 0 / .9),0 1px 10px rgb(0 0 0 / .7);box-shadow:0 0 0 1px rgb(0 0 0 / .35),inset 0 0 0 1px rgb(0 0 0 / .35)}
-/* the label and edge carry the captions' tight shadow, so they hold on a bright frame; the hover fill needs none */
-@media (hover:hover){[data-mtscroll] .mt-comm-all:hover{text-shadow:none}}
-[data-mtscroll] .mt-sheet{margin-top:0}
-[data-mtscroll] .mt-masonry{display:none}
 
 /* ── Sideways rows: Cover art (3.7) and Motion (3.8) ── */
 [data-mtscroll] .mt-held .mt-stage{position:relative;min-height:max(100svh,600px)}
@@ -137,6 +120,21 @@
 [data-mtscroll] .mt-ask-row b{font:900 calc(40 * var(--u))/1 var(--display);letter-spacing:-.04em}
 [data-mtscroll] .mt-ask-row .lbl{color:var(--mute)}
 @media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){[data-mtscroll] .mt-ask-row b{display:block;transition:transform .25s cubic-bezier(.23,1,.32,1)}[data-mtscroll] .mt-ask-row:hover b{transform:translateX(8px)}}
+/* ── Commissions (3.3): four frames in a row, the client's mark on each, the type of work under it ── */
+[data-mtscroll] .mt-cm{padding:calc(120 * var(--u)) calc(36 * var(--u))}
+[data-mtscroll] .mt-cm-head{margin-bottom:calc(48 * var(--u))}
+[data-mtscroll] .mt-cm-head h2{margin:0;font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em}
+[data-mtscroll] .mt-cm-head .lbl{margin:10px 0 0}
+[data-mtscroll] .mt-cm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:calc(32 * var(--u))}
+[data-mtscroll] .mt-cm-grid figure{margin:0}
+[data-mtscroll] .mt-cm-ph{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;background:var(--card)}
+[data-mtscroll] .mt-cm-ph img{object-fit:cover}
+[data-mtscroll] .mt-cm-ph::after{content:"";position:absolute;inset:0 0 auto;height:34%;background:linear-gradient(rgb(0 0 0 / .5),transparent);pointer-events:none}
+[data-mtscroll] .mt-cm-mk{position:absolute;z-index:1;top:14px;right:14px;color:rgb(var(--on-photo));font:900 17px/1 var(--display);letter-spacing:-.04em}
+[data-mtscroll] .mt-cm-mk .mk{display:block}
+[data-mtscroll] .mt-cm-grid figcaption{margin-top:12px;text-align:right}
+[data-mtscroll] .mt .mt-cm-all{display:flex;width:max-content;margin:28px 0 0 auto}
+[data-mtscroll] .mt-cm-ph:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 /* ── Statement (was About, 3.9): the sentence and the facts hold 7 columns, my portrait 5, the client marks run under both ── */
 [data-mtscroll] .mt-st{padding:calc(140 * var(--u)) calc(36 * var(--u)) 0}
 [data-mtscroll] .mt-st-in{display:grid;grid-template-columns:7fr 5fr;gap:calc(80 * var(--u))}
@@ -241,17 +239,6 @@
   [data-mtscroll] .mt-ctas{left:16px;right:16px;bottom:44px}
   [data-mtscroll] .mt-ctas .btn{flex:1;min-height:48px}
 
-  /* Commissions: masonry, heading once. */
-  [data-mtscroll] .mt-sheet,[data-mtscroll] .mt-comm-now,[data-mtscroll] .mt-comm-foot{display:none}
-  [data-mtscroll] .mt-comm{padding-top:48px}
-  [data-mtscroll] .mt-comm-head{position:static;height:auto;margin:0;padding:0 16px 20px;background:none;color:var(--ink)}
-  [data-mtscroll] .mt-comm-head h2{font-size:46px}
-  [data-mtscroll] .mt-masonry{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 16px;align-items:start}
-  [data-mtscroll] .mt-mcol{display:flex;flex-direction:column;gap:20px}
-  [data-mtscroll] .mt-mcol:nth-child(2){margin-top:56px}
-  [data-mtscroll] .mt-mcol figure{margin:0}
-  [data-mtscroll] .mt-mcol .ph{position:relative;overflow:hidden;background:var(--card)}
-  [data-mtscroll] .mt-mcol figcaption{display:flex;flex-direction:column;gap:2px;padding-top:7px;font-size:11px}
 
   /* Rows: snap rows, the snapped item centred. */
   [data-mtscroll] .mt-held .mt-stage{min-height:0;padding:48px 0 40px}
@@ -311,6 +298,12 @@
   [data-mtscroll] .mt .mt-ask-row{display:block;padding:16px 0}
   [data-mtscroll] .mt-ask-row b{display:block;font-size:26px}
   [data-mtscroll] .mt-ask-row .lbl{display:block;margin-top:8px}
+  /* Commissions: two by two. */
+  [data-mtscroll] .mt-cm{padding:56px 16px}
+  [data-mtscroll] .mt-cm-head{margin-bottom:24px}
+  [data-mtscroll] .mt-cm-head h2{font-size:46px}
+  [data-mtscroll] .mt-cm-grid{grid-template-columns:1fr 1fr;gap:28px 10px}
+  [data-mtscroll] .mt-cm-grid figcaption{margin-top:10px}
   /* Statement: one column, the portrait under the facts, the marks as a sideways row to the screen edges. */
   [data-mtscroll] .mt-st{padding:72px 16px 0}
   [data-mtscroll] .mt-st-in,[data-mtscroll] .mt-st-l,[data-mtscroll] .mt-st-b{display:block}
@@ -591,18 +584,14 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @keyframes mt-dev{to{opacity:1}}
 /* Keyboard focus on a photo link: the ring is drawn inside the frame, since the frame clips an outer one (Commissions tiles
    showed none, the hero a sliver on the photo's top edge). A dark band on both sides keeps it readable on a bright photo. */
-[data-mtscroll] .mt-hero a.fig:focus-visible,[data-mtscroll] .mt-comm a.tile:focus-visible{outline:0}
-[data-mtscroll] .mt-hero a.fig:focus-visible .ph::after,[data-mtscroll] .mt-comm a.tile:focus-visible::after{content:"";position:absolute;inset:4px;z-index:3;opacity:1;background:none;border:2px solid var(--accent);box-shadow:0 0 0 2px rgb(0 0 0 / .6),inset 0 0 0 2px rgb(0 0 0 / .6);pointer-events:none}
-/* Polish pass: a Commissions caption stacks left, name over discipline, so a long name shows whole; touch targets reach 44px at every layout */
-@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-sheet figcaption{flex-direction:column;align-items:flex-start;gap:2px}}
+[data-mtscroll] .mt-hero a.fig:focus-visible{outline:0}
+[data-mtscroll] .mt-hero a.fig:focus-visible .ph::after{content:"";position:absolute;inset:4px;z-index:3;opacity:1;background:none;border:2px solid var(--accent);box-shadow:0 0 0 2px rgb(0 0 0 / .6),inset 0 0 0 2px rgb(0 0 0 / .6);pointer-events:none}
 @media (pointer:coarse){
   [data-mtscroll] .mt-fline{align-items:center}
   /* 48: the hand-over scales these to .95 while they move */
   [data-mtscroll] .mt .mt-rowhead .btn,[data-mtscroll] .mt .mt-st-more{min-height:48px}
 }
 @media (pointer:coarse) and (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(a,button){display:inline-flex;align-items:center;min-height:44px}[data-mtscroll] .mt-fcols p{margin-bottom:0}}
-/* Commissions, desktop: the count and name sit under the heading, so a long line never runs onto the next tile (was beside it) */
-@media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-comm-head{flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:calc(10 * var(--u));height:calc(246 * var(--u));margin-bottom:calc(-246 * var(--u))}}
 /* Footer, desktop: a dark photo ground in both themes with light text and no halo */
 @media (min-width:1024px) and (min-height:600px){
   :root[data-mtscroll]:root .mt-foot{--bg:var(--dark-bg);--ink:var(--dark-ink);--mute:oklch(0.78 0.005 80);--accent:var(--dark-accent);--hair:color-mix(in srgb,var(--ink) 14%,transparent);--phr:var(--grey);color:var(--ink)}

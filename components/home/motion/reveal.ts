@@ -3,8 +3,6 @@ import { matches } from "@/lib/device";
 /* Phone and tablet (no holds): each block comes into frame as it scrolls into view, once.
    The desktop holds have their own beats, so reveal.css only applies when nothing is held. */
 const BLOCKS = [
-  ".mt-comm-head",
-  ".mt-masonry figure",
   ".mt-held .mt-stage > *",
   ".mt-book .mt-book-col > *",
   ".mt-book .mt-photo",

@@ -1,4 +1,4 @@
-import { COMM_KEYS, DISCIPLINES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/home/data";
+import { COMM_HOME, COMM_KEYS, DISCIPLINES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/home/data";
 import { PROJECTS, categoryLabel, getProject } from "@/lib/work/work";
 import { CONTENT } from "@/lib/content";
 import { REEL, posterFor, previewUrl } from "@/lib/work/videos";
@@ -38,7 +38,7 @@ export const HOME_DATA: HomeData = {
       .slice(0, 70)
       .map((p) => frame(`${p.slug}/${p.images[0].src.split("/").pop()!.replace(".jpg", "")}`)),
   ],
-  commissions: COMM_KEYS.map(frame),
+  commissions: COMM_HOME.map(frame),
   films: FILM_PICKS.map(([title, kind]) => {
     const reel =
       title === REEL.title ? previewUrl({ ...REEL, id: "reel", section: "music", ...at(title) } as Parameters<typeof previewUrl>[0]) : "";

@@ -38,13 +38,7 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
   The exit at p .76 to .96 goes on this element.
 
 ## Commissions (`commissions.tsx`)
-- `.mt-comm-head` is sticky (CSS). `section[data-cur]`, `[data-mt-count]`,
-  `[data-mt-name]` inside `.ln` (overflow clip) for the name line rise. React renders them from the
-  frame motion/commissions.ts tells it (`tell`, `useTold`); the driver runs the rise.
-- Figures carry `data-i`. Phone held label: not built.
-- Logos: `.mt-logos-row` is a native sideways row; `.mt-logos-track` takes the
-  drift transform. The second copy `.set[data-copy]` is `display: none` until the
-  drift shows it (it is already `aria-hidden`).
+- Four frames, no driver: the rise and fade are CSS from the section's `--in` (`flow.css`, `.mt-cm-grid figure` `--e`).
 
 ## Cover art and Motion (`rows.tsx`)
 - `.mt-row` is a native snap row; `.mt-track` takes the vertical-to-sideways

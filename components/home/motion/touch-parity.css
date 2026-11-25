@@ -27,9 +27,6 @@ html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-sleeve[data-on]
 /* films: the film in the row gets its muted preview (rows.ts). The player is drawn over the poster, so the film is its box. */
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion .mt-film { position: relative; }
 
-/* drift: each Commissions column's photos drift inside their frames at their own rate, as the desktop sheet does */
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-masonry .mt-mcol .ph img { scale: 1.12; translate: 0 calc((var(--p, .5) - .5) * var(--k, -9%)); }
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-masonry .mt-mcol:nth-child(2) { --k: -3%; }
 
 /* sheet: on phones the note slides up from the bottom and back down, and the handle drags it (inquiry-card.tsx) */
 @keyframes tp-up { from { transform: translateY(100%); } }
@@ -42,6 +39,6 @@ html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-masonry .mt-mcol:nth-child
 
 /* press: a finger on a photo dips it, the press feedback a mouse gets from the hover lift */
 @media (pointer: coarse) {
-  html[data-mt-motion][data-tp] :is(.mt-hero a.fig, .mt-mcol a) .ph { transition: scale .16s cubic-bezier(.23, 1, .32, 1); }
-  html[data-mt-motion][data-tp] :is(.mt-hero a.fig, .mt-mcol a):active .ph { scale: .97; }
+  html[data-mt-motion][data-tp] .mt-hero a.fig .ph { transition: scale .16s cubic-bezier(.23, 1, .32, 1); }
+  html[data-mt-motion][data-tp] .mt-hero a.fig:active .ph { scale: .97; }
 }

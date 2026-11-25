@@ -5,7 +5,6 @@ import { matches } from "@/lib/device";
 import { startEngine } from "./engine";
 import { heroDrivers, heroStill } from "./hero";
 import { rowsDrivers } from "./rows";
-import { commissionsDrivers } from "./commissions";
 import { footDrivers } from "./foot";
 import { depthDrivers } from "./depth";
 import { startReveal } from "./reveal";
@@ -13,7 +12,6 @@ import { barDrivers } from "./bars";
 import "./motion.css";
 import "./hero.css";
 import "./rows.css";
-import "./commissions.css";
 import "./foot.css";
 import "./depth.css";
 import "./touch-parity.css";
@@ -28,7 +26,6 @@ export function MotionLayer() {
     const stop = startEngine(root, [
       ...heroDrivers,
       ...rowsDrivers,
-      ...commissionsDrivers,
       ...footDrivers,
       ...depthDrivers,
       ...barDrivers,

@@ -58,6 +58,8 @@ export const COMM_KEYS = [
   "ukiyosunknown/03",
   "celestis/03",
 ];
+/** The four the home's Commissions row shows, left to right. */
+export const COMM_HOME = ["cyber1a/01", "ukiyosunknown/03", "goodcult/01", "jubo/03"];
 /* Julian's eight, in his order from Home Picks. The rest are on /portfolio?d=coverart. */
 export const COVER_KEYS = [
   "the-river",
