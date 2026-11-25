@@ -40,7 +40,9 @@ async function find(release) {
     () => apple("search", { term: release.title, entity: "song", limit: "200" }),
     // Every song by each artist with exactly this name: the term search misses small catalogues.
     async () => {
-      const artists = (await apple("search", { term: first, entity: "musicArtist", limit: "25" })).filter((a) => norm(a.artistName) === norm(first));
+      const artists = (await apple("search", { term: first, entity: "musicArtist", limit: "25" })).filter(
+        (a) => norm(a.artistName) === norm(first),
+      );
       const all = [];
       for (const a of artists.slice(0, 4)) all.push(...(await apple("lookup", { id: String(a.artistId), entity: "song", limit: "200" })));
       return all;
@@ -61,8 +63,11 @@ const out = {};
 const report = [];
 for (const release of COVER_RELEASES) {
   const { slug } = release;
-  const file = ["m4a", "mp3"].map((ext) => `/covers/sound/${slug}.${ext}`).find((p) => existsSync(new URL(`../public${p}`, import.meta.url)));
-  let got = null, note = "";
+  const file = ["m4a", "mp3"]
+    .map((ext) => `/covers/sound/${slug}.${ext}`)
+    .find((p) => existsSync(new URL(`../public${p}`, import.meta.url)));
+  let got = null,
+    note = "";
   try {
     if (old[slug]?.id) {
       const [x] = songs(await apple("lookup", { id: String(old[slug].id) }));
@@ -82,7 +87,9 @@ for (const release of COVER_RELEASES) {
   // A SoundCloud link is put in by hand and kept: `"<slug>": { "soundcloud": "<track url>" }`.
   const sc = old[slug]?.soundcloud;
   if (got || file || sc) out[slug] = { ...got, ...(file ? { clip: file } : {}), ...(sc ? { soundcloud: sc } : {}) };
-  report.push(`${got?.preview ? "matched  " : file ? "clip     " : sc ? "soundcloud" : note.startsWith("confirm") ? "confirm  " : "unmatched"} | ${release.title} | ${release.artist}${got?.id ? ` | ${got.id}` : ""}${note ? ` | ${note}` : ""}`);
+  report.push(
+    `${got?.preview ? "matched  " : file ? "clip     " : sc ? "soundcloud" : note.startsWith("confirm") ? "confirm  " : "unmatched"} | ${release.title} | ${release.artist}${got?.id ? ` | ${got.id}` : ""}${note ? ` | ${note}` : ""}`,
+  );
 }
 writeFileSync(OUT, JSON.stringify(out, null, 2) + "\n", "utf8");
 console.log(report.join("\n"));

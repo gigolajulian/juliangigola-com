@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { srcOf } from "@/lib/admin/admin-sequence";
+import { srcOf } from "@/components/admin/use-sequence";
 
-/* The one pure export of /admin's sequence editor (`lib/admin/admin-sequence.ts`);
+/* The one pure export of /admin's sequence editor (`components/admin/use-sequence.ts`);
    `useSequence` is a React hook and is not covered here. */
 
 describe("srcOf", () => {

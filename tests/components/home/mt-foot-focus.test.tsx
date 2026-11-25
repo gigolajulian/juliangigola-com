@@ -3,7 +3,10 @@ import { fireEvent, render, waitFor, within } from "@testing-library/react";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
-vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("offline"))),
+);
 // no frames: with every jsdom rect 0 the films row reads its place as NaN on the next frame
 vi.stubGlobal("requestAnimationFrame", () => 0);
 
@@ -23,11 +26,14 @@ describe("v4 home footer: focus comes back to the opener", () => {
     const link = foot().getByRole("button", { name: QUOTE_OPTS[0].name });
     fireEvent.click(link);
     // the card's code is imported on first use, so it mounts a moment after the click
-    const card = await waitFor(() => {
-      const c = document.querySelector<HTMLElement>(".mt-inq");
-      expect(c).not.toBeNull();
-      return c!;
-    }, { timeout: 15000 }); // a cold import under a full parallel run can pass 5s
+    const card = await waitFor(
+      () => {
+        const c = document.querySelector<HTMLElement>(".mt-inq");
+        expect(c).not.toBeNull();
+        return c!;
+      },
+      { timeout: 15000 },
+    ); // a cold import under a full parallel run can pass 5s
     await waitFor(() => expect(card.contains(document.activeElement)).toBe(true));
     fireEvent.keyDown(card, { key: "Escape" });
     expect(document.querySelector(".mt-inq")).toBeNull();

@@ -41,7 +41,15 @@ describe("parseVideoUrl", () => {
   });
 
   it("returns null rather than guessing", () => {
-    for (const raw of ["", "   ", "https://example.com/watch?v=" + YT, "https://youtu.be/short", "https://vimeo.com/channels/staffpicks", "javascript:alert(1)", "123456789"])
+    for (const raw of [
+      "",
+      "   ",
+      "https://example.com/watch?v=" + YT,
+      "https://youtu.be/short",
+      "https://vimeo.com/channels/staffpicks",
+      "javascript:alert(1)",
+      "123456789",
+    ])
       expect(parseVideoUrl(raw), raw).toBeNull();
   });
 

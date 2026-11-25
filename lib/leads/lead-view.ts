@@ -54,23 +54,54 @@ export function leadView(lead: Lead | null, summary: LeadSummary, templates: Tem
   const primary = !mailOk
     ? null
     : needsRenewal(l)
-      ? { label: "Renew licence", win: "Keep the licence", mail: [l.email, fillTemplate(renewTemplate.subject, l), fillTemplate(renewTemplate.body, l)] as MailParts }
+      ? {
+          label: "Renew licence",
+          win: "Keep the licence",
+          mail: [l.email, fillTemplate(renewTemplate.subject, l), fillTemplate(renewTemplate.body, l)] as MailParts,
+        }
       : nudge && late
-        ? { label: `Send ${nudge.name}`, win: "Land the booking", mail: [l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)] as MailParts }
+        ? {
+            label: `Send ${nudge.name}`,
+            win: "Land the booking",
+            mail: [l.email, fillTemplate(nudge.subject, l), fillTemplate(nudge.body, l)] as MailParts,
+          }
         : sheet
           ? { label: "Send call sheet", win: "Set the day", mail: [sheet.to, sheet.subject, sheet.body] as MailParts }
           : null;
 
   // The latest booking only; a lead with two live bookings would need a picker.
-  const bookedEvent = l.when ? [...(full?.events ?? [])].reverse().find((e) => (e.kind === "booking" || e.kind === "call") && e.ref) : undefined;
+  const bookedEvent = l.when
+    ? [...(full?.events ?? [])].reverse().find((e) => (e.kind === "booking" || e.kind === "call") && e.ref)
+    : undefined;
   const which = `${bookedEvent?.note ?? "the booking"} on ${l.when ? dateTimeLabel(l.when) : ""}`;
   const ahead = !!l.when && Date.parse(l.when) > now;
 
   // One invoice total per client, lines as needed. Once invoiced, the balance is what the open invoices still owe.
   const invoices = full?.invoices ?? [];
   const invoiced = invoices.length ? subtotal(invoices.flatMap((v) => v.lines)) : undefined;
-  const owed = invoices.length ? invoices.filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0) : full?.quote !== undefined ? full.quote - (full.deposit ? depositOfLead(full) : 0) : undefined;
+  const owed = invoices.length
+    ? invoices.filter((v) => !isSettled(v)).reduce((n, v) => n + balance(v), 0)
+    : full?.quote !== undefined
+      ? full.quote - (full.deposit ? depositOfLead(full) : 0)
+      : undefined;
   const paidAt = full?.deposit ? full.events.find((e) => e.kind === "booking")?.at : undefined;
 
-  return { l, first, mailOk, ig, phone, late, step, nudgeStep, primary, bookedEvent, booked: bookedEvent?.ref, which, ahead, invoiced, owed, paidAt };
+  return {
+    l,
+    first,
+    mailOk,
+    ig,
+    phone,
+    late,
+    step,
+    nudgeStep,
+    primary,
+    bookedEvent,
+    booked: bookedEvent?.ref,
+    which,
+    ahead,
+    invoiced,
+    owed,
+    paidAt,
+  };
 }

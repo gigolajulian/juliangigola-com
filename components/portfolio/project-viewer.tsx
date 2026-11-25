@@ -24,7 +24,8 @@ export function ProjectViewer({ frames }: { frames: FrameItem[] }) {
     if (!st || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const desk = matches("held");
     let raf = 0;
-    const set = () => st.style.setProperty("--in", Math.min(1, Math.max(0, (innerHeight - st.getBoundingClientRect().top) / innerHeight)).toFixed(3));
+    const set = () =>
+      st.style.setProperty("--in", Math.min(1, Math.max(0, (innerHeight - st.getBoundingClientRect().top) / innerHeight)).toFixed(3));
     const tick = () => {
       raf = requestAnimationFrame(tick);
       set();

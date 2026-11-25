@@ -18,11 +18,7 @@ import type { SwipeHandlers } from "./use-swipe";
 const ZOOM_MIN = 1;
 const ZOOM_MAX = 3;
 
-export function useZoom(
-  box: React.RefObject<HTMLDivElement | null>,
-  key: string,
-  swipe: SwipeHandlers,
-) {
+export function useZoom(box: React.RefObject<HTMLDivElement | null>, key: string, swipe: SwipeHandlers) {
   const [scale, setScale] = React.useState(1);
   const [at, setAt] = React.useState({ x: 0, y: 0 });
   const [held, setHeld] = React.useState(false);
@@ -85,13 +81,8 @@ export function useZoom(
       const px = e.clientX - (r.left + r.width / 2);
       const py = e.clientY - (r.top + r.height / 2);
       setScale((was) => {
-        const next = Math.min(
-          ZOOM_MAX,
-          Math.max(ZOOM_MIN, was * Math.exp(-e.deltaY / 420)),
-        );
-        setAt((o) =>
-          clamp(next, px - ((px - o.x) * next) / was, py - ((py - o.y) * next) / was),
-        );
+        const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, was * Math.exp(-e.deltaY / 420)));
+        setAt((o) => clamp(next, px - ((px - o.x) * next) / was, py - ((py - o.y) * next) / was));
         return next;
       });
     };
@@ -114,8 +105,7 @@ export function useZoom(
     x: (a.x + b.x) / 2,
     y: (a.y + b.y) / 2,
   });
-  const gapOf = (a: { x: number; y: number }, b: { x: number; y: number }) =>
-    Math.hypot(a.x - b.x, a.y - b.y);
+  const gapOf = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     pts.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
@@ -155,18 +145,9 @@ export function useZoom(
     const p = pinch.current;
     if (p && pts.current.size >= 2) {
       const [a, b] = [...pts.current.values()];
-      const next = Math.min(
-        ZOOM_MAX,
-        Math.max(ZOOM_MIN, (p.scale * gapOf(a, b)) / p.gap),
-      );
+      const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, (p.scale * gapOf(a, b)) / p.gap));
       setScale(next);
-      setAt(
-        clamp(
-          next,
-          p.x - ((p.x - p.ox) * next) / p.scale,
-          p.y - ((p.y - p.oy) * next) / p.scale,
-        ),
-      );
+      setAt(clamp(next, p.x - ((p.x - p.ox) * next) / p.scale, p.y - ((p.y - p.oy) * next) / p.scale));
       return;
     }
     const d = drag.current;
@@ -182,10 +163,7 @@ export function useZoom(
     if (scale === 1) swipe.onPointerMove?.(e);
   };
 
-  const release = (
-    e: React.PointerEvent<HTMLDivElement>,
-    cancelled: boolean,
-  ) => {
+  const release = (e: React.PointerEvent<HTMLDivElement>, cancelled: boolean) => {
     const wasPinching = pts.current.size >= 2;
     pts.current.delete(e.pointerId);
     if (pts.current.size < 2) pinch.current = null;

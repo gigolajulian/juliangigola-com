@@ -22,7 +22,7 @@ export function LogoBand({ children }: { children: React.ReactNode }) {
     const copies: Element[] = [];
     const fill = () => {
       // enough copies that the line never runs out
-      for (let n = (Math.ceil(row.clientWidth / w) + 1) * set.length; track.children.length < n; ) {
+      for (let n = (Math.ceil(row.clientWidth / w) + 1) * set.length; track.children.length < n;) {
         for (const c of set) {
           const k = c.cloneNode(true) as Element;
           k.setAttribute("aria-hidden", "true");
@@ -33,7 +33,13 @@ export function LogoBand({ children }: { children: React.ReactNode }) {
     const ro = new ResizeObserver(fill);
     ro.observe(row);
     const max = matchMedia("(pointer:coarse)").matches ? MAX_PHONE : MAX;
-    let x = 0, v = IDLE, kick = 0, last = 0, y = scrollY, hover = false, raf = 0;
+    let x = 0,
+      v = IDLE,
+      kick = 0,
+      last = 0,
+      y = scrollY,
+      hover = false,
+      raf = 0;
     const tick = (t: number) => {
       raf = requestAnimationFrame(tick);
       const dt = Math.min(t - (last || t), 50);

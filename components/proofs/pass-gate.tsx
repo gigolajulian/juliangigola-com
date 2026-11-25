@@ -30,24 +30,59 @@ export function PassGate({ id, kind }: { id: string; kind: "proofs" | "photos" }
   return (
     <div className="proof">
       <header className="proof-top">
-        <Link className="proof-word" href="/">Julian Gigola</Link>
+        <Link className="proof-word" href="/">
+          Julian Gigola
+        </Link>
       </header>
       <div className="proof-pass">
         {/* No `name` on the field: a tap before the script runs would put the password in the URL. */}
-        <form className="proof-card" noValidate onSubmit={(e) => { e.preventDefault(); void submit(); }}>
+        <form
+          className="proof-card"
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            void submit();
+          }}
+        >
           <div>
             <p className="proof-lab">{kind === "proofs" ? "Proofs" : "Your photos"} · Private</p>
             <h1>Enter the password.</h1>
           </div>
           <label>
             <span className="proof-lab">Password</span>
-            <input ref={field} type={shown ? "text" : "password"} autoComplete="current-password" autoFocus required value={value} aria-invalid={!!bad || undefined} aria-describedby={bad ? "pass-err" : undefined}
-              onChange={(e) => { setValue(e.target.value); setBad(null); }} />
+            <input
+              ref={field}
+              type={shown ? "text" : "password"}
+              autoComplete="current-password"
+              autoFocus
+              required
+              value={value}
+              aria-invalid={!!bad || undefined}
+              aria-describedby={bad ? "pass-err" : undefined}
+              onChange={(e) => {
+                setValue(e.target.value);
+                setBad(null);
+              }}
+            />
           </label>
-          <button type="button" className="proof-show" aria-pressed={shown} onClick={() => setShown((s) => !s)}>{shown ? "Hide" : "Show"} password</button>
-          {bad ? <p id="pass-err" className="proof-err" role="alert">{bad}</p> : null}
-          <button type="submit" className="proof-btn" disabled={busy} data-off={!value || undefined}>{busy ? "Checking" : `Open ${kind}`}</button>
-          <p className="proof-mu">The password is in the email I sent, or ask me at <a href="mailto:hello@juliangigola.com" className="underline underline-offset-4">hello@juliangigola.com</a>.</p>
+          <button type="button" className="proof-show" aria-pressed={shown} onClick={() => setShown((s) => !s)}>
+            {shown ? "Hide" : "Show"} password
+          </button>
+          {bad ? (
+            <p id="pass-err" className="proof-err" role="alert">
+              {bad}
+            </p>
+          ) : null}
+          <button type="submit" className="proof-btn" disabled={busy} data-off={!value || undefined}>
+            {busy ? "Checking" : `Open ${kind}`}
+          </button>
+          <p className="proof-mu">
+            The password is in the email I sent, or ask me at{" "}
+            <a href="mailto:hello@juliangigola.com" className="underline underline-offset-4">
+              hello@juliangigola.com
+            </a>
+            .
+          </p>
         </form>
       </div>
     </div>
@@ -59,7 +94,10 @@ export function Shut({ offline }: { offline?: boolean }) {
   return (
     <main className="grid min-h-svh place-items-center px-6 font-mono text-[13px] text-muted-foreground">
       <p>
-        {offline ? "This gallery is offline." : "This gallery closed."} <a href="mailto:hello@juliangigola.com" className="underline underline-offset-4">hello@juliangigola.com</a>
+        {offline ? "This gallery is offline." : "This gallery closed."}{" "}
+        <a href="mailto:hello@juliangigola.com" className="underline underline-offset-4">
+          hello@juliangigola.com
+        </a>
       </p>
     </main>
   );

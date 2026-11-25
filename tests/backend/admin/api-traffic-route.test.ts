@@ -9,7 +9,8 @@ import { SCOPED, githubToken, reply } from "../fakes";
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx));
 
-const get = (token?: string) => GET(new Request("https://juliangigola.com/api/traffic", { headers: token ? { authorization: `Bearer ${token}` } : {} }));
+const get = (token?: string) =>
+  GET(new Request("https://juliangigola.com/api/traffic", { headers: token ? { authorization: `Bearer ${token}` } : {} }));
 
 beforeEach(() => {
   ctx.env = { CF_ANALYTICS_TOKEN: "cf-analytics-secret-value" };
@@ -20,7 +21,14 @@ beforeEach(() => {
         data: {
           viewer: {
             accounts: [{ rumPageloadEventsAdaptiveGroups: [{ sum: { visits: 4 }, dimensions: { x: "2026-11-09" } }] }],
-            zones: [{ httpRequestsAdaptiveGroups: [{ count: 9, dimensions: { userAgent: "Googlebot/2.1" } }, { count: 5, dimensions: { userAgent: "Mozilla/5.0 Safari" } }] }],
+            zones: [
+              {
+                httpRequestsAdaptiveGroups: [
+                  { count: 9, dimensions: { userAgent: "Googlebot/2.1" } },
+                  { count: 5, dimensions: { userAgent: "Mozilla/5.0 Safari" } },
+                ],
+              },
+            ],
           },
         },
       });

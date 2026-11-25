@@ -9,10 +9,7 @@
  * collapse into the new two. The disciplines are built on it in `disciplines.ts`,
  * the client marks are in `press.ts`.
  */
-import {
-  PROJECTS as HARVESTED,
-  CATEGORIES as HARVESTED_CATEGORIES,
-} from "./work-data";
+import { PROJECTS as HARVESTED, CATEGORIES as HARVESTED_CATEGORIES } from "./work-data";
 import type { Project, Category, Frame, TextBlock } from "./work-types";
 import { COVER_RELEASES as RELEASES } from "./cover-art-data";
 import type { CoverRelease } from "./cover-art-types";
@@ -49,9 +46,7 @@ import {
  */
 export const CATEGORIES: Category[] = [
   ...HARVESTED_CATEGORIES,
-  ...ADDED_DISCIPLINES.filter(
-    (d) => !HARVESTED_CATEGORIES.some((c) => c.slug === d.slug),
-  ),
+  ...ADDED_DISCIPLINES.filter((d) => !HARVESTED_CATEGORIES.some((c) => c.slug === d.slug)),
 ];
 
 /**
@@ -63,14 +58,10 @@ export const CATEGORIES: Category[] = [
  * named release takes its place, an unnamed one keeps the place the script
  * gave it, and an empty list is the gallery as generated.
  */
-const releaseRank = new Map(
-  CONTENT.coverArtOrder.map((slug, i) => [slug, i] as const),
-);
+const releaseRank = new Map(CONTENT.coverArtOrder.map((slug, i) => [slug, i] as const));
 
 export const COVER_RELEASES: CoverRelease[] = [...RELEASES].sort(
-  (a, b) =>
-    (releaseRank.get(a.slug) ?? Infinity) -
-    (releaseRank.get(b.slug) ?? Infinity),
+  (a, b) => (releaseRank.get(a.slug) ?? Infinity) - (releaseRank.get(b.slug) ?? Infinity),
 );
 
 /**
@@ -134,9 +125,7 @@ const LEAD_FRAMES: Record<string, string> = {
 
 const withLeadFrame = (project: Project): Project => {
   const wanted = LEAD_FRAMES[project.slug];
-  const lead = wanted
-    ? project.images.find((f) => f.src === wanted)
-    : undefined;
+  const lead = wanted ? project.images.find((f) => f.src === wanted) : undefined;
   // Silently unchanged if the named frame is gone, rather than throwing a
   // build that is otherwise fine — a re-harvest can renumber a gallery.
   if (!lead) return project;
@@ -170,9 +159,7 @@ const withLeadFrame = (project: Project): Project => {
 const fromAdded = (p: AddedProject): Project => {
   const category = CATEGORIES.find((c) => c.slug === p.categorySlug);
   if (!category) {
-    throw new Error(
-      `content/projects.json: "${p.slug}" is filed under "${p.categorySlug}", which is not a category.`,
-    );
+    throw new Error(`content/projects.json: "${p.slug}" is filed under "${p.categorySlug}", which is not a category.`);
   }
 
   return {
@@ -199,9 +186,7 @@ const fromAdded = (p: AddedProject): Project => {
  */
 const reslug = (project: Project): Project => {
   const to = SLUGS[project.slug];
-  return to && to !== project.slug
-    ? { ...project, slug: to, origin: project.slug }
-    : project;
+  return to && to !== project.slug ? { ...project, slug: to, origin: project.slug } : project;
 };
 
 /**
@@ -228,14 +213,11 @@ const refile = (project: Project): Project => {
 /** Rewritten title and intent from `/admin`; see `AddedFile.copy`. */
 const recopy = (project: Project): Project => {
   const c = RECOPIED[project.slug];
-  return c
-    ? { ...project, name: c.title, headline: null, intent: c.intent }
-    : project;
+  return c ? { ...project, name: c.title, headline: null, intent: c.intent } : project;
 };
 
 /** Behind-the-scenes frames, where a project has any; see `AddedFile.bts`. */
-const withBts = (project: Project): Project =>
-  BTS[project.slug] ? { ...project, bts: BTS[project.slug] } : project;
+const withBts = (project: Project): Project => (BTS[project.slug] ? { ...project, bts: BTS[project.slug] } : project);
 
 /**
  * Replaces the credits `/admin` has rewritten.
@@ -247,10 +229,7 @@ const withBts = (project: Project): Project =>
  * "This project's harvested credits are wrong, publish none" is a real
  * instruction and the only way to say it.
  */
-const recredit = (project: Project): Project =>
-  project.slug in RECREDITED
-    ? { ...project, credits: RECREDITED[project.slug] }
-    : project;
+const recredit = (project: Project): Project => (project.slug in RECREDITED ? { ...project, credits: RECREDITED[project.slug] } : project);
 
 /**
  * Re-sequences a gallery that `/admin` has reordered, trimmed or added to.
@@ -297,10 +276,7 @@ const reframe = (project: Project): Project => {
       });
       continue;
     }
-    const found =
-      typeof ref === "string"
-        ? (archive.get(ref) ?? null)
-        : (archive.get(ref.src) ?? ref);
+    const found = typeof ref === "string" ? (archive.get(ref) ?? null) : (archive.get(ref.src) ?? ref);
     if (found) images.push(found);
   }
 
@@ -356,18 +332,13 @@ export const categoryLabel = (category: Category): string =>
  * when the person was added. A handle with no picture on file is not a
  * failure — the card it feeds prints the handle on its own.
  */
-export const avatarFor = (
-  handle: string | null | undefined,
-): string | undefined => (handle ? AVATARS[handle.toLowerCase()] : undefined);
+export const avatarFor = (handle: string | null | undefined): string | undefined => (handle ? AVATARS[handle.toLowerCase()] : undefined);
 
 /** Julian's own photo credit goes last, after the crew. */
 const MINE = /^photo(grapher|graphy)?$/i;
 const ownLast = (project: Project): Project => ({
   ...project,
-  credits: [
-    ...project.credits.filter((c) => !MINE.test(c.role.trim())),
-    ...project.credits.filter((c) => MINE.test(c.role.trim())),
-  ],
+  credits: [...project.credits.filter((c) => !MINE.test(c.role.trim())), ...project.credits.filter((c) => MINE.test(c.role.trim()))],
 });
 
 /**
@@ -383,14 +354,16 @@ const withFaces = (project: Project): Project => ({
   credits: project.credits.map((c) => {
     // Six harvested credits carry the handle as the name ("@apricotsss3")
     // with no instagram field of their own; they link too.
-    const handle =
-      c.instagram ?? (c.name.startsWith("@") ? c.name.slice(1) : null);
+    const handle = c.instagram ?? (c.name.startsWith("@") ? c.name.slice(1) : null);
     return { ...c, handle, avatar: avatarFor(handle) ?? null };
   }),
 });
 
 export const titleCase = (s: string) =>
-  s.trim().toLowerCase().replace(/(^|[\s(/-])\S/g, (c) => c.toUpperCase());
+  s
+    .trim()
+    .toLowerCase()
+    .replace(/(^|[\s(/-])\S/g, (c) => c.toUpperCase());
 
 /**
  * What the project page says about a photograph, as a sentence for its
@@ -401,8 +374,7 @@ export const titleCase = (s: string) =>
 export const altContext = (project: Project): string => {
   const name = titleCase(project.name);
   const discipline = project.categories[0]?.name;
-  const credit = (role: RegExp) =>
-    project.credits.find((c) => role.test(c.role))?.name.trim();
+  const credit = (role: RegExp) => project.credits.find((c) => role.test(c.role))?.name.trim();
   const same = (a?: string) => !a || a.toLowerCase() === project.name.trim().toLowerCase();
   const model = credit(/^models?$/i);
   const artist = credit(/^artists?$/i);
@@ -432,15 +404,11 @@ const withAlt = (project: Project): Project => {
      and where in the sequence the frame sits. */
   const alt = (f: Frame, i: number) => {
     const said = ALT[f.src] || f.alt;
-    return said
-      ? `${said.replace(/\.$/, "")}. ${context}`
-      : `${context}, photo ${i + 1} of ${project.images.length}`;
+    return said ? `${said.replace(/\.$/, "")}. ${context}` : `${context}, photo ${i + 1} of ${project.images.length}`;
   };
   const images = project.images.map((f, i) => ({ ...f, alt: alt(f, i) }));
   // `cover.jpg` is the harvest's copy of the opening frame, so it says what that frame says.
-  const at = project.cover.src.endsWith("/cover.jpg")
-    ? 0
-    : project.images.findIndex((f) => f.src === project.cover.src);
+  const at = project.cover.src.endsWith("/cover.jpg") ? 0 : project.images.findIndex((f) => f.src === project.cover.src);
   return {
     ...project,
     cover: { ...project.cover, alt: images[at]?.alt ?? alt(project.cover, 0) },
@@ -486,8 +454,7 @@ const relabel = (project: Project): Project => ({
  */
 const rank = new Map(ORDER.map((slug, i) => [slug, i]));
 
-const byRunningOrder = (a: Project, b: Project): number =>
-  (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity);
+const byRunningOrder = (a: Project, b: Project): number => (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity);
 
 /**
  * Every project, added work first, and including what is hidden.
@@ -504,13 +471,9 @@ const byRunningOrder = (a: Project, b: Project): number =>
  */
 export const ALL_PROJECTS: Project[] = [
   ...ADDED.map(fromAdded),
-  ...HARVESTED.map((p) =>
-    p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p),
-  ),
+  ...HARVESTED.map((p) => (p.slug === "coverart" ? withCoverArt(p) : withLeadFrame(p))),
 ]
-  .map((p) =>
-    withBts(withFaces(ownLast(withAlt(relabel(reframe(recopy(recredit(refile(reslug(p)))))))))),
-  )
+  .map((p) => withBts(withFaces(ownLast(withAlt(relabel(reframe(recopy(recredit(refile(reslug(p)))))))))))
   .sort(byRunningOrder);
 
 /**
@@ -526,9 +489,7 @@ export const ALL_PROJECTS: Project[] = [
  * one, because an unlisted project is reachable by anybody holding the link
  * and all three are about whether a URL answers.
  */
-export const LINKABLE: Project[] = ALL_PROJECTS.filter(
-  (p) => !HIDDEN.has(p.slug),
-);
+export const LINKABLE: Project[] = ALL_PROJECTS.filter((p) => !HIDDEN.has(p.slug));
 
 /**
  * Everything that appears anywhere: the pages, less what has been unlisted.
@@ -537,9 +498,7 @@ export const LINKABLE: Project[] = ALL_PROJECTS.filter(
  * band, the running order, the prev/next chain and the sitemap - so unlisting
  * is one entry in one file rather than a slug to be remembered in six places.
  */
-export const PROJECTS: Project[] = LINKABLE.filter(
-  (p) => !UNLISTED.has(p.slug),
-);
+export const PROJECTS: Project[] = LINKABLE.filter((p) => !UNLISTED.has(p.slug));
 
 export { HIDDEN, UNLISTED };
 
@@ -551,17 +510,14 @@ export const WITH_BTS: Project[] = PROJECTS.filter((p) => p.bts);
  * art director want different things from the first screen (price and dates,
  * or clients and credits).
  */
-const inSessions = (p: Project) =>
-  p.categories.some((c) => c.section === "SESSIONS");
+const inSessions = (p: Project) => p.categories.some((c) => c.section === "SESSIONS");
 
 /* Julian: studio digitals shows in the portfolio too, a chip and a page
    of its own there, and stays on /sessions. */
 const IN_PORTFOLIO = new Set(["studio-digitals"]);
-const inPortfolio = (p: Project) =>
-  !inSessions(p) || p.categories.some((c) => IN_PORTFOLIO.has(c.slug));
+const inPortfolio = (p: Project) => !inSessions(p) || p.categories.some((c) => IN_PORTFOLIO.has(c.slug));
 
-export const projectsIn = (categorySlug: string): Project[] =>
-  PROJECTS.filter((p) => p.categories.some((c) => c.slug === categorySlug));
+export const projectsIn = (categorySlug: string): Project[] => PROJECTS.filter((p) => p.categories.some((c) => c.slug === categorySlug));
 
 /**
  * Whether a nav leaf is one gallery rather than a listing of projects.
@@ -592,8 +548,7 @@ export const isOwnGallery = (categorySlug: string): boolean => {
  * category called "Event coverage", with a "next project" that leaves the
  * subject entirely.
  */
-export const isDisciplineGallery = (p: Project) =>
-  p.categories.some((c) => c.slug === p.slug && isOwnGallery(c.slug));
+export const isDisciplineGallery = (p: Project) => p.categories.some((c) => c.slug === p.slug && isOwnGallery(c.slug));
 
 /** Kept for the two uses below, which read better unqualified. */
 const isDiscipline = isDisciplineGallery;
@@ -609,9 +564,7 @@ const isDiscipline = isDisciplineGallery;
  * one-gallery discipline straight to its gallery rather than to a listing
  * page with a single row on it.
  */
-export const COMMISSIONS: Project[] = PROJECTS.filter(
-  (p) => p.categories.length > 0 && inPortfolio(p) && !isDiscipline(p),
-);
+export const COMMISSIONS: Project[] = PROJECTS.filter((p) => p.categories.length > 0 && inPortfolio(p) && !isDiscipline(p));
 
 /** Client-session work: graduation, headshots, weddings, studio digitals. */
 export const SESSIONS: Project[] = PROJECTS.filter(inSessions);
@@ -622,21 +575,16 @@ export const SESSIONS: Project[] = PROJECTS.filter(inSessions);
  * indexed breaks, but they stay out of the indexes until Julian files one
  * under a category by hand.
  */
-export const UNFILED: Project[] = PROJECTS.filter(
-  (p) => p.categories.length === 0,
-);
+export const UNFILED: Project[] = PROJECTS.filter((p) => p.categories.length === 0);
 
-export const WORK_CATEGORIES: Category[] = CATEGORIES.filter(
-  (c) => c.section !== "SESSIONS" || IN_PORTFOLIO.has(c.slug),
-);
+export const WORK_CATEGORIES: Category[] = CATEGORIES.filter((c) => c.section !== "SESSIONS" || IN_PORTFOLIO.has(c.slug));
 
 /* Built from `LINKABLE` and not from `PROJECTS`: an unlisted project is off
    every index and still has to resolve, or the page it kept would render
    as a 404 the moment somebody followed the link to it. */
 const bySlug = new Map(LINKABLE.map((p) => [p.slug, p]));
 
-export const getProject = (slug: string): Project | undefined =>
-  bySlug.get(slug);
+export const getProject = (slug: string): Project | undefined => bySlug.get(slug);
 
 /**
  * Whether the Video discipline has anything behind it.
@@ -653,8 +601,7 @@ const HAS_VIDEOS = CONTENT.videos.length > 0;
     the films), and not one with no work yet. Cover art has one again:
     its rack under the filters, scrolling sideways like every other
     discipline, rather than a page of its own scrolling down. */
-const isListing = (slug: string): boolean =>
-  slug !== "video" && projectsIn(slug).length > 0;
+const isListing = (slug: string): boolean => slug !== "video" && projectsIn(slug).length > 0;
 
 export const categoryHref = (categorySlug: string): string => {
   // Video's page is the work rather than a listing of it, like `/portfolio/coverart`
@@ -694,13 +641,7 @@ export type CategoryLink = {
  * as data.
  */
 /** The front of the chip row, in the order Julian wants it read. */
-const ROW_ORDER = [
-  "editorial",
-  "campaigns",
-  "artist-presskit",
-  "portraits",
-  "chroma",
-];
+const ROW_ORDER = ["editorial", "campaigns", "artist-presskit", "portraits", "chroma"];
 
 export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
   /* A row that navigates nowhere is worse than one that is absent, so a
@@ -708,10 +649,7 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
      soon as one link is pasted into /admin, since its work is embeds, not
      projects. Music video is a section inside that page (Julian's call), not
      a row. */
-  (c) =>
-    c.slug === "video"
-      ? HAS_VIDEOS
-      : c.slug !== "music-video" && projectsIn(c.slug).length > 0,
+  (c) => (c.slug === "video" ? HAS_VIDEOS : c.slug !== "music-video" && projectsIn(c.slug).length > 0),
 )
   .map((c) => ({
     slug: c.slug,
@@ -732,11 +670,7 @@ export const WORK_CATEGORY_LINKS: CategoryLink[] = WORK_CATEGORIES.filter(
     const at = ROW_ORDER.indexOf(c.slug);
     return { c, rank: at < 0 ? ROW_ORDER.length + i : at };
   })
-  .sort(
-    (a, b) =>
-      Number(a.c.slug === "video") - Number(b.c.slug === "video") ||
-      a.rank - b.rank,
-  )
+  .sort((a, b) => Number(a.c.slug === "video") - Number(b.c.slug === "video") || a.rank - b.rank)
   .map(({ c }) => c);
 
 /* ── what a list is handed ────────────────────────────────────────
@@ -769,15 +703,12 @@ export const withBlur = (cover: Frame): Frame => {
     thing twice. */
 export const credited = (p: Project, role: RegExp): string | undefined => {
   const name = p.credits.find((c) => role.test(c.role))?.name.trim();
-  return name && name.toLowerCase() !== p.name.trim().toLowerCase()
-    ? name
-    : undefined;
+  return name && name.toLowerCase() !== p.name.trim().toLowerCase() ? name : undefined;
 };
 
 /** The person or company a project is credited to, when there is one: the
     client, or the model or artist in front of the lens. */
-export const billing = (p: Project): string | undefined =>
-  credited(p, /client|model|artist/i);
+export const billing = (p: Project): string | undefined => credited(p, /client|model|artist/i);
 
 /**
  * One tile of the homepage band: the cover, the three frames it scrubs
@@ -832,9 +763,7 @@ export type BandTile = {
  */
 const FEATURED_SLUGS: string[] = CONTENT.featured;
 
-export const FEATURED: Project[] = FEATURED_SLUGS.map((s) =>
-  bySlug.get(s),
-).filter((p): p is Project => Boolean(p));
+export const FEATURED: Project[] = FEATURED_SLUGS.map((s) => bySlug.get(s)).filter((p): p is Project => Boolean(p));
 
 const wallTile = (src: string, title: string, href: string): WallTile => ({ src, title, href });
 
@@ -846,10 +775,9 @@ const wallTile = (src: string, title: string, href: string): WallTile => ({ src,
  * server, so a client component is handed three strings a tile and never
  * the projects; its image URLs are made where it is drawn (`wall-tile.ts`).
  */
-export const WALL: WallTile[] = [
-  ...FEATURED,
-  ...PROJECTS.filter((p) => !FEATURED.includes(p)),
-].map((p) => wallTile(p.cover.src, p.name, `/portfolio/${p.slug}`));
+export const WALL: WallTile[] = [...FEATURED, ...PROJECTS.filter((p) => !FEATURED.includes(p))].map((p) =>
+  wallTile(p.cover.src, p.name, `/portfolio/${p.slug}`),
+);
 
 /**
  * The same wall for one kind of session, behind its booking page's
@@ -858,9 +786,7 @@ export const WALL: WallTile[] = [
  */
 export const wallOf = (slug: string): WallTile[] => {
   const one = getProject(slug);
-  return (one ? [one] : projectsIn(slug)).flatMap((p) =>
-    p.images.map((f) => wallTile(f.src, p.name, `/portfolio/${p.slug}`)),
-  );
+  return (one ? [one] : projectsIn(slug)).flatMap((p) => p.images.map((f) => wallTile(f.src, p.name, `/portfolio/${p.slug}`)));
 };
 
 /**
@@ -875,9 +801,7 @@ export const wallOf = (slug: string): WallTile[] => {
  *
  * Declared after `WORK_CATEGORY_LINKS`, whose order it follows.
  */
-export const nextDiscipline = (
-  slug: string,
-): { href: string; name: string } | undefined => {
+export const nextDiscipline = (slug: string): { href: string; name: string } | undefined => {
   const at = WORK_CATEGORY_LINKS.findIndex((c) => c.slug === slug);
   if (at === -1 || WORK_CATEGORY_LINKS.length < 2) return undefined;
   const next = WORK_CATEGORY_LINKS[(at + 1) % WORK_CATEGORY_LINKS.length];
@@ -893,11 +817,7 @@ export const nextDiscipline = (
  * than a policy.
  */
 const disciplineOf = (p: Project): string | undefined =>
-  (
-    p.categories.find((c) =>
-      WORK_CATEGORY_LINKS.some((l) => l.slug === c.slug),
-    ) ?? p.categories[0]
-  )?.slug;
+  (p.categories.find((c) => WORK_CATEGORY_LINKS.some((l) => l.slug === c.slug)) ?? p.categories[0])?.slug;
 
 /**
  * The commissions filed under one discipline, in Julian's running order.
@@ -906,8 +826,7 @@ const disciplineOf = (p: Project): string | undefined =>
  * commissions up rather than overlapping: every project is in exactly one,
  * which is what makes the walk below a walk and not a set of loops.
  */
-export const commissionsIn = (categorySlug: string): Project[] =>
-  COMMISSIONS.filter((p) => disciplineOf(p) === categorySlug);
+export const commissionsIn = (categorySlug: string): Project[] => COMMISSIONS.filter((p) => disciplineOf(p) === categorySlug);
 
 /**
  * The project after this one, for the end of a sequence.
@@ -952,9 +871,7 @@ const neighbour = (p: Project, dir: 1 | -1): Project | undefined => {
   const at = WORK_CATEGORY_LINKS.findIndex((l) => l.slug === here);
   const n = WORK_CATEGORY_LINKS.length;
   for (let hop = 1; hop <= n; hop++) {
-    const run = commissionsIn(
-      WORK_CATEGORY_LINKS[(at + dir * hop + 2 * n) % n].slug,
-    );
+    const run = commissionsIn(WORK_CATEGORY_LINKS[(at + dir * hop + 2 * n) % n].slug);
     const found = run[dir > 0 ? 0 : run.length - 1];
     if (found) return found;
   }

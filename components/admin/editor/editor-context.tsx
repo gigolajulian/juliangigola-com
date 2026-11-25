@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import type { PendingUpload } from "@/lib/admin/admin-sequence";
+import type { PendingUpload } from "@/components/admin/use-sequence";
 import type { SetOverride } from "@/components/admin/editor/draft";
 
 /** What the editor shares with the panels that stage photographs or set a project's override. */

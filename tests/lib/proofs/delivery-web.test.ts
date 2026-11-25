@@ -14,11 +14,24 @@ beforeEach(async () => {
   const kv = new FakeKV();
   asked = [];
   env = {
-    INBOX: kv, LEADS_KEY,
+    INBOX: kv,
+    LEADS_KEY,
     PROOFS: { get: async (k: string) => (asked.push(k), { body: new Response("webcopy").body, size: 7 }) },
     DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
   };
-  const p = { token: ID, name: "Ana", included: 2, price: 15, days: 14, createdAt: "2026-11-01T00:00:00Z", frames: [], finals: [{ id: "a", file: "DSC0001.jpg", w: 1, h: 1, bytes: 9, crc: 0 }], selects: [], notes: {}, views: 0 };
+  const p = {
+    token: ID,
+    name: "Ana",
+    included: 2,
+    price: 15,
+    days: 14,
+    createdAt: "2026-11-01T00:00:00Z",
+    frames: [],
+    finals: [{ id: "a", file: "DSC0001.jpg", w: 1, h: 1, bytes: 9, crc: 0 }],
+    selects: [],
+    notes: {},
+    views: 0,
+  };
   await writeProof(kv as never, (await sealer(LEADS_KEY))!, p as Proof);
 });
 

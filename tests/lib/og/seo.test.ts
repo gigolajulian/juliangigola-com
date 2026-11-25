@@ -21,17 +21,30 @@ describe("siteGraph", () => {
     const ids = g.map((n) => n["@id"]);
     expect(new Set(ids).size).toBe(ids.length);
     expect(ids).toEqual(expect.arrayContaining([`${SITE}/#julian`, `${SITE}/#business`, `${SITE}/#website`]));
-    const refs = JSON.stringify(g).match(/"@id":"[^"]+"/g)!.map((s) => s.slice(7, -1));
+    const refs = JSON.stringify(g)
+      .match(/"@id":"[^"]+"/g)!
+      .map((s) => s.slice(7, -1));
     for (const r of refs) expect(ids, r).toContain(r);
   });
 });
 
 describe("serviceGraph", () => {
-  const p = { url: "/book/portraits", name: "Portraits", service: "Portrait photography", description: "d", price: 400, faqs: [{ q: "Q?", a: "A." }], places: ["San Jose", "Anywhere else"] };
+  const p = {
+    url: "/book/portraits",
+    name: "Portraits",
+    service: "Portrait photography",
+    description: "d",
+    price: 400,
+    faqs: [{ q: "Q?", a: "A." }],
+    places: ["San Jose", "Anywhere else"],
+  };
   it("sells the service in its places, from its price, with its questions", () => {
     const [service, faq, crumbs] = serviceGraph(p)["@graph"] as Record<string, unknown>[];
     expect(service.areaServed).toEqual([{ "@type": "City", name: "San Jose" }]);
-    expect(service.offers).toMatchObject({ priceSpecification: { minPrice: 400, priceCurrency: "USD" }, url: "https://juliangigola.com/book/portraits#book" });
+    expect(service.offers).toMatchObject({
+      priceSpecification: { minPrice: 400, priceCurrency: "USD" },
+      url: "https://juliangigola.com/book/portraits#book",
+    });
     expect(faq["@type"]).toBe("FAQPage");
     expect(crumbs["@type"]).toBe("BreadcrumbList");
   });

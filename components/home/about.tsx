@@ -32,7 +32,11 @@ export function HomeAbout({ disciplines }: { disciplines: string[] }) {
           <Image src="/about/julian-studio.jpg" alt="Julian Gigola at the tether station on set" fill sizes="100vw" />
         </figure>
         <p className="mt-wordmark" aria-hidden>
-          {[...WORDMARK].map((ch, j) => <span key={j} style={{ "--j": j } as React.CSSProperties}>{ch === " " ? " " : ch}</span>)}
+          {[...WORDMARK].map((ch, j) => (
+            <span key={j} style={{ "--j": j } as React.CSSProperties}>
+              {ch === " " ? " " : ch}
+            </span>
+          ))}
         </p>
         <div className="mt-frame">
           <div className="mt-ab-col">
@@ -40,7 +44,8 @@ export function HomeAbout({ disciplines }: { disciplines: string[] }) {
             <p className="mt-say" style={{ "--n": words.length } as React.CSSProperties}>
               {words.map((w, i) => (
                 <React.Fragment key={i}>
-                  <span style={{ "--w": i } as React.CSSProperties}>{w}</span>{i < words.length - 1 ? " " : null}
+                  <span style={{ "--w": i } as React.CSSProperties}>{w}</span>
+                  {i < words.length - 1 ? " " : null}
                 </React.Fragment>
               ))}
             </p>
@@ -69,7 +74,9 @@ export function HomeAbout({ disciplines }: { disciplines: string[] }) {
             </div>
           </div>
         </div>
-        <Link className="btn mt-more-me" href="/about" onFocus={uncoverOnFocus}>More about me</Link>
+        <Link className="btn mt-more-me" href="/about" onFocus={uncoverOnFocus}>
+          More about me
+        </Link>
       </div>
     </section>
   );

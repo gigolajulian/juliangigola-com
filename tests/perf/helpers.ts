@@ -102,7 +102,7 @@ export function frameStats(frames: number[]): FrameStats {
 
 /** One row of the summary table (`reporter.ts`). */
 export type Metric = {
-  kind: "swipe" | "splash" | "images";
+  kind: "swipe" | "images";
   page: string;
   viewport: string;
   [key: string]: string | number | boolean;
@@ -142,10 +142,7 @@ export async function wheelFlick(page: Page, sign: 1 | -1, axis: "x" | "y" = "x"
      display's pixel ratio (a 40 arrives as 20 on a Retina Mac), so the
      same flick there moved the strip half as far and fell short of a
      screen at 1920. Scaled back up so every browser gets the same flick. */
-  const gain =
-    page.context().browser()?.browserType().name() === "firefox"
-      ? await page.evaluate(() => devicePixelRatio)
-      : 1;
+  const gain = page.context().browser()?.browserType().name() === "firefox" ? await page.evaluate(() => devicePixelRatio) : 1;
   for (let i = 0; i < 24; i++) {
     const d = sign * Math.round(40 * gain * Math.exp(-i / 8));
     await page.mouse.wheel(axis === "x" ? d : 0, axis === "y" ? d : 0);
@@ -164,11 +161,8 @@ export async function wheelFlick(page: Page, sign: 1 | -1, axis: "x" | "y" = "x"
 export function touchSwipe(page: Page, x0: number, x1: number, ms: number, axis: "x" | "y" = "x") {
   return page.evaluate(
     async ({ x0, x1, ms, axis }) => {
-      const el =
-        axis === "x"
-          ? (document.querySelector(".strip-scroll") as HTMLElement)
-          : (document.scrollingElement as HTMLElement);
-      const target = axis === "x" ? el : document.elementFromPoint(innerWidth / 2, innerHeight / 2) ?? document.body;
+      const el = axis === "x" ? (document.querySelector(".strip-scroll") as HTMLElement) : (document.scrollingElement as HTMLElement);
+      const target = axis === "x" ? el : (document.elementFromPoint(innerWidth / 2, innerHeight / 2) ?? document.body);
       const across = axis === "x" ? innerHeight / 2 : innerWidth / 2;
       const at = (p: number) => (axis === "x" ? { clientX: p, clientY: across } : { clientX: across, clientY: p });
       const touch = (p: number) => ({ identifier: 1, target, ...at(p) });
@@ -182,9 +176,7 @@ export function touchSwipe(page: Page, x0: number, x1: number, ms: number, axis:
         target.dispatchEvent(e);
       };
       const ptr = (type: string, p: number) =>
-        target.dispatchEvent(
-          new PointerEvent(type, { bubbles: true, pointerType: "touch", pointerId: 7, isPrimary: true, ...at(p) }),
-        );
+        target.dispatchEvent(new PointerEvent(type, { bubbles: true, pointerType: "touch", pointerId: 7, isPrimary: true, ...at(p) }));
       const frame = () => new Promise((r) => requestAnimationFrame(r));
       const start = axis === "x" ? el.scrollLeft : el.scrollTop;
       ptr("pointerdown", x0);

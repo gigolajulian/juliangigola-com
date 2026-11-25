@@ -64,10 +64,7 @@ export function AdminPicker({
   const [dragging, setDragging] = React.useState<number | null>(null);
   const [over, setOver] = React.useState<number | null>(null);
 
-  const bySlug = React.useMemo(
-    () => new Map(items.map((p) => [p.slug, p])),
-    [items],
-  );
+  const bySlug = React.useMemo(() => new Map(items.map((p) => [p.slug, p])), [items]);
 
   const move = (i: number, delta: number) => {
     const j = i + delta;
@@ -95,11 +92,7 @@ export function AdminPicker({
 
   const candidates = items.filter(
     (p) =>
-      !chosen.includes(p.slug) &&
-      (query.trim() === "" ||
-        `${p.name} ${p.slug} ${p.detail}`
-          .toLowerCase()
-          .includes(query.toLowerCase())),
+      !chosen.includes(p.slug) && (query.trim() === "" || `${p.name} ${p.slug} ${p.detail}`.toLowerCase().includes(query.toLowerCase())),
   );
 
   const full = limit !== undefined && chosen.length >= limit;
@@ -157,50 +150,28 @@ export function AdminPicker({
                 // The slot it would land in, outlined rather than nudged
                 // aside: rows reflowing under the pointer is motion sickness,
                 // and the outline says the same thing.
-                over === i &&
-                  dragging !== null &&
-                  dragging !== i &&
-                  "outline outline-2 outline-offset-2 outline-foreground",
+                over === i && dragging !== null && dragging !== i && "outline outline-2 outline-offset-2 outline-foreground",
               )}
             >
-              <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">
-                {pad(i + 1)}
-              </span>
+              <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">{pad(i + 1)}</span>
 
               {item ? (
-                <span
-                  className="relative block h-12 w-10 shrink-0 overflow-hidden"
-                  style={{ backgroundColor: item.cover.color }}
-                >
-                  <Image
-                    src={item.cover.src}
-                    alt=""
-                    fill
-                    sizes="40px"
-                    draggable={false}
-                    className="object-cover"
-                  />
+                <span className="relative block h-12 w-10 shrink-0 overflow-hidden" style={{ backgroundColor: item.cover.color }}>
+                  <Image src={item.cover.src} alt="" fill sizes="40px" draggable={false} className="object-cover" />
                 </span>
               ) : (
                 <span className="block h-12 w-10 shrink-0 border border-destructive" />
               )}
 
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-sm">
-                  {item?.name ?? slug}
-                </span>
+                <span className="block truncate text-sm">{item?.name ?? slug}</span>
                 {/* The three ways a row can be wrong are worth saying here
                     rather than leaving to the preview: a slug that matches
                     nothing is silently skipped, something withheld is skipped
                     for a different reason entirely, and a row past the limit
                     is correct but will not be reached. */}
                 <span
-                  className={cn(
-                    "label block truncate",
-                    item && !isUnavailable && !beyond
-                      ? "text-muted-foreground"
-                      : "text-destructive",
-                  )}
+                  className={cn("label block truncate", item && !isUnavailable && !beyond ? "text-muted-foreground" : "text-destructive")}
                 >
                   {!item
                     ? "nothing with this slug, will be skipped"
@@ -280,17 +251,8 @@ export function AdminPicker({
                   }}
                   className="flex w-full items-center gap-3 px-3 py-2 text-left transition-colors duration-150 hoverable:hover:bg-card"
                 >
-                  <span
-                    className="relative block h-10 w-8 shrink-0 overflow-hidden"
-                    style={{ backgroundColor: p.cover.color }}
-                  >
-                    <Image
-                      src={p.cover.src}
-                      alt=""
-                      fill
-                      sizes="32px"
-                      className="object-cover"
-                    />
+                  <span className="relative block h-10 w-8 shrink-0 overflow-hidden" style={{ backgroundColor: p.cover.color }}>
+                    <Image src={p.cover.src} alt="" fill sizes="32px" className="object-cover" />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-sm">{p.name}</span>
@@ -302,11 +264,7 @@ export function AdminPicker({
                 </button>
               </li>
             ))}
-            {candidates.length === 0 ? (
-              <li className="px-3 py-3 text-sm text-muted-foreground">
-                Nothing left to add.
-              </li>
-            ) : null}
+            {candidates.length === 0 ? <li className="px-3 py-3 text-sm text-muted-foreground">Nothing left to add.</li> : null}
           </ul>
         </div>
       ) : (

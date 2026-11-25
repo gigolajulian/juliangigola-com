@@ -41,8 +41,7 @@ export type ProjectsFile = {
  * import from it would drag the JSON in and cost this module the one property
  * that makes it testable. One line is the cheaper of the two prices.
  */
-const isText = (f: unknown): f is { body: string } =>
-  typeof f === "object" && f !== null && "kind" in f && f.kind === "text";
+const isText = (f: unknown): f is { body: string } => typeof f === "object" && f !== null && "kind" in f && f.kind === "text";
 
 /**
  * Drops passages nobody wrote anything in.
@@ -53,8 +52,7 @@ const isText = (f: unknown): f is { body: string } =>
  * it would be the editor's fault rather than Julian's. So the empties go on
  * the way out instead of being validated against on the way in.
  */
-export const tidySequence = <T>(list: T[]): T[] =>
-  list.filter((f) => !isText(f) || f.body.trim() !== "");
+export const tidySequence = <T>(list: T[]): T[] => list.filter((f) => !isText(f) || f.body.trim() !== "");
 
 /**
  * The editable half of the project list, in the shape the file is written in.
@@ -96,13 +94,8 @@ export type Manifest = {
  * through untouched, which is what makes it safe to publish a content edit
  * without having loaded the project list at all.
  */
-export function projectsFile(
-  existing: ProjectsFile | null,
-  edit: Manifest,
-): ProjectsFile {
-  const next: ProjectsFile = existing
-    ? { ...existing }
-    : { projects: [], trash: [] };
+export function projectsFile(existing: ProjectsFile | null, edit: Manifest): ProjectsFile {
+  const next: ProjectsFile = existing ? { ...existing } : { projects: [], trash: [] };
 
   // Sorted, so the committed file does not churn on the order a Set happens
   // to iterate in — a diff should show what changed and nothing else.
@@ -125,9 +118,7 @@ export function projectsFile(
   // like an empty passage, it is dropped on the way out rather than
   // validated against on the way in.
   const copy = Object.fromEntries(
-    Object.entries(edit.copy).filter(
-      ([, c]) => isRecord(c) && typeof c.title === "string" && c.title.trim(),
-    ),
+    Object.entries(edit.copy).filter(([, c]) => isRecord(c) && typeof c.title === "string" && c.title.trim()),
   );
   if (Object.keys(copy).length) next.copy = copy;
   else delete next.copy;
@@ -152,11 +143,7 @@ export function projectsFile(
 
   // BTS: a shoot with every frame cleared leaves no entry, and the handle
   // typed beside it goes with it, since `lib/work/added.ts` wants one frame.
-  const bts = Object.fromEntries(
-    Object.entries(edit.bts).filter(
-      ([, b]) => isRecord(b) && Array.isArray(b.frames) && b.frames.length > 0,
-    ),
-  );
+  const bts = Object.fromEntries(Object.entries(edit.bts).filter(([, b]) => isRecord(b) && Array.isArray(b.frames) && b.frames.length > 0));
   if (Object.keys(bts).length) next.bts = bts;
   else delete next.bts;
 
@@ -188,9 +175,7 @@ export function projectsFile(
 /** Objects with their keys sorted, recursively; arrays keep their order. */
 const sorted = (_key: string, value: unknown): unknown =>
   value && typeof value === "object" && !Array.isArray(value)
-    ? Object.fromEntries(
-        Object.entries(value).sort(([a], [b]) => (a < b ? -1 : 1)),
-      )
+    ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => (a < b ? -1 : 1)))
     : value;
 
 /**
@@ -200,8 +185,7 @@ const sorted = (_key: string, value: unknown): unknown =>
  * is the edit. Key order does not, and `undefined` is absent either way,
  * which is what `role: undefined` from an omitted field should mean.
  */
-export const sameJson = (a: unknown, b: unknown): boolean =>
-  JSON.stringify(a, sorted) === JSON.stringify(b, sorted);
+export const sameJson = (a: unknown, b: unknown): boolean => JSON.stringify(a, sorted) === JSON.stringify(b, sorted);
 
 /* ── reading the manifest back ────────────────────────────────────
  * `adoptable` is the other direction: the file as the repository holds it,
@@ -224,23 +208,15 @@ export const sameJson = (a: unknown, b: unknown): boolean =>
  * ─────────────────────────────────────────────────────────────── */
 
 // Its own copy of `lib/json.ts` isRecord: scripts/check-payload.mjs runs this file under Node, with no imports.
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null && !Array.isArray(v);
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
-const strings = (v: unknown): string[] | null =>
-  Array.isArray(v) && v.every((x) => typeof x === "string")
-    ? (v as string[])
-    : null;
+const strings = (v: unknown): string[] | null => (Array.isArray(v) && v.every((x) => typeof x === "string") ? (v as string[]) : null);
 
 const stringMap = (v: unknown): Record<string, string> | null =>
-  isRecord(v) && Object.values(v).every((x) => typeof x === "string")
-    ? (v as Record<string, string>)
-    : null;
+  isRecord(v) && Object.values(v).every((x) => typeof x === "string") ? (v as Record<string, string>) : null;
 
 const listMap = (v: unknown): Record<string, unknown[]> | null =>
-  isRecord(v) && Object.values(v).every((x) => Array.isArray(x))
-    ? (v as Record<string, unknown[]>)
-    : null;
+  isRecord(v) && Object.values(v).every((x) => Array.isArray(x)) ? (v as Record<string, unknown[]>) : null;
 
 export function adoptable(file: ProjectsFile, fallback: Manifest): Manifest {
   /* The sequences and credit lists come back as "a list of something": this
@@ -249,50 +225,17 @@ export function adoptable(file: ProjectsFile, fallback: Manifest): Manifest {
      live site keeps serving the last good build. The editor is not the last
      line of defence for a file it wrote itself. */
   return {
-    hidden:
-      file.hidden === undefined
-        ? []
-        : (strings(file.hidden) ?? fallback.hidden),
-    unlisted:
-      file.unlisted === undefined
-        ? []
-        : (strings(file.unlisted) ?? fallback.unlisted),
-    categories:
-      file.categories === undefined
-        ? {}
-        : (stringMap(file.categories) ?? fallback.categories),
-    frames:
-      file.frames === undefined
-        ? {}
-        : (listMap(file.frames) ?? fallback.frames),
-    credits:
-      file.credits === undefined
-        ? {}
-        : (listMap(file.credits) ?? fallback.credits),
-    copy:
-      file.copy === undefined
-        ? {}
-        : isRecord(file.copy)
-          ? file.copy
-          : fallback.copy,
-    order:
-      file.order === undefined ? [] : (strings(file.order) ?? fallback.order),
-    avatars:
-      file.avatars === undefined
-        ? {}
-        : (stringMap(file.avatars) ?? fallback.avatars),
-    covers:
-      file.covers === undefined
-        ? {}
-        : (stringMap(file.covers) ?? fallback.covers),
-    slugs:
-      file.slugs === undefined ? {} : (stringMap(file.slugs) ?? fallback.slugs),
-    bts:
-      file.bts === undefined
-        ? {}
-        : isRecord(file.bts)
-          ? file.bts
-          : fallback.bts,
+    hidden: file.hidden === undefined ? [] : (strings(file.hidden) ?? fallback.hidden),
+    unlisted: file.unlisted === undefined ? [] : (strings(file.unlisted) ?? fallback.unlisted),
+    categories: file.categories === undefined ? {} : (stringMap(file.categories) ?? fallback.categories),
+    frames: file.frames === undefined ? {} : (listMap(file.frames) ?? fallback.frames),
+    credits: file.credits === undefined ? {} : (listMap(file.credits) ?? fallback.credits),
+    copy: file.copy === undefined ? {} : isRecord(file.copy) ? file.copy : fallback.copy,
+    order: file.order === undefined ? [] : (strings(file.order) ?? fallback.order),
+    avatars: file.avatars === undefined ? {} : (stringMap(file.avatars) ?? fallback.avatars),
+    covers: file.covers === undefined ? {} : (stringMap(file.covers) ?? fallback.covers),
+    slugs: file.slugs === undefined ? {} : (stringMap(file.slugs) ?? fallback.slugs),
+    bts: file.bts === undefined ? {} : isRecord(file.bts) ? file.bts : fallback.bts,
   };
 }
 
@@ -316,12 +259,7 @@ export function adoptable(file: ProjectsFile, fallback: Manifest): Manifest {
  * removes where there was nothing published to keep.
  * ─────────────────────────────────────────────────────────────── */
 
-export function withOverride<T>(
-  current: Record<string, T>,
-  slug: string,
-  next: T | null,
-  published: Record<string, T>,
-): Record<string, T> {
+export function withOverride<T>(current: Record<string, T>, slug: string, next: T | null, published: Record<string, T>): Record<string, T> {
   const copy = { ...current };
   if (next) copy[slug] = next;
   else if (published[slug]) copy[slug] = published[slug];

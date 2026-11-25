@@ -4,9 +4,6 @@
     "slowPct": 25,
     "worstMs": 250
   },
-  "splash": {
-    "liftedMs": 4000
-  },
   "images": {
     "/": {
       "iphone-se": 461,

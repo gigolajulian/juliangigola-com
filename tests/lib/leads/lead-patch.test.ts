@@ -13,19 +13,20 @@ const s = (await sealer(LEADS_KEY))!;
 const EMAIL = "maya@example.com";
 let kv: FakeKV;
 let id: string;
-let key: string;
 
 beforeEach(async () => {
   kv = new FakeKV();
   id = await s.id(EMAIL);
-  key = `lead:${id}`;
-  const lead: Lead = applyLeadEvent(null, EMAIL, { event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:1" }, name: "Maya Ortiz" });
+  const lead: Lead = applyLeadEvent(null, EMAIL, {
+    event: { at: "2026-11-01T10:00:00Z", kind: "inquiry", ref: "msg:1" },
+    name: "Maya Ortiz",
+  });
   await writeLead(kv as never, s, id, lead);
   kv.puts = [];
 });
 
 const patch = async (body: Record<string, unknown>): Promise<{ status: number; body: { lead?: Lead; error?: string } }> => {
-  const r = await patchLead(kv as never, s, { key, ...body });
+  const r = await patchLead(kv as never, s, { id, ...body });
   return "error" in r ? { status: r.status, body: { error: r.error } } : { status: 200, body: { lead: r.lead } };
 };
 const stored = async () => (await readLead(kv as never, s, id))!;
@@ -43,7 +44,7 @@ describe("patchLead: refusals", () => {
     [{ licence: { use: "Web", end: "2027-13-40" } }, 400, "Bad date."],
     [{ invoice: { date: "2026-11-06", lines: [] } }, 400, "One to"],
     [{ invoicePaid: { no: "0999", paid: true } }, 404, "No such invoice."],
-    [{ mergeFrom: "lead:nobody" }, 404, "Gone."],
+    [{ mergeFrom: "nobody" }, 404, "Gone."],
   ])("%j answers %i and writes nothing", async (body, status, error) => {
     const r = await patch(body);
     expect(r.status).toBe(status);
@@ -52,8 +53,23 @@ describe("patchLead: refusals", () => {
   });
 
   it("404s a lead that is not there", async () => {
-    const res = await patchLead(kv as never, s, { key: "lead:0000", seen: true });
+    const res = await patchLead(kv as never, s, { id: "0000", seen: true });
     expect(res).toEqual({ error: "Gone.", status: 404 });
+  });
+
+  it("answers 500 for a lead that will not open, and a merge from one, writing nothing", async () => {
+    const err = vi.spyOn(console, "error").mockImplementation(() => {});
+    const other = await s.id("other@example.com");
+    kv.data.set(`lead:${other}`, { value: "not a sealed lead" } as never);
+    kv.puts = [];
+    expect(await patchLead(kv as never, s, { id: other, seen: true })).toEqual({
+      error: "That lead cannot be opened. LEADS_KEY may have changed.",
+      status: 500,
+    });
+    expect((await patch({ mergeFrom: other })).status).toBe(500);
+    expect(kv.puts).toEqual([]);
+    expect(err).toHaveBeenCalled();
+    err.mockRestore();
   });
 });
 
@@ -63,7 +79,10 @@ describe("patchLead: fields", () => {
     let l = await stored();
     expect(l.stage).toBe("Quoted");
     expect(l.snoozeUntil).toBe("2026-12-01T00:00:00Z");
-    expect(l.events.slice(-2).map((e) => [e.kind, e.note])).toEqual([["stage", "Quoted"], ["snooze", "2026-12-01T00:00:00Z"]]);
+    expect(l.events.slice(-2).map((e) => [e.kind, e.note])).toEqual([
+      ["stage", "Quoted"],
+      ["snooze", "2026-12-01T00:00:00Z"],
+    ]);
     await patch({ snoozeUntil: "" });
     l = await stored();
     expect(l.snoozeUntil).toBeUndefined();
@@ -78,7 +97,9 @@ describe("patchLead: fields", () => {
   });
 
   it("cleans the details: trimmed, @ on the handle, kind lowercased, a blank name kept", async () => {
-    const { body } = await patch({ details: { name: "  ", phone: " 408 555 0100 ", ig: "maya.shoots", company: "", kind: "  Portraits " } });
+    const { body } = await patch({
+      details: { name: "  ", phone: " 408 555 0100 ", ig: "maya.shoots", company: "", kind: "  Portraits " },
+    });
     expect(body.lead).toMatchObject({ name: "Maya Ortiz", phone: "408 555 0100", ig: "@maya.shoots", kind: "portraits" });
     expect(body.lead?.company).toBeUndefined();
     expect(body.lead?.events.at(-1)?.kind).toBe("edit");
@@ -104,8 +125,20 @@ describe("patchLead: fields", () => {
   });
 
   it("keeps paper status, notes, lost reason and a licence", async () => {
-    await patch({ contract: "Signed", release: "Sent", notes: "  call after 6  ", lostReason: "budget", licence: { use: "Web, 1 year", end: "2027-11-06" } });
-    expect(await stored()).toMatchObject({ contract: "Signed", release: "Sent", notes: "call after 6", lostReason: "budget", licence: { use: "Web, 1 year", end: "2027-11-06" } });
+    await patch({
+      contract: "Signed",
+      release: "Sent",
+      notes: "  call after 6  ",
+      lostReason: "budget",
+      licence: { use: "Web, 1 year", end: "2027-11-06" },
+    });
+    expect(await stored()).toMatchObject({
+      contract: "Signed",
+      release: "Sent",
+      notes: "call after 6",
+      lostReason: "budget",
+      licence: { use: "Web, 1 year", end: "2027-11-06" },
+    });
     await patch({ notes: "   " });
     expect((await stored()).notes).toBeUndefined();
   });
@@ -140,7 +173,10 @@ describe("patchLead: invoices marked by hand", () => {
     l = await stored();
     expect(l.invoices?.[0]).toMatchObject({ unpaid: true });
     expect(l.invoices?.[0].paidAt).toBeUndefined();
-    expect(paidEvents().map((e) => [e.note, e.amount])).toEqual([["1126 paid, $350.00", 350], ["1126 unpaid again", -350]]);
+    expect(paidEvents().map((e) => [e.note, e.amount])).toEqual([
+      ["1126 paid, $350.00", 350],
+      ["1126 unpaid again", -350],
+    ]);
   });
 
   it("can mark paid the invoice made in the same patch", async () => {

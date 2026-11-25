@@ -5,7 +5,9 @@ import { CardTilt } from "@/components/effects/card-tilt";
 const fine = (on: boolean) =>
   vi
     .spyOn(window, "matchMedia")
-    .mockImplementation((q: string) => ({ matches: on, media: q, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList);
+    .mockImplementation(
+      (q: string) => ({ matches: on, media: q, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList,
+    );
 
 afterEach(() => vi.restoreAllMocks());
 

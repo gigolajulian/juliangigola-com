@@ -8,11 +8,7 @@ export type FitSize = { w: number; h: number; vw: number };
    picture's own shape. Measured rather than left to CSS, because the trip
    is a transform of this box and it has to be exactly the picture, no
    letterbox inside it. */
-export function useFit(
-  area: React.RefObject<HTMLDivElement | null>,
-  width: number,
-  height: number,
-) {
+export function useFit(area: React.RefObject<HTMLDivElement | null>, width: number, height: number) {
   const [size, setSize] = React.useState<FitSize | null>(null);
   React.useLayoutEffect(() => {
     const el = area.current;

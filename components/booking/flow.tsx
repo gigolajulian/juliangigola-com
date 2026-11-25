@@ -1,6 +1,6 @@
 import * as React from "react";
-import { pad } from "@/lib/utils";
 import { useSkyCalendar } from "@/components/booking/sky-motion";
+import { WEEKDAYS, localDayKey, mondayIndex, monthCells, weekCells, weekdayDateLabel } from "@/components/booking/picker/dates";
 
 /** A run of short items (the session's includes): each item stays whole,
     a dot rides at the end of every item but the last, so a line may end on
@@ -18,24 +18,6 @@ export function DotList({ items, className = "" }: { items: string[]; className?
     </p>
   );
 }
-
-/* Dates and times the way the master prints them. */
-export const weekdayDateLabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
-export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-/** A day on the visitor's own calendar as "2026-11-04" (local, not UTC). The picker shares it. */
-export const localDayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-/** The month's cells, Monday first, blanks before the 1st. */
-export const monthCells = (base: Date) => {
-  const first = new Date(base.getFullYear(), base.getMonth(), 1);
-  const lead = (first.getDay() + 6) % 7;
-  const n = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
-  return [...Array<Date | null>(lead).fill(null), ...Array.from({ length: n }, (_, i) => new Date(base.getFullYear(), base.getMonth(), i + 1))];
-};
-/** The Monday-to-Sunday week holding `d`. */
-export const weekCells = (d: Date) => {
-  const m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - ((d.getDay() + 6) % 7));
-  return Array.from({ length: 7 }, (_, i) => new Date(m.getFullYear(), m.getMonth(), m.getDate() + i));
-};
 
 /** The calendar block (master step 1): title, Week / Month, arrows, the days. */
 export function Calendar({
@@ -74,19 +56,63 @@ export function Calendar({
   return (
     <>
       <div className="cal-top lbl">
-        <span>{own && own.at(-1)!.getMonth() !== head.getMonth() ? `${head.toLocaleDateString("en-US", { month: "long" })} – ${own.at(-1)!.toLocaleDateString("en-US", { month: "long", year: "numeric" })}` : head.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</span>
+        <span>
+          {own && own.at(-1)!.getMonth() !== head.getMonth()
+            ? `${head.toLocaleDateString("en-US", { month: "long" })} – ${own.at(-1)!.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`
+            : head.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        </span>
         <span className="seg">
-          <button type="button" aria-pressed={view === "week"} onClick={() => { if (view !== "week") before(0); setView("week"); }}>Week</button>
-          <button type="button" aria-pressed={view === "month"} onClick={() => { if (view !== "month") before(0); setView("month"); }}>Month</button>
+          <button
+            type="button"
+            aria-pressed={view === "week"}
+            onClick={() => {
+              if (view !== "week") before(0);
+              setView("week");
+            }}
+          >
+            Week
+          </button>
+          <button
+            type="button"
+            aria-pressed={view === "month"}
+            onClick={() => {
+              if (view !== "month") before(0);
+              setView("month");
+            }}
+          >
+            Month
+          </button>
         </span>
         <span className="arrows">
-          <button type="button" aria-label="Earlier" disabled={!canBack} onClick={() => { before(-1); shift(-1); }}>&larr;</button>
-          <button type="button" aria-label="Later" disabled={!canNext} onClick={() => { before(1); shift(1); }}>&rarr;</button>
+          <button
+            type="button"
+            aria-label="Earlier"
+            disabled={!canBack}
+            onClick={() => {
+              before(-1);
+              shift(-1);
+            }}
+          >
+            &larr;
+          </button>
+          <button
+            type="button"
+            aria-label="Later"
+            disabled={!canNext}
+            onClick={() => {
+              before(1);
+              shift(1);
+            }}
+          >
+            &rarr;
+          </button>
         </span>
       </div>
       <div ref={cal} className={`cal lbl ${view}`} style={own ? { gridTemplateColumns: `repeat(${own.length},minmax(0,1fr))` } : undefined}>
-        {(own ? own.map((d) => WEEKDAYS[(d.getDay() + 6) % 7]) : WEEKDAYS).map((w, k) => (
-          <span key={`${w}${k}`} className="wd">{w}</span>
+        {(own ? own.map((d) => WEEKDAYS[mondayIndex(d)]) : WEEKDAYS).map((w, k) => (
+          <span key={`${w}${k}`} className="wd">
+            {w}
+          </span>
         ))}
         {cells.map((t, k) => {
           if (!t) return <span key={`b${k}`} />;
@@ -97,15 +123,27 @@ export function Calendar({
           const open = tg && /open$/i.test(tg) ? Number(/^\d+/.exec(tg)?.[0] ?? 0) : -1;
           const sky = parts?.(t);
           return (
-            <button key={id} type="button" data-day={id} aria-pressed={id === picked} disabled={tg === null} aria-label={`${weekdayDateLabel(t)}${tg ? `, ${tg}` : ""}`} onClick={() => onPick(t)}>
+            <button
+              key={id}
+              type="button"
+              data-day={id}
+              aria-pressed={id === picked}
+              disabled={tg === null}
+              aria-label={`${weekdayDateLabel(t)}${tg ? `, ${tg}` : ""}`}
+              onClick={() => onPick(t)}
+            >
               <b>{t.getDate()}</b>
               {sky ? (
                 <span className="dots sky" aria-hidden="true">
-                  {sky.map((on, i) => <i key={i} className={on ? undefined : "out"} />)}
+                  {sky.map((on, i) => (
+                    <i key={i} className={on ? undefined : "out"} />
+                  ))}
                 </span>
               ) : open >= 0 ? (
                 <span className={open && open <= 2 ? "dots few" : "dots"} aria-hidden="true">
-                  {Array.from({ length: open >= 7 ? 3 : open >= 3 ? 2 : 1 }, (_, i) => <i key={i} />)}
+                  {Array.from({ length: open >= 7 ? 3 : open >= 3 ? 2 : 1 }, (_, i) => (
+                    <i key={i} />
+                  ))}
                 </span>
               ) : (
                 <span>{tg}</span>

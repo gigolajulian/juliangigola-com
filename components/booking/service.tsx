@@ -28,27 +28,44 @@ export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame
     <div className="v3 contents">
       <section className="v3page" id="p-service">
         <div className="sv-hero">
-        <header className="sv-top">
-          <p className="lbl mute">{page.kicker}</p>
-          <h1 className="pg-t">{page.h1.replace(/San (Francisco|Jose)/g, "San $1")}</h1>
-          <p className="sv-lead">{page.lead}</p>
-          <DotList className="inc lbl" items={[page.rate, ...includes, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])]} />
-          <div className="ctas">
-            <Link className="btn fill" href={s ? "#book" : "/contact/form"}>{page.book.title}</Link>
-            <Link className="btn" href="#work">See the work</Link>
+          <header className="sv-top">
+            <p className="lbl mute">{page.kicker}</p>
+            <h1 className="pg-t">{page.h1.replace(/San (Francisco|Jose)/g, "San $1")}</h1>
+            <p className="sv-lead">{page.lead}</p>
+            <DotList className="inc lbl" items={[page.rate, ...includes, ...(page.turnaround ? [`Ready in ${page.turnaround}`] : [])]} />
+            <div className="ctas">
+              <Link className="btn fill" href={s ? "#book" : "/contact/form"}>
+                {page.book.title}
+              </Link>
+              <Link className="btn" href="#work">
+                See the work
+              </Link>
+            </div>
+          </header>
+          {/* The empty side of the title, filled with this session's own frames at their own shape. */}
+          <div className="sv-pics" data-n={hero.length} aria-hidden="true">
+            {hero.map((f) => (
+              <Image
+                key={f.src}
+                src={f.src}
+                alt=""
+                width={f.width}
+                height={f.height}
+                sizes="(max-width: 1023px) 1px, 40vw"
+                loading="eager"
+                style={{ background: f.color }}
+              />
+            ))}
           </div>
-        </header>
-        {/* The empty side of the title, filled with this session's own frames at their own shape. */}
-        <div className="sv-pics" data-n={hero.length} aria-hidden="true">
-          {hero.map((f) => (
-            <Image key={f.src} src={f.src} alt="" width={f.width} height={f.height} sizes="(max-width: 1023px) 1px, 40vw" loading="eager" style={{ background: f.color }} />
-          ))}
-        </div>
         </div>
         <div className="b-head seq-head" id="work">
           <h2>{page.gallery.label}</h2>
           {/* Headshots and Graduation show their whole gallery right here: the old address redirects back to this screen (next.config.ts), so a button would loop. */}
-          {!/#work$|^\/portfolio\/headshots$/.test(page.gallery.href) && <Link className="btn" href={page.gallery.href}>See the gallery</Link>}
+          {!/#work$|^\/portfolio\/headshots$/.test(page.gallery.href) && (
+            <Link className="btn" href={page.gallery.href}>
+              See the gallery
+            </Link>
+          )}
         </div>
         <div className="a-seq sv-seq">
           {cols.map((c, k) => (
@@ -56,7 +73,13 @@ export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame
               {c.map((f) => (
                 <figure key={f.src}>
                   <div className="ph">
-                    <Image src={f.src} alt={f.alt || `${page.name} by Julian Gigola`} fill sizes="(max-width: 700px) 50vw, 30vw" style={{ objectFit: "cover", background: f.color }} />
+                    <Image
+                      src={f.src}
+                      alt={f.alt || `${page.name} by Julian Gigola`}
+                      fill
+                      sizes="(max-width: 700px) 50vw, 30vw"
+                      style={{ objectFit: "cover", background: f.color }}
+                    />
                   </div>
                 </figure>
               ))}
@@ -73,7 +96,11 @@ export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame
             <section className={b.items ? "sv-row sv-v4" : "sv-row"} key={b.heading}>
               <h2 className="lbl mute">{b.heading}</h2>
               {b.items ? (
-                <ul>{b.items.map((x) => <li key={x}>{x}</li>)}</ul>
+                <ul>
+                  {b.items.map((x) => (
+                    <li key={x}>{x}</li>
+                  ))}
+                </ul>
               ) : (
                 <p>{b.body}</p>
               )}
@@ -84,7 +111,12 @@ export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame
               <h2 className="lbl mute">Campus guides</h2>
               <ul>
                 {CAMPUS_GUIDES.map((c) => (
-                  <li key={c.slug}><Link href={campusHref(c)}>{c.h1}<span aria-hidden>→</span></Link></li>
+                  <li key={c.slug}>
+                    <Link href={campusHref(c)}>
+                      {c.h1}
+                      <span aria-hidden>→</span>
+                    </Link>
+                  </li>
                 ))}
               </ul>
             </section>
@@ -93,7 +125,10 @@ export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame
             <h2 className="lbl mute">Where</h2>
             <ul>
               {page.where.map((w) => (
-                <li key={w.name}><b>{w.name}</b><span className="mute">{w.note}</span></li>
+                <li key={w.name}>
+                  <b>{w.name}</b>
+                  <span className="mute">{w.note}</span>
+                </li>
               ))}
             </ul>
           </section>
@@ -122,7 +157,12 @@ export function ServiceBook({ page, frames }: { page: BookingPage; frames: Frame
             <h2 className="lbl mute">Also booking</h2>
             <ul>
               {others.map((p) => (
-                <li key={p.slug}><Link href={bookingHref(p)}>{p.h1.replace(/\b(?!in\b)\w/g, (c) => c.toUpperCase())}<span aria-hidden>→</span></Link></li>
+                <li key={p.slug}>
+                  <Link href={bookingHref(p)}>
+                    {p.h1.replace(/\b(?!in\b)\w/g, (c) => c.toUpperCase())}
+                    <span aria-hidden>→</span>
+                  </Link>
+                </li>
               ))}
             </ul>
           </section>

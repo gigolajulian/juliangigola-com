@@ -17,7 +17,9 @@ beforeEach(() => {
   kv = new FakeKV();
   intent = { amount: 10000, currency: "usd", metadata: { kind: "deposit" } };
   ctx.env = { INBOX: kv, STRIPE_SECRET_KEY: "sk_test_x", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) } };
-  vi.stubGlobal("fetch", async (u: string) => (u.endsWith(`/payment_intents/${PI}`) ? reply({ id: PI, ...intent }) : reply({ error: {} }, 404)));
+  vi.stubGlobal("fetch", async (u: string) =>
+    u.endsWith(`/payment_intents/${PI}`) ? reply({ id: PI, ...intent }) : reply({ error: {} }, 404),
+  );
 });
 afterEach(() => vi.unstubAllGlobals());
 
@@ -34,7 +36,10 @@ describe("GET /api/deposit/[id]", () => {
   it("is pending until the webhook settles it, then booked with the time only", async () => {
     expect(await (await GET(new Request(url(PI)), params(PI))).json()).toEqual({ status: "pending" });
     intent.metadata = { kind: "deposit", outcome: "booked", cal_uid: "uid1", cal_start: "2026-12-02T18:00:00Z", email: "qa@example.com" };
-    expect(await (await GET(new Request(url(PI)), params(PI))).json()).toEqual({ status: "booked", booking: { uid: "uid1", start: "2026-12-02T18:00:00Z" } });
+    expect(await (await GET(new Request(url(PI)), params(PI))).json()).toEqual({
+      status: "booked",
+      booking: { uid: "uid1", start: "2026-12-02T18:00:00Z" },
+    });
   });
 });
 

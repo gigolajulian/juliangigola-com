@@ -6,7 +6,13 @@ import type { TrashedProject } from "@/lib/work/added";
 import type { ListDraft, Overrides } from "@/components/admin/editor/props";
 
 /** The five per-project override maps out of a manifest. */
-const overridesOf = (m: Draft): Overrides => ({ categories: m.categories, frames: m.frames, credits: m.credits, copy: m.copy, slugs: m.slugs });
+const overridesOf = (m: Draft): Overrides => ({
+  categories: m.categories,
+  frames: m.frames,
+  credits: m.credits,
+  copy: m.copy,
+  slugs: m.slugs,
+});
 
 /**
  * The manifest side of the editor's draft: the project list, the per-project
@@ -40,12 +46,18 @@ export function useManifestDraft(published: Draft, initialTrash: TrashedProject[
   };
 
   return {
-    listDraft, setListDraft,
-    trash, setTrash,
-    overrides, setOverrides,
-    order, setOrder,
-    covers, setCovers,
-    avatars, setAvatars,
+    listDraft,
+    setListDraft,
+    trash,
+    setTrash,
+    overrides,
+    setOverrides,
+    order,
+    setOrder,
+    covers,
+    setCovers,
+    avatars,
+    setAvatars,
     reset,
   };
 }

@@ -20,7 +20,15 @@ import { postJson } from "@/lib/http";
 export type Managed = ReturnType<typeof clientView>;
 
 const stampIn = (iso: string, timeZone?: string) =>
-  new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(iso));
+  new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(new Date(iso));
 
 export function ManageBooking({ booking, token, open }: { booking: Managed; token: string; open?: string }) {
   const [b, setB] = React.useState(booking);
@@ -49,7 +57,11 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
     if (!out?.record) {
       setState("");
       // 409 is also "already cancelled" and "has started": only the taken time has its own words, the rest says what the server said.
-      setError(!r.ok && r.code === "taken" ? "That time was just taken. Pick another." : ((!r.ok && r.error) || "That did not go through. Try again, or reply to your confirmation email."));
+      setError(
+        !r.ok && r.code === "taken"
+          ? "That time was just taken. Pick another."
+          : (!r.ok && r.error) || "That did not go through. Try again, or reply to your confirmation email.",
+      );
       return;
     }
     setB(out.record);
@@ -66,7 +78,12 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
         <h1 className="text-2xl">{b.session}</h1>
         <p className="mute">
           {stampIn(b.start, TZ)}
-          {b.where ? <><br />{b.where}</> : null}
+          {b.where ? (
+            <>
+              <br />
+              {b.where}
+            </>
+          ) : null}
         </p>
       </div>
 
@@ -79,7 +96,9 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
             : refunded === false && b.paid && share
               ? "It's cancelled. The refund did not go through on its own; I'll send it by hand and email you."
               : "It's cancelled. A note is on its way to your inbox."}{" "}
-          <Link href="/book" className="underline">Book another time</Link>
+          <Link href="/book" className="underline">
+            Book another time
+          </Link>
         </p>
       ) : past ? (
         <p>This session has started. Reply to your confirmation email if something changed.</p>
@@ -100,7 +119,9 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
             <button type="button" className="btn fill" disabled={state === "busy"} onClick={() => act({ action: "cancel" })}>
               {state === "busy" ? "Cancelling" : "Cancel booking"}
             </button>
-            <button type="button" className="btn" onClick={() => setMode("")}>Keep it</button>
+            <button type="button" className="btn" onClick={() => setMode("")}>
+              Keep it
+            </button>
           </div>
         </div>
       ) : mode === "reschedule" ? (
@@ -120,13 +141,21 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
                   : `Your $${usd} deposit moves with it. It is no longer refundable: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${PART_HOURS} hours away.`}
             </p>
           ) : null}
-          <button type="button" className="btn self-start" onClick={() => setMode("")}>Back</button>
+          <button type="button" className="btn self-start" onClick={() => setMode("")}>
+            Back
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex gap-3">
-            {movable ? <button type="button" className="btn fill" onClick={() => setMode("reschedule")}>Reschedule</button> : null}
-            <button type="button" className="btn" onClick={() => setMode("cancel")}>Cancel</button>
+            {movable ? (
+              <button type="button" className="btn fill" onClick={() => setMode("reschedule")}>
+                Reschedule
+              </button>
+            ) : null}
+            <button type="button" className="btn" onClick={() => setMode("cancel")}>
+              Cancel
+            </button>
           </div>
           <p className="mute">
             {(b.moves ?? 0) >= MAX_MOVES
@@ -139,7 +168,11 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           </p>
         </div>
       )}
-      {error ? <p role="alert" className="text-accent">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="text-accent">
+          {error}
+        </p>
+      ) : null}
       {state === "moved" ? <p>Moved. A new confirmation is on its way to your inbox.</p> : null}
     </section>
   );

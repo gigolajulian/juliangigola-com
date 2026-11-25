@@ -42,26 +42,47 @@ describe("source", () => {
 describe("daysOf", () => {
   it("gives n Pacific days from the first, marking today", () => {
     const days = daysOf([], "2026-11-19", 3);
-    expect(days.map((d) => [d.d, d.today])).toEqual([["2026-11-19", false], ["2026-11-20", true], ["2026-11-21", false]]);
+    expect(days.map((d) => [d.d, d.today])).toEqual([
+      ["2026-11-19", false],
+      ["2026-11-20", true],
+      ["2026-11-21", false],
+    ]);
   });
 
   it("puts a booked time on its Pacific day, not its UTC one", () => {
     // 23:30 Pacific on the 21st is the 22nd in UTC.
-    const days = daysOf([lead({ stage: "Confirmed", when: "2026-11-22T07:30:00Z", contract: "Signed", release: "Signed" })], "2026-11-20", 3);
+    const days = daysOf(
+      [lead({ stage: "Confirmed", when: "2026-11-22T07:30:00Z", contract: "Signed", release: "Signed" })],
+      "2026-11-20",
+      3,
+    );
     expect(days[1].evs).toEqual([expect.objectContaining({ small: "11:30 PM Shoot", text: "Ana" })]);
     expect(days[2].evs).toEqual([]);
   });
 
   it("leaves out archived leads and the dates of closed ones", () => {
-    const days = daysOf([
-      lead({ stage: "Confirmed", when: "2026-11-21T18:00:00Z", archivedAt: at }),
-      lead({ stage: "Lost", when: "2026-11-21T18:00:00Z" }),
-    ], "2026-11-20", 2);
+    const days = daysOf(
+      [lead({ stage: "Confirmed", when: "2026-11-21T18:00:00Z", archivedAt: at }), lead({ stage: "Lost", when: "2026-11-21T18:00:00Z" })],
+      "2026-11-20",
+      2,
+    );
     expect(days.flatMap((d) => d.evs)).toEqual([]);
   });
 
   it("lands a reminder still to come on its day, and one that is due today as Due", () => {
-    const later = daysOf([lead({ stage: "Quoted", stageAt: "2026-11-20T17:00:00Z", lastAt: "2026-11-20T17:00:00Z", due: "2026-11-21T18:00:00Z", dueText: "Chase the quote" })], "2026-11-20", 2);
+    const later = daysOf(
+      [
+        lead({
+          stage: "Quoted",
+          stageAt: "2026-11-20T17:00:00Z",
+          lastAt: "2026-11-20T17:00:00Z",
+          due: "2026-11-21T18:00:00Z",
+          dueText: "Chase the quote",
+        }),
+      ],
+      "2026-11-20",
+      2,
+    );
     expect(later[1].evs).toEqual([expect.objectContaining({ small: "Reminder", text: "Chase the quote", who: "Ana" })]);
     const now = daysOf([lead({ stage: "Quoted", due: "2026-11-19T18:00:00Z", dueText: "Chase the quote" })], "2026-11-20", 2);
     expect(now[0].evs).toEqual([expect.objectContaining({ small: "Due", due: true, who: "Ana" })]);

@@ -49,16 +49,26 @@ export function leadKey(e: Press, typing: boolean, snoozing: boolean): LeadKey |
   // Ten stages: 0 is the tenth, Lost.
   if (/^[0-9]$/.test(k)) return { do: "stage", at: k === "0" ? 9 : Number(k) - 1 };
   switch (k) {
-    case "?": return { do: "help" };
-    case "j": return { do: "move", by: 1 };
-    case "k": return { do: "move", by: -1 };
-    case "n": return { do: "new" };
-    case "u": return { do: "refresh" };
-    case "r": return { do: "reply" };
-    case "s": return { do: "snooze" };
-    case "e": return { do: "archive" };
-    case "t": return { do: "task" };
-    default: return null;
+    case "?":
+      return { do: "help" };
+    case "j":
+      return { do: "move", by: 1 };
+    case "k":
+      return { do: "move", by: -1 };
+    case "n":
+      return { do: "new" };
+    case "u":
+      return { do: "refresh" };
+    case "r":
+      return { do: "reply" };
+    case "s":
+      return { do: "snooze" };
+    case "e":
+      return { do: "archive" };
+    case "t":
+      return { do: "task" };
+    default:
+      return null;
   }
 }
 

@@ -6,8 +6,7 @@ export type Scope = Record<string, { w: string[]; p: number[] }>;
 export type PickAt = { a: number; c: number };
 
 export const ang = (u: number, v: number) => Math.atan2(v, u);
-const dAng = (a: number, b: number) =>
-  Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
+const dAng = (a: number, b: number) => Math.abs(Math.atan2(Math.sin(a - b), Math.cos(a - b)));
 
 /** The Color view's scope points, fetched on first visit, and how well a set matches the pick. */
 export function useColorScope(view: string, pick: PickAt | null) {

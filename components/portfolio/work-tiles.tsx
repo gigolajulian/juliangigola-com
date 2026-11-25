@@ -51,7 +51,12 @@ export function Cap({ p, cls }: { p: WorkItem; cls: string }) {
       {/* --n: a long name sets smaller to stay near two lines; --w: its longest word still fits the cover's width. */}
       <b style={{ "--n": p.name.length, "--w": Math.max(...p.name.split(/\s+/).map((x) => x.length)) } as React.CSSProperties}>{p.name}</b>
       {/* The space keeps "THRESHOLD Editorial" two words for screen readers and label-in-name; between blocks it draws nothing. */}
-      {d.toLowerCase() !== p.name.toLowerCase() ? <>{" "}<span className="lbl">{d}</span></> : null}
+      {d.toLowerCase() !== p.name.toLowerCase() ? (
+        <>
+          {" "}
+          <span className="lbl">{d}</span>
+        </>
+      ) : null}
     </span>
   );
 }

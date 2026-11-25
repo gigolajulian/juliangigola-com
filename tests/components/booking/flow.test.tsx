@@ -2,9 +2,13 @@ import { describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
-vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("offline"))),
+);
 
-import { Calendar, DotList, localDayKey, monthCells, weekCells } from "@/components/booking/flow";
+import { Calendar, DotList } from "@/components/booking/flow";
+import { localDayKey, monthCells, weekCells } from "@/components/booking/picker/dates";
 import { clockLabel } from "@/lib/booking/clock";
 import { Failed, Field, FlowShell, Hidden, checkYou, first } from "@/components/enquiry/flow";
 
@@ -56,7 +60,11 @@ describe("flow parts", () => {
   });
 
   it("Hidden carries the type and the honeypot", () => {
-    const { container } = render(<form><Hidden type="note" detail="Diesel" /></form>);
+    const { container } = render(
+      <form>
+        <Hidden type="note" detail="Diesel" />
+      </form>,
+    );
     expect(container.querySelector('input[name="type"]')?.getAttribute("value")).toBe("note");
     expect(container.querySelector('input[name="company"]')).toBeTruthy();
   });
@@ -64,7 +72,18 @@ describe("flow parts", () => {
   it("Calendar picks a day and switches view", () => {
     const onPick = vi.fn();
     const setView = vi.fn();
-    render(<Calendar view="week" setView={setView} anchor={new Date(2026, 10, 11)} shift={() => {}} canBack={false} picked="" tag={(d) => (d.getDay() === 0 ? null : "3 open")} onPick={onPick} />);
+    render(
+      <Calendar
+        view="week"
+        setView={setView}
+        anchor={new Date(2026, 10, 11)}
+        shift={() => {}}
+        canBack={false}
+        picked=""
+        tag={(d) => (d.getDay() === 0 ? null : "3 open")}
+        onPick={onPick}
+      />,
+    );
     expect((screen.getByRole("button", { name: "Earlier" }) as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getByRole("button", { name: "Month" }));
     expect(setView).toHaveBeenCalledWith("month");
@@ -74,7 +93,18 @@ describe("flow parts", () => {
   });
 
   it("FlowShell draws the rail, the head and the summary", () => {
-    render(<FlowShell steps={["Date", "You"]} at={1} head="Pick a day" body={<p>body</p>} photo={{ d: "/a.jpg", l: "/b.jpg" }} name="Portraits" sum={[["Session", "$100 deposit"]]} h1 />);
+    render(
+      <FlowShell
+        steps={["Date", "You"]}
+        at={1}
+        head="Pick a day"
+        body={<p>body</p>}
+        photo={{ d: "/a.jpg", l: "/b.jpg" }}
+        name="Portraits"
+        sum={[["Session", "$100 deposit"]]}
+        h1
+      />,
+    );
     expect(screen.getByRole("heading", { level: 1, name: "Pick a day" })).toBeTruthy();
     expect(screen.getByRole("list", { name: "Steps" }).querySelector('[aria-current="step"]')?.textContent).toContain("Date");
     expect(screen.getByText("$100 deposit")).toBeTruthy();

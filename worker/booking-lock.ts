@@ -1,5 +1,19 @@
 import type { HoursKV } from "../lib/booking/slots";
-import { bookOwn, cancelOwn, dueHeadsUp, dueReminders, findBooking, markHeadsUp, markReminded, readHours, rescheduleOwn, writeHours, type LockOps, type Store } from "../lib/booking/engine";
+import { asRecord } from "../lib/json";
+import {
+  bookOwn,
+  cancelOwn,
+  dueHeadsUp,
+  dueReminders,
+  findBooking,
+  markHeadsUp,
+  markReminded,
+  readHours,
+  rescheduleOwn,
+  writeHours,
+  type LockOps,
+  type Store,
+} from "../lib/booking/engine";
 
 /* ── the booking lock: one Durable Object for hello@'s calendar ─────
  * Every booking passes through `serial`, so a recheck and its insert
@@ -7,6 +21,9 @@ import { bookOwn, cancelOwn, dueHeadsUp, dueReminders, findBooking, markHeadsUp,
  * booking records (`lib/booking/engine.ts`). Reached by fetch, not RPC,
  * so it needs no runtime import and runs the same in the tests.
  * ─────────────────────────────────────────────────────────────── */
+
+/** `op` names one of the lock's ops. */
+const isOp = (ops: object, op: unknown): op is keyof LockOps => typeof op === "string" && Object.hasOwn(ops, op);
 
 export class BookingLock {
   private queue: Promise<unknown> = Promise.resolve();
@@ -35,6 +52,7 @@ export class BookingLock {
       reminded: async (id) => ({ ok: (await markReminded(store, String(id)), true) }),
       dueHeads: async () => ({ records: await dueHeadsUp(store) }),
       headed: async (id) => ({ ok: (await markHeadsUp(store, String(id)), true) }),
+      // Dates already past are dropped on read, so the desk's Hours never lists them.
       hours: async () => ({ hours: await readHours(store) }),
       // Checked by the route (`cleanHours`); queued so no booking reads half of it.
       setHours: (hours) => this.serial(async () => (await writeHours(store, hours), { hours })),
@@ -43,10 +61,11 @@ export class BookingLock {
   }
 
   async fetch(request: Request): Promise<Response> {
-    const { op, arg } = (await request.json()) as { op: keyof LockOps; arg: unknown };
+    const { op, arg } = asRecord(await request.json());
     const ops = this.ops(this.state.storage);
     try {
-      if (Object.hasOwn(ops, op)) return Response.json(await (ops[op] as (a: unknown) => Promise<unknown>)(arg));
+      // The argument is not rechecked here: `lockOp` callers send it typed, and the routes check what a visitor sent.
+      if (isOp(ops, op)) return Response.json(await (ops[op] as (a: unknown) => Promise<unknown>)(arg));
       return Response.json({ error: "unknown op" }, { status: 400 });
     } catch (e) {
       console.error("booking lock", op, String(e));

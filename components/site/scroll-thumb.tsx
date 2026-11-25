@@ -18,10 +18,15 @@ export function ScrollThumb() {
     const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
     const PAD = 6;
     let s: SpringState = { x: 0, v: 0 };
-    let raf = 0, at = 0, idle = 0, drag: { dy: number } | null = null;
+    let raf = 0,
+      at = 0,
+      idle = 0,
+      drag: { dy: number } | null = null;
 
     const geo = () => {
-      const vh = innerHeight, sh = root.scrollHeight, max = sh - vh;
+      const vh = innerHeight,
+        sh = root.scrollHeight,
+        max = sh - vh;
       const h = Math.max(32, (vh - 2 * PAD) * (vh / sh));
       return { max, h, room: vh - 2 * PAD - h };
     };
@@ -38,17 +43,28 @@ export function ScrollThumb() {
     const wake = () => {
       el.dataset.live = "";
       clearTimeout(idle);
-      idle = window.setTimeout(() => { if (!drag) delete el.dataset.live; }, 900);
+      idle = window.setTimeout(() => {
+        if (!drag) delete el.dataset.live;
+      }, 900);
     };
     const tick = (now: number) => {
       const t = target();
       s = calm || drag ? { x: t, v: 0 } : stepSpring(s, t, 0.85, frameDt(now, at));
       at = now;
       paint();
-      if (springSettled(s, t)) { s = { x: t, v: 0 }; paint(); raf = 0; at = 0; return; }
+      if (springSettled(s, t)) {
+        s = { x: t, v: 0 };
+        paint();
+        raf = 0;
+        at = 0;
+        return;
+      }
       raf = requestAnimationFrame(tick);
     };
-    const go = () => { wake(); if (!raf) raf = requestAnimationFrame(tick); };
+    const go = () => {
+      wake();
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
 
     const down = (e: PointerEvent) => {
       e.preventDefault();
@@ -62,7 +78,11 @@ export function ScrollThumb() {
       const { max, room } = geo();
       if (room > 0) scrollTo({ top: ((e.clientY - drag.dy - PAD) / room) * max, behavior: "instant" });
     };
-    const up = () => { drag = null; delete el.dataset.drag; wake(); };
+    const up = () => {
+      drag = null;
+      delete el.dataset.drag;
+      wake();
+    };
 
     s = { x: target(), v: 0 };
     paint();

@@ -7,7 +7,7 @@ import { TOKEN_STORE, credentials, listDirectory, readFile } from "@/lib/admin/a
 afterEach(() => vi.unstubAllGlobals());
 
 describe("credentials", () => {
-  it("prefers a pasted inbox key, else the stored GitHub token, else nothing", () => {
+  it("prefers a pasted admin key, else the stored GitHub token, else nothing", () => {
     const stored = new Map<string, string>();
     vi.stubGlobal("localStorage", { getItem: (k: string) => stored.get(k) ?? null });
     expect(credentials("k1")).toEqual({ "x-admin-key": "k1" });
@@ -19,7 +19,12 @@ describe("credentials", () => {
 
 describe("listDirectory", () => {
   it("lists only files, and nothing for a missing folder", async () => {
-    vi.stubGlobal("fetch", async () => reply([{ type: "file", path: "public/a.jpg" }, { type: "dir", path: "public/x" }]));
+    vi.stubGlobal("fetch", async () =>
+      reply([
+        { type: "file", path: "public/a.jpg" },
+        { type: "dir", path: "public/x" },
+      ]),
+    );
     expect(await listDirectory("t", "public")).toEqual(["public/a.jpg"]);
     vi.stubGlobal("fetch", async () => reply({ message: "Not Found" }, 404));
     expect(await listDirectory("t", "nope")).toEqual([]);

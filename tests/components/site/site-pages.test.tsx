@@ -41,7 +41,15 @@ vi.mock("next/font/local", () => ({ default: () => ({ variable: "font", classNam
 
 beforeAll(() => {
   // jsdom has no Web Animations API (the 404's drift wall).
-  Element.prototype.animate = vi.fn(() => ({ pause() {}, play() {}, cancel() {}, updatePlaybackRate() {}, currentTime: 0, playState: "paused", effect: { getComputedTiming: () => ({ progress: 0 }) } })) as never;
+  Element.prototype.animate = vi.fn(() => ({
+    pause() {},
+    play() {},
+    cancel() {},
+    updatePlaybackRate() {},
+    currentTime: 0,
+    playState: "paused",
+    effect: { getComputedTiming: () => ({ progress: 0 }) },
+  })) as never;
 });
 
 const og = (title: string) => ({ openGraph: { title: `${title} | Julian Gigola` }, twitter: { title: `${title} | Julian Gigola` } });
@@ -115,7 +123,11 @@ describe("page bodies", () => {
 });
 
 describe("/portfolio", () => {
-  type Work = { work: { s: string; cover: string }[]; chip: Record<string, string>; frames: Record<string, { src: string; back?: { src: string } }[]> };
+  type Work = {
+    work: { s: string; cover: string }[];
+    chip: Record<string, string>;
+    frames: Record<string, { src: string; back?: { src: string } }[]>;
+  };
   const props = () => (render(<portfolio.default />), got.WorkIndex as Work);
 
   it("lists every project but real estate, in Julian's order first", () => {
@@ -130,10 +142,15 @@ describe("/portfolio", () => {
 
   it("names a chip for each discipline and folds a sleeve's back into its front", () => {
     const { chip, frames } = props();
-    expect(Object.values(frames).flat().some((f) => f.back)).toBe(true);
+    expect(
+      Object.values(frames)
+        .flat()
+        .some((f) => f.back),
+    ).toBe(true);
     for (const c of CATEGORIES) expect(chip[c.slug]).toBe(categoryLabel(c));
     for (const list of Object.values(frames)) for (const f of list) expect(f.src).not.toMatch(/-b\.\w+$/);
-    for (const list of Object.values(frames)) for (const f of list) if (f.back) expect(f.back.src).toBe(f.src.replace(/-a(\.\w+)$/, "-b$1"));
+    for (const list of Object.values(frames))
+      for (const f of list) if (f.back) expect(f.back.src).toBe(f.src.replace(/-a(\.\w+)$/, "-b$1"));
   });
 });
 

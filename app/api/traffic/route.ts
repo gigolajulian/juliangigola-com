@@ -65,7 +65,10 @@ export async function GET(request: Request) {
       const ua = a.dimensions.userAgent;
       if (!botLike.test(ua)) continue;
       bots += a.count;
-      topBots.push({ n: a.count, key: ua.match(/([A-Za-z-]*(?:bot|Agent|Extended|curl|HeadlessChrome)[\w./-]*)/i)?.[1] ?? (ua || "(no user agent)") });
+      topBots.push({
+        n: a.count,
+        key: ua.match(/([A-Za-z-]*(?:bot|Agent|Extended|curl|HeadlessChrome)[\w./-]*)/i)?.[1] ?? (ua || "(no user agent)"),
+      });
     }
 
     return json({
@@ -99,7 +102,12 @@ async function searchConsole(secret?: string) {
     const [total, queries, pages] = await Promise.all([query([]), query(["query"]), query(["page"])]);
     const t = total[0];
     const rows = (list: typeof queries) =>
-      list.map((r) => ({ key: sitePath(r.keys![0]), clicks: r.clicks, impressions: r.impressions, position: Math.round(r.position * 10) / 10 }));
+      list.map((r) => ({
+        key: sitePath(r.keys![0]),
+        clicks: r.clicks,
+        impressions: r.impressions,
+        position: Math.round(r.position * 10) / 10,
+      }));
     return {
       clicks: t?.clicks ?? 0,
       impressions: t?.impressions ?? 0,
@@ -134,18 +142,16 @@ async function bingWebmaster(key?: string) {
     };
     // Bing's dates arrive as "/Date(1759017600000-0700)/".
     const since = Date.now() - 28 * DAY_MS;
-    const recent = (rows: Record<string, unknown>[]) =>
-      rows.filter((r) => Number(String(r.Date).match(/\d+/)?.[0] ?? 0) >= since);
-    const [traffic, queries, pages] = await Promise.all([
-      call("GetRankAndTrafficStats"),
-      call("GetQueryStats"),
-      call("GetPageStats"),
-    ]);
+    const recent = (rows: Record<string, unknown>[]) => rows.filter((r) => Number(String(r.Date).match(/\d+/)?.[0] ?? 0) >= since);
+    const [traffic, queries, pages] = await Promise.all([call("GetRankAndTrafficStats"), call("GetQueryStats"), call("GetPageStats")]);
     const sum = (rows: Record<string, unknown>[], field: string) => rows.reduce((s, r) => s + Number(r[field] ?? 0), 0);
     const group = (rows: Record<string, unknown>[], field: string) => {
       const by = new Map<string, { clicks: number; impressions: number; pos: number; n: number }>();
       for (const r of recent(rows)) {
-        const k = String(r[field]).replace(/^https?:\/\//, "").replace(/^juliangigola\.com(?=\/)/, "") || "/";
+        const k =
+          String(r[field])
+            .replace(/^https?:\/\//, "")
+            .replace(/^juliangigola\.com(?=\/)/, "") || "/";
         const g = by.get(k) ?? { clicks: 0, impressions: 0, pos: 0, n: 0 };
         g.clicks += Number(r.Clicks ?? 0);
         g.impressions += Number(r.Impressions ?? 0);

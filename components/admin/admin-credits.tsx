@@ -18,8 +18,7 @@ import { cn } from "@/lib/utils";
  * that deletes the empty row underneath them is a form that fights back.
  * ─────────────────────────────────────────────────────────────── */
 
-const field =
-  "w-full border border-border bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-foreground";
+const field = "w-full border border-border bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-foreground";
 
 /** What the roles actually are on Julian's jobs, in the order they recur. */
 const ROLES = [
@@ -55,10 +54,7 @@ type CreditDeskValue = {
   /** Handle to a path under `public/`, or a staged data URL. */
   faces: Record<string, string>;
   /** A picture for a handle: base64 JPEG bytes, or null to forget it. */
-  onFace: (
-    handle: string,
-    picture: { base64: string; preview: string; bytes: number } | null,
-  ) => void;
+  onFace: (handle: string, picture: { base64: string; preview: string; bytes: number } | null) => void;
 };
 
 const Desk = React.createContext<CreditDeskValue | null>(null);
@@ -95,8 +91,7 @@ export function AdminCredits({
 }) {
   const desk = React.useContext(Desk);
 
-  const set = (i: number, patch: Partial<Credit>) =>
-    onChange(credits.map((c, j) => (j === i ? { ...c, ...patch } : c)));
+  const set = (i: number, patch: Partial<Credit>) => onChange(credits.map((c, j) => (j === i ? { ...c, ...patch } : c)));
 
   /* A name that has been credited before brings its handle and its role
      with it. Only into empty boxes: filling in what somebody has already
@@ -140,9 +135,7 @@ export function AdminCredits({
       {title ? (
         <p className="label flex items-baseline justify-between gap-3 text-muted-foreground">
           <span>{title}</span>
-          {credits.length ? (
-            <span className="tabular-nums">{credits.length}</span>
-          ) : null}
+          {credits.length ? <span className="tabular-nums">{credits.length}</span> : null}
         </p>
       ) : null}
 
@@ -169,10 +162,7 @@ export function AdminCredits({
             className={cn(
               "flex flex-wrap items-center gap-2 transition-opacity duration-150",
               dragging === i && "opacity-30",
-              over === i &&
-                dragging !== null &&
-                dragging !== i &&
-                "outline outline-2 outline-offset-2 outline-foreground",
+              over === i && dragging !== null && dragging !== i && "outline outline-2 outline-offset-2 outline-foreground",
             )}
           >
             <span
@@ -225,15 +215,11 @@ export function AdminCredits({
                 instead of expected inside it, and a pasted profile URL is
                 accepted whole and reduced on blur. */}
             <span className="relative shrink-0 sm:w-52">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                @
-              </span>
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">@</span>
               <input
                 value={credit.instagram ?? ""}
                 onChange={(e) => set(i, { instagram: e.target.value })}
-                onBlur={(e) =>
-                  set(i, { instagram: instagramHandle(e.target.value) })
-                }
+                onBlur={(e) => set(i, { instagram: instagramHandle(e.target.value) })}
                 placeholder="instagram"
                 aria-label={`Instagram handle for credit ${i + 1}`}
                 className={cn(field, "pl-7")}
@@ -290,18 +276,14 @@ export function AdminCredits({
 
       <button
         type="button"
-        onClick={() =>
-          onChange([...credits, { role: "", name: "", instagram: null }])
-        }
+        onClick={() => onChange([...credits, { role: "", name: "", instagram: null }])}
         className="label mt-3 border border-border px-4 py-2 press hoverable:hover:bg-card"
       >
         Add credit
       </button>
 
       {credits.length === 0 ? (
-        <p className="label mt-3 text-muted-foreground">
-          No credits. The block is left off the project page entirely.
-        </p>
+        <p className="label mt-3 text-muted-foreground">No credits. The block is left off the project page entirely.</p>
       ) : null}
     </div>
   );
@@ -370,11 +352,7 @@ function Face({ desk, handle }: { desk: CreditDeskValue; handle: string }) {
         type="button"
         disabled={!handle || busy}
         onClick={() => file.current?.click()}
-        title={
-          handle
-            ? "Choose this person's picture. `scripts/faces.mjs` fetches them all."
-            : "Add the handle first"
-        }
+        title={handle ? "Choose this person's picture. `scripts/faces.mjs` fetches them all." : "Add the handle first"}
         aria-label={`Picture for ${handle || "this credit"}`}
         className="size-10 shrink-0 overflow-hidden border border-border bg-card press disabled:opacity-30"
       >
@@ -382,9 +360,7 @@ function Face({ desk, handle }: { desk: CreditDeskValue; handle: string }) {
           // eslint-disable-next-line @next/next/no-img-element
           <img src={has} alt="" className="size-full object-cover" />
         ) : (
-          <span className="label text-muted-foreground">
-            {busy ? "…" : "+"}
-          </span>
+          <span className="label text-muted-foreground">{busy ? "…" : "+"}</span>
         )}
       </button>
       {has ? (
@@ -396,9 +372,7 @@ function Face({ desk, handle }: { desk: CreditDeskValue; handle: string }) {
           Remove
         </button>
       ) : null}
-      {said ? (
-        <span className="label max-w-40 text-muted-foreground">{said}</span>
-      ) : null}
+      {said ? <span className="label max-w-40 text-muted-foreground">{said}</span> : null}
       <input
         ref={file}
         type="file"

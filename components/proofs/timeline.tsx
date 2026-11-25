@@ -14,7 +14,21 @@ import { TZ } from "@/lib/time-zone";
 
 const short = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "short", day: "numeric" }).format(new Date(iso));
 
-type P = Pick<Proof, "email" | "sentAt" | "firstViewAt" | "submittedAt" | "pulledAt" | "deliveredAt" | "firstDownloadAt" | "closesAt" | "offline" | "reminded" | "selects" | "included">;
+type P = Pick<
+  Proof,
+  | "email"
+  | "sentAt"
+  | "firstViewAt"
+  | "submittedAt"
+  | "pulledAt"
+  | "deliveredAt"
+  | "firstDownloadAt"
+  | "closesAt"
+  | "offline"
+  | "reminded"
+  | "selects"
+  | "included"
+>;
 
 const CSS = `
 .gtl{display:grid;grid-template-columns:repeat(6,minmax(0,1fr)) minmax(76px,1fr);margin:6px 0 2px}
@@ -58,14 +72,33 @@ export function Timeline({ p }: { p: P }) {
     <div className="gtl" role="list" aria-label="Where this gallery stands">
       <style>{CSS}</style>
       {steps.map(([label, at], i) => (
-        <div key={label} role="listitem" className={`gtl-n${reached(i) ? " done" : ""}${i === now ? " now" : ""}`} style={{ "--i": i } as React.CSSProperties}>
+        <div
+          key={label}
+          role="listitem"
+          className={`gtl-n${reached(i) ? " done" : ""}${i === now ? " now" : ""}`}
+          style={{ "--i": i } as React.CSSProperties}
+        >
           <i className="gtl-d" aria-hidden />
           <b>{label}</b>
-          <span>{at ? short(at) : i === now ? (label === "Selects in" && p.selects.length ? `${p.selects.length} of ${p.included} picked` : "next") : reached(i) ? "done" : ""}</span>
+          <span>
+            {at
+              ? short(at)
+              : i === now
+                ? label === "Selects in" && p.selects.length
+                  ? `${p.selects.length} of ${p.included} picked`
+                  : "next"
+                : reached(i)
+                  ? "done"
+                  : ""}
+          </span>
         </div>
       ))}
       <div role="listitem" className={`gtl-c${left !== null ? " soon" : ""}`}>
-        {windowShown ? <div className="gtl-w"><i>Remind window</i></div> : null}
+        {windowShown ? (
+          <div className="gtl-w">
+            <i>Remind window</i>
+          </div>
+        ) : null}
         <b>{p.closesAt ? `Closes ${short(p.closesAt)}` : "Closes"}</b>
         <span>{p.closesAt ? (left !== null ? `${left} ${left === 1 ? "day" : "days"} left` : "") : "once sent"}</span>
       </div>

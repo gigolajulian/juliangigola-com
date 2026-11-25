@@ -1,9 +1,21 @@
+import { pad } from "@/lib/utils";
 import { TZ } from "@/lib/time-zone";
 
-/* The picker's pure date helpers (`use-picker.tsx`). */
+/* The booking calendars' pure date helpers: the stepper's `Calendar` (`flow.tsx`)
+   and the picker (`use-picker.tsx`). Weeks run Monday to Sunday everywhere. */
 
 /* Julian: the time where I am, with the place, before a time is picked. */
-export const clockHere = () => new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date());
+export const clockHere = () =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date());
+
+/* Dates the way the master prints them. */
+export const weekdayDateLabel = (t: Date) => t.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
+/** The weekday heads, Monday first. */
+export const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+/** Where a day sits in a Monday-first week: Monday 0, Sunday 6. */
+export const mondayIndex = (d: Date) => (d.getDay() + 6) % 7;
+/** A day on the visitor's own calendar as "2026-11-04" (local, not UTC). */
+export const localDayKey = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
 export function startOfToday() {
   const d = new Date();
@@ -22,9 +34,18 @@ export function weekFrom(anchor: Date, today: Date) {
   });
 }
 
-/* The month on show, its first row padded to its weekday. */
-export function monthCells(anchor: Date) {
-  const first = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
-  const count = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0).getDate();
-  return [...Array.from({ length: first.getDay() }, () => null), ...Array.from({ length: count }, (_, i) => new Date(first.getFullYear(), first.getMonth(), i + 1))];
+/** The month's cells, Monday first, blanks before the 1st. */
+export function monthCells(base: Date) {
+  const first = new Date(base.getFullYear(), base.getMonth(), 1);
+  const n = new Date(base.getFullYear(), base.getMonth() + 1, 0).getDate();
+  return [
+    ...Array<Date | null>(mondayIndex(first)).fill(null),
+    ...Array.from({ length: n }, (_, i) => new Date(base.getFullYear(), base.getMonth(), i + 1)),
+  ];
+}
+
+/** The Monday-to-Sunday week holding `d`. */
+export function weekCells(d: Date) {
+  const m = new Date(d.getFullYear(), d.getMonth(), d.getDate() - mondayIndex(d));
+  return Array.from({ length: 7 }, (_, i) => new Date(m.getFullYear(), m.getMonth(), m.getDate() + i));
 }

@@ -7,11 +7,36 @@ import { FakeKV, LEADS_KEY, leadOf } from "../../../backend/fakes";
 
 /* Past Stripe payments onto the log (`lib/leads/sync/stripe-import.ts`), against a fake Stripe. */
 
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: () => { throw new Error("no worker"); } }));
+vi.mock("@opennextjs/cloudflare", () => ({
+  getCloudflareContext: () => {
+    throw new Error("no worker");
+  },
+}));
 
 const T = Date.UTC(2026, 5, 1) / 1000;
-const deposit = (n: number, email: string) => ({ id: `pi_dep${String(n).padStart(6, "0")}`, status: "succeeded", created: T + n, amount: 10000, amount_received: 10000, currency: "usd", receipt_email: email, metadata: { kind: "deposit", email, name: "Ana Test" }, latest_charge: null });
-const other = (n: number, email: string, cents: number) => ({ id: `pi_oth${String(n).padStart(6, "0")}`, status: "succeeded", created: T + n, amount: cents, amount_received: cents, currency: "usd", description: "Invoice 0626", receipt_email: null, metadata: {}, latest_charge: { billing_details: { email, name: "Bo Test" } } });
+const deposit = (n: number, email: string) => ({
+  id: `pi_dep${String(n).padStart(6, "0")}`,
+  status: "succeeded",
+  created: T + n,
+  amount: 10000,
+  amount_received: 10000,
+  currency: "usd",
+  receipt_email: email,
+  metadata: { kind: "deposit", email, name: "Ana Test" },
+  latest_charge: null,
+});
+const other = (n: number, email: string, cents: number) => ({
+  id: `pi_oth${String(n).padStart(6, "0")}`,
+  status: "succeeded",
+  created: T + n,
+  amount: cents,
+  amount_received: cents,
+  currency: "usd",
+  description: "Invoice 0626",
+  receipt_email: null,
+  metadata: {},
+  latest_charge: { billing_details: { email, name: "Bo Test" } },
+});
 
 let intents: object[];
 let refunds: object[];
@@ -54,7 +79,12 @@ describe("importStripe", () => {
   });
 
   it("records payments and refunds with the live refs, and a second run adds nothing", async () => {
-    intents = [deposit(1, "ana@example.com"), other(2, "bo@example.com", 50000), { ...other(3, "cy@example.com", 9000), metadata: { proof: "tok" } }, { ...deposit(4, "ana@example.com"), status: "canceled" }];
+    intents = [
+      deposit(1, "ana@example.com"),
+      other(2, "bo@example.com", 50000),
+      { ...other(3, "cy@example.com", 9000), metadata: { proof: "tok" } },
+      { ...deposit(4, "ana@example.com"), status: "canceled" },
+    ];
     refunds = [
       { id: "re_1", status: "succeeded", created: T + 10, amount: 10000, payment_intent: deposit(1, "").id },
       { id: "re_2", status: "succeeded", created: T + 11, amount: 20000, payment_intent: other(2, "", 0).id },
@@ -62,7 +92,10 @@ describe("importStripe", () => {
     const c = await importStripe(env(), "sk_test_fake", false);
     expect(c).toMatchObject({ payments: 2, refunds: 2, already: 0 });
     const ana = await logOf("ana@example.com");
-    expect(ana.map((e) => [e.kind, e.ref, e.amount])).toEqual([["payment", deposit(1, "").id, 100], ["refund", `refund-${deposit(1, "").id}`, 100]]);
+    expect(ana.map((e) => [e.kind, e.ref, e.amount])).toEqual([
+      ["payment", deposit(1, "").id, 100],
+      ["refund", `refund-${deposit(1, "").id}`, 100],
+    ]);
     const bo = await logOf("bo@example.com");
     expect(bo.map((e) => e.ref)).toEqual([other(2, "", 0).id, `refund-${other(2, "", 0).id}-20000`]);
     // An old payment is a line on the log, not news.
@@ -73,8 +106,11 @@ describe("importStripe", () => {
 
   it("skips what the live webhook already logged, even past the lead's last 50 events", async () => {
     const pi = deposit(1, "ana@example.com");
-    await recordLead(env(), "ana@example.com", { event: { at: new Date().toISOString(), kind: "payment", ref: pi.id, note: "Deposit", amount: 100 } });
-    for (let i = 0; i < 55; i++) await recordLead(env(), "ana@example.com", { event: { at: new Date().toISOString(), kind: "wrote", ref: `g${i}` } });
+    await recordLead(env(), "ana@example.com", {
+      event: { at: new Date().toISOString(), kind: "payment", ref: pi.id, note: "Deposit", amount: 100 },
+    });
+    for (let i = 0; i < 55; i++)
+      await recordLead(env(), "ana@example.com", { event: { at: new Date().toISOString(), kind: "wrote", ref: `g${i}` } });
     intents = [pi];
     expect(await importStripe(env(), "sk_test_fake", false)).toMatchObject({ payments: 0, already: 1 });
     expect((await logOf("ana@example.com")).filter((e) => e.kind === "payment")).toHaveLength(1);

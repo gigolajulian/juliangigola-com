@@ -48,7 +48,9 @@ export async function servedSize(env: Env, p: Pick<Proof, "token" | "watermark">
   if (!full) return null;
   // The small copy is a nicety: if it cannot be made or kept, the whole frame (already marked, now in R2) is served instead.
   try {
-    const out = await env.IMAGES.input(full.body).transform({ width: THUMB_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 82 });
+    const out = await env.IMAGES.input(full.body)
+      .transform({ width: THUMB_W, fit: "scale-down" })
+      .output({ format: "image/jpeg", quality: 82 });
     const bytes = await out.response().arrayBuffer();
     const put = await env.PROOFS.put(key, bytes, { httpMetadata: { contentType: "image/jpeg" } });
     return { body: stream(bytes), etag: put.httpEtag };
@@ -58,7 +60,12 @@ export async function servedSize(env: Env, p: Pick<Proof, "token" | "watermark">
 }
 
 /** One frame as the client may see it: clean, or with the mark (baked on first fetch, then read from R2). */
-export async function servedFrame(env: Env, p: Pick<Proof, "token" | "watermark">, id: string, origin: string): Promise<{ body: ReadableStream; etag: string } | null> {
+export async function servedFrame(
+  env: Env,
+  p: Pick<Proof, "token" | "watermark">,
+  id: string,
+  origin: string,
+): Promise<{ body: ReadableStream; etag: string } | null> {
   if (p.watermark) {
     const kept = await env.PROOFS.get(markedKey(p.token, id));
     if (kept) return { body: kept.body, etag: kept.httpEtag };
@@ -77,19 +84,26 @@ export async function servedFrame(env: Env, p: Pick<Proof, "token" | "watermark"
 export const CARD = { src: "/proof-card.png", w: 1800, h: 945, photoLeft: 600 } as const;
 
 /** The gallery's card, drawn once per first frame and kept in R2. Null when the gallery has no card (watermark off, closed, empty). */
-export async function shareCard(env: Env, p: Pick<Proof, "token" | "watermark" | "closesAt" | "frames" | "card">, origin: string): Promise<{ body: ReadableStream; etag: string } | null> {
+export async function shareCard(
+  env: Env,
+  p: Pick<Proof, "token" | "watermark" | "closesAt" | "frames" | "card">,
+  origin: string,
+): Promise<{ body: ReadableStream; etag: string } | null> {
   const f = coverFrame(p);
   if (!f) return null;
   const kept = await env.PROOFS.get(cardKey(p.token, f.id));
   if (kept) return { body: kept.body, etag: kept.httpEtag };
   const clean = await env.PROOFS.get(frameKey(p.token, f.id));
   if (!clean) return null;
-  const pw = CARD.w - CARD.photoLeft, box = markBox(pw, CARD.h);
+  const pw = CARD.w - CARD.photoLeft,
+    box = markBox(pw, CARD.h);
   const [panel, mark] = await Promise.all([asset(env, CARD.src, origin), asset(env, MARK.src, origin)]);
   // Julian's crop when he picked one for this frame, else Images' own subject crop.
   const c = p.card?.id === f.id ? p.card : null;
   const photo = c
-    ? env.IMAGES.input(clean.body).transform({ trim: { left: c.x, top: c.y, width: c.w, height: Math.round((c.w * CARD.h) / pw) } }).transform({ width: pw, height: CARD.h, fit: "cover" })
+    ? env.IMAGES.input(clean.body)
+        .transform({ trim: { left: c.x, top: c.y, width: c.w, height: Math.round((c.w * CARD.h) / pw) } })
+        .transform({ width: pw, height: CARD.h, fit: "cover" })
     : env.IMAGES.input(clean.body).transform({ width: pw, height: CARD.h, fit: "cover", gravity: "auto" });
   const out = await env.IMAGES.input(panel)
     .draw(photo, { left: CARD.photoLeft, top: 0 })

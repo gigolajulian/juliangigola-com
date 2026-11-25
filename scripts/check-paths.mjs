@@ -37,9 +37,11 @@ const resolves = (raw) => {
 
 const broken = [];
 for (const f of files) {
-  readFileSync(f, "utf8").split("\n").forEach((line, i) => {
-    for (const m of line.matchAll(PATH)) if (!resolves(m[1])) broken.push(`${f}:${i + 1}: ${m[1]}`);
-  });
+  readFileSync(f, "utf8")
+    .split("\n")
+    .forEach((line, i) => {
+      for (const m of line.matchAll(PATH)) if (!resolves(m[1])) broken.push(`${f}:${i + 1}: ${m[1]}`);
+    });
 }
 
 if (broken.length) {

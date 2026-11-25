@@ -45,7 +45,8 @@ export async function openDeliveryIn(env: Env, id: string, cookie: string | null
 export const finalOf = (p: Proof, id: string) => p.finals?.find((f) => f.id === id);
 
 /** A download header: an ASCII fallback name and the real one. */
-export const attachment = (name: string) => `attachment; filename="${name.replace(/[^\x20-\x7e]|["\\]/g, "_")}"; filename*=UTF-8''${encodeURIComponent(name)}`;
+export const attachment = (name: string) =>
+  `attachment; filename="${name.replace(/[^\x20-\x7e]|["\\]/g, "_")}"; filename*=UTF-8''${encodeURIComponent(name)}`;
 
 const PRIVATE = { "cache-control": "private, no-store", "x-robots-tag": "noindex, nofollow" };
 const notFound = () => new Response("Not found", { status: 404 });
@@ -64,16 +65,28 @@ export async function finalResponse(request: Request, env: Env, id: string, fid:
   if (busy) return busy;
   const o = await env.PROOFS.get(finalKey(g.p.token, fid));
   if (!o) return notFound();
-  return new Response(o.body, { headers: { "content-type": "image/jpeg", "content-length": String(o.size), "content-disposition": attachment(f.file), ...PRIVATE } });
+  return new Response(o.body, {
+    headers: { "content-type": "image/jpeg", "content-length": String(o.size), "content-disposition": attachment(f.file), ...PRIVATE },
+  });
 }
 
 /** The 2000px and 800px copies, made once by Cloudflare Images and kept in R2. */
 export async function previews(env: Pick<Env, "PROOFS" | "IMAGES">, token: string, id: string) {
   const full = await env.PROOFS.get(finalKey(token, id));
   if (!full) return null;
-  const big = await (await env.IMAGES.input(full.body).transform({ width: PREVIEW_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 85 })).response().arrayBuffer();
+  const big = await (
+    await env.IMAGES.input(full.body).transform({ width: PREVIEW_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 85 })
+  )
+    .response()
+    .arrayBuffer();
   await env.PROOFS.put(finalKey(token, id, PREVIEW_W), big, { httpMetadata: { contentType: "image/jpeg" } });
-  const small = await (await env.IMAGES.input(new Response(big).body!).transform({ width: THUMB_W, fit: "scale-down" }).output({ format: "image/jpeg", quality: 82 })).response().arrayBuffer();
+  const small = await (
+    await env.IMAGES.input(new Response(big).body!)
+      .transform({ width: THUMB_W, fit: "scale-down" })
+      .output({ format: "image/jpeg", quality: 82 })
+  )
+    .response()
+    .arrayBuffer();
   await env.PROOFS.put(finalKey(token, id, THUMB_W), small, { httpMetadata: { contentType: "image/jpeg" } });
   return true;
 }
@@ -95,7 +108,14 @@ export async function webResponse(request: Request, env: Env, id: string, fid: s
   const o = await servedPreview(env, g.p.token, fid, false).catch(() => undefined);
   if (o === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
   if (!o) return notFound();
-  return new Response(o.body, { headers: { "content-type": "image/jpeg", "content-length": String(o.size), "content-disposition": attachment(webName(f.file)), ...PRIVATE } });
+  return new Response(o.body, {
+    headers: {
+      "content-type": "image/jpeg",
+      "content-length": String(o.size),
+      "content-disposition": attachment(webName(f.file)),
+      ...PRIVATE,
+    },
+  });
 }
 export const webName = (file: string) => `${file.replace(/\.[a-z0-9]+$/i, "")} web.jpg`;
 
@@ -132,7 +152,12 @@ export async function zipResponse(request: Request, env: Env, id: string) {
   });
   const day = id.slice(0, 8);
   return new Response(out.readable, {
-    headers: { "content-type": "application/zip", "content-length": String(z.total), "content-disposition": attachment(`Julian Gigola ${day.slice(0, 2)}-${day.slice(2, 4)}-${day.slice(4)}${m ? ` ${m}` : ""}.zip`), ...PRIVATE },
+    headers: {
+      "content-type": "application/zip",
+      "content-length": String(z.total),
+      "content-disposition": attachment(`Julian Gigola ${day.slice(0, 2)}-${day.slice(2, 4)}-${day.slice(4)}${m ? ` ${m}` : ""}.zip`),
+      ...PRIVATE,
+    },
   });
 }
 
@@ -150,5 +175,9 @@ export function deliveryDownload(request: Request, env: Env) {
   } catch {
     return Promise.resolve(new Response("Not found", { status: 404 })); // a broken %-escape is a bad link, not a server error
   }
-  return fid === undefined ? zipResponse(request, env, id) : m[2] === "web" ? webResponse(request, env, id, fid) : finalResponse(request, env, id, fid);
+  return fid === undefined
+    ? zipResponse(request, env, id)
+    : m[2] === "web"
+      ? webResponse(request, env, id, fid)
+      : finalResponse(request, env, id, fid);
 }

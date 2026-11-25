@@ -20,9 +20,7 @@ export function generateStaticParams() {
   return CAMPUS_GUIDES.map((c) => ({ campus: c.slug }));
 }
 
-export async function generateMetadata(
-  props: PageProps<"/graduation-photos/[campus]">,
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<"/graduation-photos/[campus]">): Promise<Metadata> {
   const { campus } = await props.params;
   const c = campusGuide(campus);
   if (!c) return {};
@@ -43,7 +41,9 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
   /* The spots that have a photograph, each with its first frame from the guide's photos (s4). */
   const held = c.spots.flatMap((s) => {
     const f = images.find((x) => x.src === c.photos.find((p) => s.frames.includes(p)));
-    return f ? [{ name: s.name, note: s.note, src: f.src, alt: f.alt || `Graduation photo at ${s.name} by Julian Gigola`, color: f.color }] : [];
+    return f
+      ? [{ name: s.name, note: s.note, src: f.src, alt: f.alt || `Graduation photo at ${s.name} by Julian Gigola`, color: f.color }]
+      : [];
   });
   const url = `${SITE}${campusHref(c)}`;
 
@@ -80,8 +80,12 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
             <h1 className="pg-t">{c.h1}</h1>
             <p className="sv-lead">{c.lead}</p>
             <div className="ctas">
-              <Link className="btn fill" href="/graduation-photos#book">Book a graduation session</Link>
-              <Link className="btn" href="#spots">See the spots</Link>
+              <Link className="btn fill" href="/graduation-photos#book">
+                Book a graduation session
+              </Link>
+              <Link className="btn" href="#spots">
+                See the spots
+              </Link>
             </div>
           </header>
           <div className="sv-info" id="spots">
@@ -104,7 +108,11 @@ export default async function CampusPage(props: PageProps<"/graduation-photos/[c
             <section className="sv-row">
               <h2 className="lbl mute">Book</h2>
               <ul>
-                <li><Link href="/graduation-photos">Graduation photos in San Jose & San Francisco<span aria-hidden>→</span></Link></li>
+                <li>
+                  <Link href="/graduation-photos">
+                    Graduation photos in San Jose & San Francisco<span aria-hidden>→</span>
+                  </Link>
+                </li>
               </ul>
             </section>
           </div>

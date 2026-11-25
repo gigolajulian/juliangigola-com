@@ -5,12 +5,7 @@ import type { Status } from "@/lib/admin/publish";
 import { StatusLine } from "@/components/admin/status-line";
 import { ADDED_PATH, type AddedProject } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
-import {
-  COVER_WIDTH,
-  MAX_WIDTH,
-  prepareImage,
-  toSlug,
-} from "@/lib/admin/admin-image";
+import { COVER_WIDTH, MAX_WIDTH, prepareImage, toSlug } from "@/lib/admin/admin-image";
 import type { Credit, Frame } from "@/lib/work/work-types";
 import { AdminCredits, tidyCredits } from "@/components/admin/admin-credits";
 import { cn, errorText, pad } from "@/lib/utils";
@@ -53,9 +48,7 @@ export function AdminNewProject({
   const [name, setName] = React.useState("");
   const [slugEdited, setSlugEdited] = React.useState(false);
   const [slug, setSlug] = React.useState("");
-  const [categorySlug, setCategorySlug] = React.useState(
-    categories[0]?.slug ?? "",
-  );
+  const [categorySlug, setCategorySlug] = React.useState(categories[0]?.slug ?? "");
   const [credits, setCredits] = React.useState<Credit[]>([]);
   const [staged, setStaged] = React.useState<Staged[]>([]);
   const [status, setStatus] = React.useState<Status>({ kind: "idle" });
@@ -80,13 +73,9 @@ export function AdminNewProject({
     for (const item of incoming) {
       try {
         const processed = await prepareImage(item.file, MAX_WIDTH);
-        setStaged((s) =>
-          s.map((x) => (x.file === item.file ? { ...x, processed } : x)),
-        );
+        setStaged((s) => s.map((x) => (x.file === item.file ? { ...x, processed } : x)));
       } catch (e) {
-        setStaged((s) =>
-          s.map((x) => (x.file === item.file ? { ...x, error: String(e) } : x)),
-        );
+        setStaged((s) => s.map((x) => (x.file === item.file ? { ...x, error: String(e) } : x)));
       }
     }
   }
@@ -100,9 +89,7 @@ export function AdminNewProject({
       return next;
     });
 
-  const ready = staged.filter(
-    (s): s is Staged & { processed: NonNullable<Staged["processed"]> } => !!s.processed && !s.error,
-  );
+  const ready = staged.filter((s): s is Staged & { processed: NonNullable<Staged["processed"]> } => !!s.processed && !s.error);
   const stillReading = staged.some((s) => !s.processed && !s.error);
 
   const slugTaken = existingSlugs.has(slug);
@@ -153,9 +140,7 @@ export function AdminNewProject({
       // and writing a stale list would delete it.
       setStatus({ kind: "working", message: "Reading the project list…" });
       const current = await readFile(token, ADDED_PATH);
-      const parsed = current
-        ? (JSON.parse(current) as { projects: AddedProject[] })
-        : { projects: [] };
+      const parsed = current ? (JSON.parse(current) as { projects: AddedProject[] }) : { projects: [] };
       if (parsed.projects.some((p) => p.slug === slug)) {
         throw new Error(`"${slug}" already exists in the project list.`);
       }
@@ -213,28 +198,15 @@ export function AdminNewProject({
     <section className="border-t border-border pt-10">
       <h2 className="title">Add a project</h2>
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
-        Photographs are resized to {MAX_WIDTH}px and committed with the project
-        in one go. The first frame becomes the cover.
+        Photographs are resized to {MAX_WIDTH}px and committed with the project in one go. The first frame becomes the cover.
       </p>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">
         <Field label="Name">
-          <input
-            value={name}
-            onChange={(e) => onName(e.target.value)}
-            placeholder="Luxe Meets Future"
-            className={input}
-          />
+          <input value={name} onChange={(e) => onName(e.target.value)} placeholder="Luxe Meets Future" className={input} />
         </Field>
 
-        <Field
-          label="Slug"
-          hint={
-            slugTaken
-              ? "Already used by another project."
-              : `/portfolio/${slug || "…"}`
-          }
-        >
+        <Field label="Slug" hint={slugTaken ? "Already used by another project." : `/portfolio/${slug || "…"}`}>
           <input
             value={slug}
             onChange={(e) => {
@@ -247,11 +219,7 @@ export function AdminNewProject({
         </Field>
 
         <Field label="Discipline">
-          <select
-            value={categorySlug}
-            onChange={(e) => setCategorySlug(e.target.value)}
-            className={input}
-          >
+          <select value={categorySlug} onChange={(e) => setCategorySlug(e.target.value)} className={input}>
             {categories.map((c) => (
               <option key={c.slug} value={c.slug}>
                 {c.name}
@@ -262,11 +230,7 @@ export function AdminNewProject({
 
         <Field
           label="Photographs"
-          hint={
-            ready.length
-              ? `${ready.length} ready · ${(totalBytes / 1024 / 1024).toFixed(1)}MB`
-              : "JPEG, PNG, WebP or AVIF"
-          }
+          hint={ready.length ? `${ready.length} ready · ${(totalBytes / 1024 / 1024).toFixed(1)}MB` : "JPEG, PNG, WebP or AVIF"}
         >
           <input
             type="file"
@@ -284,16 +248,9 @@ export function AdminNewProject({
       {staged.length > 0 ? (
         <ol className="mt-8 border-t border-border">
           {staged.map((item, i) => (
-            <li
-              key={`${item.file.name}-${i}`}
-              className="flex items-center gap-4 border-b border-border py-3"
-            >
-              <span className="label w-8 shrink-0 tabular-nums text-muted-foreground">
-                {i === 0 ? "CVR" : pad(i + 1)}
-              </span>
-              <span className="min-w-0 flex-1 truncate text-sm">
-                {item.file.name}
-              </span>
+            <li key={`${item.file.name}-${i}`} className="flex items-center gap-4 border-b border-border py-3">
+              <span className="label w-8 shrink-0 tabular-nums text-muted-foreground">{i === 0 ? "CVR" : pad(i + 1)}</span>
+              <span className="min-w-0 flex-1 truncate text-sm">{item.file.name}</span>
               <span className="label shrink-0 text-muted-foreground">
                 {item.error
                   ? "failed"
@@ -302,28 +259,13 @@ export function AdminNewProject({
                     : "reading…"}
               </span>
               <span className="flex shrink-0 gap-1">
-                <button
-                  type="button"
-                  onClick={() => move(i, -1)}
-                  className={tiny}
-                  aria-label="Move up"
-                >
+                <button type="button" onClick={() => move(i, -1)} className={tiny} aria-label="Move up">
                   ↑
                 </button>
-                <button
-                  type="button"
-                  onClick={() => move(i, 1)}
-                  className={tiny}
-                  aria-label="Move down"
-                >
+                <button type="button" onClick={() => move(i, 1)} className={tiny} aria-label="Move down">
                   ↓
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setStaged((s) => s.filter((_, j) => j !== i))}
-                  className={tiny}
-                  aria-label="Remove"
-                >
+                <button type="button" onClick={() => setStaged((s) => s.filter((_, j) => j !== i))} className={tiny} aria-label="Remove">
                   ✕
                 </button>
               </span>
@@ -349,27 +291,15 @@ export function AdminNewProject({
   );
 }
 
-const input =
-  "w-full border border-border bg-transparent px-4 py-3 text-sm text-foreground outline-none focus-visible:border-foreground";
-const tiny =
-  "label border border-border px-2 py-1 text-muted-foreground hoverable:hover:text-foreground";
+const input = "w-full border border-border bg-transparent px-4 py-3 text-sm text-foreground outline-none focus-visible:border-foreground";
+const tiny = "label border border-border px-2 py-1 text-muted-foreground hoverable:hover:text-foreground";
 
-function Field({
-  label,
-  hint,
-  children,
-}: {
-  label: string;
-  hint?: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block">
       <span className="label block text-muted-foreground">{label}</span>
       <span className="mt-2 block">{children}</span>
-      {hint ? (
-        <span className="label mt-2 block text-muted-foreground">{hint}</span>
-      ) : null}
+      {hint ? <span className="label mt-2 block text-muted-foreground">{hint}</span> : null}
     </label>
   );
 }

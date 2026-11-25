@@ -59,7 +59,7 @@ describe("the plan and tasks on a lead", () => {
     fireEvent.click(screen.getByRole("button", { name: "Add" }));
     await waitFor(() => expect(patches).toHaveLength(1), slow);
     const sent = patches[0];
-    expect(sent).toEqual({ key: "lead:a", tasks: [task, { id: expect.stringMatching(/^[a-z0-9]+$/), text: "Book the studio" }] });
+    expect(sent).toEqual({ id: "a", tasks: [task, { id: expect.stringMatching(/^[a-z0-9]+$/), text: "Book the studio" }] });
     const checked = cleanTasks(sent.tasks, full.tasks);
     expect(checked).not.toHaveProperty("error");
     expect((checked as { tasks: Task[] }).tasks.map((t) => t.text)).toEqual(["Rent red gel and snoot", "Book the studio"]);
@@ -71,7 +71,7 @@ describe("the plan and tasks on a lead", () => {
     await waitFor(() => expect(box.disabled).toBe(false), slow);
     fireEvent.click(box);
     await waitFor(() => expect(patches).toHaveLength(1), slow);
-    expect(patches[0]).toEqual({ key: "lead:a", tasks: [{ ...task, doneAt: expect.any(String) }] });
+    expect(patches[0]).toEqual({ id: "a", tasks: [{ ...task, doneAt: expect.any(String) }] });
     const checked = cleanTasks(patches[0].tasks, full.tasks, [], "2026-12-01T18:00:00.000Z") as { tasks: Task[]; events: unknown[] };
     expect(checked.tasks[0].doneAt).toBe("2026-12-01T18:00:00.000Z");
     expect(checked.events).toEqual([{ at: "2026-12-01T18:00:00.000Z", kind: "task", ref: "task:t1", note: "Rent red gel and snoot" }]);

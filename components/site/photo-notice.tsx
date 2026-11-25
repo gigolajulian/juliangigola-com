@@ -31,7 +31,11 @@ const DWELL_MS = 3000;
     the notice answers the second, the first only keeps the menu shut. */
 const AGAIN_MS = 500;
 /** gsap's power2.in, expo.out and power3.out, which these fades were first drawn with. */
-const EASE = { in: "cubic-bezier(0.55, 0.085, 0.68, 0.53)", expo: "cubic-bezier(0.19, 1, 0.22, 1)", out: "cubic-bezier(0.215, 0.61, 0.355, 1)" };
+const EASE = {
+  in: "cubic-bezier(0.55, 0.085, 0.68, 0.53)",
+  expo: "cubic-bezier(0.19, 1, 0.22, 1)",
+  out: "cubic-bezier(0.215, 0.61, 0.355, 1)",
+};
 
 /** Which frame of which set it is, as a contact sheet labels it: the
     project's title and the frame's place in its strip ("BYTE ME · 03 / 10").
@@ -40,9 +44,7 @@ function slugOf(target: HTMLElement) {
   const cell = target.closest(".strip-cell");
   const title = document.querySelector("main h1")?.textContent?.trim();
   if (!cell?.parentElement || !title) return "";
-  const frames = [...cell.parentElement.children].filter(
-    (c) => c.classList.contains("strip-cell") && c.querySelector("img"),
-  );
+  const frames = [...cell.parentElement.children].filter((c) => c.classList.contains("strip-cell") && c.querySelector("img"));
   const n = frames.indexOf(cell);
   if (n < 0) return "";
   return `${title} · ${pad(n + 1)} / ${pad(frames.length)}`;
@@ -121,10 +123,7 @@ export function PhotoNotice() {
 
   React.useEffect(() => {
     if (!raised?.open || held) return;
-    const id = window.setTimeout(
-      () => setRaised((r) => r && { ...r, open: false }),
-      DWELL_MS,
-    );
+    const id = window.setTimeout(() => setRaised((r) => r && { ...r, open: false }), DWELL_MS);
     return () => window.clearTimeout(id);
   }, [raised, held]);
 
@@ -156,7 +155,10 @@ export function PhotoNotice() {
     }
     if (!shown) {
       const out = el.animate(
-        [{ opacity: getComputedStyle(el).opacity, transform: "none" }, { opacity: 0, transform: "translateY(-6px)" }],
+        [
+          { opacity: getComputedStyle(el).opacity, transform: "none" },
+          { opacity: 0, transform: "translateY(-6px)" },
+        ],
         { duration: 220, easing: "cubic-bezier(.23,1,.32,1)" }, // Motion plan item 4 (docs/decisions.md): exits leave on `out`
       );
       el.style.opacity = "0";
@@ -164,10 +166,10 @@ export function PhotoNotice() {
       return () => out.cancel();
     }
     show(true);
-    const wipe = el.animate(
-      [{ clipPath: "inset(0 100% 100% 0 round 4px)" }, { clipPath: "inset(0 0% 0% 0 round 4px)" }],
-      { duration: 420, easing: EASE.expo },
-    );
+    const wipe = el.animate([{ clipPath: "inset(0 100% 100% 0 round 4px)" }, { clipPath: "inset(0 0% 0% 0 round 4px)" }], {
+      duration: 420,
+      easing: EASE.expo,
+    });
     const lines = [...el.querySelectorAll("[data-line]")].map((l, i) =>
       l.animate([{ transform: "translateY(110%)" }, { transform: "none" }], {
         duration: 500,
@@ -198,14 +200,8 @@ export function PhotoNotice() {
   const at = raised;
   const position = at
     ? {
-        left: Math.max(
-          MARGIN,
-          Math.min(at.x + GAP, window.innerWidth - BOX_W - MARGIN),
-        ),
-        top: Math.max(
-          MARGIN,
-          Math.min(at.y + GAP, window.innerHeight - BOX_H - MARGIN),
-        ),
+        left: Math.max(MARGIN, Math.min(at.x + GAP, window.innerWidth - BOX_W - MARGIN)),
+        top: Math.max(MARGIN, Math.min(at.y + GAP, window.innerHeight - BOX_H - MARGIN)),
       }
     : undefined;
   const year = new Date().getFullYear();
@@ -234,8 +230,7 @@ export function PhotoNotice() {
       {/* Said once per raise; the lines below stay through the fade out. */}
       {shown ? (
         <span className="sr-only">
-          This photo{raised?.slug ? `, ${raised.slug},` : ""} is Copyright
-          &copy; {year} Julian Gigola. All rights reserved.
+          This photo{raised?.slug ? `, ${raised.slug},` : ""} is Copyright &copy; {year} Julian Gigola. All rights reserved.
         </span>
       ) : null}
       {/* In a box of its own, so nothing that styles an icon's direct

@@ -14,12 +14,23 @@ const { POST: gmailPost } = await import("@/app/api/leads/gmail/route");
 let kv: FakeKV;
 beforeEach(() => {
   kv = new FakeKV();
-  ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: SECRET, GCAL_OAUTH: JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" }) };
+  ctx.env = {
+    INBOX: kv,
+    LEADS_KEY,
+    WORKER_KEY: SECRET,
+    GCAL_OAUTH: JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" }),
+  };
   vi.unstubAllGlobals();
 });
 
 const call = (route: (r: Request) => Promise<Response>, path: string, body: unknown, auth?: string) =>
-  route(new Request(`https://juliangigola.com/api/leads/${path}`, { method: "POST", body: JSON.stringify(body), headers: auth ? { authorization: auth } : {} }));
+  route(
+    new Request(`https://juliangigola.com/api/leads/${path}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: auth ? { authorization: auth } : {},
+    }),
+  );
 const MAIL = { email: "client@example.com", subject: "See you tomorrow", kind: "reminder", booking: "bk_1" };
 
 describe("POST /api/leads/mail", () => {

@@ -12,7 +12,11 @@ import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/home/data";
 import type { CoverRelease } from "@/lib/work/cover-art-types";
 
 const nav = vi.hoisted(() => ({ path: "/" }));
-vi.mock("next/navigation", () => ({ usePathname: () => nav.path, useRouter: () => ({ push() {}, back() {} }), useSearchParams: () => new URLSearchParams() }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => nav.path,
+  useRouter: () => ({ push() {}, back() {} }),
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock("@/components/cover/lightbox", () => ({ useLightbox: () => ({ show() {} }), Lightbox: () => null }));
 if (!globalThis.CSS?.escape) vi.stubGlobal("CSS", { escape: (s: string) => s });
 
@@ -21,7 +25,11 @@ if (!globalThis.CSS?.escape) vi.stubGlobal("CSS", { escape: (s: string) => s });
 const flag = (keys: string) => (document.documentElement.dataset.v4pages = keys);
 // Every query matches but reduced motion: a desktop mouse with motion allowed.
 const desktop = () =>
-  vi.spyOn(window, "matchMedia").mockImplementation((q: string) => ({ matches: !q.includes("reduce)"), media: q, addEventListener() {}, removeEventListener() {} }) as never);
+  vi
+    .spyOn(window, "matchMedia")
+    .mockImplementation(
+      (q: string) => ({ matches: !q.includes("reduce)"), media: q, addEventListener() {}, removeEventListener() {} }) as never,
+    );
 // An observer that reports everything it watches on screen at once.
 const onScreen = () =>
   vi.stubGlobal(
@@ -111,8 +119,15 @@ describe("ServiceBar (s1)", () => {
 
 describe("LogoBand (a2)", () => {
   it("is the plain line under reduced motion", () => {
-    vi.spyOn(window, "matchMedia").mockImplementation((q: string) => ({ matches: q.includes("reduce"), media: q, addEventListener() {}, removeEventListener() {} }) as never);
-    const { container } = render(<LogoBand><i>A</i><i>B</i></LogoBand>);
+    vi.spyOn(window, "matchMedia").mockImplementation(
+      (q: string) => ({ matches: q.includes("reduce"), media: q, addEventListener() {}, removeEventListener() {} }) as never,
+    );
+    const { container } = render(
+      <LogoBand>
+        <i>A</i>
+        <i>B</i>
+      </LogoBand>,
+    );
     expect(container.querySelectorAll(".lg > i")).toHaveLength(2);
   });
 
@@ -121,8 +136,24 @@ describe("LogoBand (a2)", () => {
     vi.spyOn(HTMLElement.prototype, "scrollWidth", "get").mockReturnValue(100);
     vi.spyOn(HTMLElement.prototype, "clientWidth", "get").mockReturnValue(250);
     const fill: ResizeObserverCallback[] = [];
-    vi.stubGlobal("ResizeObserver", class { constructor(cb: ResizeObserverCallback) { fill.push(cb); } observe() { fill.forEach((f) => f([], this as never)); } disconnect() {} });
-    const { container, unmount } = render(<LogoBand><i>A</i><i>B</i></LogoBand>);
+    vi.stubGlobal(
+      "ResizeObserver",
+      class {
+        constructor(cb: ResizeObserverCallback) {
+          fill.push(cb);
+        }
+        observe() {
+          fill.forEach((f) => f([], this as never));
+        }
+        disconnect() {}
+      },
+    );
+    const { container, unmount } = render(
+      <LogoBand>
+        <i>A</i>
+        <i>B</i>
+      </LogoBand>,
+    );
     const marks = container.querySelectorAll(".lg > i");
     // ceil(250 / 100) + 1 = 4 sets of two
     expect(marks).toHaveLength(8);
@@ -138,7 +169,12 @@ describe("PageFoot", () => {
     render(<PageFoot />);
     const nav = screen.getByRole("navigation", { name: "Footer" });
     for (const b of BOOK_ROWS) expect(screen.getByRole("link", { name: b.name }).getAttribute("href")).toBe(`/book/${b.slug}`);
-    const types: Record<string, string> = { Music: "/contact/form?type=coverart", Fashion: "/contact/form?type=editorial", Commercial: "/contact/form?type=campaign", Weddings: "/contact/form" };
+    const types: Record<string, string> = {
+      Music: "/contact/form?type=coverart",
+      Fashion: "/contact/form?type=editorial",
+      Commercial: "/contact/form?type=campaign",
+      Weddings: "/contact/form",
+    };
     for (const o of QUOTE_OPTS) expect(screen.getByRole("link", { name: o.name }).getAttribute("href")).toBe(types[o.name]);
     expect(nav.querySelector('a[href="mailto:hello@juliangigola.com"]')).toBeTruthy();
     expect(screen.getByRole("link", { name: "Legal" }).getAttribute("href")).toBe("/legal");
@@ -150,8 +186,12 @@ describe("PageFoot", () => {
     expect(screen.getByRole("link", { name: "Book me" }).getAttribute("href")).toBe("/book");
     cleanup();
     nav.path = "/portfolio/paradox";
-    const a = render(<PageFoot />).container.querySelector(".v4f-phrase")!.getAttribute("aria-label");
-    const b = render(<PageFoot />).container.querySelectorAll(".v4f-phrase")[0].getAttribute("aria-label");
+    const a = render(<PageFoot />)
+      .container.querySelector(".v4f-phrase")!
+      .getAttribute("aria-label");
+    const b = render(<PageFoot />)
+      .container.querySelectorAll(".v4f-phrase")[0]
+      .getAttribute("aria-label");
     expect(a).toBe(b);
     expect(a).toBeTruthy();
   });

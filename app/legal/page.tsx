@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   description:
     "The terms on which juliangigola.com and the photographs on it may be used, none of it as AI training data, and what the site knows about you.",
   alternates: { canonical: "/legal" },
-  ...shareOg("Terms and privacy","The terms for juliangigola.com and the photographs on it, and what the site knows about you."),
+  ...shareOg("Terms and privacy", "The terms for juliangigola.com and the photographs on it, and what the site knows about you."),
 };
 
 /* The terms and the privacy policy on one page, a screen each, dealt as

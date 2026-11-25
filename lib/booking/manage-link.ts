@@ -11,7 +11,8 @@ const SITE = "https://juliangigola.com";
 const enc = new TextEncoder();
 const b64url = (buf: ArrayBuffer) => Buffer.from(buf).toString("base64url");
 
-const key = (secret: string, use: "sign" | "verify") => crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [use]);
+const key = (secret: string, use: "sign" | "verify") =>
+  crypto.subtle.importKey("raw", enc.encode(secret), { name: "HMAC", hash: "SHA-256" }, false, [use]);
 
 /** The token for booking `id`, good until `exp` (ms). */
 export async function bookingToken(secret: string, id: string, exp: number) {

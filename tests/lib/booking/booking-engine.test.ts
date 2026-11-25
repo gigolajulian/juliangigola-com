@@ -65,7 +65,8 @@ describe("hours in the store", () => {
 });
 
 describe("dueHeadsUp", () => {
-  const paid = (id: string, over: Partial<BookingRecord> = {}) => rec(id, { intent: "pi_1", start: new Date(NOW + 60 * H).toISOString(), at: new Date(NOW - 30 * 24 * H).toISOString(), ...over });
+  const paid = (id: string, over: Partial<BookingRecord> = {}) =>
+    rec(id, { intent: "pi_1", start: new Date(NOW + 60 * H).toISOString(), at: new Date(NOW - 30 * 24 * H).toISOString(), ...over });
   it("picks paid bookings 72 to 48 hours out, while the early refund is still open", async () => {
     await saveBooking(store, paid("due"));
     await saveBooking(store, paid("far", { start: new Date(NOW + 80 * H).toISOString() }));

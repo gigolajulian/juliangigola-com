@@ -27,7 +27,13 @@ export async function alertHello(
   } catch (e) {
     console.error("hello mail", subject.split(":")[0], String(e));
     // Images can push a mail past the size limit: the mail matters more, so it goes again without them.
-    if (attachments.length) return alertHello(email, subject, [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`], { who });
+    if (attachments.length)
+      return alertHello(
+        email,
+        subject,
+        [...lines, "", `${attachments.length} reference image(s) were too large to attach. Ask the client to email them.`],
+        { who },
+      );
     return false;
   }
 }

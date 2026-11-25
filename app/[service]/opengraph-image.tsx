@@ -13,5 +13,10 @@ export function generateStaticParams() {
 export default async function Image({ params }: { params: Promise<{ service: string }> }) {
   const page = bookingPage((await params).service)!;
   const frames = page.picks?.length ? await framesOf(page.picks) : page.tiles.map((t) => t.frame);
-  return renderCard({ kicker: "Book a session", title: page.name, byline: page.rate, frames: frames.length ? frames : FEATURED.map((p) => p.images[0]) });
+  return renderCard({
+    kicker: "Book a session",
+    title: page.name,
+    byline: page.rate,
+    frames: frames.length ? frames : FEATURED.map((p) => p.images[0]),
+  });
 }

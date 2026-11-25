@@ -17,7 +17,6 @@
  * that mounts the viewer and one that unmounts it.
  * ─────────────────────────────────────────────────────────────── */
 
-
 /** Opening: how long, and on what curve. */
 const OPEN_MS = 420;
 const OPEN_EASE = "cubic-bezier(0.2, 0, 0, 1)";
@@ -92,14 +91,9 @@ type CloseOptions = Chrome & {
   radius?: number;
 };
 
-const reduced = () =>
-  typeof window !== "undefined" &&
-  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const reduced = () => typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-const hasVT = () =>
-  ENGINE === "vt" &&
-  typeof document !== "undefined" &&
-  typeof document.startViewTransition === "function";
+const hasVT = () => ENGINE === "vt" && typeof document !== "undefined" && typeof document.startViewTransition === "function";
 
 const rectOf = (el: Element): Rect => {
   const r = el.getBoundingClientRect();
@@ -158,10 +152,7 @@ const centre = (T: Rect): Rect => ({
    what was already on the screen and the swap happens after the landing,
    on identical pixels. */
 function standIn(box: HTMLElement, from: HTMLElement | null) {
-  const src =
-    from instanceof HTMLImageElement
-      ? from
-      : from?.querySelector<HTMLImageElement>("img");
+  const src = from instanceof HTMLImageElement ? from : from?.querySelector<HTMLImageElement>("img");
   if (!src?.currentSrc) return null;
   const copy = document.createElement("img");
   copy.src = src.currentSrc;
@@ -182,17 +173,9 @@ function standIn(box: HTMLElement, from: HTMLElement | null) {
 
 /** The real picture, decoded, or the cap, whichever is first. */
 const decoded = (img: HTMLImageElement | null) =>
-  Promise.race([
-    img ? img.decode().catch(() => {}) : Promise.resolve(),
-    new Promise<void>((r) => window.setTimeout(r, DECODE_CAP_MS)),
-  ]);
+  Promise.race([img ? img.decode().catch(() => {}) : Promise.resolve(), new Promise<void>((r) => window.setTimeout(r, DECODE_CAP_MS))]);
 
-const fade = (
-  el: HTMLElement | null | undefined,
-  to: 0 | 1,
-  ms: number,
-  delay = 0,
-) => {
+const fade = (el: HTMLElement | null | undefined, to: 0 | 1, ms: number, delay = 0) => {
   if (!el) return;
   el.getAnimations().forEach((a) => a.cancel());
   const from = getComputedStyle(el).opacity;
@@ -286,10 +269,7 @@ function hideLive(box: HTMLElement | null) {
 /* The group's rectangle right now, read off the pseudo element, for a
    close that interrupts an open the browser is drawing. */
 function groupRect(): Rect | null {
-  const cs = getComputedStyle(
-    document.documentElement,
-    `::view-transition-group(${NAME})`,
-  );
+  const cs = getComputedStyle(document.documentElement, `::view-transition-group(${NAME})`);
   const w = parseFloat(cs.width);
   const h = parseFloat(cs.height);
   if (!w || !h) return null;
@@ -337,8 +317,7 @@ export function zoomOpen(o: OpenOptions): ZoomTrip {
       unpromote = promote([box]);
       unhide = hideLive(box);
       fade(o.backdrop?.(), 1, BACKDROP_IN_MS);
-      for (const c of o.chrome?.() ?? [])
-        fade(c, 1, CHROME_MS, OPEN_MS + CHROME_DELAY_MS);
+      for (const c of o.chrome?.() ?? []) fade(c, 1, CHROME_MS, OPEN_MS + CHROME_DELAY_MS);
     });
     const done = () => {
       delete root.dataset.zoom;
@@ -382,14 +361,8 @@ export function zoomOpen(o: OpenOptions): ZoomTrip {
   );
   // The stand-in rides the same counter scale as the picture it covers,
   // or the box's own scale would squash it.
-  const b = pic?.animate(
-    [{ transform: at.picture }, { transform: ID }],
-    opts,
-  );
-  const c = copy?.animate(
-    [{ transform: at.picture }, { transform: ID }],
-    opts,
-  );
+  const b = pic?.animate([{ transform: at.picture }, { transform: ID }], opts);
+  const c = copy?.animate([{ transform: at.picture }, { transform: ID }], opts);
   /* Held at the thumbnail until the first frame of the viewer has been
      painted. The viewer's first frame is the dear one, the picture's
      texture going up to the GPU, and measured on production it took
@@ -406,8 +379,7 @@ export function zoomOpen(o: OpenOptions): ZoomTrip {
       b?.play();
       c?.play();
       fade(o.backdrop?.(), 1, BACKDROP_IN_MS);
-      for (const el of o.chrome?.() ?? [])
-        fade(el, 1, CHROME_MS, OPEN_MS + CHROME_DELAY_MS);
+      for (const el of o.chrome?.() ?? []) fade(el, 1, CHROME_MS, OPEN_MS + CHROME_DELAY_MS);
     }),
   );
   const settle = async () => {
@@ -518,10 +490,7 @@ export function zoomClose(o: CloseOptions): ZoomTrip {
     ],
     opts,
   );
-  const b = pic?.animate(
-    [{ transform: here.picture }, { transform: there.picture }],
-    opts,
-  );
+  const b = pic?.animate([{ transform: here.picture }, { transform: there.picture }], opts);
   const done = () => {
     unpromote();
     o.unmount();

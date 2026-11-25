@@ -16,7 +16,9 @@ vi.setSystemTime(PIN);
    and mails a new confirmation. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
-vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx, (p) => p));
+// The free call's ctx.waitUntil work (the client's mail among it), kept so a test can wait for it.
+const background = vi.hoisted(() => [] as Promise<unknown>[]);
+vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx, (p) => background.push(p)));
 const { POST: book } = await import("@/app/api/book/route");
 const { POST: change } = await import("@/app/api/booking/[id]/route");
 const { bookDeposit } = await import("@/lib/booking/deposit");
@@ -70,7 +72,10 @@ beforeEach(() => {
       return Response.json({ id: busy.at(-1)!.id });
     }
     if (method === "PATCH" && ev) {
-      Object.assign(busy.find((x) => x.id === ev)!, { start: body.start.dateTime, end: body.end.dateTime });
+      Object.assign(
+        busy.find((x) => x.id === ev)!,
+        { start: body.start.dateTime, end: body.end.dateTime },
+      );
       return Response.json({ id: ev });
     }
     if (method === "DELETE" && ev) {
@@ -92,7 +97,14 @@ async function paid(start: string) {
   return { id: link[1], t: link[2] };
 }
 const post = (id: string, body: unknown, key?: string) =>
-  change(new Request(`https://juliangigola.com/api/booking/${id}`, { method: "POST", body: JSON.stringify(body), headers: key ? { "x-admin-key": key } : {} }), { params: Promise.resolve({ id }) });
+  change(
+    new Request(`https://juliangigola.com/api/booking/${id}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: key ? { "x-admin-key": key } : {},
+    }),
+    { params: Promise.resolve({ id }) },
+  );
 
 describe("the link", () => {
   it("opens its own booking until a day after it, and nothing else", async () => {
@@ -102,7 +114,13 @@ describe("the link", () => {
     expect(await tokenOpens("other", "abc", t)).toBe(false);
     expect(await tokenOpens(undefined, "abc", t)).toBe(false);
     // The first signature character: all 6 bits count (the last one carries 2 padding bits, so A to D decode alike).
-    expect(await tokenOpens(SECRET, "abc", t.replace(/\.(.)/, (_, c) => "." + (c === "A" ? "B" : "A")))).toBe(false);
+    expect(
+      await tokenOpens(
+        SECRET,
+        "abc",
+        t.replace(/\.(.)/, (_, c) => "." + (c === "A" ? "B" : "A")),
+      ),
+    ).toBe(false);
     expect(await tokenOpens(SECRET, "abc", await bookingToken(SECRET, "abc", Date.now() - 1000))).toBe(false);
     expect(await manageLinks(undefined, { id: "abc", start: new Date().toISOString() })).toBeNull();
   });
@@ -125,7 +143,9 @@ describe("cancel", () => {
     expect(calls.some((c) => c.method === "DELETE" && c.url.includes("sendUpdates=none"))).toBe(true);
     expect(calls.filter((c) => c.url.endsWith("/refunds"))).toHaveLength(1);
     expect(calls.find((c) => c.url.endsWith("/refunds"))!.form).toContain("amount=22500");
-    expect(String(client.sent.at(-1)!.text)).toContain("$225 of your $250 deposit is refunded to your card. $25 is kept as the booking fee.");
+    expect(String(client.sent.at(-1)!.text)).toContain(
+      "$225 of your $250 deposit is refunded to your card. $25 is kept as the booking fee.",
+    );
     expect(mail.sent.at(-1)!.subject).toMatch(/^Cancelled: /);
     expect(String(client.sent.at(-1)!.text)).toContain("refunded to your card");
     // A second click does nothing more.
@@ -168,6 +188,16 @@ describe("cancel", () => {
     expect(await res.json()).toMatchObject({ refunded: null, back: 0, record: { cancelled: true } });
     expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
     expect(String(client.sent.at(-1)!.text)).toContain("not refunded");
+  });
+
+  it("with no Stripe key, a refund owed is a refund by hand, never a kept deposit", async () => {
+    const { id, t } = await paid(wednesday(7));
+    delete (ctx.env as { STRIPE_SECRET_KEY?: string }).STRIPE_SECRET_KEY;
+    const res = await post(id, { t, action: "cancel" });
+    expect(await res.json()).toMatchObject({ refunded: false, back: 0, record: { cancelled: true } });
+    expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
+    expect(String(mail.sent.at(-1)!.text)).toContain("The refund FAILED: refund $225 by hand in Stripe.");
+    expect(String(client.sent.at(-1)!.text)).toContain("I'll send it by hand");
   });
 
   it("names the figure to refund by hand when a 70% refund fails", async () => {
@@ -231,8 +261,21 @@ describe("cancel", () => {
   });
 
   it("a free call cancels with no money", async () => {
-    const res = await book(new Request("https://juliangigola.com/api/book", { method: "POST", body: JSON.stringify({ slug: "music-call", start: wednesday(7), timeZone: "America/Los_Angeles", name: "QA", email: "qa@example.com", via: "Phone" }) }));
+    const res = await book(
+      new Request("https://juliangigola.com/api/book", {
+        method: "POST",
+        body: JSON.stringify({
+          slug: "music-call",
+          start: wednesday(7),
+          timeZone: "America/Los_Angeles",
+          name: "QA",
+          email: "qa@example.com",
+          via: "Phone",
+        }),
+      }),
+    );
     const { id } = await res.json();
+    await Promise.all(background.splice(0));
     const t = String(client.sent[0].text).match(/t=([\w.-]+)&do=cancel/)![1];
     expect(await (await post(id, { t, action: "cancel" })).json()).toMatchObject({ refunded: null, record: { paid: false } });
   });
@@ -247,7 +290,9 @@ describe("the lead desk", () => {
     const lead = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!;
     expect(lead.events.find((e) => e.kind === "booking")).toMatchObject({ ref: id, note: "Portraits" });
     const mails = lead.events.filter((e) => e.kind === "mail").map((e) => `${e.mail?.to} ${e.mail?.kind}`);
-    expect(mails).toEqual(expect.arrayContaining(["client confirm", "hello@ reschedule", "client reschedule", "hello@ cancelled", "client cancelled"]));
+    expect(mails).toEqual(
+      expect.arrayContaining(["client confirm", "hello@ reschedule", "client reschedule", "hello@ cancelled", "client cancelled"]),
+    );
   });
 });
 
@@ -339,7 +384,11 @@ describe("the desk", () => {
   it("Julian cancels and the refund fails: hello@ gets the figure to refund by hand, the client hears it goes by hand, no refund line", async () => {
     const { id } = await paid(wednesday(7));
     refundOk = false;
-    expect(await (await post(id, { action: "cancel-mine" }, KEY)).json()).toMatchObject({ refunded: false, back: 0, record: { cancelled: true } });
+    expect(await (await post(id, { action: "cancel-mine" }, KEY)).json()).toMatchObject({
+      refunded: false,
+      back: 0,
+      record: { cancelled: true },
+    });
     expect(String(mail.sent.at(-1)!.text)).toContain("The refund FAILED: refund $250 by hand in Stripe.");
     expect(String(client.sent.at(-1)!.text)).toContain("I'll send it by hand");
     const events = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!.events;
@@ -355,12 +404,15 @@ describe("the desk", () => {
     vi.useFakeTimers({ toFake: ["Date"] });
     vi.setSystemTime(Date.parse(start) + 2 * 36e5);
     const res = await post(id, { action: "no-show" }, KEY);
-    await post(id, { action: "no-show" }, KEY);
+    const again = await post(id, { action: "no-show" }, KEY);
     vi.setSystemTime(PIN);
     expect(res.status).toBe(200);
     expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
     expect(client.sent).toHaveLength(before);
-    expect(mail.sent.some((m) => /^No-show: /.test(String(m.subject)) && String(m.text).includes("The $250 deposit is kept."))).toBe(true);
+    expect(await again.json()).toEqual({ ok: true, already: true });
+    const noShows = mail.sent.filter((m) => /^No-show: /.test(String(m.subject)));
+    expect(noShows).toHaveLength(1);
+    expect(String(noShows[0].text)).toContain("The $250 deposit is kept.");
     const lead = (await leadOf(ctx.env.INBOX as FakeKV, "qa@example.com"))!;
     expect(lead.events.filter((e) => e.kind === "no-show")).toHaveLength(1);
   });

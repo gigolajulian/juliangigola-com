@@ -7,7 +7,10 @@ export const metadata: Metadata = {
   description:
     "Julian Gigola photographs people, mostly for fashion, music and brands, and covers headshots, portraits, graduations and weddings across San Francisco, San Jose and the Bay Area.",
   alternates: { canonical: "/about" },
-  ...shareOg("About","I photograph people, mostly for fashion, music and brands, and cover headshots, portraits and graduations across the Bay Area."),
+  ...shareOg(
+    "About",
+    "I photograph people, mostly for fashion, music and brands, and cover headshots, portraits and graduations across the Bay Area.",
+  ),
 };
 
 export default function AboutPage() {

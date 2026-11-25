@@ -24,7 +24,13 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 const chunks = [new Uint8Array([1, 2, 3]), new Uint8Array([4, 5])];
-const body = () => new ReadableStream<Uint8Array>({ start(c) { for (const x of chunks) c.enqueue(x); c.close(); } });
+const body = () =>
+  new ReadableStream<Uint8Array>({
+    start(c) {
+      for (const x of chunks) c.enqueue(x);
+      c.close();
+    },
+  });
 const r2 = () => {
   const got: { key: string; bytes: number[]; type?: string }[] = [];
   return {

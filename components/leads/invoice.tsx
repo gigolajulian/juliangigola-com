@@ -5,7 +5,20 @@ import { createPortal } from "react-dom";
 import { type Lead, type LeadSummary } from "@/lib/leads/leads";
 import { cn, errorText } from "@/lib/utils";
 import { mailable } from "@/lib/leads/lead-crm";
-import { balance, shortDate, depositOfLead, isSettled, MAX_INVOICE_ROWS, THANKS_NOTES, usd, usdTrim, type Crop, type Invoice, type InvoiceDetails, type InvoiceFrom } from "@/lib/leads/invoice";
+import {
+  balance,
+  shortDate,
+  depositOfLead,
+  isSettled,
+  MAX_INVOICE_ROWS,
+  THANKS_NOTES,
+  usd,
+  usdTrim,
+  type Crop,
+  type Invoice,
+  type InvoiceDetails,
+  type InvoiceFrom,
+} from "@/lib/leads/invoice";
 import { framed, loadImage, coverFit, shrink, toneFor } from "@/lib/leads/invoice-photo";
 import { dayLabel, deskCall, plusDays, ymdPT } from "@/lib/leads/lead-desk";
 import { adminCall } from "@/lib/admin/admin-call";
@@ -41,12 +54,26 @@ export function Deliver({ file, inv, l }: { file: File; inv: Invoice; l: LeadSum
     <div className="grid gap-2">
       <div className="flex flex-wrap gap-2.5">
         {canShare ? (
-          <button type="button" className={cn(btn, primary)} onClick={() => navigator.share({ files: [file], title: subject }).catch(() => {})}>Share PDF</button>
+          <button
+            type="button"
+            className={cn(btn, primary)}
+            onClick={() => navigator.share({ files: [file], title: subject }).catch(() => {})}
+          >
+            Share PDF
+          </button>
         ) : null}
-        <a href={url} download={file.name} className={cn(btn, !canShare && primary)}>Download PDF</a>
-        {mailable(l.email) ? <a href={compose(l.email, subject, body)} target="_blank" rel="noreferrer" className={btn}>Gmail draft</a> : null}
+        <a href={url} download={file.name} className={cn(btn, !canShare && primary)}>
+          Download PDF
+        </a>
+        {mailable(l.email) ? (
+          <a href={compose(l.email, subject, body)} target="_blank" rel="noreferrer" className={btn}>
+            Gmail draft
+          </a>
+        ) : null}
       </div>
-      <p className="font-mono text-[12.5px] text-muted-foreground">Nothing is sent. The Gmail draft has no attachment: add the PDF before you send.</p>
+      <p className="font-mono text-[12.5px] text-muted-foreground">
+        Nothing is sent. The Gmail draft has no attachment: add the PDF before you send.
+      </p>
     </div>
   );
 }
@@ -57,13 +84,31 @@ export function InvoiceRow({ inv, l, full }: { inv: Invoice; l: LeadSummary; ful
   return (
     <li className="grid gap-2 border-b border-border py-2.5">
       <p className="flex flex-wrap items-center justify-between gap-3 text-[15px]">
-        <span><b className="font-mono font-medium">{inv.no}</b> <span className="text-muted-foreground">· {dayLabel(`${inv.date}T12:00:00`)} · {isSettled(inv) ? "paid" : `${usd(balance(inv))} due`}</span></span>
+        <span>
+          <b className="font-mono font-medium">{inv.no}</b>{" "}
+          <span className="text-muted-foreground">
+            · {dayLabel(`${inv.date}T12:00:00`)} · {isSettled(inv) ? "paid" : `${usd(balance(inv))} due`}
+          </span>
+        </span>
         {file ? null : (
-          <button type="button" className={cn(btn, "min-h-10")} onClick={() => { setErr(null); makePdf(inv, l, full).then(setFile, (e: unknown) => setErr(errorText(e))); }}>PDF</button>
+          <button
+            type="button"
+            className={cn(btn, "min-h-10")}
+            onClick={() => {
+              setErr(null);
+              makePdf(inv, l, full).then(setFile, (e: unknown) => setErr(errorText(e)));
+            }}
+          >
+            PDF
+          </button>
         )}
       </p>
       {file ? <Deliver file={file} inv={inv} l={l} /> : null}
-      {err ? <p role="alert" className="text-[14px] text-destructive">{err}</p> : null}
+      {err ? (
+        <p role="alert" className="text-[14px] text-destructive">
+          {err}
+        </p>
+      ) : null}
     </li>
   );
 }
@@ -118,9 +163,20 @@ const PAGE_B_CSS = `
 `;
 
 type PageBProps = {
-  no: string; date: string; due: string; to: InvoiceDetails["to"]; project: string; caption: string; note: string[];
-  rows: { t: string; sub: string; n: number }[]; total: number; from: InvoiceFrom | null;
-  src: string | null; crop: Crop; setCrop: React.Dispatch<React.SetStateAction<Crop>>; tone: "dark" | "light";
+  no: string;
+  date: string;
+  due: string;
+  to: InvoiceDetails["to"];
+  project: string;
+  caption: string;
+  note: string[];
+  rows: { t: string; sub: string; n: number }[];
+  total: number;
+  from: InvoiceFrom | null;
+  src: string | null;
+  crop: Crop;
+  setCrop: React.Dispatch<React.SetStateAction<Crop>>;
+  tone: "dark" | "light";
 };
 
 function PageB(p: PageBProps) {
@@ -134,16 +190,24 @@ function PageB(p: PageBProps) {
     const ro = new ResizeObserver(() => setBox({ w: el.clientWidth, h: el.clientHeight }));
     ro.observe(el);
     // Wheel zooms the photo; React's wheel listener is passive and cannot keep the page still.
-    const wheel = (e: WheelEvent) => { e.preventDefault(); setCrop((c) => ({ ...c, z: Math.min(3, Math.max(1, c.z - e.deltaY * 0.0015)) })); };
+    const wheel = (e: WheelEvent) => {
+      e.preventDefault();
+      setCrop((c) => ({ ...c, z: Math.min(3, Math.max(1, c.z - e.deltaY * 0.0015)) }));
+    };
     el.addEventListener("wheel", wheel, { passive: false });
-    return () => { ro.disconnect(); el.removeEventListener("wheel", wheel); };
+    return () => {
+      ro.disconnect();
+      el.removeEventListener("wheel", wheel);
+    };
   }, [setCrop]);
   // As the PDF does: draw the gaps in until the bank block clears the note by 4cqw.
   const page = React.useRef<HTMLDivElement>(null);
   React.useLayoutEffect(() => {
     const el = page.current;
     if (!el) return;
-    const pay = el.querySelector(".pay")!, sign = el.querySelector(".sign")!, clear = el.clientWidth * 0.04;
+    const pay = el.querySelector(".pay")!,
+      sign = el.querySelector(".sign")!,
+      clear = el.clientWidth * 0.04;
     for (let k = 1; k >= 0.3; k -= 0.05) {
       el.style.setProperty("--k", String(k));
       if (sign.getBoundingClientRect().top - pay.getBoundingClientRect().bottom >= clear) break;
@@ -151,7 +215,13 @@ function PageB(p: PageBProps) {
   });
   const at = nat.w && box.w ? coverFit(nat.w, nat.h, box.w, box.h, p.crop) : null;
   const clamp = (v: number) => Math.min(1, Math.max(0, v));
-  const move = (dx: number, dy: number, from: Crop) => at && p.setCrop({ ...from, x: at.w > box.w ? clamp(from.x - dx / (at.w - box.w)) : 0.5, y: at.h > box.h ? clamp(from.y - dy / (at.h - box.h)) : 0.5 });
+  const move = (dx: number, dy: number, from: Crop) =>
+    at &&
+    p.setCrop({
+      ...from,
+      x: at.w > box.w ? clamp(from.x - dx / (at.w - box.w)) : 0.5,
+      y: at.h > box.h ? clamp(from.y - dy / (at.h - box.h)) : 0.5,
+    });
   const f = p.from;
   return (
     <div ref={page} className="ivb" aria-label="The invoice page">
@@ -161,46 +231,113 @@ function PageB(p: PageBProps) {
         tabIndex={0}
         role="group"
         aria-label="Photo. Drag or use the arrow keys to move it."
-        onPointerDown={(e) => { drag.current = { x: e.clientX, y: e.clientY, c: p.crop }; e.currentTarget.setPointerCapture(e.pointerId); }}
-        onPointerMove={(e) => { const d = drag.current; if (d) move(e.clientX - d.x, e.clientY - d.y, d.c); }}
+        onPointerDown={(e) => {
+          drag.current = { x: e.clientX, y: e.clientY, c: p.crop };
+          e.currentTarget.setPointerCapture(e.pointerId);
+        }}
+        onPointerMove={(e) => {
+          const d = drag.current;
+          if (d) move(e.clientX - d.x, e.clientY - d.y, d.c);
+        }}
         onPointerUp={() => (drag.current = null)}
         onPointerCancel={() => (drag.current = null)}
         onKeyDown={(e) => {
-          const step = e.shiftKey ? 40 : 10, k = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
-          if (k) { e.preventDefault(); move(k[0], k[1], p.crop); }
+          const step = e.shiftKey ? 40 : 10,
+            k = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[e.key];
+          if (k) {
+            e.preventDefault();
+            move(k[0], k[1], p.crop);
+          }
         }}
       >
         {p.src ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={p.src} alt="" onLoad={(e) => setNat({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })} style={at ? { width: at.w, height: at.h, left: at.left, top: at.top } : { visibility: "hidden" }} />
+          <img
+            src={p.src}
+            alt=""
+            onLoad={(e) => setNat({ w: e.currentTarget.naturalWidth, h: e.currentTarget.naturalHeight })}
+            style={at ? { width: at.w, height: at.h, left: at.left, top: at.top } : { visibility: "hidden" }}
+          />
         ) : null}
-        <span className="vno" style={{ color: p.tone === "dark" ? "#2E2F34" : "#D9DADF" }}>Julian Gigola</span>
-        <div className="cap"><b>{p.project}</b>{p.caption}</div>
+        <span className="vno" style={{ color: p.tone === "dark" ? "#2E2F34" : "#D9DADF" }}>
+          Julian Gigola
+        </span>
+        <div className="cap">
+          <b>{p.project}</b>
+          {p.caption}
+        </div>
       </div>
       <div className="col">
-        <div className="hd"><span className="wm">INVOICE</span><span className="l">#{p.no || "…"}</span></div>
+        <div className="hd">
+          <span className="wm">INVOICE</span>
+          <span className="l">#{p.no || "…"}</span>
+        </div>
         <div className="to">
           <div className="l">Billed to</div>
-          {p.to.name}{p.to.company ? <><br />{p.to.company}</> : null}{p.to.email ? <><br /><span className="dim">{p.to.email}</span></> : null}
+          {p.to.name}
+          {p.to.company ? (
+            <>
+              <br />
+              {p.to.company}
+            </>
+          ) : null}
+          {p.to.email ? (
+            <>
+              <br />
+              <span className="dim">{p.to.email}</span>
+            </>
+          ) : null}
         </div>
         <div className="items">
-          {p.rows.map((r, i) => <div key={i} className="it"><span>{r.t}{r.sub ? <small>{r.sub}</small> : null}</span><span>{usdTrim(r.n)}</span></div>)}
+          {p.rows.map((r, i) => (
+            <div key={i} className="it">
+              <span>
+                {r.t}
+                {r.sub ? <small>{r.sub}</small> : null}
+              </span>
+              <span>{usdTrim(r.n)}</span>
+            </div>
+          ))}
         </div>
         <div className="amount">
           <div className="l">Total due</div>
           <div className="k">{usdTrim(p.total)}</div>
-          <div className="sub"><span>Issued <b>{p.date ? shortDate(p.date) : ""}</b></span><span>Due <b className="v">{p.due ? shortDate(p.due, true) : ""}</b></span></div>
+          <div className="sub">
+            <span>
+              Issued <b>{p.date ? shortDate(p.date) : ""}</b>
+            </span>
+            <span>
+              Due <b className="v">{p.due ? shortDate(p.due, true) : ""}</b>
+            </span>
+          </div>
         </div>
         <div className="pay">
           <div className="l">Bank transfer</div>
-          {f?.bank}<br />{f?.routing ? `Routing ${f.routing}` : null}<br />{f?.account ? `Account ${f.account}` : null}<br /><em>{f?.late}</em>
+          {f?.bank}
+          <br />
+          {f?.routing ? `Routing ${f.routing}` : null}
+          <br />
+          {f?.account ? `Account ${f.account}` : null}
+          <br />
+          <em>{f?.late}</em>
         </div>
         <div className="sign">
-          <p>{p.note.filter(Boolean).map((n, i) => <React.Fragment key={i}>{i ? <br /> : null}{n}</React.Fragment>)}<i>Cheers,</i></p>
+          <p>
+            {p.note.filter(Boolean).map((n, i) => (
+              <React.Fragment key={i}>
+                {i ? <br /> : null}
+                {n}
+              </React.Fragment>
+            ))}
+            <i>Cheers,</i>
+          </p>
           <span className="wm2">Julian Gigola</span>
           <span className="em">hello@juliangigola.com</span>
         </div>
-        <div className="ft"><span>juliangigola.com</span><span>{f?.tax ? `Tax ${f.tax}` : ""}</span></div>
+        <div className="ft">
+          <span>juliangigola.com</span>
+          <span>{f?.tax ? `Tax ${f.tax}` : ""}</span>
+        </div>
       </div>
     </div>
   );
@@ -235,8 +372,14 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
   const shot = l.when ? l.when.slice(0, 10) : ymdPT();
   const [project, setProject] = React.useState(full.company ?? "");
   const [caption, setCaption] = React.useState(`Editorial · ${shortDate(shot, true)}`);
-  const [to, setTo] = React.useState<InvoiceDetails["to"]>({ name: l.name, company: full.company ?? "", email: mailable(l.email) ? l.email : "" });
-  const [lines, setLines] = React.useState<LineB[]>([{ desc: kindOf(l.kind) ?? "Photography", sub: "", amt: full.quote !== undefined ? String(full.quote) : "" }]);
+  const [to, setTo] = React.useState<InvoiceDetails["to"]>({
+    name: l.name,
+    company: full.company ?? "",
+    email: mailable(l.email) ? l.email : "",
+  });
+  const [lines, setLines] = React.useState<LineB[]>([
+    { desc: kindOf(l.kind) ?? "Photography", sub: "", amt: full.quote !== undefined ? String(full.quote) : "" },
+  ]);
   const [paid, setPaid] = React.useState(full.deposit ? String(depositOfLead(full)) : "0");
   const [depositNote, setDepositNote] = React.useState("Paid at booking");
   const [note, setNote] = React.useState<string[]>([...THANKS_NOTES]);
@@ -264,7 +407,14 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
     const last = [...(full.invoices ?? [])].reverse().find((i) => i.b)?.b;
     if (!last) return;
     deskCall<{ photo?: string }>({ path: `/invoice-photo?key=${last.photo}` })
-      .then((o) => { if (o.photo) { setSrc(o.photo); setPhotoKey(last.photo); setCropRaw(last.crop); setTone(last.tone); } })
+      .then((o) => {
+        if (o.photo) {
+          setSrc(o.photo);
+          setPhotoKey(last.photo);
+          setCropRaw(last.crop);
+          setTone(last.tone);
+        }
+      })
       // Only a head start: without it the sheet opens empty, as a first invoice does.
       .catch(() => {});
   }, [full.invoices]);
@@ -273,19 +423,35 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
   React.useEffect(() => {
     if (!src) return;
     let live = true;
-    (img.current?.src === src ? Promise.resolve(img.current) : loadImage(src)).then((i) => { img.current = i; if (live) setTone(toneFor(i, crop)); }, () => {});
-    return () => { live = false; };
+    (img.current?.src === src ? Promise.resolve(img.current) : loadImage(src)).then(
+      (i) => {
+        img.current = i;
+        if (live) setTone(toneFor(i, crop));
+      },
+      () => {},
+    );
+    return () => {
+      live = false;
+    };
   }, [src, crop]);
 
   const pick = async (file?: File) => {
     if (!file) return;
     setErr(null);
-    try { setSrc(await shrink(file)); setPhotoKey(null); setCropRaw({ x: 0.5, y: 0.5, z: 1 }); }
-    catch (e) { setErr(errorText(e)); }
+    try {
+      setSrc(await shrink(file));
+      setPhotoKey(null);
+      setCropRaw({ x: 0.5, y: 0.5, z: 1 });
+    } catch (e) {
+      setErr(errorText(e));
+    }
   };
 
   const dep = Number(paid) || 0;
-  const rows = [...lines.map((x) => ({ t: x.desc, sub: x.sub, n: Number(x.amt) || 0 })), ...(dep ? [{ t: "Deposit received", sub: depositNote, n: -dep }] : [])];
+  const rows = [
+    ...lines.map((x) => ({ t: x.desc, sub: x.sub, n: Number(x.amt) || 0 })),
+    ...(dep ? [{ t: "Deposit received", sub: depositNote, n: -dep }] : []),
+  ];
   const total = rows.reduce((s, r) => s + r.n, 0);
   const setLine = (i: number, k: keyof LineB) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setLines(lines.map((x, j) => (j === i ? { ...x, [k]: k === "amt" ? e.target.value.replace(/[^\d.]/g, "") : e.target.value } : x)));
@@ -299,19 +465,23 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
     try {
       let key = photoKey;
       if (!key) {
-        const o = await adminCall<{ key?: string }>("/api/leads/invoice-photo", { method: "POST", body: JSON.stringify({ photo: src }) }, "Could not save the photo.");
+        const o = await adminCall<{ key?: string }>(
+          "/api/leads/invoice-photo",
+          { method: "POST", body: JSON.stringify({ photo: src }) },
+          "Could not save the photo.",
+        );
         if (!o.key) throw new Error("Could not save the photo.");
         setPhotoKey((key = o.key));
       }
       // Saved once: a retry after a failed PDF makes the PDF again, never a second invoice.
-      saved.current ??= (await patch({
+      saved.current ??= await patch({
         invoice: {
           date,
           lines: lines.map((x) => ({ desc: x.desc.trim(), sub: x.sub.trim(), qty: 1, rate: Number(x.amt) })),
           paid: dep,
           b: { due, to, project, caption, note, depositNote, photo: key, crop, tone },
         },
-      }));
+      });
       // The PATCH answers with the lead as stored, so no second read (that one asked for a key the full lead has no id for).
       const fresh = saved.current;
       const inv = fresh.invoices!.at(-1)!;
@@ -326,27 +496,69 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
   if (made)
     return (
       <div className="grid gap-3 rounded-xl border border-border p-3.5">
-        <p className="text-[15px]">Invoice <b className="font-mono font-medium">{made.inv.no}</b> made, {usd(balance(made.inv))} due.</p>
+        <p className="text-[15px]">
+          Invoice <b className="font-mono font-medium">{made.inv.no}</b> made, {usd(balance(made.inv))} due.
+        </p>
         <Deliver file={made.file} inv={made.inv} l={l} />
-        <button type="button" onClick={done} className={cn(btn, "justify-self-start")}>Done</button>
+        <button type="button" onClick={done} className={cn(btn, "justify-self-start")}>
+          Done
+        </button>
       </div>
     );
 
   const legend = "mb-1.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground";
   const mono = "font-mono text-[14px]";
   return (
-    <form className="grid gap-5 rounded-xl border border-border p-3.5 @container" onSubmit={(e) => { e.preventDefault(); save(); }}>
+    <form
+      className="grid gap-5 rounded-xl border border-border p-3.5 @container"
+      onSubmit={(e) => {
+        e.preventDefault();
+        save();
+      }}
+    >
       <style>{PAGE_B_CSS}</style>
       <div className={cn("grid gap-5", !left && "@[760px]:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] @[760px]:items-start")}>
         {(() => {
-          const page = <PageB no={no} date={date} due={due} to={to} project={project} caption={caption} note={note} rows={rows} total={total} from={from} src={src} crop={crop} setCrop={setCropRaw} tone={tone} />;
+          const page = (
+            <PageB
+              no={no}
+              date={date}
+              due={due}
+              to={to}
+              project={project}
+              caption={caption}
+              note={note}
+              rows={rows}
+              total={total}
+              from={from}
+              src={src}
+              crop={crop}
+              setCrop={setCropRaw}
+              tone={tone}
+            />
+          );
           // Julian: on desktop the full-size page sits on the left, over the tabs and the list.
-          return left
-            ? createPortal(<div className="absolute inset-y-0 left-0 z-20 w-[calc(220px+var(--list-w,420px))] overflow-y-auto border-r border-border bg-background p-6">{page}</div>, left)
-            : <div className="grid gap-5 @[760px]:order-2 @[760px]:sticky @[760px]:top-4">{page}</div>;
+          return left ? (
+            createPortal(
+              <div className="absolute inset-y-0 left-0 z-20 w-[calc(220px+var(--list-w,420px))] overflow-y-auto border-r border-border bg-background p-6">
+                {page}
+              </div>,
+              left,
+            )
+          ) : (
+            <div className="grid gap-5 @[760px]:order-2 @[760px]:sticky @[760px]:top-4">{page}</div>
+          );
         })()}
         <div className="grid gap-5">
-          {from && editFrom ? <FromForm from={from} saved={(f) => { setFrom(f); setEditFrom(false); }} /> : null}
+          {from && editFrom ? (
+            <FromForm
+              from={from}
+              saved={(f) => {
+                setFrom(f);
+                setEditFrom(false);
+              }}
+            />
+          ) : null}
           <fieldset className="grid gap-2.5">
             <legend className={legend}>Photo</legend>
             <div className="flex flex-wrap gap-2.5">
@@ -354,66 +566,204 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
                 {src ? "Replace photo" : "Add a photo"}
                 <input type="file" accept="image/*" className="sr-only" onChange={(e) => pick(e.target.files?.[0])} />
               </label>
-              {src ? <button type="button" onClick={() => setCropRaw({ x: 0.5, y: 0.5, z: 1 })} className={cn(btn, "min-h-10")}>Reset framing</button> : null}
+              {src ? (
+                <button type="button" onClick={() => setCropRaw({ x: 0.5, y: 0.5, z: 1 })} className={cn(btn, "min-h-10")}>
+                  Reset framing
+                </button>
+              ) : null}
             </div>
             {src ? (
               <label className="flex items-center gap-3 font-mono text-[12.5px] text-muted-foreground">
                 Zoom
-                <input type="range" min={1} max={3} step={0.01} value={crop.z} onChange={(e) => setCropRaw({ ...crop, z: Number(e.target.value) })} className="flex-1 accent-foreground" />
+                <input
+                  type="range"
+                  min={1}
+                  max={3}
+                  step={0.01}
+                  value={crop.z}
+                  onChange={(e) => setCropRaw({ ...crop, z: Number(e.target.value) })}
+                  className="flex-1 accent-foreground"
+                />
                 <span className="w-10 text-right">{Math.round(crop.z * 100)}%</span>
               </label>
             ) : null}
-            <p className="font-mono text-[12.5px] text-muted-foreground">Drag the photo on the page to move it. The framing is saved with the invoice.</p>
+            <p className="font-mono text-[12.5px] text-muted-foreground">
+              Drag the photo on the page to move it. The framing is saved with the invoice.
+            </p>
           </fieldset>
           <fieldset className="grid gap-2.5">
             <legend className={legend}>Caption on the photo</legend>
-            <label className={fieldLabelClass}>Project<input required maxLength={40} value={project} onChange={(e) => setProject(e.target.value)} className={fieldClass} /></label>
-            <label className={fieldLabelClass}>Line under it<input maxLength={40} value={caption} onChange={(e) => setCaption(e.target.value)} className={fieldClass} /></label>
+            <label className={fieldLabelClass}>
+              Project
+              <input required maxLength={40} value={project} onChange={(e) => setProject(e.target.value)} className={fieldClass} />
+            </label>
+            <label className={fieldLabelClass}>
+              Line under it
+              <input maxLength={40} value={caption} onChange={(e) => setCaption(e.target.value)} className={fieldClass} />
+            </label>
           </fieldset>
           <fieldset className="grid grid-cols-3 gap-2.5">
             <legend className={legend}>Invoice</legend>
-            <div className={fieldLabelClass}>No.<span className="flex min-h-11 items-center font-mono text-[15px] text-foreground">{no || "…"}</span></div>
-            <label className={fieldLabelClass}>Issued<input type="date" required value={date} onChange={(e) => e.target.value && setDate(e.target.value)} className={cn(fieldClass, "px-2", mono)} /></label>
-            <label className={fieldLabelClass}>Due<input type="date" required value={due} onChange={(e) => e.target.value && setDue(e.target.value)} className={cn(fieldClass, "px-2", mono)} /></label>
+            <div className={fieldLabelClass}>
+              No.<span className="flex min-h-11 items-center font-mono text-[15px] text-foreground">{no || "…"}</span>
+            </div>
+            <label className={fieldLabelClass}>
+              Issued
+              <input
+                type="date"
+                required
+                value={date}
+                onChange={(e) => e.target.value && setDate(e.target.value)}
+                className={cn(fieldClass, "px-2", mono)}
+              />
+            </label>
+            <label className={fieldLabelClass}>
+              Due
+              <input
+                type="date"
+                required
+                value={due}
+                onChange={(e) => e.target.value && setDue(e.target.value)}
+                className={cn(fieldClass, "px-2", mono)}
+              />
+            </label>
           </fieldset>
           <fieldset className="grid gap-2.5">
             <legend className={legend}>Billed to</legend>
-            <label className={fieldLabelClass}>Name<input required maxLength={60} value={to.name} onChange={(e) => setTo({ ...to, name: e.target.value })} className={fieldClass} /></label>
-            <label className={fieldLabelClass}>Company<input maxLength={60} value={to.company} onChange={(e) => setTo({ ...to, company: e.target.value })} className={fieldClass} /></label>
-            <label className={fieldLabelClass}>Email<input type="email" maxLength={80} value={to.email} onChange={(e) => setTo({ ...to, email: e.target.value })} className={fieldClass} /></label>
+            <label className={fieldLabelClass}>
+              Name
+              <input
+                required
+                maxLength={60}
+                value={to.name}
+                onChange={(e) => setTo({ ...to, name: e.target.value })}
+                className={fieldClass}
+              />
+            </label>
+            <label className={fieldLabelClass}>
+              Company
+              <input maxLength={60} value={to.company} onChange={(e) => setTo({ ...to, company: e.target.value })} className={fieldClass} />
+            </label>
+            <label className={fieldLabelClass}>
+              Email
+              <input
+                type="email"
+                maxLength={80}
+                value={to.email}
+                onChange={(e) => setTo({ ...to, email: e.target.value })}
+                className={fieldClass}
+              />
+            </label>
           </fieldset>
           <fieldset className="grid gap-2">
             <legend className={legend}>Lines: title, what was done, amount</legend>
             {lines.map((x, i) => (
               <div key={i} className="grid grid-cols-[minmax(0,1fr)_96px_44px] gap-2 border-b border-border pb-2.5">
-                <input aria-label={`Line ${i + 1} title`} required maxLength={48} value={x.desc} onChange={setLine(i, "desc")} className={cn(fieldClass, "px-3")} />
-                <input aria-label={`Line ${i + 1} amount`} required inputMode="decimal" value={x.amt} onChange={setLine(i, "amt")} placeholder="0" className={cn(fieldClass, "px-2 text-right", mono)} />
+                <input
+                  aria-label={`Line ${i + 1} title`}
+                  required
+                  maxLength={48}
+                  value={x.desc}
+                  onChange={setLine(i, "desc")}
+                  className={cn(fieldClass, "px-3")}
+                />
+                <input
+                  aria-label={`Line ${i + 1} amount`}
+                  required
+                  inputMode="decimal"
+                  value={x.amt}
+                  onChange={setLine(i, "amt")}
+                  placeholder="0"
+                  className={cn(fieldClass, "px-2 text-right", mono)}
+                />
                 {lines.length > 1 ? (
-                  <button type="button" aria-label={`Remove line ${i + 1}`} onClick={() => setLines(lines.filter((_, j) => j !== i))} className="grid size-11 place-items-center text-muted-foreground hoverable:hover:text-foreground">×</button>
-                ) : <span aria-hidden="true" />}
-                <input aria-label={`Line ${i + 1}, what was done`} maxLength={60} value={x.sub} onChange={setLine(i, "sub")} placeholder="What was done" className={cn(fieldClass, "px-3")} />
+                  <button
+                    type="button"
+                    aria-label={`Remove line ${i + 1}`}
+                    onClick={() => setLines(lines.filter((_, j) => j !== i))}
+                    className="grid size-11 place-items-center text-muted-foreground hoverable:hover:text-foreground"
+                  >
+                    ×
+                  </button>
+                ) : (
+                  <span aria-hidden="true" />
+                )}
+                <input
+                  aria-label={`Line ${i + 1}, what was done`}
+                  maxLength={60}
+                  value={x.sub}
+                  onChange={setLine(i, "sub")}
+                  placeholder="What was done"
+                  className={cn(fieldClass, "px-3")}
+                />
               </div>
             ))}
             {lines.length + (dep ? 1 : 0) < MAX_INVOICE_ROWS ? (
-              <button type="button" onClick={() => setLines([...lines, { desc: "", sub: "", amt: "" }])} className={cn(btn, "min-h-10 justify-self-start")}>Add a line</button>
+              <button
+                type="button"
+                onClick={() => setLines([...lines, { desc: "", sub: "", amt: "" }])}
+                className={cn(btn, "min-h-10 justify-self-start")}
+              >
+                Add a line
+              </button>
             ) : null}
           </fieldset>
           <fieldset className="grid grid-cols-[96px_minmax(0,1fr)] gap-2.5">
             <legend className={legend}>Deposit received</legend>
-            <label className={fieldLabelClass}>Amount<input inputMode="decimal" value={paid} onChange={(e) => setPaid(e.target.value.replace(/[^\d.]/g, ""))} className={cn(fieldClass, "px-2 text-right", mono)} /></label>
-            <label className={fieldLabelClass}>Line under it<input maxLength={60} value={depositNote} onChange={(e) => setDepositNote(e.target.value)} className={fieldClass} /></label>
-            <p className="col-span-2 font-mono text-[12.5px] text-muted-foreground">0 leaves it off. Above 0 it shows as a line and comes off the total.</p>
+            <label className={fieldLabelClass}>
+              Amount
+              <input
+                inputMode="decimal"
+                value={paid}
+                onChange={(e) => setPaid(e.target.value.replace(/[^\d.]/g, ""))}
+                className={cn(fieldClass, "px-2 text-right", mono)}
+              />
+            </label>
+            <label className={fieldLabelClass}>
+              Line under it
+              <input maxLength={60} value={depositNote} onChange={(e) => setDepositNote(e.target.value)} className={fieldClass} />
+            </label>
+            <p className="col-span-2 font-mono text-[12.5px] text-muted-foreground">
+              0 leaves it off. Above 0 it shows as a line and comes off the total.
+            </p>
           </fieldset>
           <fieldset className="grid gap-2">
             <legend className={legend}>Note</legend>
-            {note.map((n, i) => <input key={i} aria-label={`Note, line ${i + 1}`} maxLength={44} value={n} onChange={(e) => setNote(note.map((m, j) => (j === i ? e.target.value : m)))} className={fieldClass} />)}
+            {note.map((n, i) => (
+              <input
+                key={i}
+                aria-label={`Note, line ${i + 1}`}
+                maxLength={44}
+                value={n}
+                onChange={(e) => setNote(note.map((m, j) => (j === i ? e.target.value : m)))}
+                className={fieldClass}
+              />
+            ))}
           </fieldset>
-          <p className="flex justify-between font-mono text-[14px] text-muted-foreground">Total due<b className="text-[16px] font-medium text-accent">{usd(total)}</b></p>
-          {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}
+          <p className="flex justify-between font-mono text-[14px] text-muted-foreground">
+            Total due<b className="text-[16px] font-medium text-accent">{usd(total)}</b>
+          </p>
+          {err ? (
+            <p role="alert" className="text-[15px] text-destructive">
+              {err}
+            </p>
+          ) : null}
           <div className="flex flex-wrap gap-2.5">
-            <button type="submit" disabled={busy || !no} className={cn(btn, primary)}>{busy ? "Making" : "Save and make PDF"}</button>
-            <button type="button" onClick={done} className={btn}>Cancel</button>
-            {from && !editFrom ? <button type="button" onClick={() => setEditFrom(true)} className="min-h-11 px-2 font-mono text-[12.5px] text-muted-foreground hoverable:hover:text-foreground">Your details</button> : null}
+            <button type="submit" disabled={busy || !no} className={cn(btn, primary)}>
+              {busy ? "Making" : "Save and make PDF"}
+            </button>
+            <button type="button" onClick={done} className={btn}>
+              Cancel
+            </button>
+            {from && !editFrom ? (
+              <button
+                type="button"
+                onClick={() => setEditFrom(true)}
+                className="min-h-11 px-2 font-mono text-[12.5px] text-muted-foreground hoverable:hover:text-foreground"
+              >
+                Your details
+              </button>
+            ) : null}
           </div>
         </div>
       </div>
@@ -421,8 +771,38 @@ export function InvoiceSheetB({ l, full, patch, done }: { l: LeadSummary; full: 
   );
 }
 
-const EMPTY_FROM: InvoiceFrom = { name: "", a1: "", a2: "", a3: "", email: "hello@juliangigola.com", phone: "", ein: "", signoff: "Best,", notes: "", bank: "", routing: "", account: "", late: "Late payments add 5% per week.", tax: "" };
-const FROM_FIELDS: [keyof InvoiceFrom, string][] = [["name", "Name on the invoice"], ["a1", "Address, line 1"], ["a2", "Address, line 2"], ["a3", "City, state, zip"], ["email", "Email"], ["phone", "Phone"], ["ein", "EIN line"], ["signoff", "Sign-off"], ["notes", "Notes on every invoice"], ["bank", "Bank name"], ["routing", "Routing number"], ["account", "Account number"], ["late", "Late fee line"], ["tax", "Tax number"]];
+const EMPTY_FROM: InvoiceFrom = {
+  name: "",
+  a1: "",
+  a2: "",
+  a3: "",
+  email: "hello@juliangigola.com",
+  phone: "",
+  ein: "",
+  signoff: "Best,",
+  notes: "",
+  bank: "",
+  routing: "",
+  account: "",
+  late: "Late payments add 5% per week.",
+  tax: "",
+};
+const FROM_FIELDS: [keyof InvoiceFrom, string][] = [
+  ["name", "Name on the invoice"],
+  ["a1", "Address, line 1"],
+  ["a2", "Address, line 2"],
+  ["a3", "City, state, zip"],
+  ["email", "Email"],
+  ["phone", "Phone"],
+  ["ein", "EIN line"],
+  ["signoff", "Sign-off"],
+  ["notes", "Notes on every invoice"],
+  ["bank", "Bank name"],
+  ["routing", "Routing number"],
+  ["account", "Account number"],
+  ["late", "Late fee line"],
+  ["tax", "Tax number"],
+];
 
 /** His details, once: sealed on the Worker, never in the code (the repo is public). */
 function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) => void }) {
@@ -441,13 +821,26 @@ function FromForm({ from, saved }: { from: InvoiceFrom; saved: (f: InvoiceFrom) 
       {FROM_FIELDS.map(([k, t]) => (
         <label key={k} className={fieldLabelClass}>
           {t}
-          {k === "notes"
-            ? <textarea value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} rows={3} className={cn(fieldClass, "py-3 leading-relaxed")} />
-            : <input value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} className={fieldClass} autoComplete="off" />}
+          {k === "notes" ? (
+            <textarea
+              value={f[k]}
+              onChange={(e) => setF({ ...f, [k]: e.target.value })}
+              rows={3}
+              className={cn(fieldClass, "py-3 leading-relaxed")}
+            />
+          ) : (
+            <input value={f[k]} onChange={(e) => setF({ ...f, [k]: e.target.value })} className={fieldClass} autoComplete="off" />
+          )}
         </label>
       ))}
-      {err ? <p role="alert" className="text-[15px] text-destructive">{err}</p> : null}
-      <button type="button" onClick={save} className={cn(btn, "justify-self-start")}>Save details</button>
+      {err ? (
+        <p role="alert" className="text-[15px] text-destructive">
+          {err}
+        </p>
+      ) : null}
+      <button type="button" onClick={save} className={cn(btn, "justify-self-start")}>
+        Save details
+      </button>
     </fieldset>
   );
 }

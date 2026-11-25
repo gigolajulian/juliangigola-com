@@ -4,7 +4,18 @@ import * as React from "react";
 import Image from "next/image";
 import { PageFoot } from "@/components/site/foot";
 import { Mark } from "@/components/site/duo";
-import { REEL, creditOf, embedUrl, previewUrl, captionsOff, vimeoListen, vimeoPlays, posterFor, sectionName, type Video } from "@/lib/work/videos";
+import {
+  REEL,
+  creditOf,
+  embedUrl,
+  previewUrl,
+  captionsOff,
+  vimeoListen,
+  vimeoPlays,
+  posterFor,
+  sectionName,
+  type Video,
+} from "@/lib/work/videos";
 import { noSubscribe, pad } from "@/lib/utils";
 
 /* JG V3 Motion (Julian): A as an index over one full-screen stage;
@@ -13,14 +24,32 @@ import { noSubscribe, pad } from "@/lib/utils";
    in frame; a click opens the player, and Back, Esc, the browser's back or
    a click outside the film puts the visitor where they were. */
 
-const reel: Video = { id: "reel", title: REEL.title, provider: REEL.provider, videoId: REEL.videoId, section: "music", poster: REEL.poster, previewAt: 0 };
+const reel: Video = {
+  id: "reel",
+  title: REEL.title,
+  provider: REEL.provider,
+  videoId: REEL.videoId,
+  section: "music",
+  poster: REEL.poster,
+  previewAt: 0,
+};
 /* Julian's order: the reel, Clean, Ladera Granola, The Description, then
    the rest varied between the two sections. */
-const ORDER = ["youtube-lmR6-qjutn0", "vimeo-895734192", "youtube-E7N7HDnQjfI", "youtube-9QGO20Jgz7s", "youtube-ym7xEK50OT0", "youtube-pwzi7LKu-_I", "youtube-bqw03DYQavM", "youtube-1e1fYalqTJs"];
-const rank = (v: Video) => (ORDER.indexOf(v.id) + 1 || 99);
+const ORDER = [
+  "youtube-lmR6-qjutn0",
+  "vimeo-895734192",
+  "youtube-E7N7HDnQjfI",
+  "youtube-9QGO20Jgz7s",
+  "youtube-ym7xEK50OT0",
+  "youtube-pwzi7LKu-_I",
+  "youtube-bqw03DYQavM",
+  "youtube-1e1fYalqTJs",
+];
+const rank = (v: Video) => ORDER.indexOf(v.id) + 1 || 99;
 /* A client's logo slug; Sammy Shiblaq releases under Empire, Imanemun's
    Dide O Del under Paydar (Julian). */
-const markOf = (client: string) => (client === "Sammy Shiblaq" ? "empire" : client === "Imanemun" ? "paydar" : client.toLowerCase().replace(/\s+/g, "-"));
+const markOf = (client: string) =>
+  client === "Sammy Shiblaq" ? "empire" : client === "Imanemun" ? "paydar" : client.toLowerCase().replace(/\s+/g, "-");
 const subOf = (v: Video) => (v.id === "reel" ? "Reel" : [creditOf(v), v.year ?? sectionName(v.section)].filter(Boolean).join(" · "));
 const still = () => typeof window !== "undefined" && matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -38,23 +67,44 @@ function Loop({ v }: { v: Video }) {
     const onMsg = (e: MessageEvent) => {
       if (e.source !== ref.current?.contentWindow) return;
       let m;
-      try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
+      try {
+        m = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+      } catch {
+        return;
+      }
       if (m?.event === "ready") return void vimeoListen(ref.current?.contentWindow);
       if (vimeoPlays(m)) return setReady(true);
       const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
       if (typeof state !== "number") return;
       clearTimeout(t);
-      if (state === 1) (captionsOff(ref.current?.contentWindow), (t = setTimeout(() => setReady(true), 2500)));
-      else setReady(false);
+      if (state === 1) {
+        captionsOff(ref.current?.contentWindow);
+        t = setTimeout(() => setReady(true), 2500);
+      } else setReady(false);
     };
     addEventListener("message", onMsg);
-    return () => { clearTimeout(t); removeEventListener("message", onMsg); };
+    return () => {
+      clearTimeout(t);
+      removeEventListener("message", onMsg);
+    };
   }, []);
   const hello = () => {
     if (yt) ref.current?.contentWindow?.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*");
     else vimeoListen(ref.current?.contentWindow);
   };
-  return <iframe ref={ref} onLoad={hello} className="mo-loop" data-ready={ready || undefined} src={previewUrl(v) + (yt ? "&enablejsapi=1" : "")} title="" aria-hidden tabIndex={-1} allow="autoplay" />;
+  return (
+    <iframe
+      ref={ref}
+      onLoad={hello}
+      className="mo-loop"
+      data-ready={ready || undefined}
+      src={previewUrl(v) + (yt ? "&enablejsapi=1" : "")}
+      title=""
+      aria-hidden
+      tabIndex={-1}
+      allow="autoplay"
+    />
+  );
 }
 
 /* The player: the film over the whole screen, in a modal dialog with a
@@ -64,7 +114,8 @@ function Loop({ v }: { v: Video }) {
    and click (an iframe would swallow them): a move brings the bars back,
    a click plays or pauses. Paused, the film dims and the bars stay up. */
 const clock = (s: number) => `${pad(Math.floor(s / 60))}:${pad(Math.floor(s % 60))}`;
-const playerSrc = (v: Video) => embedUrl(v) + (v.provider === "youtube" ? "&controls=0&enablejsapi=1&iv_load_policy=3&cc_load_policy=0" : "&controls=0&api=1");
+const playerSrc = (v: Video) =>
+  embedUrl(v) + (v.provider === "youtube" ? "&controls=0&enablejsapi=1&iv_load_policy=3&cc_load_policy=0" : "&controls=0&api=1");
 
 function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; onGo: (v: Video) => void; onClose: () => void }) {
   const n = v ? list.findIndex((x) => x.id === v.id) : 0;
@@ -98,7 +149,11 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
     const onMsg = (e: MessageEvent) => {
       if (e.source !== frame.current?.contentWindow) return;
       let m;
-      try { m = typeof e.data === "string" ? JSON.parse(e.data) : e.data; } catch { return; }
+      try {
+        m = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+      } catch {
+        return;
+      }
       if (m?.event === "infoDelivery" && m.info) {
         const i = m.info;
         if (typeof i.playerState === "number") setPaused(i.playerState === 2);
@@ -130,44 +185,88 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
       w.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*");
       // Captions off by default, whatever the viewer's YouTube setting.
       captionsOff(w);
-    } else for (const value of ["pause", "play", "timeupdate", "playProgress"]) w.postMessage(JSON.stringify({ method: "addEventListener", value }), "*");
+    } else
+      for (const value of ["pause", "play", "timeupdate", "playProgress"])
+        w.postMessage(JSON.stringify({ method: "addEventListener", value }), "*");
   }
-  const toggle = () => { post(paused ? "playVideo" : "pauseVideo", [], paused ? "play" : "pause"); setPaused(!paused); poke(); };
-  const seek = (s: number) => { const at = Math.max(0, Math.min(time.dur, s)); post("seekTo", [at, true], "setCurrentTime", at); setTime((p) => ({ ...p, at })); poke(); };
-  const sound = () => { post(muted ? "unMute" : "mute", [], "setMuted", !muted); setMuted(!muted); poke(); };
+  const toggle = () => {
+    post(paused ? "playVideo" : "pauseVideo", [], paused ? "play" : "pause");
+    setPaused(!paused);
+    poke();
+  };
+  const seek = (s: number) => {
+    const at = Math.max(0, Math.min(time.dur, s));
+    post("seekTo", [at, true], "setCurrentTime", at);
+    setTime((p) => ({ ...p, at }));
+    poke();
+  };
+  const sound = () => {
+    post(muted ? "unMute" : "mute", [], "setMuted", !muted);
+    setMuted(!muted);
+    poke();
+  };
   const full = () => (document.fullscreenElement ? document.exitFullscreen() : ref.current?.requestFullscreen());
   const back = () => history.back();
   const keys = (e: React.KeyboardEvent) => {
     poke();
     if ((e.target as HTMLElement).closest("button, input")) return;
-    if (e.key === " " || e.key === "k") { e.preventDefault(); toggle(); }
-    else if (e.key === "ArrowRight") seek(time.at + 5);
+    if (e.key === " " || e.key === "k") {
+      e.preventDefault();
+      toggle();
+    } else if (e.key === "ArrowRight") seek(time.at + 5);
     else if (e.key === "ArrowLeft") seek(time.at - 5);
     else if (e.key === "m") sound();
     else if (e.key === "f") full();
   };
   const up = shown || paused;
   return (
-    <dialog ref={ref} tabIndex={-1} className="v3 mo-player" aria-label={v?.title} data-shown={up || undefined} data-paused={paused || undefined} onPointerMove={poke} onKeyDown={keys} onCancel={(e) => { e.preventDefault(); if (document.fullscreenElement) document.exitFullscreen(); else back(); }}>
+    <dialog
+      ref={ref}
+      tabIndex={-1}
+      className="v3 mo-player"
+      aria-label={v?.title}
+      data-shown={up || undefined}
+      data-paused={paused || undefined}
+      onPointerMove={poke}
+      onKeyDown={keys}
+      onCancel={(e) => {
+        e.preventDefault();
+        if (document.fullscreenElement) document.exitFullscreen();
+        else back();
+      }}
+    >
       {v ? (
         <>
-          <iframe ref={frame} onLoad={hello} src={playerSrc(v)} title={v.title} tabIndex={-1} allow="autoplay; fullscreen; picture-in-picture" />
+          <iframe
+            ref={frame}
+            onLoad={hello}
+            src={playerSrc(v)}
+            title={v.title}
+            tabIndex={-1}
+            allow="autoplay; fullscreen; picture-in-picture"
+          />
           <div className="pl-tint" />
           <div className="pl-wake" onClick={toggle} />
           {/* Paused (Julian): the outer thirds step to the film before and after. */}
           {paused && prev ? (
             <button type="button" className="pl-step prev" onClick={() => onGo(prev)}>
-              <span className="lbl">← {pad(n - 1)}</span><b>{prev.title}</b>
+              <span className="lbl">← {pad(n - 1)}</span>
+              <b>{prev.title}</b>
             </button>
           ) : null}
           {paused && next ? (
             <button type="button" className="pl-step next" onClick={() => onGo(next)}>
-              <span className="lbl">{pad(n + 1)} →</span><b>{next.title}</b>
+              <span className="lbl">{pad(n + 1)} →</span>
+              <b>{next.title}</b>
             </button>
           ) : null}
           <div className="pl-bar lbl">
-            <button type="button" onClick={back}>← Back</button>
-            <span>{pad(n)} / {pad(list.length - 1)}</span>
+            <button type="button" onClick={back}>
+              ← Back
+            </button>
+            <span>
+              {pad(n)} / {pad(list.length - 1)}
+            </span>
           </div>
           <div className="pl-info">
             <div className="pl-meta">
@@ -178,11 +277,28 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
               {v.client ? <Mark slug={markOf(v.client)} name={v.client} h={26} even /> : null}
             </div>
             <div className="pl-ctl lbl">
-              <button type="button" onClick={toggle}>{paused ? "Play" : "Pause"}</button>
-              <span className="pl-time">{clock(time.at)} / {clock(time.dur)}</span>
-              <input type="range" min={0} max={time.dur || 1} step={0.1} value={time.at} onChange={(e) => seek(Number(e.target.value))} aria-label="Seek" style={{ "--p": `${time.dur ? (time.at / time.dur) * 100 : 0}%` } as React.CSSProperties} />
-              <button type="button" onClick={sound}>{muted ? "Sound off" : "Sound on"}</button>
-              <button type="button" onClick={full}>Full</button>
+              <button type="button" onClick={toggle}>
+                {paused ? "Play" : "Pause"}
+              </button>
+              <span className="pl-time">
+                {clock(time.at)} / {clock(time.dur)}
+              </span>
+              <input
+                type="range"
+                min={0}
+                max={time.dur || 1}
+                step={0.1}
+                value={time.at}
+                onChange={(e) => seek(Number(e.target.value))}
+                aria-label="Seek"
+                style={{ "--p": `${time.dur ? (time.at / time.dur) * 100 : 0}%` } as React.CSSProperties}
+              />
+              <button type="button" onClick={sound}>
+                {muted ? "Sound off" : "Sound on"}
+              </button>
+              <button type="button" onClick={full}>
+                Full
+              </button>
             </div>
           </div>
         </>
@@ -200,10 +316,9 @@ function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void })
   );
   const steps = React.useRef<(HTMLDivElement | null)[]>([]);
   React.useEffect(() => {
-    const io = new IntersectionObserver(
-      (es) => es.forEach((e) => e.isIntersecting && setI(Number((e.target as HTMLElement).dataset.i))),
-      { rootMargin: "-50% 0px -50% 0px" },
-    );
+    const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && setI(Number((e.target as HTMLElement).dataset.i))), {
+      rootMargin: "-50% 0px -50% 0px",
+    });
     steps.current.forEach((el) => el && io.observe(el));
     return () => io.disconnect();
   }, []);
@@ -221,28 +336,51 @@ function Desk({ films, onPlay }: { films: Video[]; onPlay: (v: Video) => void })
           );
         })}
         <button type="button" className="mo-hit" onClick={() => onPlay(v)} aria-label={`Play ${v.title}`} />
-        <p className="mo-h lbl" aria-hidden>Motion · {pad(films.length)} films</p>
+        <p className="mo-h lbl" aria-hidden>
+          Motion · {pad(films.length)} films
+        </p>
         <div className="mo-cap" key={v.id}>
-          <span className="lbl">{pad(i)} · {subOf(v)}</span>
+          <span className="lbl">
+            {pad(i)} · {subOf(v)}
+          </span>
           <h2>{v.title}</h2>
         </div>
         <ol className="mo-index lbl">
           {films.map((f, j) => (
             <li key={f.id}>
-              <button type="button" aria-current={j === i || undefined} onClick={() => steps.current[j]?.scrollIntoView({ behavior: still() ? "auto" : "smooth" })}>
-                <span>{pad(j)}</span>{f.title}
+              <button
+                type="button"
+                aria-current={j === i || undefined}
+                onClick={() => steps.current[j]?.scrollIntoView({ behavior: still() ? "auto" : "smooth" })}
+              >
+                <span>{pad(j)}</span>
+                {f.title}
               </button>
             </li>
           ))}
         </ol>
         {/* The client's logo at the top of the film, under the page label (Julian). */}
-        {v.client ? <span className="mo-mark" key={`${v.id}-mk`}><Mark slug={markOf(v.client)} name={v.client} h={26} even /></span> : null}
+        {v.client ? (
+          <span className="mo-mark" key={`${v.id}-mk`}>
+            <Mark slug={markOf(v.client)} name={v.client} h={26} even />
+          </span>
+        ) : null}
         <div className="mo-play">
-          <button type="button" className="btn fill cn-light" onClick={() => onPlay(v)}>Play with sound</button>
+          <button type="button" className="btn fill cn-light" onClick={() => onPlay(v)}>
+            Play with sound
+          </button>
         </div>
       </div>
       <div className="mo-steps" aria-hidden>
-        {films.map((f, j) => <div key={f.id} data-i={j} ref={(el) => { steps.current[j] = el; }} />)}
+        {films.map((f, j) => (
+          <div
+            key={f.id}
+            data-i={j}
+            ref={(el) => {
+              steps.current[j] = el;
+            }}
+          />
+        ))}
       </div>
     </div>
   );
@@ -252,12 +390,18 @@ function Row({ v, i, onOpen, bare = false }: { v: Video; i: number; onOpen: (v: 
   const poster = posterFor(v);
   return (
     <button type="button" className="mo-row" onClick={() => onOpen(v)} aria-label={`Open ${v.title}`}>
-      <span className="mo-frame">{poster ? <Image src={poster} alt="" fill sizes="100vw" priority={i === 0} style={{ objectFit: "cover" }} /> : null}</span>
+      <span className="mo-frame">
+        {poster ? <Image src={poster} alt="" fill sizes="100vw" priority={i === 0} style={{ objectFit: "cover" }} /> : null}
+      </span>
       <span className="mo-row-cap">
         <span className="lbl mute">{bare ? subOf(v).split(" · ")[0] : subOf(v)}</span>
         <b>{v.title}</b>
       </span>
-      {v.client ? <span className="mo-row-mk"><Mark slug={markOf(v.client)} name={v.client} h={20} even /></span> : null}
+      {v.client ? (
+        <span className="mo-row-mk">
+          <Mark slug={markOf(v.client)} name={v.client} h={20} even />
+        </span>
+      ) : null}
     </button>
   );
 }
@@ -283,14 +427,20 @@ function Stack({ films }: { films: Video[] }) {
   if (!open)
     return (
       <div className="mo-stack">
-        <p className="lbl mute" aria-hidden>Motion · {pad(films.length)} films</p>
-        {films.map((v, i) => <Row key={v.id} v={v} i={i} onOpen={go} />)}
+        <p className="lbl mute" aria-hidden>
+          Motion · {pad(films.length)} films
+        </p>
+        {films.map((v, i) => (
+          <Row key={v.id} v={v} i={i} onOpen={go} />
+        ))}
       </div>
     );
   const n = films.findIndex((f) => f.id === open.id);
   return (
     <div className="mo-stack">
-      <button type="button" className="mo-back lbl" onClick={() => history.back()}>← Motion</button>
+      <button type="button" className="mo-back lbl" onClick={() => history.back()}>
+        ← Motion
+      </button>
       <div className="mo-film">
         <iframe key={open.id} src={embedUrl(open)} title={open.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
       </div>
@@ -299,7 +449,11 @@ function Stack({ films }: { films: Video[] }) {
           <span className="lbl mute">{subOf(open)}</span>
           <b>{open.title}</b>
         </span>
-        {open.client ? <span className="mo-row-mk"><Mark slug={markOf(open.client)} name={open.client} h={24} even /></span> : null}
+        {open.client ? (
+          <span className="mo-row-mk">
+            <Mark slug={markOf(open.client)} name={open.client} h={24} even />
+          </span>
+        ) : null}
       </div>
       <h2 className="lbl mute mo-more">More films</h2>
       <div className="mo-pair">
@@ -307,7 +461,9 @@ function Stack({ films }: { films: Video[] }) {
           .map((_, k) => films[(n + 1 + k) % films.length])
           .filter((f) => f.id !== open.id && !f.title.startsWith("Iranian Americans")) // Julian: never suggested
           .slice(0, 2)
-          .map((f) => <Row key={f.id} v={f} i={films.indexOf(f)} onOpen={go} bare />)}
+          .map((f) => (
+            <Row key={f.id} v={f} i={films.indexOf(f)} onOpen={go} bare />
+          ))}
       </div>
     </div>
   );

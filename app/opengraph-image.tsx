@@ -13,5 +13,13 @@ const SRC = "/work/i-wanna-be-a-human/01.jpg";
 export default function Image() {
   const frame = PROJECTS.flatMap((p) => p.images).find((f) => f.src === SRC);
   if (!frame) throw new Error(`Share card frame not in the archive: ${SRC}`);
-  return renderCard({ kicker: "San Francisco Bay Area", title: "Julian Gigola", byline: "Photographer and creative director", oneLine: true, panel: 620, exact: true, frames: [frame] });
+  return renderCard({
+    kicker: "San Francisco Bay Area",
+    title: "Julian Gigola",
+    byline: "Photographer and creative director",
+    oneLine: true,
+    panel: 620,
+    exact: true,
+    frames: [frame],
+  });
 }

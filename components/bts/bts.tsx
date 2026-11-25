@@ -11,7 +11,6 @@ import { pad } from "@/lib/utils";
    (the files stay in color); clips keep their color and hold on their
    poster until hovered or tapped (`bts-clip.tsx`). */
 
-
 /** "04 frames · 01 clip": photos and clips counted apart, an empty kind left out. */
 const count = (bts: Bts) => {
   const clips = bts.frames.filter((f) => f.src.endsWith(".mp4")).length;
@@ -40,26 +39,12 @@ export function BtsCredit({ bts }: { bts: Bts }) {
           </a>
         </p>
       ) : null}
-      <p className="label tabular-nums text-muted-foreground">
-        {count(bts)}
-      </p>
+      <p className="label tabular-nums text-muted-foreground">{count(bts)}</p>
     </>
   );
 }
 
-function Tile({
-  frame,
-  name,
-  n,
-  sizes,
-  className = "",
-}: {
-  frame: Frame;
-  name: string;
-  n: number;
-  sizes: string;
-  className?: string;
-}) {
+function Tile({ frame, name, n, sizes, className = "" }: { frame: Frame; name: string; n: number; sizes: string; className?: string }) {
   // Clips keep their own shape, uncropped; photos stay on the 4:3 sheet.
   const clip = frame.src.endsWith(".mp4");
   return (
@@ -71,10 +56,7 @@ function Tile({
       }}
     >
       {clip ? (
-        <BtsClip
-          src={frame.src}
-          label={frame.alt || `${name}, behind the scenes, clip ${n}`}
-        />
+        <BtsClip src={frame.src} label={frame.alt || `${name}, behind the scenes, clip ${n}`} />
       ) : (
         <Image
           src={frame.src}
@@ -106,9 +88,7 @@ export function BtsStripGrid({ bts, name }: { bts: Bts; name: string }) {
           n={i + 1}
           sizes="(min-width: 40rem) 30vw, 50vw"
           // A vertical clip stands the full height of the strip, both rows.
-          className={`sm:h-full ${
-            f.src.endsWith(".mp4") && f.height > f.width ? "sm:row-span-2" : ""
-          }`}
+          className={`sm:h-full ${f.src.endsWith(".mp4") && f.height > f.width ? "sm:row-span-2" : ""}`}
         />
       ))}
     </div>
@@ -120,13 +100,7 @@ export function BtsPageGrid({ bts, name }: { bts: Bts; name: string }) {
   return (
     <div className="grid grid-cols-2 items-start gap-2 sm:grid-cols-3 sm:gap-3 xl:grid-cols-4">
       {bts.frames.map((f, i) => (
-        <Tile
-          key={f.src}
-          frame={f}
-          name={name}
-          n={i + 1}
-          sizes="(min-width: 80rem) 20vw, (min-width: 40rem) 30vw, 50vw"
-        />
+        <Tile key={f.src} frame={f} name={name} n={i + 1} sizes="(min-width: 80rem) 20vw, (min-width: 40rem) 30vw, 50vw" />
       ))}
     </div>
   );

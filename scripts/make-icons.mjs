@@ -28,11 +28,7 @@ const svg = await readFile(join(root, "app/icon.svg"));
  * drawing. */
 
 /** The mark at one size, as PNG. */
-const png = (size) =>
-  sharp(svg, { density: 384 })
-    .resize(size, size, { fit: "contain" })
-    .png({ compressionLevel: 9 })
-    .toBuffer();
+const png = (size) => sharp(svg, { density: 384 }).resize(size, size, { fit: "contain" }).png({ compressionLevel: 9 }).toBuffer();
 
 /* ── favicon.ico ──────────────────────────────────────────────────
  * An ICO is a small directory of images, and each entry may be a PNG rather
@@ -69,10 +65,7 @@ images.forEach((buf, i) => {
   offset += buf.length;
 });
 
-await writeFile(
-  join(root, "public/favicon.ico"),
-  Buffer.concat([dir, ...images]),
-);
+await writeFile(join(root, "public/favicon.ico"), Buffer.concat([dir, ...images]));
 
 /* ── the home screen ─────────────────────────────────────────────
  * No transparency and no rounding: iOS masks the corners itself, and a mark

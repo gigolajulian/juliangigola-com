@@ -61,7 +61,12 @@ async function reply<T>(sent: Promise<Response>): Promise<Reply<T>> {
   const body: unknown = await res.json().catch(() => null);
   if (res.ok) return { ok: true, status: res.status, data: body as T };
   const b = isRecord(body) ? body : {};
-  return { ok: false, status: res.status, error: typeof b.error === "string" ? b.error : undefined, code: typeof b.code === "string" ? b.code : undefined };
+  return {
+    ok: false,
+    status: res.status,
+    error: typeof b.error === "string" ? b.error : undefined,
+    code: typeof b.code === "string" ? b.code : undefined,
+  };
 }
 
 export const getJson = <T>(url: string, init?: RequestInit) => reply<T>(fetch(url, init));

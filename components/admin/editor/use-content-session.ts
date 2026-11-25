@@ -5,7 +5,7 @@ import { sameJson } from "@/lib/admin/admin-payload";
 import { TOKEN_STORE } from "@/lib/admin/admin-github";
 import { localGet, localRemove, localSet } from "@/lib/storage";
 import type { Baseline } from "@/components/admin/editor/draft";
-import type { PendingUpload } from "@/lib/admin/admin-sequence";
+import type { PendingUpload } from "@/components/admin/use-sequence";
 
 /* The GitHub session behind the editor (`editor.tsx`): the token, the blob
  * SHA of the content file, the status line, and the baseline the draft is
@@ -142,8 +142,7 @@ export function useContentSession({
     onPublished(written);
     setStatus({
       kind: "saved",
-      message:
-        "Committed. The site rebuilds and goes live in a couple of minutes.",
+      message: "Committed. The site rebuilds and goes live in a couple of minutes.",
     });
   }
 

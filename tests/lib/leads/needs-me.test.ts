@@ -6,7 +6,14 @@ import { DAY_MS } from "@/lib/time-zone";
 /* Needs me, as a truth table over what decides it. Fake people only. */
 
 const iso = (ms: number) => new Date(Date.now() + ms).toISOString();
-const lead = (o: { renew?: boolean; aside?: boolean; closed?: boolean; due?: boolean; snoozed?: boolean; unread?: boolean }): LeadSummary => ({
+const lead = (o: {
+  renew?: boolean;
+  aside?: boolean;
+  closed?: boolean;
+  due?: boolean;
+  snoozed?: boolean;
+  unread?: boolean;
+}): LeadSummary => ({
   email: "ana@example.com",
   name: "Ana Test",
   stage: o.closed ? "Delivered" : "Replied",

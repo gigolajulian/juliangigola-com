@@ -79,11 +79,14 @@ function onScreen(hero: HTMLElement, wall: HTMLElement) {
   const H = window.innerHeight;
   const u = (wall.querySelector(".mt-col:not(.side) figure:not(.xr) .ph")?.getBoundingClientRect().width ?? 403) / 403;
   const cy = hero.getBoundingClientRect().top + PUSH_Y * u; // build(): py, in screen space
-  const hit = (r: DOMRect, l: number, t: number, rt: number, b: number) => r.width > 0 && r.right > l && r.left < rt && r.bottom > t && r.top < b;
+  const hit = (r: DOMRect, l: number, t: number, rt: number, b: number) =>
+    r.width > 0 && r.right > l && r.left < rt && r.bottom > t && r.top < b;
   const imgs = [...document.querySelectorAll<HTMLImageElement>("main img")].filter((i) => i.offsetParent !== null);
   return imgs.filter((i) => {
     const r = i.getBoundingClientRect();
-    return hit(r, 0, 0, W, H) || (wall.contains(i) && hit(r, W / 2 - W / (2 * S0), cy - H / (2 * S0), W / 2 + W / (2 * S0), cy + H / (2 * S0)));
+    return (
+      hit(r, 0, 0, W, H) || (wall.contains(i) && hit(r, W / 2 - W / (2 * S0), cy - H / (2 * S0), W / 2 + W / (2 * S0), cy + H / (2 * S0)))
+    );
   });
 }
 
@@ -107,10 +110,18 @@ function canvasOf(hero: HTMLElement, wall: HTMLElement) {
   const flat = !!lead0 && getComputedStyle(lead0).display === "contents";
   const cols: Col[] = flat
     ? [0, 1].map((c) => {
-        const figs = [...wall.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure:not(.xr)")].filter((f) => f.style.getPropertyValue("--c2").trim() === String(c));
+        const figs = [...wall.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure:not(.xr)")].filter(
+          (f) => f.style.getPropertyValue("--c2").trim() === String(c),
+        );
         return { els: figs, b: figs.map((f) => box(f.querySelector(".ph")!)).sort((a, z) => a.y - z.y), side: false };
       })
-    : all.filter((c) => c.offsetParent !== null && c.querySelector(".ph")).map((c) => ({ els: [c], b: [...c.querySelectorAll<HTMLElement>(".ph")].filter((ph) => ph.offsetParent !== null).map(box), side: c.classList.contains("side") })); // rows five and six only where they show
+    : all
+        .filter((c) => c.offsetParent !== null && c.querySelector(".ph"))
+        .map((c) => ({
+          els: [c],
+          b: [...c.querySelectorAll<HTMLElement>(".ph")].filter((ph) => ph.offsetParent !== null).map(box),
+          side: c.classList.contains("side"),
+        })); // rows five and six only where they show
   const core = cols.filter((c) => !c.side && c.b.length);
   if (core.length < 2) return null;
   const first = core[0].b;
@@ -206,7 +217,8 @@ export function HomeIntro({ extras = [] }: { extras?: HomeFrame[] }) {
         seen = !!sessionStorage.getItem("jg-intro");
         if (calm && !seen) sessionStorage.setItem("jg-intro", "1");
       } catch {}
-      if (calm && !seen) document.querySelector('[data-mt="hero"] .mt-wall')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: "ease" });
+      if (calm && !seen)
+        document.querySelector('[data-mt="hero"] .mt-wall')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: "ease" });
       return;
     }
     const hero = document.querySelector<HTMLElement>('[data-mt="hero"]');
@@ -270,14 +282,27 @@ export function HomeIntro({ extras = [] }: { extras?: HomeFrame[] }) {
       return a;
     };
     const rise = (el: Element, from: number, delay: number) => {
-      play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], { duration: pace.rise, delay, easing: OUT, composite: "add" }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
+      play(el, [{ transform: `translate3d(0,${from}px,0)` }, { transform: "translate3d(0,0,0)" }], {
+        duration: pace.rise,
+        delay,
+        easing: OUT,
+        composite: "add",
+      }); // added on top of the scroll travel, so scrolling as the intro lands never snaps
       unseen.push([el, delay]);
     };
     // the ground colour lifts off a column: one opacity per column, so nothing repaints
-    const light = (el: Element, delay: number, pseudoElement?: string) => play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: pace.light, delay, pseudoElement });
+    const light = (el: Element, delay: number, pseudoElement?: string) =>
+      play(el, [{ opacity: 1 }, { opacity: 0 }], { duration: pace.light, delay, pseudoElement });
     const fadeIn = (sel: string, delay: number, duration: number, lift = 0) =>
       document.querySelectorAll(sel).forEach((el) =>
-        play(el, [{ opacity: 0, transform: lift ? `translate3d(0,${lift}px,0)` : "none" }, { opacity: 1, transform: "none" }], { duration, delay, easing: OUT }),
+        play(
+          el,
+          [
+            { opacity: 0, transform: lift ? `translate3d(0,${lift}px,0)` : "none" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration, delay, easing: OUT },
+        ),
       );
 
     // a throw while building the intro gives the page back (scroll, focus, wall) instead of leaving it locked
@@ -334,7 +359,14 @@ export function HomeIntro({ extras = [] }: { extras?: HomeFrame[] }) {
       hero.prepend(jg);
       made.push(jg);
       [...jg.children].forEach((b, i) => {
-        play(b, [{ opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" }, { opacity: 1, transform: "none", filter: "blur(0)" }], { duration: pace.jg, easing: OUT });
+        play(
+          b,
+          [
+            { opacity: 0, transform: `translate3d(0,${i ? 110 : -110}px,0)`, filter: "blur(22px)" },
+            { opacity: 1, transform: "none", filter: "blur(0)" },
+          ],
+          { duration: pace.jg, easing: OUT },
+        );
       });
       const marks = [...jg.children] as HTMLElement[];
       const jr = jg.getBoundingClientRect();

@@ -15,16 +15,31 @@ beforeEach(async () => {
   kv = new FakeKV();
   r2 = { delete: vi.fn(async () => {}) };
   ctx.env = { INBOX: kv, INBOX_KEY: KEY, LEADS_KEY, PROOFS: r2 };
-  const p = { token: TOKEN, name: "Test", frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })), selects: ["a", "c"], notes: { a: "keep", b: "x" } };
+  const p = {
+    token: TOKEN,
+    name: "Test",
+    frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })),
+    selects: ["a", "c"],
+    notes: { a: "keep", b: "x" },
+  };
   await writeProof(kv as never, (await sealer(LEADS_KEY))!, p as unknown as Proof);
 });
-const del = async (query: string) => (await DELETE(new Request(`https://juliangigola.com/api/proof${query}`, { method: "DELETE", headers: { "x-admin-key": KEY } })))!;
+const del = async (query: string) =>
+  (await DELETE(new Request(`https://juliangigola.com/api/proof${query}`, { method: "DELETE", headers: { "x-admin-key": KEY } })))!;
 
 describe("DELETE /api/proof", () => {
   it("drops several frames in one write, and one frame the old way", async () => {
     expect((await del(`?token=${TOKEN}&ids=a,b`)).status).toBe(200);
     // The watermarked copies and link cards go with the originals.
-    expect(r2.delete).toHaveBeenCalledWith(["a", "b"].flatMap((id) => [`${TOKEN}/${id}.jpg`, `${TOKEN}/${id}.wm1.jpg`, `${TOKEN}/card-${id}.v1.jpg`, `${TOKEN}/${id}.t800.wm1.jpg`, `${TOKEN}/${id}.t800.jpg`]));
+    expect(r2.delete).toHaveBeenCalledWith(
+      ["a", "b"].flatMap((id) => [
+        `${TOKEN}/${id}.jpg`,
+        `${TOKEN}/${id}.wm1.jpg`,
+        `${TOKEN}/card-${id}.v1.jpg`,
+        `${TOKEN}/${id}.t800.wm1.jpg`,
+        `${TOKEN}/${id}.t800.jpg`,
+      ]),
+    );
     let p = (await readProof(kv as never, (await sealer(LEADS_KEY))!, TOKEN))!;
     expect(p.frames.map((f) => f.id)).toEqual(["c"]);
     expect(p.selects).toEqual(["c"]);

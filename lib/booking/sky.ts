@@ -15,7 +15,16 @@ import { pad } from "@/lib/utils";
 type Stop = readonly [hour: number, l: number, c: number, h: number];
 
 /* Tuned on the dark ground; blended in OKLab so coral fades through dusk grey into cobalt, never purple. */
-const DARK: Stop[] = [[10, 0.86, 0.11, 78], [12, 0.82, 0.135, 72], [14, 0.8, 0.143, 70], [16, 0.74, 0.16, 52], [17, 0.7, 0.175, 35], [18, 0.68, 0.045, 245], [19, 0.66, 0.11, 256], [20, 0.6, 0.11, 253]];
+const DARK: Stop[] = [
+  [10, 0.86, 0.11, 78],
+  [12, 0.82, 0.135, 72],
+  [14, 0.8, 0.143, 70],
+  [16, 0.74, 0.16, 52],
+  [17, 0.7, 0.175, 35],
+  [18, 0.68, 0.045, 245],
+  [19, 0.66, 0.11, 256],
+  [20, 0.6, 0.11, 253],
+];
 /* The same hues dropped to read as text (4.5:1) on the light ground. */
 const LIGHT: Stop[] = DARK.map(([h, l, c, hu]) => [h, Math.min(l, 0.5), c * 0.9, hu]);
 
@@ -35,9 +44,14 @@ const rad = Math.PI / 180;
 export function sun(ymd: string) {
   const [y, m, d] = ymd.split("-").map(Number);
   const doy = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / DAY_MS);
-  const g = ((2 * Math.PI) / 365) * (doy - 1), C = Math.cos, S = Math.sin, lat = 37.34 * rad, lon = -121.89;
+  const g = ((2 * Math.PI) / 365) * (doy - 1),
+    C = Math.cos,
+    S = Math.sin,
+    lat = 37.34 * rad,
+    lon = -121.89;
   const eq = 229.18 * (0.000075 + 0.001868 * C(g) - 0.032077 * S(g) - 0.014615 * C(2 * g) - 0.040849 * S(2 * g));
-  const de = 0.006918 - 0.399912 * C(g) + 0.070257 * S(g) - 0.006758 * C(2 * g) + 0.000907 * S(2 * g) - 0.002697 * C(3 * g) + 0.00148 * S(3 * g);
+  const de =
+    0.006918 - 0.399912 * C(g) + 0.070257 * S(g) - 0.006758 * C(2 * g) + 0.000907 * S(2 * g) - 0.002697 * C(3 * g) + 0.00148 * S(3 * g);
   const ha = Math.acos(C(90.833 * rad) / (C(lat) * C(de)) - Math.tan(lat) * Math.tan(de)) / rad;
   const off = pacificOffset(Date.UTC(y, m - 1, d, 20));
   const at = (min: number) => min / 60 + off;
@@ -46,13 +60,27 @@ export function sun(ymd: string) {
 
 /** Pacific's offset from UTC in hours at `ms` (-8, or -7 in DST). */
 function pacificOffset(ms: number) {
-  const name = new Intl.DateTimeFormat("en-US", { timeZone: TZ, timeZoneName: "shortOffset" }).formatToParts(ms).find((p) => p.type === "timeZoneName")?.value ?? "GMT-8";
+  const name =
+    new Intl.DateTimeFormat("en-US", { timeZone: TZ, timeZoneName: "shortOffset" }).formatToParts(ms).find((p) => p.type === "timeZoneName")
+      ?.value ?? "GMT-8";
   return Number(name.slice(3)) || -8;
 }
 
 /** The Pacific date and hour (with minutes as a fraction) of an instant. */
 export function pacific(ms: number) {
-  const p = Object.fromEntries(new Intl.DateTimeFormat("en-CA", { timeZone: TZ, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(ms).map((x) => [x.type, x.value]));
+  const p = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: TZ,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    })
+      .formatToParts(ms)
+      .map((x) => [x.type, x.value]),
+  );
   return { ymd: `${p.year}-${p.month}-${p.day}`, hour: Number(p.hour) + Number(p.minute) / 60 };
 }
 
@@ -72,7 +100,8 @@ function blend(stops: Stop[], hour: number) {
   for (let i = 0; i < stops.length - 1; i++) {
     if (hour > stops[i + 1][0]) continue;
     const t = Math.max(0, (hour - stops[i][0]) / (stops[i + 1][0] - stops[i][0]));
-    const a = ab(stops[i]), b = ab(stops[i + 1]);
+    const a = ab(stops[i]),
+      b = ab(stops[i + 1]);
     v = a.map((x, k) => x + (b[k] - x) * t);
     break;
   }
@@ -89,7 +118,8 @@ export function skyColors(ms: number) {
 
 /** "6:06 PM": sunset in San Jose on a Pacific date. */
 export function sunsetLabel(ymd: string) {
-  const s = sun(ymd).set, h = Math.floor(s);
+  const s = sun(ymd).set,
+    h = Math.floor(s);
   // sunset falls in the evening, so the minutes never reach midnight
   return clockLabel(h * 60 + Math.round((s - h) * 60));
 }

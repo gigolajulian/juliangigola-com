@@ -22,7 +22,10 @@ export function VisitTrail() {
   React.useEffect(() => {
     if (!sessionJson("jg-landing")) {
       const q = new URLSearchParams(location.search);
-      const utm = [...q].filter(([k]) => k.startsWith("utm_")).map(([k, v]) => `${k.slice(4)}=${v}`).join(" ");
+      const utm = [...q]
+        .filter(([k]) => k.startsWith("utm_"))
+        .map(([k, v]) => `${k.slice(4)}=${v}`)
+        .join(" ");
       write("jg-landing", { path: location.pathname + location.hash, referrer: document.referrer, utm });
     }
     const note = () => {

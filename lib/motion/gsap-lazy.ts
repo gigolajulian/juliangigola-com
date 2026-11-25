@@ -9,8 +9,15 @@ import type { Flip as F } from "gsap/Flip";
    the motion starts on the same frame; before that, it waits. */
 let gsap: typeof G | undefined;
 let loading: Promise<typeof G> | undefined;
-/** gsap, fetched once and shared by every caller. */
-export const loadGsap = () => (loading ??= import("gsap").then((m) => (gsap = m.gsap)));
+/** gsap, fetched once and shared by every caller. A failed fetch is asked again next time. */
+export const loadGsap = () =>
+  (loading ??= import("gsap").then(
+    (m) => (gsap = m.gsap),
+    (e: unknown) => {
+      loading = undefined;
+      throw e;
+    },
+  ));
 
 export function warmGsap() {
   void loadGsap();

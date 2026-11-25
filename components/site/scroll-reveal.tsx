@@ -20,14 +20,14 @@ export function ScrollReveal() {
       {
         threshold: 0.05,
         rootMargin: "50px 0px 50px 0px",
-      }
+      },
     );
 
     const observeTargets = () => {
       const targets = document.querySelectorAll(
         ".v3 .a-seq figure, .v3 .sheet figure, .v3 .door, .v3 .wgrid .wt, .v3 .a-index .frame, .v3 .wstrip .sc, .v3 .sc-res .wt" +
           // Motion plan item 7 (docs/decisions.md): project figures reveal once on entry.
-          ", .v3 .pj-r"
+          ", .v3 .pj-r",
       );
       targets.forEach((el) => observer.observe(el));
     };

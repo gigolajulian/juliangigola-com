@@ -1,13 +1,24 @@
-import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, type Booking, type Hours } from "@/lib/booking/rules";
+import {
+  BOOKING_FEE,
+  DEFAULT_HOURS,
+  EVENTS,
+  HEADS_UP_HOURS,
+  MAX_MOVES,
+  MOVE_HOURS,
+  REFUND_HOURS,
+  type Booking,
+  type Hours,
+} from "@/lib/booking/rules";
 import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/leads/enquiry";
 import { looksLikeEmail } from "@/lib/utils";
 import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/leads/deposit-terms";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
-import { toNotion } from "@/lib/leads/sync/notion-lead";
+import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type HoursKV } from "@/lib/booking/slots";
-import { statusOf } from "@/lib/http";
+import { HttpError, statusOf } from "@/lib/http";
+import { asRecord } from "@/lib/json";
 
 const MINUTE_MS = 6e4;
 const HOUR_MS = 36e5;
@@ -72,7 +83,7 @@ const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, 
 /** The visitor's booking, checked, or the reason it is not one. `call`: a free call (`app/api/book`), not a paid session. */
 export type Parsed = { ok: true; booking: Booking & { via?: CallVia } } | { ok: false; reason: string };
 export function parseBooking(raw: unknown, call = false): Parsed {
-  const b = (raw ?? {}) as { [k: string]: unknown };
+  const b = asRecord(raw);
   const slug = cap(b.slug);
   if (call ? !EVENTS[slug]?.call : !takesDeposit(slug)) return { ok: false, reason: call ? "Not a call." : "Not a paid session." };
   const start = cap(b.start);
@@ -115,13 +126,33 @@ const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
 /** What the client's page may show: no email, no phone, no deposit id. */
-export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, moves: r.moves ?? 0, fee: r.fee, paid: !!r.intent, deposit: depositPaid(r), cancelled: !!r.cancelled });
+export const clientView = (r: BookingRecord) => ({
+  id: r.id,
+  slug: r.slug,
+  session: r.session,
+  start: r.start,
+  end: r.end,
+  firstStart: r.firstStart,
+  where: r.where,
+  moves: r.moves ?? 0,
+  fee: r.fee,
+  paid: !!r.intent,
+  deposit: depositPaid(r),
+  cancelled: !!r.cancelled,
+});
 
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
 export const saveBooking = (store: Store, r: BookingRecord) => store.put(recKey(r.id), r);
-/** Julian's hours as set from the lead desk, or the defaults. */
-export const readHours = async (store: Store) => (await store.get<Hours>("hours")) ?? DEFAULT_HOURS;
+/** Today's date in Julian's zone, "2026-11-24": the hours drop the dates before it. */
+export const todayPT = (now = Date.now()) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(now);
+/** Julian's hours as set from the lead desk, or the defaults. Dates before today are dropped: they can never be booked again. */
+export const readHours = async (store: Store, now = Date.now()): Promise<Hours> => {
+  const h = (await store.get<Hours>("hours")) ?? DEFAULT_HOURS;
+  if (!h.days) return h;
+  const today = todayPT(now);
+  return { ...h, days: Object.fromEntries(Object.entries(h.days).filter(([d]) => d >= today)) };
+};
 export const writeHours = (store: Store, h: Hours) => store.put("hours", h);
 export const allBookings = async (store: Store) => [...(await store.list<BookingRecord>({ prefix: "b:" })).values()];
 
@@ -213,7 +244,9 @@ export async function recordBooking(env: BookingEnv, r: BookingRecord, deposit?:
       startTime: r.start,
       endTime: r.end,
       location: r.where,
-      additionalNotes: [r.phone && `Phone: ${r.phone}`, r.via && `Call: ${r.via}`, r.notes, `Booked on the site (${r.id}).`].filter(Boolean).join("\n"),
+      additionalNotes: [r.phone && `Phone: ${r.phone}`, r.via && `Call: ${r.via}`, r.notes, `Booked on the site (${r.id}).`]
+        .filter(Boolean)
+        .join("\n"),
       attendees: [{ name: r.name, email: r.email }],
     },
     now,
@@ -226,11 +259,24 @@ export async function recordBooking(env: BookingEnv, r: BookingRecord, deposit?:
     console.error("booking inbox", String(e));
   }
   // The lead desk: the person's row moves to Call booked or Confirmed.
-  await recordLead(env, r.email, { event: { at: r.at, kind: r.call ? "call" : "booking", ref: r.id, note: r.session }, name: r.name, kind: r.slug, when: r.start });
-  await toNotion(env.NOTION_TOKEN, { stored, status: r.call ? "Call booked" : "Confirmed", kind: r.slug, calUid: r.id, shootDate: r.call ? undefined : r.start });
+  await recordLead(env, r.email, {
+    event: { at: r.at, kind: r.call ? "call" : "booking", ref: r.id, note: r.session },
+    name: r.name,
+    kind: r.slug,
+    when: r.start,
+  });
+  await toNotion(env.NOTION_TOKEN, {
+    stored,
+    status: r.call ? "Call booked" : "Confirmed",
+    kind: r.slug,
+    calUid: r.id,
+    shootDate: r.call ? undefined : r.start,
+  });
 }
 
-export type ChangeResult = { ok: true; record: BookingRecord; was: BookingRecord } | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" | "moves" | "late" };
+export type ChangeResult =
+  | { ok: true; record: BookingRecord; was: BookingRecord }
+  | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" | "moves" | "late" };
 
 /** Cancels booking `id`: the event leaves hello@'s calendar, the record is marked. Call it only through the lock. */
 export async function cancelOwn(store: Store, secret: string | undefined, id: string): Promise<ChangeResult> {
@@ -251,7 +297,13 @@ export async function cancelOwn(store: Store, secret: string | undefined, id: st
 }
 
 /** Moves booking `id` to `start` if that time is open. Call it only through the lock. */
-export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string, kv?: HoursKV): Promise<ChangeResult> {
+export async function rescheduleOwn(
+  store: Store,
+  secret: string | undefined,
+  id: string,
+  start: string,
+  kv?: HoursKV,
+): Promise<ChangeResult> {
   const was = await findBooking(store, id);
   if (!was) return { ok: false, reason: "missing" };
   if (was.cancelled) return { ok: false, reason: "cancelled" };
@@ -261,7 +313,8 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (Date.parse(was.start) - Date.now() < MOVE_HOURS * HOUR_MS) return { ok: false, reason: "late" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
-  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
+  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) })))
+    return { ok: false, reason: "taken" };
   const end = new Date(t + rule.length * MINUTE_MS).toISOString();
   await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, {
     method: "PATCH",
@@ -318,7 +371,9 @@ export async function markReminded(store: Store, id: string, now = Date.now()) {
 
 /* ── reaching the lock from a route ───────────────────────────── */
 
-type LockEnv = { BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } } };
+type LockEnv = {
+  BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } };
+};
 
 /** What the booking flow reads off the Worker's env: the lock, the lead store, the mailers, Stripe and the link secret. */
 export type BookingEnv = LeadStore &
@@ -332,7 +387,11 @@ export type BookingEnv = LeadStore &
   };
 
 /** Julian's hours from the lock, or the defaults when it cannot answer (the lock rechecks every booking anyway). */
-export const liveHours = (env: LockEnv) => lockOp(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
+export const liveHours = (env: LockEnv) =>
+  lockOp(env, "hours", null).then(
+    (x) => x.hours,
+    () => DEFAULT_HOURS,
+  );
 
 /** Each op the lock answers (`worker/booking-lock.ts`): [argument, answer]. */
 export type LockOps = {
@@ -356,7 +415,7 @@ export async function lockOp<K extends keyof LockOps>(env: LockEnv, op: K, arg: 
   if (!res.ok) {
     // A failing lock may answer plain text: keep the status when the body is not JSON.
     const out = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(`booking lock ${op}: ${out.error ?? res.status}`);
+    throw new HttpError(`booking lock ${op}: ${out.error ?? res.status}`, res.status);
   }
   return (await res.json()) as LockOps[K][1];
 }

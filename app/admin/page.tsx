@@ -3,16 +3,7 @@ import { AdminEditor } from "@/components/admin/editor";
 import { CLIENT_MARKS, type ClientMarkData } from "@/lib/work/clients-data";
 import { CONTENT, CONTENT_PATH } from "@/lib/content";
 import { SHOWN as HOMEPAGE_RELEASES } from "@/components/cover/cover-art";
-import {
-  PROJECTS,
-  ALL_PROJECTS,
-  HIDDEN,
-  UNLISTED,
-  CATEGORIES,
-  COVER_RELEASES,
-  categoryLabel,
-  categoryHref,
-} from "@/lib/work/work";
+import { PROJECTS, ALL_PROJECTS, HIDDEN, UNLISTED, CATEGORIES, COVER_RELEASES, categoryLabel, categoryHref } from "@/lib/work/work";
 import { categoryFrame } from "@/lib/work/disciplines";
 import { PRESS } from "@/lib/work/press";
 import {
@@ -84,15 +75,11 @@ export default function AdminPage() {
 
        Below `xl` the columns stack, and a stack in a fixed box is three
        scrollers in a phone screen. There it stays an ordinary page. */
-    <div
-      data-workbench
-      className="w-full px-6 pb-24 pt-20 sm:px-10 xl:flex xl:h-dvh xl:flex-col xl:overflow-hidden xl:pb-0"
-    >
+    <div data-workbench className="w-full px-6 pb-24 pt-20 sm:px-10 xl:flex xl:h-dvh xl:flex-col xl:overflow-hidden xl:pb-0">
       <header className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border pb-3 xl:shrink-0">
         <h1 className="font-display text-xl uppercase tracking-[0]">Content</h1>
         <p className="label text-muted-foreground">
-          commits to <code className="text-foreground">{CONTENT_PATH}</code>{" "}
-          &middot; live a couple of minutes after the deploy
+          commits to <code className="text-foreground">{CONTENT_PATH}</code> &middot; live a couple of minutes after the deploy
         </p>
       </header>
 
@@ -139,9 +126,7 @@ export default function AdminPage() {
              "Editorial"; the sitemap counts its tiles by this string and
              looks them up by the label, so passing the raw name here made
              every discipline count read "—". */
-          category: p.categories[0]
-            ? categoryLabel(p.categories[0])
-            : "Unfiled",
+          category: p.categories[0] ? categoryLabel(p.categories[0]) : "Unfiled",
           categorySlug: p.categories[0]?.slug ?? "",
           images: p.images.map((f) => f.src),
           frames: p.images.map((f) => ({
@@ -190,16 +175,12 @@ export default function AdminPage() {
            no work has no frame to show, and `DISCIPLINES` drops it — so
            offering it here would be a pick that silently does nothing. */
         heroChoices={CATEGORIES.filter(
-          (c) =>
-            PROJECTS.some((p) => p.categories.some((x) => x.slug === c.slug)) &&
-            categoryFrame(c.slug) !== null,
+          (c) => PROJECTS.some((p) => p.categories.some((x) => x.slug === c.slug)) && categoryFrame(c.slug) !== null,
         ).map((c) => ({
           slug: c.slug,
           name: categoryLabel(c),
           detail: (() => {
-            const n = PROJECTS.filter((p) =>
-              p.categories.some((x) => x.slug === c.slug),
-            ).length;
+            const n = PROJECTS.filter((p) => p.categories.some((x) => x.slug === c.slug)).length;
             return `${n} ${n === 1 ? "project" : "projects"}`;
           })(),
           cover: {

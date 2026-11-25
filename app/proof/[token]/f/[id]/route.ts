@@ -14,7 +14,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   const { env, seal, kv } = await sealedStore();
   if (!isToken(token) || !isFrameId(id) || !kv || !env.PROOFS || !seal) return new Response("Not found", { status: 404 });
   const p = await readPublic(kv, seal, token);
-  if (!p || (await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) || !p.frames.some((f) => f.id === id)) return new Response("Not found", { status: 404 });
+  if (!p || (await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) || !p.frames.some((f) => f.id === id))
+    return new Response("Not found", { status: 404 });
   // The watermark, when on, is in the bytes. If it cannot be drawn the frame is not served at all.
   // `?w=800`: the smaller copy for the wall and the grid (THUMB_W). Any other width gets the whole frame.
   const small = new URL(request.url).searchParams.get("w") === String(THUMB_W);
@@ -22,6 +23,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   if (o === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
   if (!o) return new Response("Not found", { status: 404 });
   return new Response(o.body, {
-    headers: { "content-type": "image/jpeg", "cache-control": "private, max-age=3600", "x-robots-tag": "noindex, nofollow, noimageindex", etag: o.etag },
+    headers: {
+      "content-type": "image/jpeg",
+      "cache-control": "private, max-age=3600",
+      "x-robots-tag": "noindex, nofollow, noimageindex",
+      etag: o.etag,
+    },
   });
 }

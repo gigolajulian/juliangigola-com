@@ -20,10 +20,16 @@ export const CURSOR = "gmail:history";
 const BUDGET = 25;
 const SKIP = ["SPAM", "TRASH", "DRAFT", "CHAT"];
 /** Headers and attachment names, no bodies: `format=metadata` has no part names, so the full format cut down by `fields`. */
-export const FIELDS = "format=full&fields=id,labelIds,internalDate,payload(headers(name,value),parts(filename,parts(filename,parts(filename))))";
+export const FIELDS =
+  "format=full&fields=id,labelIds,internalDate,payload(headers(name,value),parts(filename,parts(filename,parts(filename))))";
 
 type Part = { filename?: string; parts?: Part[] };
-export type Msg = { id: string; labelIds?: string[]; internalDate?: string; payload?: { headers?: { name: string; value: string }[]; parts?: Part[] } };
+export type Msg = {
+  id: string;
+  labelIds?: string[];
+  internalDate?: string;
+  payload?: { headers?: { name: string; value: string }[]; parts?: Part[] };
+};
 /** Attachment names, nested parts included: an invoice PDF is named "INVOICE 1126 - CLIENT.pdf". */
 const files = (ps: Part[] = []): string[] => ps.flatMap((p) => [...(p.filename ? [p.filename] : []), ...files(p.parts)]);
 type History = { history?: { id: string; messagesAdded?: { message: Msg }[] }[]; historyId?: string; nextPageToken?: string };
@@ -38,13 +44,23 @@ export function mailChanges(m: Msg): { email: string; c: Change }[] {
   if (labels.some((l) => SKIP.includes(l))) return [];
   const h = (n: string) => m.payload?.headers?.find((x) => x.name.toLowerCase() === n)?.value ?? "";
   // no internalDate would make an Invalid Date and throw outside the per-lead guard, stalling the cursor
-  const event = { at: new Date(Number(m.internalDate) || Date.now()).toISOString(), ref: m.id, note: h("subject").slice(0, 120) || undefined };
+  const event = {
+    at: new Date(Number(m.internalDate) || Date.now()).toISOString(),
+    ref: m.id,
+    note: h("subject").slice(0, 120) || undefined,
+  };
   if (labels.includes("SENT")) {
     const mailed = [h("subject"), ...files(m.payload?.parts)].join(" | ");
-    return people(`${h("to")},${h("cc")}`).map((email) => ({ email, c: { event: { ...event, kind: "replied" as const }, ...(/invoice/i.test(mailed) ? { mailed } : {}) } }));
+    return people(`${h("to")},${h("cc")}`).map((email) => ({
+      email,
+      c: { event: { ...event, kind: "replied" as const }, ...(/invoice/i.test(mailed) ? { mailed } : {}) },
+    }));
   }
   const [email] = people(h("from"));
-  const name = h("from").replace(/<[^>]*>/, "").replace(/"/g, "").trim();
+  const name = h("from")
+    .replace(/<[^>]*>/, "")
+    .replace(/"/g, "")
+    .trim();
   return email ? [{ email, c: { event: { ...event, kind: "wrote" as const }, ...(name && !name.includes("@") ? { name } : {}) } }] : [];
 }
 
@@ -70,7 +86,10 @@ export async function syncGmail(env: LeadStore & { GCAL_OAUTH?: string }): Promi
   do {
     let h: History;
     try {
-      h = await gcal<History>(env.GCAL_OAUTH, `${GMAIL}/history?startHistoryId=${start}&historyTypes=messageAdded${page ? `&pageToken=${page}` : ""}`);
+      h = await gcal<History>(
+        env.GCAL_OAUTH,
+        `${GMAIL}/history?startHistoryId=${start}&historyTypes=messageAdded${page ? `&pageToken=${page}` : ""}`,
+      );
     } catch (e) {
       // A cursor older than Gmail keeps (about a week): start again from now.
       if (statusOf(e) === 404) return restart();

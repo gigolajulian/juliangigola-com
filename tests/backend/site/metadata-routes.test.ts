@@ -7,7 +7,6 @@ import { PROJECTS } from "@/lib/work/work";
 /* The static routes: the canvas frames, the unlisted /visit page and the
    Leads app's service worker. robots, manifest and sitemap have their own files. */
 
-
 describe("canvas.json", () => {
   it("gives each project's frames in order as [src, ratio, alt, colour]", async () => {
     const out = (await canvas().json()) as Record<string, [string, number, string, string][]>;

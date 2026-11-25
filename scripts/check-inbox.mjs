@@ -56,14 +56,8 @@ const eq = (a, b, what) => {
 
   ok(cooldown(null, now).ok, "a sender nobody has seen may write");
   ok(!cooldown(now, now).ok, "a sender who just wrote may not");
-  ok(
-    cooldown(now - COOLDOWN_MS, now).ok,
-    "exactly five minutes later, they may",
-  );
-  ok(
-    cooldown(now - COOLDOWN_MS - 1, now).ok,
-    "and any time after that",
-  );
+  ok(cooldown(now - COOLDOWN_MS, now).ok, "exactly five minutes later, they may");
+  ok(cooldown(now - COOLDOWN_MS - 1, now).ok, "and any time after that");
   ok(!cooldown(now - COOLDOWN_MS + 1000, now).ok, "a second short, they wait");
 
   // The wait it reports is the wait that is left, and it is never zero — "you
@@ -99,23 +93,12 @@ const eq = (a, b, what) => {
   ok(enquiryKey(1, "a") < enquiryKey(2, "a"), "and at the small end too");
   ok(later.startsWith("msg:"), "the prefix is what the list filters on");
 
-  eq(
-    dayKey(Date.UTC(2026, 8, 12, 23, 59)),
-    "count:2026-09-12",
-    "the counter is bucketed by UTC day",
-  );
-  assert.notEqual(
-    dayKey(Date.UTC(2026, 8, 12, 23, 59)),
-    dayKey(Date.UTC(2026, 8, 13, 0, 1)),
-    "and rolls over at midnight",
-  );
+  eq(dayKey(Date.UTC(2026, 8, 12, 23, 59)), "count:2026-09-12", "the counter is bucketed by UTC day");
+  assert.notEqual(dayKey(Date.UTC(2026, 8, 12, 23, 59)), dayKey(Date.UTC(2026, 8, 13, 0, 1)), "and rolls over at midnight");
   n++;
 
   ok(cooldownKey("abc").startsWith("cool:"), "cooldowns have their own prefix");
-  ok(
-    !cooldownKey("abc").startsWith("msg:"),
-    "so they can never be listed as enquiries",
-  );
+  ok(!cooldownKey("abc").startsWith("msg:"), "so they can never be listed as enquiries");
 }
 
 /* ── what the form may send ───────────────────────────────────── */
@@ -123,19 +106,9 @@ const eq = (a, b, what) => {
   eq(problems({ name: "A", email: "a@b.co", message: "hi" }), {}, "a real one");
 
   ok(problems({ name: "", email: "a@b.co", message: "hi" }).name, "name needed");
-  ok(
-    problems({ name: "A", email: "nope", message: "hi" }).email,
-    "an address that cannot be one is refused",
-  );
-  ok(
-    problems({ name: "A", email: "a@b.co", message: "" }).message,
-    "and a message is the point",
-  );
-  ok(
-    problems({ name: "x".repeat(MAX.name + 1), email: "a@b.co", message: "hi" })
-      .name,
-    "a name past the cap is refused rather than cut",
-  );
+  ok(problems({ name: "A", email: "nope", message: "hi" }).email, "an address that cannot be one is refused");
+  ok(problems({ name: "A", email: "a@b.co", message: "" }).message, "and a message is the point");
+  ok(problems({ name: "x".repeat(MAX.name + 1), email: "a@b.co", message: "hi" }).name, "a name past the cap is refused rather than cut");
 
   ok(looksLikeEmail("j@example.com"), "ordinary address");
   ok(!looksLikeEmail("j@example"), "no dot, no address");
@@ -190,20 +163,12 @@ const eq = (a, b, what) => {
 
   // No country given — the field is absent rather than present and empty, so
   // the row does not print a stray separator.
-  ok(
-    !("country" in enquiry({ type: "other", name: "n", email: "e", detail: "", message: "m" }, at, "x")),
-    "no country, no key",
-  );
+  ok(!("country" in enquiry({ type: "other", name: "n", email: "e", detail: "", message: "m" }, at, "x")), "no country, no key");
 }
 
 /* ── the summary the list reads ───────────────────────────────── */
 {
-  const e = enquiry(
-    { type: "music", name: "N", email: "e@x.co", detail: "d", message: "the message" },
-    Date.now(),
-    "id",
-    "GB",
-  );
+  const e = enquiry({ type: "music", name: "N", email: "e@x.co", detail: "d", message: "the message" }, Date.now(), "id", "GB");
   const s = summary(e);
 
   eq(s.name, "N", "who");
@@ -257,10 +222,7 @@ const eq = (a, b, what) => {
     1_700_000_000_000,
     "id",
   );
-  ok(
-    !/[\r\n\t]/.test(e.name) && !/[\r\n\t]/.test(e.detail),
-    "control characters stripped from header fields",
-  );
+  ok(!/[\r\n\t]/.test(e.name) && !/[\r\n\t]/.test(e.detail), "control characters stripped from header fields");
   eq(e.message, "hi\nthere", "the body keeps its newlines");
 }
 
@@ -275,11 +237,9 @@ const eq = (a, b, what) => {
 }
 // The HTML copy shows a fetched pick inline under its link, and escapes the message.
 {
-  const { html } = emailCopy(
-    { type: "Portrait", name: "A", email: "a@b.co", message: "<b>hi</b>", picks: ["/a.jpg", "/b.jpg"] },
-    {},
-    ["/b.jpg"],
-  );
+  const { html } = emailCopy({ type: "Portrait", name: "A", email: "a@b.co", message: "<b>hi</b>", picks: ["/a.jpg", "/b.jpg"] }, {}, [
+    "/b.jpg",
+  ]);
   ok(html.includes('src="cid:pick-1"') && !html.includes("cid:pick-0"), "only fetched picks are inline");
   ok(html.includes("&lt;b&gt;hi&lt;/b&gt;"), "the message is escaped");
 }

@@ -10,7 +10,11 @@ const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown> }));
 vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudflareMock(ctx));
 
 const req = (method: string, { body, query = "", key = KEY }: { body?: unknown; query?: string; key?: string } = {}) =>
-  new Request(`https://juliangigola.com/api/calendar${query}`, { method, headers: { "x-admin-key": key }, body: body === undefined ? undefined : JSON.stringify(body) });
+  new Request(`https://juliangigola.com/api/calendar${query}`, {
+    method,
+    headers: { "x-admin-key": key },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
 
 let posted: unknown[];
 beforeEach(() => {
@@ -24,7 +28,9 @@ beforeEach(() => {
       posted.push(JSON.parse(String(init.body)));
       return Response.json({ id: "new1" });
     }
-    return Response.json({ items: [{ id: "e1", summary: "Shoot", start: { dateTime: "2026-12-02T18:00:00Z" }, end: { dateTime: "2026-12-02T19:00:00Z" } }] });
+    return Response.json({
+      items: [{ id: "e1", summary: "Shoot", start: { dateTime: "2026-12-02T18:00:00Z" }, end: { dateTime: "2026-12-02T19:00:00Z" } }],
+    });
   });
 });
 

@@ -31,8 +31,7 @@ export type Draft = Omit<Manifest, "frames" | "credits" | "copy" | "bts"> & {
  * narrowed. Not checked here: `lib/work/added.ts` validates the file at build
  * time, where a bad one fails the deploy (see `adoptable`).
  */
-const adoptDraft = (file: ProjectsFile, fallback: Draft): Draft =>
-  adoptable(file, fallback) as Draft;
+const adoptDraft = (file: ProjectsFile, fallback: Draft): Draft => adoptable(file, fallback) as Draft;
 
 export type Status =
   | { kind: "idle" }
@@ -110,9 +109,7 @@ export async function loadRepo(
      * date, whereas a page with edits on it asked to reconnect would be
      * having them thrown away. */
     const manifestJson = await readFile(t, ADDED_PATH);
-    const repo = manifestJson
-      ? adoptDraft(JSON.parse(manifestJson) as ProjectsFile, baseline)
-      : baseline;
+    const repo = manifestJson ? adoptDraft(JSON.parse(manifestJson) as ProjectsFile, baseline) : baseline;
 
     return { sha: body.sha, content, repo };
   } catch (e) {
@@ -171,8 +168,7 @@ export async function publishDraft({
     const checkBody = (await check.json()) as { sha: string };
     if (checkBody.sha !== sha) {
       return {
-        error:
-          "The content changed in the repo since this page loaded. Reload to pick up the new version, then redo the edit.",
+        error: "The content changed in the repo since this page loaded. Reload to pick up the new version, then redo the edit.",
       };
     }
 
@@ -209,9 +205,7 @@ export async function publishDraft({
        * with edits on it cannot, because adopting would throw them away.
        * So it refuses instead. One reload costs a minute. The other way
        * costs work, silently. */
-      const live = current
-        ? adoptDraft(JSON.parse(current) as ProjectsFile, baseline)
-        : baseline;
+      const live = current ? adoptDraft(JSON.parse(current) as ProjectsFile, baseline) : baseline;
       if (!sameJson(live, baseline)) {
         return {
           error:
@@ -222,10 +216,7 @@ export async function publishDraft({
       // `scripts/check-payload.mjs`. That is the one part of publishing
       // testable without a token, and the part where a dropped field
       // publishes as "you never made that edit".
-      const parsed = projectsFile(
-        current ? (JSON.parse(current) as ProjectsFile) : null,
-        manifest,
-      );
+      const parsed = projectsFile(current ? (JSON.parse(current) as ProjectsFile) : null, manifest);
       // What the repo will hold, which is not quite what was asked for:
       // `projectsFile` drops blank passages and empty sequences. Kept, so
       // the baseline is what was actually written rather than what was
@@ -246,9 +237,7 @@ export async function publishDraft({
       [...Object.values(reframed), ...Object.values(bts).map((b) => b.frames)]
         .flat()
         // A passage names no file, so it contributes nothing here.
-        .flatMap((f) =>
-          isTextRef(f) ? [] : [`public${typeof f === "string" ? f : f.src}`],
-        ),
+        .flatMap((f) => (isTextRef(f) ? [] : [`public${typeof f === "string" ? f : f.src}`])),
     );
     for (const [path, upload] of Object.entries(uploads)) {
       if (!referenced.has(path)) continue;
@@ -258,9 +247,7 @@ export async function publishDraft({
     onStatus({ kind: "working", message: "Committing…" });
     await commitFiles({
       token,
-      message: manifestMoved
-        ? "Update site content and projects from /admin"
-        : "Update site content from /admin",
+      message: manifestMoved ? "Update site content and projects from /admin" : "Update site content from /admin",
       files,
       onProgress: (done, total) =>
         onStatus({
@@ -277,10 +264,7 @@ export async function publishDraft({
     return { sha: (await after.json())?.sha ?? null, written };
   } catch (e) {
     return {
-      error:
-        e instanceof Error
-          ? e.message
-          : `Could not reach GitHub: ${String(e)}`,
+      error: e instanceof Error ? e.message : `Could not reach GitHub: ${String(e)}`,
     };
   }
 }

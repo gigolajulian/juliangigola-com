@@ -26,10 +26,7 @@ const SKIP = /photo|bts|assist|archive|grip|video|3d|in frame|tech/i;
 
 /** Discipline and the main credits of a project, for the card and its text:
     "Model Kai Lin, styling Mia R" in the manifest's own order. */
-export const projectFacts = (p: {
-  categories: { name: string }[];
-  credits: { role: string; name: string }[];
-}) => {
+export const projectFacts = (p: { categories: { name: string }[]; credits: { role: string; name: string }[] }) => {
   const discipline = p.categories[0]?.name ?? "Photography";
   const credits = p.credits
     .filter((c) => c.name && !SKIP.test(c.role))

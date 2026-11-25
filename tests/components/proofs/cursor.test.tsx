@@ -6,7 +6,15 @@ import { ProofCursor } from "@/components/proofs/cursor";
    arrow, which reads what it is over: a cell, the pick ring, a picked ring. */
 
 const fine = (on: boolean) =>
-  vi.spyOn(window, "matchMedia").mockImplementation((q: string) => ({ matches: on && q.includes("pointer: fine"), media: q, addEventListener() {}, removeEventListener() {} }) as unknown as MediaQueryList);
+  vi.spyOn(window, "matchMedia").mockImplementation(
+    (q: string) =>
+      ({
+        matches: on && q.includes("pointer: fine"),
+        media: q,
+        addEventListener() {},
+        removeEventListener() {},
+      }) as unknown as MediaQueryList,
+  );
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -30,7 +38,10 @@ describe("ProofCursor", () => {
 
   it("reads a photo, then a picked ring, then off the grid", () => {
     fine(true);
-    document.body.insertAdjacentHTML("beforeend", `<div id="g"><div class="proof-grid"><div class="proof-cell"><img id="ph"><button class="proof-mark" id="mk" aria-pressed="true"></button></div></div><p id="off"></p></div>`);
+    document.body.insertAdjacentHTML(
+      "beforeend",
+      `<div id="g"><div class="proof-grid"><div class="proof-cell"><img id="ph"><button class="proof-mark" id="mk" aria-pressed="true"></button></div></div><p id="off"></p></div>`,
+    );
     const { container } = render(<ProofCursor />);
     const cur = container.querySelector(".proof-cur")!;
     fireEvent.pointerMove(document.getElementById("ph")!, { clientX: 5, clientY: 5 });

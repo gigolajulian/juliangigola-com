@@ -405,8 +405,7 @@
 }
 
 @media (prefers-reduced-transparency: reduce) {
-  .glass,
-  .glass-surface {
+  .glass {
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
     background-color: var(--background);
@@ -416,11 +415,4 @@
     backdrop-filter: none;
     background-color: var(--foreground);
   }
-}
-
-/* "Up next" stands on the page's own wash at every width, not on a
-   card of its own. */
-.strip-scroll[data-dealt] > .next-cell {
-  background: none;
-  box-shadow: none;
 }

@@ -3,7 +3,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
 import { DepositStep, type DepositBody } from "@/components/booking/deposit-step";
 
-vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("no network"))));
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("no network"))),
+);
 afterEach(() => {
   delete window.Stripe;
   // jsdom never loads Stripe.js: fail a load left pending, so the module drops it and the next test starts fresh.
@@ -39,19 +42,8 @@ describe("DepositStep", () => {
     window.Stripe = () => {
       throw new Error("bad key");
     };
-    render(<DepositStep skin="v3" shell={shell} body={body} rows={rows} onBooked={() => {}} onTaken={() => {}} onBack={() => {}} />);
+    render(<DepositStep shell={shell} body={body} rows={rows} onBooked={() => {}} onTaken={() => {}} onBack={() => {}} />);
     expect(await screen.findByText("The payment form did not load.")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Edit details" })).toBeTruthy();
-  });
-
-  it("draws the same end in the editorial card", async () => {
-    window.Stripe = () => {
-      throw new Error("bad key");
-    };
-    render(<DepositStep skin="editorial" body={body} rows={rows} onBooked={() => {}} onTaken={() => {}} onBack={() => {}} />);
-    expect(await screen.findByText("The payment form did not load.")).toBeTruthy();
-    expect(screen.getByText("Not loaded.")).toBeTruthy();
     expect(screen.getByRole("button", { name: "Try again" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Edit details" })).toBeTruthy();
   });
@@ -59,7 +51,7 @@ describe("DepositStep", () => {
   it("shows the bill and holds Pay while the card fields load", () => {
     // Stripe.js never arrives in jsdom (no script loading): the stage stays loading.
     const onBack = vi.fn();
-    render(<DepositStep skin="v3" shell={shell} body={body} rows={rows} onBooked={() => {}} onTaken={() => {}} onBack={onBack} />);
+    render(<DepositStep shell={shell} body={body} rows={rows} onBooked={() => {}} onTaken={() => {}} onBack={onBack} />);
     expect(screen.getByRole("region", { name: "Deposit" })).toBeTruthy();
     expect(screen.getByText("Portraits")).toBeTruthy();
     expect((screen.getByRole("button", { name: "Pay $250 deposit" }) as HTMLButtonElement).disabled).toBe(true);

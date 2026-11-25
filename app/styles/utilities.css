@@ -44,10 +44,6 @@
       height: max(100%, 44px);
       translate: -50% -50%;
     }
-    /* The form's fields, which cannot carry a box of their own. */
-    .contact-card form :is(input:not([type="file"], [type="radio"], .sr-only), select) {
-      min-height: 44px;
-    }
   }
 }
 

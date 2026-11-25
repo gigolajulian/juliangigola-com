@@ -15,8 +15,25 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 
 const ID = "11152026-k7m2q9xd";
 const NOW = Date.parse("2026-11-17T20:00:00Z");
-const base = { token: ID, name: "Maya", email: "maya@gmail.com", included: 10, price: 15, days: 14, createdAt: "2026-11-01T00:00:00Z", frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }], selects: [], notes: {}, views: 0 } as Proof;
-const sentP = (closesIn: number, more: Partial<Proof> = {}): Proof => ({ ...base, sentAt: "2026-11-06T00:00:00Z", closesAt: new Date(NOW + closesIn * DAY_MS).toISOString(), ...more });
+const base = {
+  token: ID,
+  name: "Maya",
+  email: "maya@gmail.com",
+  included: 10,
+  price: 15,
+  days: 14,
+  createdAt: "2026-11-01T00:00:00Z",
+  frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }],
+  selects: [],
+  notes: {},
+  views: 0,
+} as Proof;
+const sentP = (closesIn: number, more: Partial<Proof> = {}): Proof => ({
+  ...base,
+  sentAt: "2026-11-06T00:00:00Z",
+  closesAt: new Date(NOW + closesIn * DAY_MS).toISOString(),
+  ...more,
+});
 
 describe("remindState", () => {
   it("is ready only in the last 5 days, and locked before", () => {
@@ -47,7 +64,19 @@ describe("remindState", () => {
 
 describe("reminder mail", () => {
   it("proofs: the client's own picks so far, none said when zero; finals: when to save by", () => {
-    const viewers = { "maya@gmail.com": { first: "", last: "", visits: 1, seconds: 0, devices: [], places: [], picks: ["a", "b", "c", "d"], looks: {}, events: [] } };
+    const viewers = {
+      "maya@gmail.com": {
+        first: "",
+        last: "",
+        visits: 1,
+        seconds: 0,
+        devices: [],
+        places: [],
+        picks: ["a", "b", "c", "d"],
+        looks: {},
+        events: [],
+      },
+    };
     const p = sentP(3, { closesAt: "2026-11-21T07:00:00Z", viewers });
     expect(reminderMail(p, "proofs").subject).toBe("Your proofs close Nov 20");
     expect(reminderMail(p, "proofs").text).toContain("Pick your 10 frames by November 20 and I'll start editing. You have 4 so far.");
@@ -63,13 +92,29 @@ describe("POST remind", () => {
   let kv: FakeKV;
   let sent: { to: string; subject: string }[];
   let fail = false;
-  const req = (method: string, body?: unknown, query = "") => new Request(`https://juliangigola.com/api/proof${query}`, { method, body: body ? JSON.stringify(body) : undefined, headers: { "x-admin-key": "k" } });
+  const req = (method: string, body?: unknown, query = "") =>
+    new Request(`https://juliangigola.com/api/proof${query}`, {
+      method,
+      body: body ? JSON.stringify(body) : undefined,
+      headers: { "x-admin-key": "k" },
+    });
   const seal = async () => (await sealer(LEADS_KEY))!;
   beforeEach(async () => {
     kv = new FakeKV();
     sent = [];
     fail = false;
-    ctx.env = { INBOX: kv, INBOX_KEY: "k", LEADS_KEY, PROOFS: { delete: async () => {}, get: async () => null }, CLIENT_EMAIL: { send: async (m: { to: string; subject: string }) => { if (fail) throw new Error("down"); sent.push(m); } } };
+    ctx.env = {
+      INBOX: kv,
+      INBOX_KEY: "k",
+      LEADS_KEY,
+      PROOFS: { delete: async () => {}, get: async () => null },
+      CLIENT_EMAIL: {
+        send: async (m: { to: string; subject: string }) => {
+          if (fail) throw new Error("down");
+          sent.push(m);
+        },
+      },
+    };
   });
 
   it("sends once, stamps the stage, keeps the close date, and refuses the second tap", async () => {
@@ -88,7 +133,11 @@ describe("POST remind", () => {
   it("refuses before the window and after selects are in", async () => {
     await writeProof(kv as never, await seal(), sentP(12, { closesAt: new Date(Date.now() + 12 * DAY_MS).toISOString() }));
     expect((await POST(req("POST", { action: "remind", token: ID })))!.status).toBe(409);
-    await writeProof(kv as never, await seal(), sentP(3, { closesAt: new Date(Date.now() + 3 * DAY_MS).toISOString(), submittedAt: new Date().toISOString() }));
+    await writeProof(
+      kv as never,
+      await seal(),
+      sentP(3, { closesAt: new Date(Date.now() + 3 * DAY_MS).toISOString(), submittedAt: new Date().toISOString() }),
+    );
     expect((await POST(req("POST", { action: "remind", token: ID })))!.status).toBe(409);
     expect(sent).toHaveLength(0);
   });
@@ -110,5 +159,8 @@ describe("POST remind", () => {
 });
 
 it("the first download pings his devices", () => {
-  expect(pushFor({ name: "Maya Chen", kind: "Portraits" } as never, { at: "", kind: "download" } as never)).toMatchObject({ title: "Finals downloaded", body: "Maya Chen, Portraits" });
+  expect(pushFor({ name: "Maya Chen", kind: "Portraits" } as never, { at: "", kind: "download" } as never)).toMatchObject({
+    title: "Finals downloaded",
+    body: "Maya Chen, Portraits",
+  });
 });

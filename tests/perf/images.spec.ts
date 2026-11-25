@@ -35,7 +35,12 @@ for (const path of PAGES) {
             if (res.request().resourceType() !== "image" && !type.startsWith("image/")) return;
             if (res.status() >= 300) return;
             lastImage = Date.now();
-            pending.push(res.body().then((b) => b.length, () => 0));
+            pending.push(
+              res.body().then(
+                (b) => b.length,
+                () => 0,
+              ),
+            );
           });
           await page.goto(path, { waitUntil: "load" });
           /* The strips warm the next screens' pictures once the page is in

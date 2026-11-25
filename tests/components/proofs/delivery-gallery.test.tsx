@@ -7,11 +7,29 @@ import type { PublicDelivery } from "@/lib/proofs/proof-model";
    cover the split gate (`?proofwall=0`): any email opens it, each download
    is logged under it, and models get their own view and zip. */
 
-const final = (id: string, over: Partial<PublicDelivery["finals"][number]> = {}) => ({ id, file: `${id}.jpg`, w: 1200, h: 1800, bytes: 4e6, v: 7, model: null, top: false, ...over });
-const delivery = (over: Partial<PublicDelivery> = {}): PublicDelivery => ({ finals: [final("a"), final("b"), final("c")], cover: "b", closesAt: null, subhead: null, labels: false, ...over });
+const final = (id: string, over: Partial<PublicDelivery["finals"][number]> = {}) => ({
+  id,
+  file: `${id}.jpg`,
+  w: 1200,
+  h: 1800,
+  bytes: 4e6,
+  v: 7,
+  model: null,
+  top: false,
+  ...over,
+});
+const delivery = (over: Partial<PublicDelivery> = {}): PublicDelivery => ({
+  finals: [final("a"), final("b"), final("c")],
+  cover: "b",
+  closesAt: null,
+  subhead: null,
+  labels: false,
+  ...over,
+});
 
 const fetchMock = vi.fn(async () => new Response("{}"));
-const bodies = () => (fetchMock.mock.calls as unknown as [string, RequestInit][]).map(([url, init]) => [url, JSON.parse(init.body as string)]);
+const bodies = () =>
+  (fetchMock.mock.calls as unknown as [string, RequestInit][]).map(([url, init]) => [url, JSON.parse(init.body as string)]);
 
 beforeEach(() => {
   localStorage.clear();
