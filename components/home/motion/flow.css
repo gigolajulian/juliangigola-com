@@ -46,6 +46,10 @@ html[data-mt-motion]:not([data-mt-held]) .mt .mt-photo[data-rv] > * { transition
 html[data-mt-motion]:not([data-mt-held]) .mt .mt-photo[data-rv=""] > * { scale: 1.16; }
 
 
+/* Phones and tablets: the end of the hero moves at a slower rate and dims while the statement slides over it */
+html[data-mt-motion]:not([data-mt-held]) .mt-about { position: relative; z-index: 1; background: var(--bg); }
+html[data-mt-motion]:not([data-mt-held]) .mt-hero :is(.mt-wall, .mt-more) { transform: translate3d(0, calc(var(--out, 0) * 30svh), 0); opacity: calc(1 - var(--out, 0) * .5); }
+
 /* Hero into Commissions: the wall sinks and dims while the Commissions sheet slides over it */
 html[data-mt-held] .mt-hero .mt-stage { transform: translate3d(0, calc(var(--out, 0) * 22svh), 0) scale(calc(1 - var(--out, 0) * .05)); transform-origin: 50% 100%; opacity: calc(1 - var(--out, 0) * .6); }
 

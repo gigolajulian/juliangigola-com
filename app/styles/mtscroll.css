@@ -316,6 +316,8 @@
   [data-mtscroll] .mt-st-facts{margin-top:32px}
   [data-mtscroll] .mt-st-more{display:inline-flex;margin-top:28px}
   [data-mtscroll] .mt-st-ph{margin-top:28px;max-width:520px}
+  /* Tablets: the sentence and facts left, the portrait right, as on desktop */
+  @media (min-width:700px){[data-mtscroll] .mt-st-in{display:grid;grid-template-columns:7fr 5fr;gap:32px;align-items:end}[data-mtscroll] .mt-st-ph{margin-top:0;max-width:none}}
   [data-mtscroll] .mt-st-logos{flex-wrap:nowrap;justify-content:flex-start;gap:28px;margin:48px -16px 0;padding:28px 16px;overflow-x:auto;scrollbar-width:none}
 
   /* Footer: link groups, the wall as one row under them, the phrase. */
