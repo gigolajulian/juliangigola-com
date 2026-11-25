@@ -73,7 +73,13 @@ export async function upright(page: Page, r: Ratio, browserName: string): Promis
 /** Errors the page throws or logs. Third parties' own noise is left out. */
 export function errorsOn(page: Page): string[] {
   const out: string[] = [];
-  page.on("pageerror", (e) => out.push(`pageerror: ${e.message.slice(0, 200)}`));
+  page.on("pageerror", (e) => {
+    /* A view transition the browser skipped. React drops this one itself, but only on the exact old
+       message, and Playwright 1.65's Chromium appends ". Viewport size changed" (React's own ready
+       handler reports it, no app code sees it). shortcut: drop when React's filter matches a prefix. */
+    if (e.message.startsWith("Transition was aborted because of invalid state")) return;
+    out.push(`pageerror: ${e.message.slice(0, 200)}`);
+  });
   page.on("console", (m) => {
     if (m.type() !== "error") return;
     const t = m.text();
