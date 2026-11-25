@@ -337,7 +337,8 @@ export async function sendClient(
     await mailer.send({ ...head, ...m });
     return true;
   } catch (e) {
-    console.error("proof mail", m.subject, String(e));
+    // The error only: the mail's heading names the client.
+    console.error("proof mail", String(e));
     // Inline parts refused: send without the frames, the logo linked.
     try {
       await mailer.send({

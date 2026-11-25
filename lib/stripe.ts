@@ -28,7 +28,8 @@ export async function stripe(key: string, path: string, form?: { [k: string]: st
   const out = (await res.json().catch(() => ({}))) as { [k: string]: unknown };
   if (!res.ok) {
     const err = out.error as { type?: string; code?: string; message?: string } | undefined;
-    console.error("stripe", path, res.status, err?.type, err?.code, err?.message);
+    // Type and code only: Stripe's message can quote the customer's address.
+    console.error("stripe", path.split("?")[0], res.status, err?.type, err?.code);
     throw new HttpError(`Stripe ${path} ${res.status}`, res.status);
   }
   return out;

@@ -113,7 +113,7 @@ export async function toNotion(token: string | undefined, lead: NotionLead): Pro
       res = await notion(token, "/pages", "POST", { parent: { database_id: DATABASE }, properties: props });
     }
     if (!res.ok) {
-      console.error("notion lead", res.status, (await res.text()).slice(0, 300));
+      console.error("notion lead", res.status);
       return void (await alertLater("notion lead", `Notion answered ${res.status}`));
     }
     return id ?? ((await res.json()) as { id: string }).id;
@@ -154,7 +154,7 @@ async function notionRow(
     // shortcut: a lead with no row is left alone; create one here if old leads ever need it.
     if (!id) return;
     const res = await notion(token, `/pages/${id}`, "PATCH", { properties });
-    if (!res.ok) return void console.error("notion row", res.status, (await res.text()).slice(0, 300));
+    if (!res.ok) return void console.error("notion row", res.status);
     return id;
   } catch (e) {
     console.error("notion row", e);

@@ -36,7 +36,7 @@ describe("alertHello", () => {
     const mail = new FakeEmail();
     mail.broken = true;
     expect(await alertHello(mail as never, "Proof: Cy", ["x"])).toBe(false);
-    expect(err).toHaveBeenCalledWith("hello mail", "Proof", expect.any(String));
+    expect(err).toHaveBeenCalledWith("hello mail", expect.any(String));
     err.mockRestore();
   });
 });
