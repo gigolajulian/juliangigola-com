@@ -26,7 +26,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (isDeskAction(body.action)) return (await refuseAdmin(request, env.INBOX_KEY)) ?? deskAction(env, id, body.action);
   if (!(await tokenOpens(env.BOOKING_SECRET, id, typeof body.t === "string" ? body.t : undefined)))
     return json({ error: "This link has expired. Reply to your confirmation email." }, 401);
-  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "booking", request);
+  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "booking", request, id);
   if (slow) return slow;
 
   let out: ChangeResult;

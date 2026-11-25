@@ -1,7 +1,7 @@
 import type { Driver, HomeSection } from "./engine";
 
-/* Phones and tablets: Book online and By quote each get the bottom bar while
-   they fill the screen. Their rows change only when one is tapped,
+/* Phones and tablets: Book online gets the bottom bar while
+   it fills the screen. Its rows change only when one is tapped,
    never with the scroll. */
 const bar = (name: HomeSection): Driver => ({
   name,
@@ -19,4 +19,4 @@ const bar = (name: HomeSection): Driver => ({
   },
 });
 
-export const barDrivers: Driver[] = [bar("book"), bar("quote")];
+export const barDrivers: Driver[] = [bar("book")];

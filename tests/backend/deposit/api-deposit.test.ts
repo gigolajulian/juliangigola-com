@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { FakeKV, FakeStore, fakeLock, reply, GOOGLE_OAUTH as OAUTH } from "../fakes";
+import { FakeKV, FakeStore, fakeLock, refusesTargets, reply, GOOGLE_OAUTH as OAUTH } from "../fakes";
 import { forgetToken } from "@/lib/google";
 import { BookingLock } from "@/worker/booking-lock";
 
@@ -132,6 +132,14 @@ const deliver = async (body: string, sig?: string) =>
   );
 
 describe("POST /api/deposit", () => {
+  it("limits per target: many addresses starting deposits for one email meet one limit", async () => {
+    const lim = refusesTargets();
+    ctx.env.PUBLIC_WRITE_LIMIT = lim;
+    expect((await post(BODY)).status).toBe(429);
+    expect(lim.keys.some((k) => k.startsWith("deposit:t:"))).toBe(true);
+    expect(calls).toEqual([]);
+  });
+
   it("is off while the Stripe key is unset", async () => {
     delete ctx.env.STRIPE_SECRET_KEY;
     expect((await post(BODY)).status).toBe(503);

@@ -1,6 +1,7 @@
 import type { Enquiry } from "@/lib/leads/enquiry";
 import type { Paper, Stage } from "@/lib/leads/leads";
 import { HttpError } from "@/lib/http";
+import { alertLater } from "@/lib/email/error-alert";
 
 /* ── leads into Notion ────────────────────────────────────────────
  * Every enquiry and booking also lands as a row on the Business
@@ -110,10 +111,14 @@ export async function toNotion(token: string | undefined, lead: NotionLead): Pro
     } else {
       res = await notion(token, "/pages", "POST", { parent: { database_id: DATABASE }, properties: props });
     }
-    if (!res.ok) return void console.error("notion lead", res.status, (await res.text()).slice(0, 300));
+    if (!res.ok) {
+      console.error("notion lead", res.status, (await res.text()).slice(0, 300));
+      return void (await alertLater("notion lead", `Notion answered ${res.status}`));
+    }
     return id ?? ((await res.json()) as { id: string }).id;
   } catch (e) {
     console.error("notion lead", e);
+    await alertLater("notion lead", e);
   }
 }
 

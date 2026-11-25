@@ -4,7 +4,8 @@ import { amountOf, intentForm } from "@/lib/booking/deposit";
 import { CURRENCY } from "@/lib/leads/deposit-terms";
 import { openNow } from "@/lib/booking/slots";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
-import { SMALL_BODY, bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
+import { SMALL_BODY, bodyOf, json, limited, limitedFor, taken, upstreamError } from "@/lib/http";
+import { sha256Hex } from "@/lib/token";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
@@ -25,6 +26,9 @@ export async function POST(request: Request) {
   const parsed = parseBooking(await bodyOf(request, SMALL_BODY));
   if (!parsed.ok) return json({ error: parsed.reason }, 400);
   const b = parsed.booking;
+  // Per address typed in too: many networks starting deposits for one address meet the same five a minute.
+  const busy = await limitedFor(env.PUBLIC_WRITE_LIMIT, "deposit", (await sha256Hex(b.email.trim().toLowerCase())).slice(0, 32));
+  if (busy) return busy;
 
   try {
     if (!(await openNow(env.GCAL_OAUTH, b.slug, b.start, { kv: env.INBOX, hours: await liveHours(env) }))) return taken();

@@ -24,13 +24,29 @@ export const statusOf = (e: unknown) => (e instanceof HttpError ? e.status : und
 /** An upstream call failed: log it under `label`, answer 502 with `error` (a fixed line on public routes; admin routes pass `errorText(e)` through). */
 export function upstreamError(label: string, e: unknown, error: string) {
   console.error(label, String(e));
+  // hello@ hears of it, once an hour per label. Lazy, so a client bundle never loads the mail code.
+  void import("@/lib/email/error-alert").then((m) => m.alertLater(label, e)).catch(() => {});
   return json({ error }, 502);
 }
 
-/** The public-write limiter (`PUBLIC_WRITE_LIMIT`, five a minute per address and `kind`): the 429 to answer, or null to go on. */
-export async function limited(limiter: { limit(o: { key: string }): Promise<{ success: boolean }> }, kind: string, request: Request) {
+type Limiter = { limit(o: { key: string }): Promise<{ success: boolean }> };
+
+/** A rate-limit binding (`PUBLIC_WRITE_LIMIT` five a minute, `DOWNLOAD_LIMIT` sixty) per address and `kind`, and per
+    `target` when given (a link, a gallery, an address typed in): many addresses aimed at one target meet the same
+    limit as one. The 429 to answer, or null to go on. */
+export async function limited(limiter: Limiter, kind: string, request: Request, target?: string) {
   const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  if ((await limiter.limit({ key: `${kind}:${ip}` })).success) return null;
+  if ((await limiter.limit({ key: `${kind}:${ip}` })).success && (target === undefined || (await limitedFor(limiter, kind, target)) === null))
+    return null;
+  return tooMany();
+}
+
+/** The same limit on `target` alone, for a target known only once the body is read. */
+export async function limitedFor(limiter: Limiter, kind: string, target: string) {
+  return (await limiter.limit({ key: `${kind}:t:${target}` })).success ? null : tooMany();
+}
+
+function tooMany() {
   const res = json({ error: "Too many tries. Wait a minute." }, 429);
   // The limiter's window is a minute; a client or crawler told when may come back waits instead of hammering.
   res.headers.set("retry-after", "60");

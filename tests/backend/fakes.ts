@@ -74,6 +74,12 @@ export class FakeEmail {
   }
 }
 
+/** A rate limiter that lets every address through and refuses every per-target key (`kind:t:...`), logging each key. */
+export const refusesTargets = () => {
+  const keys: string[] = [];
+  return { keys, limit: async ({ key }: { key: string }) => ({ success: (keys.push(key), !key.includes(":t:")) }) };
+};
+
 /** A Response for a mocked fetch. */
 export const reply = (body: unknown, status = 200, headers: Record<string, string> = {}) =>
   new Response(typeof body === "string" ? body : JSON.stringify(body), { status, headers });
