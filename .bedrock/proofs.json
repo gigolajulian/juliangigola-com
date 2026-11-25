@@ -4,7 +4,7 @@
     "command": "npx vitest run --project backend tests/backend/deposit/api-stripe.test.ts",
     "break": ".bedrock/breaks/WEB-10.patch",
     "patch_sha256": "9ab0c2cc420fb34acb2be397d8f7924daa36f26d0d2f5db9316ad8980d31d80b",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/booking/deposit.ts": "9b2e7441dc4f8b7705d8185edcd8b748a78c436a1e57bc351f35ba550305458d",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -246,7 +246,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -323,7 +323,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 22.8,
+    "seconds": 18.6,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -332,7 +332,7 @@
     "command": "node scripts/bedrock/lockfile-check.mjs",
     "break": ".bedrock/breaks/SEC-3.patch",
     "patch_sha256": "b301504b49e37d07906733dafe0895491ff15c364e1372b5f00fbf143642e7c9",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       ".github/workflows/ci.yml": "5b46375b9bc76c08e6e32f78aad824a2856292ce8caae3490bbce5689e0d34ec",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -575,7 +575,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -652,7 +652,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 6.7,
+    "seconds": 33.2,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -661,7 +661,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/api-inbox.test.ts",
     "break": ".bedrock/breaks/SEC-5.patch",
     "patch_sha256": "32c16895b2f301ff03cb76bd3c8b9736c8fc438a919797b3516e5d15968ab620",
-    "sha": "784deffdba927856d503bb80ed9686558c70b7d8",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/admin/vouch.ts": "9623580effd738654eb8e6aa925f61c052d37ee95a16df51e8592aa32f630fba",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -903,7 +903,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -980,7 +980,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 36.0,
+    "seconds": 20.2,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -989,7 +989,7 @@
     "command": "node scripts/test/gate.mjs --backend",
     "break": ".bedrock/breaks/REL-1.patch",
     "patch_sha256": "448e987e190790a797851093ab199d348153eb1fabf9beb3a8c3a914c7c197cd",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/booking/deposit.ts": "9b2e7441dc4f8b7705d8185edcd8b748a78c436a1e57bc351f35ba550305458d",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -1231,7 +1231,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -1308,7 +1308,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 84.6,
+    "seconds": 99.5,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -1317,7 +1317,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/actions.test.ts",
     "break": ".bedrock/breaks/ABU-13.patch",
     "patch_sha256": "8536a4f40aa47593a6ce7f3e0c5abd7fd1d7d12bde8959952e6d8fd0152aa24d",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/leads/enquiry-action.ts": "eade165e2670fd4362242801ca7c041b481221400610114557e955cfe8650272",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -1559,7 +1559,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -1636,7 +1636,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 20.8,
+    "seconds": 18.2,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -1645,7 +1645,7 @@
     "command": "npx vitest run --project backend tests/backend/site/security-headers.test.ts",
     "break": ".bedrock/breaks/WEB-1.patch",
     "patch_sha256": "8a160c70be4ce1dbd15cb28ef8fc65c41c7d574f763a7fa568d1f483447850bc",
-    "sha": "784deffdba927856d503bb80ed9686558c70b7d8",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
       "lightroom/Shoot.test.lua": "6248d7be4f93b23f1ecfab1143caba9336c2f863d0412c088907f85dadfb83ac",
@@ -1887,7 +1887,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -1964,7 +1964,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 21.0,
+    "seconds": 17.6,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -1973,7 +1973,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/api-leads.test.ts",
     "break": ".bedrock/breaks/PRIV-4.patch",
     "patch_sha256": "727226e9ad7bd911369457658040cf366bb91dedf3936c569958a2989a001e8f",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/seal.ts": "421188c7696f879ff0e2e0dc79ef82a161b3ef35b17f5422c50a4a2218a6de7a",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2215,7 +2215,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -2292,7 +2292,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 23.4,
+    "seconds": 19.0,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -2301,7 +2301,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"picks of the site\"",
     "break": ".bedrock/breaks/WEB-4.patch",
     "patch_sha256": "45110cffd96c374d57cb97b1e498e9a1e909ac2420f4a06b0767c63584125f4a",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2543,7 +2543,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -2620,7 +2620,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 21.4,
+    "seconds": 17.2,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -2629,7 +2629,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"first bytes\"",
     "break": ".bedrock/breaks/WEB-5.patch",
     "patch_sha256": "99f3802e3d73e5830542209bc2ff3686e267ace9a4a8cbd08fa1a00ab341d81e",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2871,7 +2871,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -2948,7 +2948,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 20.0,
+    "seconds": 17.0,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -2957,7 +2957,7 @@
     "command": "npx vitest run --project backend tests/lib/admin/vouch.test.ts",
     "break": ".bedrock/breaks/AUTHZ-2.patch",
     "patch_sha256": "e06737fc96c8e1adc1b37e9d53e003a3c6869a98716dab2163cf24c7fbe77538",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/admin/vouch.ts": "9623580effd738654eb8e6aa925f61c052d37ee95a16df51e8592aa32f630fba",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3199,7 +3199,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -3276,7 +3276,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 19.9,
+    "seconds": 28.1,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -3285,7 +3285,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"escaped HTML body\"",
     "break": ".bedrock/breaks/WEB-7.patch",
     "patch_sha256": "e5c8e0e369d57f36c0d54197cd937f850633e9572e17cf08584fb907da405956",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3527,7 +3527,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -3604,7 +3604,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 22.8,
+    "seconds": 34.2,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -3613,7 +3613,7 @@
     "command": "npx vitest run --project backend tests/backend/site/route-walk.test.ts",
     "break": ".bedrock/breaks/AUTHZ-3.patch",
     "patch_sha256": "f17845b671f1d5f4d34d300bc17ce8a1f2a5e88a07f2aa73686842c3e1bb38fc",
-    "sha": "784deffdba927856d503bb80ed9686558c70b7d8",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/admin/vouch.ts": "9623580effd738654eb8e6aa925f61c052d37ee95a16df51e8592aa32f630fba",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3855,7 +3855,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -3932,7 +3932,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 22.0,
+    "seconds": 29.5,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -3941,7 +3941,7 @@
     "command": "npx vitest run --project backend tests/lib/http-limited.test.ts",
     "break": ".bedrock/breaks/ABU-3.patch",
     "patch_sha256": "e02286d86a639bbe311f0104986abb52587db2d0a57a941df4ba96bdcd119f30",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/http.ts": "78837834e8c99f874b80da74227ac4228b80ed2ddb2a69261bc282c406815a67",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -4183,7 +4183,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -4260,7 +4260,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 22.7,
+    "seconds": 21.3,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -4269,7 +4269,7 @@
     "command": "node scripts/bedrock/ci-check.mjs",
     "break": ".bedrock/breaks/REL-7.patch",
     "patch_sha256": "3e6a6e3d1274ead59d83124c89b4ae584cdaf6e6e6cd2d29e6d632d5161108cf",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       ".github/workflows/ci.yml": "5b46375b9bc76c08e6e32f78aad824a2856292ce8caae3490bbce5689e0d34ec",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -4512,7 +4512,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -4589,7 +4589,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 5.5,
+    "seconds": 5.3,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -4598,7 +4598,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/lead-write-retry.test.ts",
     "break": ".bedrock/breaks/INP-2.patch",
     "patch_sha256": "0f73f74e33f525a2146718670169787a659007089c618d305b6649c9d3701853",
-    "sha": "784deffdba927856d503bb80ed9686558c70b7d8",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/leads/lead-store.ts": "4bace2cac60d3fce1e0a44d20bae847887f097ecd5fcfcdf86ff16496ce67c70",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -4840,7 +4840,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -4917,7 +4917,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 35.3,
+    "seconds": 21.6,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -4926,7 +4926,7 @@
     "command": "npx vitest run --project backend tests/backend/proofs/gallery-notify.test.ts -t \"at most 100 addresses\"",
     "break": ".bedrock/breaks/MEM-3.patch",
     "patch_sha256": "7f11d727249867f1e43b1c85d60a3fe906f127fb7fa4c10c6c28bd65f1fe8416",
-    "sha": "784deffdba927856d503bb80ed9686558c70b7d8",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/proofs/gallery-api.ts": "1ea446f203f968b19d0b9f97ec7091c223308255853cb22a5feec062a3146f7e",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -5168,7 +5168,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -5245,16 +5245,16 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 26.5,
+    "seconds": 22.2,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
   "MEM-4@any": {
-    "result": "proven",
-    "command": "npx vitest run --project backend tests/lib/http.test.ts -t \"size cap\"",
+    "result": "blind",
+    "command": "npx vitest run --project backend tests/lib/http.test.ts -t \"streamed body\"",
     "break": ".bedrock/breaks/MEM-4.patch",
     "patch_sha256": "059e6e5aaf4d2fc15e20b759d3b39e42b66d3b421f0f2610a654213cbc323fab",
-    "sha": "784deffdba927856d503bb80ed9686558c70b7d8",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/http.ts": "78837834e8c99f874b80da74227ac4228b80ed2ddb2a69261bc282c406815a67",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -5496,7 +5496,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -5573,7 +5573,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 82.1,
+    "seconds": 10.6,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -5582,7 +5582,7 @@
     "command": "npx vitest run --project backend tests/backend/booking/own-booking.test.ts -t \"two calls a day\"",
     "break": ".bedrock/breaks/ABU-9.patch",
     "patch_sha256": "7cadfefaa125c1d1ebb87a0b29d501c30f7614b3335ccd0d580fb2b66bc305e1",
-    "sha": "784deffdba927856d503bb80ed9686558c70b7d8",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "app/api/book/route.ts": "9ce999f74fccf2ba305779b7cdd7baaa2e6ce77aebaed0d91deb413dbc695e9a",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -5824,7 +5824,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -5901,16 +5901,16 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 62.0,
+    "seconds": 19.8,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
   "ABU-11@api": {
     "result": "proven",
-    "command": "npx vitest run --project backend tests/lib/http.test.ts -t \"size cap\"",
+    "command": "npx vitest run --project backend tests/lib/http.test.ts -t \"before parsing\"",
     "break": ".bedrock/breaks/ABU-11.patch",
     "patch_sha256": "17f816999a890cf01a5fac456d5b835ee15138c567b5e8d302101ff7e6d2c5d6",
-    "sha": "afc925ffd065843d2597a4d672b40ea148768778",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/http.ts": "78837834e8c99f874b80da74227ac4228b80ed2ddb2a69261bc282c406815a67",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -6152,7 +6152,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -6229,7 +6229,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.8,
+    "seconds": 18.4,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -6238,7 +6238,7 @@
     "command": "npx vitest run --project backend tests/lib/proofs/submit.test.ts -t \"refunded\"",
     "break": ".bedrock/breaks/MONEY-1.patch",
     "patch_sha256": "86e80c886b9b6d42d19437b6441244574e4c4d1226557fc5feb221826166b69a",
-    "sha": "784deffdba927856d503bb80ed9686558c70b7d8",
+    "sha": "ec473b4f66f9721cc4b6361ffd166c8b51a18fd3",
     "files": {
       "lib/proofs/submit.ts": "cac8dcd2dd37a1e11d2134cf4e139d31d281413ade08579e8c9ddd95b5d6bf6f",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -6480,7 +6480,7 @@
       "tests/lib/home/data.test.ts": "034661f6292ad2a6a1a7304c25fb5271122e9786abe15f341c4df359d0034aa0",
       "tests/lib/home/server.test.ts": "b66c4b2325afb2fa5195ad9a3508727aaa5001bc6a97872fb3206fd006c14a2c",
       "tests/lib/http-limited.test.ts": "f21f4ef13de9fd8a9194fc88cffaa672b047a52e69585e0371b4d2d8dc479a1a",
-      "tests/lib/http.test.ts": "5308554eb88c60ae983a405d45b00aa61b182326ec9a07f298907ebb388b730b",
+      "tests/lib/http.test.ts": "6b8799c98686019cd46b3e3a86fe41350ee2525019cd305bb1e2bb7e40cdd4aa",
       "tests/lib/json.test.ts": "a1d833c8c7663ab341ada07e75efba9248e144ed29ab1f61cee1f31c9947207b",
       "tests/lib/keep-names.test.ts": "c84529432f124fe259e8f281e857b1cb9d9f2121d93c5a4ee21d75733a748013",
       "tests/lib/later.test.ts": "321409f7ecc88b6598b8653de6c5fd4983ce3343588b1eab40852d2c5d2d4719",
@@ -6557,7 +6557,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 19.8,
+    "seconds": 35.6,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   }
