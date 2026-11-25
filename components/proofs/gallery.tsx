@@ -482,7 +482,7 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               <li data-dim>
                 <span>03</span>
                 <b>Delivery</b>
-                <p>Full-resolution finals by email, a link to download them all.</p>
+                <p>Full-resolution finals by email, with a link to download them all.</p>
               </li>
             </ol>
             {paid ? (
@@ -560,13 +560,13 @@ export function ProofGallery({ token, initial, notice }: { token: string; initia
               Proofs · {frames.length} frames · {included} included{until}
             </p>
             {/* Sized for the greeting from the start (--len), so the line that swaps in on Open proofs does not move the grid. */}
-            <h1 style={{ "--len": 38 } as React.CSSProperties}>{hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}</h1>
+            <h1 style={{ "--len": 38 } as React.CSSProperties}>{hello ? `Hi ${hello}, pick your proofs below.` : "Pick your proofs."}</h1>
             <p className="proof-hint">Tap the ring to select a frame. Tap the photo to see it large.</p>
           </div>
         ) : (
           <div className="proof-intro">
             <p className="proof-lab">Proofs{until}</p>
-            <h1>{hello ? `Hey ${hello}, pick your proofs below.` : "Pick your proofs."}</h1>
+            <h1>{hello ? `Hi ${hello}, pick your proofs below.` : "Pick your proofs."}</h1>
             <p className="proof-hint">Tap the ring to select a frame. Tap the photo to see it large.</p>
           </div>
         )}

@@ -332,7 +332,7 @@ describe("reschedule", () => {
     const cancelled = await post(id, { t, action: "cancel" });
     vi.setSystemTime(PIN);
     expect(res.status).toBe(403);
-    expect((await res.json()).error).toContain("under 24 hours");
+    expect((await res.json()).error).toContain("less than 24 hours");
     expect(cancelled.status).toBe(200);
   });
 

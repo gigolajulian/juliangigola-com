@@ -74,7 +74,7 @@ describe("ProofGallery", () => {
       email: "a@b.co",
       name: "Maya Ross",
     });
-    expect(await screen.findByRole("heading", { name: "Hey Maya, pick your proofs below." })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "Hi Maya, pick your proofs below." })).toBeTruthy();
     expect(localStorage.getItem("proof-email")).toBeNull();
   });
 
