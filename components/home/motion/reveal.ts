@@ -8,7 +8,7 @@ const BLOCKS = [
   ".mt-held .mt-stage > *",
   ".mt-book .mt-book-col > *",
   ".mt-book .mt-photo",
-  ".mt-quote .mt-frame > *",
+  ".mt-ask > *",
 ].join(",");
 
 /* In for good once it comes into frame. Visible by default: a block is hidden only once the observer has seen it

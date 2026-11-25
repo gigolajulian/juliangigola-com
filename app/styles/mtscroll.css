@@ -31,8 +31,7 @@
 [data-mtscroll] .mt .po{display:none}
 [data-mtscroll] .mt-card .mt-link{font:500 max(11px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;text-decoration:underline;text-underline-offset:4px;text-decoration-color:color-mix(in srgb,var(--ink) 40%,transparent)}
 @media (pointer:coarse){[data-mtscroll] .mt :is(.btn,.mt-sm){min-height:44px}
-  [data-mtscroll] :is(.mt,.mt-card) :is(.mt-link,.mt-bar-call,.mt-fline a,.mt-fline button){display:inline-flex;align-items:center;min-height:44px}
-  [data-mtscroll] .mt .mt-qw{min-height:44px}}
+  [data-mtscroll] :is(.mt,.mt-card) :is(.mt-link,.mt-bar-call,.mt-fline a,.mt-fline button){display:inline-flex;align-items:center;min-height:44px}}
 
 /* ── Hero wall (3.2) ── */
 [data-mtscroll] .mt-hero .mt-stage{position:relative;height:calc(2640 * var(--u))}
@@ -103,7 +102,7 @@
 [data-mtscroll] .mt-mofoot .btn{position:absolute;right:calc(36 * var(--u));bottom:0}
 
 /* ── Book online (3.4) and By quote (3.5) ── */
-[data-mtscroll] :is(.mt-book,.mt-quote)>.mt-frame{min-height:max(100svh,600px)}
+[data-mtscroll] .mt-book>.mt-frame{min-height:max(100svh,600px)}
 [data-mtscroll] .mt-label{margin:0}
 [data-mtscroll] .mt-book .mt-frame{padding:calc(100 * var(--u)) 0 calc(60 * var(--u)) calc(36 * var(--u))}
 [data-mtscroll] .mt-book-col{width:calc(724 * var(--u));margin-top:calc(19 * var(--u))}
@@ -114,39 +113,30 @@
 [data-mtscroll] .mt-br:is([aria-pressed="true"],:focus-visible) :is(b,.lbl){color:var(--ink)}
 @media (hover:hover){[data-mtscroll] .mt-br:hover :is(b,.lbl){color:var(--ink)}}
 [data-mtscroll] .mt-brs.pair{display:grid;grid-template-columns:1fr 1fr;column-gap:calc(28 * var(--u));border-bottom:1px solid var(--hair)}
-[data-mtscroll] .mt-q-line{margin:0;font:500 max(13px,calc(15 * var(--u)))/1.5 var(--display);color:var(--body);max-width:calc(560 * var(--u))}
 [data-mtscroll] .mt-act{display:flex;flex-direction:column;align-items:flex-end;gap:calc(14 * var(--u));margin-top:calc(18 * var(--u))}
 [data-mtscroll] .mt-dep{margin:calc(20 * var(--u)) 0 0}
 [data-mtscroll] .mt-photo{position:absolute;margin:0;top:calc(78 * var(--u));height:min(calc(802 * var(--u)),calc(max(100svh,600px) - 98 * var(--u)));aspect-ratio:3/4;overflow:hidden;background:var(--card)}
 [data-mtscroll] .mt-book .mt-photo{right:calc(20 * var(--u))}
-[data-mtscroll] .mt-quote .mt-photo{left:calc(20 * var(--u))}
-[data-mtscroll] :is(.mt-photo,.mt-photo-w)>:is(img,.duo,.cl,.op){position:absolute;inset:0;opacity:0;transition:opacity .4s ease-out}
-[data-mtscroll] :is(.mt-photo,.mt-photo-w)>:is(img,.duo,.cl,.op).on{opacity:1}
+[data-mtscroll] .mt-photo>:is(img,.duo,.cl,.op){position:absolute;inset:0;opacity:0;transition:opacity .4s ease-out}
+[data-mtscroll] .mt-photo>:is(img,.duo,.cl,.op).on{opacity:1}
 [data-mtscroll] .duo img{object-position:var(--at,50% 50%)}
 [data-mtscroll] .cl.two{display:flex;flex-direction:column;gap:6px}
 [data-mtscroll] .cl .st{position:relative;display:block;flex:1}
 [data-mtscroll] .cl:not(.two) .st{position:absolute;inset:0}
-[data-mtscroll] .mt-clcap{position:absolute;left:calc(16 * var(--u));bottom:calc(14 * var(--u));color:rgb(var(--on-photo));z-index:1}
-[data-mtscroll] .mt-photo-w,[data-mtscroll] .mt-bar{display:none}
-[data-mtscroll] .mt-quote-col{margin-left:calc(690 * var(--u));width:calc(714 * var(--u));padding:calc(100 * var(--u)) 0 calc(60 * var(--u))}
-[data-mtscroll] .mt-q-h{font:900 calc(58 * var(--u))/.95 var(--display);letter-spacing:-.055em;margin:calc(14 * var(--u)) 0 calc(20 * var(--u));white-space:nowrap}
-[data-mtscroll] .mt-by{margin:0 0 calc(16 * var(--u))}
-[data-mtscroll] .mt-qos{border-bottom:1px solid var(--hair)}
-[data-mtscroll] .mt-qo{display:block;width:100%;border-top:1px solid var(--hair)!important;padding:calc(10 * var(--u)) 0 calc(15 * var(--u))!important}
-[data-mtscroll] .mt-qo b{display:block;font:900 calc(64 * var(--u))/calc(68 * var(--u)) var(--display);letter-spacing:-.055em;color:var(--row);transition:color .25s ease-out}
-[data-mtscroll] .mt-qo .lbl{display:block;margin-top:2px}
-[data-mtscroll] .mt-qo-d{margin:0;max-height:0;opacity:0;overflow:hidden;font:500 max(13px,calc(15 * var(--u)))/1.5 var(--display);color:var(--body);transition:max-height .45s cubic-bezier(.16,1,.3,1),margin .45s cubic-bezier(.16,1,.3,1),opacity .3s ease-out}
-[data-mtscroll] .mt-qow[data-on] .mt-qo-d{max-height:calc(50 * var(--u));opacity:1;margin:calc(-5 * var(--u)) 0 calc(15 * var(--u))}
-[data-mtscroll] :is(.mt-qo,.mt-qw):is([aria-pressed="true"],:focus-visible) b{color:var(--ink)}
-@media (hover:hover){[data-mtscroll] :is(.mt-qo,.mt-qw):hover b{color:var(--ink)}}
-[data-mtscroll] .mt-qw{display:flex;width:100%;justify-content:space-between;align-items:center;height:calc(50 * var(--u));border-top:1px solid var(--hair)!important}
-[data-mtscroll] .mt-qw b{font:900 calc(22 * var(--u))/1 var(--display);letter-spacing:-.04em;color:var(--row);transition:color .25s ease-out}
-[data-mtscroll] .mt-qw>span{font:500 max(12px,calc(14 * var(--u)))/1 var(--display);color:var(--body)}
-[data-mtscroll] .mt-q-line{margin-top:calc(20 * var(--u))}
-[data-mtscroll] .mt-q-act{display:flex;align-items:center;gap:calc(24 * var(--u));margin-top:calc(18 * var(--u))}
-[data-mtscroll] .mt-q-alt{display:flex;flex-direction:column;gap:8px}
-[data-mtscroll] .mt-q-alt p{margin:0}
+[data-mtscroll] .mt-bar{display:none}
 
+/* ── Have something in mind? (was By quote, 3.5): the ask and its two ways in on 5 columns, the four kinds of work as rows on 7 ── */
+[data-mtscroll] .mt-ask{display:grid;grid-template-columns:5fr 7fr;gap:calc(80 * var(--u));padding:calc(120 * var(--u)) calc(36 * var(--u));border-top:1px solid var(--hair)}
+[data-mtscroll] .mt-ask-h{margin:0;font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em}
+[data-mtscroll] .mt-ask-note{margin:calc(40 * var(--u)) 0 0;max-width:44ch;font:500 max(13px,calc(14 * var(--u)))/1.5 var(--display);color:var(--mute)}
+[data-mtscroll] .mt .mt-ask-note b{font-weight:inherit;color:var(--ink)}
+[data-mtscroll] .mt-ask-cta{display:flex;flex-direction:column;align-items:flex-start;gap:18px;margin-top:calc(32 * var(--u))}
+[data-mtscroll] .mt .mt-ask-cta .btn{width:calc(280 * var(--u))}
+[data-mtscroll] .mt-ask-rows{border-top:1px solid var(--hair)}
+[data-mtscroll] .mt .mt-ask-row{display:grid;grid-template-columns:1fr 1.3fr;align-items:baseline;gap:24px;width:100%;padding:calc(22 * var(--u)) 0;border-bottom:1px solid var(--hair)}
+[data-mtscroll] .mt-ask-row b{font:900 calc(40 * var(--u))/1 var(--display);letter-spacing:-.04em}
+[data-mtscroll] .mt-ask-row .lbl{color:var(--mute)}
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){[data-mtscroll] .mt-ask-row b{display:block;transition:transform .25s cubic-bezier(.23,1,.32,1)}[data-mtscroll] .mt-ask-row:hover b{transform:translateX(8px)}}
 /* ── Statement (was About, 3.9): the sentence and the facts hold 7 columns, my portrait 5, the client marks run under both ── */
 [data-mtscroll] .mt-st{padding:calc(140 * var(--u)) calc(36 * var(--u)) 0}
 [data-mtscroll] .mt-st-in{display:grid;grid-template-columns:7fr 5fr;gap:calc(80 * var(--u))}
@@ -227,8 +217,7 @@
 
 @media (prefers-reduced-motion:reduce){
   [data-mtscroll] .mt *,[data-mtscroll] .mt-card,[data-mtscroll] .mt-dim{animation:none!important}
-  [data-mtscroll] .mt :is(.mt-photo,.mt-photo-w)>*{transition-duration:.2s!important}
-  [data-mtscroll] .mt-qo-d{transition:none!important}
+  [data-mtscroll] .mt .mt-photo>*{transition-duration:.2s!important}
 }
 
 /* ── Every screen that is not D: the phone structure (T, P, L). Natural
@@ -289,7 +278,7 @@
   [data-mtscroll] .mt-mofoot .btn{position:static;margin-top:16px}
 
   /* Book online and By quote: photo on top, rows under it, held bar. */
-  [data-mtscroll] :is(.mt-book,.mt-quote)>.mt-frame{min-height:0;width:100%;padding:24px 0 24px}
+  [data-mtscroll] .mt-book>.mt-frame{min-height:0;width:100%;padding:24px 0 24px}
   [data-mtscroll] .mt-book .mt-frame{display:flex;flex-direction:column}
   [data-mtscroll] .mt-label{padding:0 16px}
   [data-mtscroll] .mt-photo{position:relative;inset:auto!important;order:-1;width:100%;height:auto;aspect-ratio:4/3;margin:12px 0 0}
@@ -302,8 +291,7 @@
   :root[data-mtscroll][data-theme="light"] .mt-br b{color:var(--row)}
   [data-mtscroll] .mt-br .lbl{margin:0;white-space:nowrap}
   [data-mtscroll] .mt-br .w{display:none}
-  :root[data-mtscroll][data-theme="light"] :is(.mt-dep,.mt-q-line,.mt-qw:not([aria-pressed="true"],:focus-visible) b){color:var(--mute)}
-  :root[data-mtscroll][data-theme="light"] .mt-qo-d{color:var(--body)}
+  :root[data-mtscroll][data-theme="light"] .mt-dep{color:var(--mute)}
   [data-mtscroll] .mt-brs.pair{column-gap:14px}
   [data-mtscroll] .mt-brs.pair .mt-br{flex-direction:column;gap:4px}
   [data-mtscroll] .mt-brs.pair .mt-br b{font-size:22px}
@@ -311,26 +299,18 @@
   [data-mtscroll] .mt-bar{position:sticky;bottom:0;z-index:5;display:flex;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right)) max(30px,calc(env(safe-area-inset-bottom) + 12px)) max(16px,env(safe-area-inset-left));background:color-mix(in srgb,var(--bg) 72%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-top:1px solid var(--hair)}
   [data-mtscroll] .mt-bar>p,[data-mtscroll] .mt-bar>a{margin:0;flex:none;line-height:1.4}
   [data-mtscroll] .mt-bar .btn{flex:1;min-height:48px}
-  [data-mtscroll] .mt-quote .mt-photo{display:none}
-  [data-mtscroll] .mt-photo-w{display:block;position:relative;margin:12px 0 0;aspect-ratio:2/1;overflow:hidden;background:var(--card)}
-  [data-mtscroll] .mt-quote .mt-frame{display:flex;flex-direction:column}
-  [data-mtscroll] .mt-quote-col{display:contents}
-  [data-mtscroll] .mt-quote .mt-label{order:-3}
-  [data-mtscroll] .mt-q-h{order:-2;font-size:clamp(26px,8.2vw,48px);line-height:1;margin:6px 16px 6px}
-  [data-mtscroll] .mt-by{order:-1;margin:4px 16px 0}
-  [data-mtscroll] .mt-qos{margin:20px 16px 0}
-  [data-mtscroll] .mt-qo{padding:11px 0 12px!important}
-  [data-mtscroll] .mt-qo b{font-size:30px;line-height:1.05;letter-spacing:-.05em;color:var(--grey)}
-  :root[data-mtscroll][data-theme="light"] .mt-qo b{color:var(--row)}
-  [data-mtscroll] .mt-qo-d{font-size:13px;line-height:1.4;color:#a8a8a8}
-  [data-mtscroll] .mt-qow[data-on] .mt-qo-d{max-height:80px;margin:0 0 12px}
-  [data-mtscroll] .mt-qw{height:46px}
-  [data-mtscroll] .mt-qw b{font-size:18px;color:var(--grey)}
-  [data-mtscroll] .mt-qw>span{font-size:13px}
-  [data-mtscroll] .mt-q-line{margin:12px 16px 0;font-size:12px;line-height:1.4;color:var(--grey)}
-  [data-mtscroll] .mt-q-act{display:none}
   [data-mtscroll] .mt-bar-call{text-decoration:underline;text-underline-offset:3px}
 
+  /* Have something in mind?: one column, the rows under the ask, Inquire the full width. */
+  [data-mtscroll] .mt-ask{display:block;padding:56px 16px}
+  [data-mtscroll] .mt-ask-h{font-size:clamp(34px,11.3vw,64px)}
+  [data-mtscroll] .mt-ask-note{margin-top:30px;font-size:13px}
+  [data-mtscroll] .mt-ask-cta{margin-top:24px}
+  [data-mtscroll] .mt .mt-ask-cta .btn{width:100%}
+  [data-mtscroll] .mt-ask-rows{margin-top:28px}
+  [data-mtscroll] .mt .mt-ask-row{display:block;padding:16px 0}
+  [data-mtscroll] .mt-ask-row b{display:block;font-size:26px}
+  [data-mtscroll] .mt-ask-row .lbl{display:block;margin-top:8px}
   /* Statement: one column, the portrait under the facts, the marks as a sideways row to the screen edges. */
   [data-mtscroll] .mt-st{padding:72px 16px 0}
   [data-mtscroll] .mt-st-in,[data-mtscroll] .mt-st-l,[data-mtscroll] .mt-st-b{display:block}
@@ -387,7 +367,6 @@
   :root[data-theme="light"] .mt-hero .mt-scrim.mt-scrim.mt-scrim{background:none}
   [data-mtscroll] .mt-covers .mt-row{--cv:calc(358 * var(--pu));padding-inline:calc(16 * var(--pu))}
   [data-mtscroll] .mt-photo{aspect-ratio:390/226}
-  [data-mtscroll] .mt-photo-w{aspect-ratio:390/190}
   [data-mtscroll] .mt-fcols{grid-template-columns:1fr 1fr}
   [data-mtscroll] .mt-ph{font-size:150px}
   [data-mtscroll] .mt-ftime .dk{display:none}
@@ -425,7 +404,6 @@
   [data-mtscroll] .mt-ctas .btn{flex:none}
   [data-mtscroll] .mt-covers .mt-row{--cv:min(70vw,calc(100svh - 140px))}
   [data-mtscroll] .mt-motion .mt-row{--fw:60vw}
-  [data-mtscroll] .mt-photo,[data-mtscroll] .mt-photo-w{aspect-ratio:auto;height:60svh}
   [data-mtscroll] .mt-ph{font-size:120px}
 }
 /* intro waiting state, set by the head script before first paint (the rest lives in components/home/intro/intro.css) */
@@ -530,8 +508,6 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
   [data-mtscroll] .mt-bin .f-bar .btn.fill{width:100%}
 }
 /* By quote, held bar: the link leads, the button is only as wide as its word */
-[data-mtscroll] .mt-quote>.mt-bar{justify-content:space-between}
-[data-mtscroll] .mt-quote>.mt-bar .btn{flex:none;min-height:44px;padding-inline:28px}
 /* Footer link columns sit on the photo wall: a halo in the ground colour keeps them readable over a bright frame */
 /* footer links larger on the desktop layout, where 11px is too small */
 @media (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols,[data-mtscroll] .mt-fcols :is(p,a,button){font-size:max(13px,calc(15 * var(--u)))}[data-mtscroll] .mt-fcols p{margin-bottom:calc(15 * var(--u))}}
@@ -559,30 +535,13 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
   [data-mtscroll] .mt-book-col{margin-top:0}
   [data-mtscroll] .mt-next{display:block;margin-left:auto}
   [data-mtscroll] .mt-book .mt-act{justify-content:flex-start;gap:calc(28 * var(--u))}
-  [data-mtscroll] .mt-quote>.mt-frame{min-height:0;padding:0 calc(36 * var(--u)) calc(110 * var(--u))}
-  [data-mtscroll] .mt-quote .mt-photo,[data-mtscroll] .mt-quote .mt-label{display:none}
-  [data-mtscroll] .mt-quote-col{margin:0;width:auto;padding:calc(48 * var(--u)) 0 0;border-top:1px solid var(--hair);display:grid;grid-template-columns:minmax(0,1fr) calc(320 * var(--u));grid-template-areas:"h h" "o a" "l b";column-gap:calc(48 * var(--u));align-items:start}
   /* smaller than the Sessions heading above it */
-  [data-mtscroll] .mt-q-h{grid-area:h;font-size:calc(88 * var(--u));line-height:.9;margin:0 0 calc(30 * var(--u))}
-  [data-mtscroll] .mt-qos{grid-area:o;position:relative;display:flex;column-gap:calc(44 * var(--u));border:0;padding-bottom:calc(64 * var(--u))}
-  [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw){display:block;width:auto;height:auto;border:0!important;padding:0!important}
-  [data-mtscroll] .mt-quote :is(.mt-qo,.mt-qw) b{display:block;font:900 calc(48 * var(--u))/calc(54 * var(--u)) var(--display);letter-spacing:-.05em;white-space:nowrap}
   /* the open option's lines sit under the row, from its left edge */
-  [data-mtscroll] .mt-qo .lbl,[data-mtscroll] .mt-qw>span{position:absolute;left:0;top:calc(100% - 54 * var(--u));margin:0;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s ease-out;font:500 max(11px,calc(11 * var(--u)))/1.2 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--ink)}
   /* the lines of the option being left go first, then the new ones come in: two texts never cross in the same place */
-  [data-mtscroll] :is(.mt-qo,.mt-qw)[aria-pressed="true"] :is(.lbl,span){opacity:1;transition:opacity .25s ease-out .12s}
-  [data-mtscroll] .mt-qw .po{display:none}
-  [data-mtscroll] .mt-qo-d,[data-mtscroll] .mt-qow[data-on] .mt-qo-d{position:absolute;left:0;top:calc(100% - 30 * var(--u));max-height:none;margin:0;white-space:nowrap;transition:opacity .12s ease-out}
-  [data-mtscroll] .mt-qow[data-on] .mt-qo-d{transition:opacity .25s ease-out .12s}
   /* a larger Inquire with the call line and the reply time under it.
      The column has a fixed width so the client name changing under it cannot move the button. */
-  [data-mtscroll] .mt-q-act{grid-area:a;flex-direction:column;align-items:stretch;gap:calc(18 * var(--u));margin-top:calc(4 * var(--u))}
-  [data-mtscroll] .mt-q-act .mt-big{width:100%;padding:calc(28 * var(--u)) 0;font-size:max(12px,calc(15 * var(--u)))}
   /* quieter than the picked option's own line above it, and on one baseline with the client line */
-  [data-mtscroll] .mt-q-line{grid-area:l;margin-top:calc(10 * var(--u));max-width:none;color:var(--mute);align-self:baseline}
   /* flush right like the lines above it; the longest name is wider than the column and runs out to the left, over nothing */
-  [data-mtscroll] .mt-q-alt{align-items:flex-end}
-  [data-mtscroll] .mt-by{grid-area:b;margin:calc(14 * var(--u)) 0 0;justify-self:end;align-self:baseline;white-space:nowrap}
 }
 @media not ((min-width:1024px) and (min-height:600px)){
   [data-mtscroll] .mt-bq-h{order:-2;padding:0 16px}
@@ -594,8 +553,6 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* Elevate picks, phones: the By quote client frame is square, held on its left; About is a 4:5 frame
    cropped onto me (reframe A). */
 @media (max-width:599px){
-  [data-mtscroll] .mt-photo-w{aspect-ratio:1/1}
-  [data-mtscroll] .mt-photo-w img{object-position:25% 50%}
 }
 
 /* Cover art: the section is titled "Cover art" with "Design" under it, indented. v1: each
