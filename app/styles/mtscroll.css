@@ -57,15 +57,6 @@
 [data-mtscroll] .mt-track{display:flex;width:max-content}
 [data-mtscroll] .mt-item{position:relative;flex:none;scroll-snap-align:start}
 [data-mtscroll] .mt-ttl{margin:0;white-space:nowrap}
-[data-mtscroll] .mt-covers .mt-stage{padding-top:calc(120 * var(--u));padding-bottom:calc(96 * var(--u))}
-[data-mtscroll] .mt-rowhead{position:relative;width:min(100%,calc(1440 * var(--u)));margin-inline:auto;padding-inline:calc(36 * var(--u));height:calc(200 * var(--u))}
-[data-mtscroll] .mt-rowhead>p{margin:0}
-[data-mtscroll] .mt-rowhead .mc{margin-left:10px}
-[data-mtscroll] .mt-rowhead h2{font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em;margin:calc(18 * var(--u)) 0 calc(20 * var(--u))}
-[data-mtscroll] .mt-artist{margin:0}
-[data-mtscroll] .mt-rowhead .btn{position:absolute;right:calc(36 * var(--u));top:calc(62 * var(--u))}
-[data-mtscroll] .mt-covers .mt-row{--pl:calc(var(--fx) + 560 * var(--u));margin-top:calc(60 * var(--u));padding:0 calc(100vw - var(--pl) - 320 * var(--u)) 0 var(--pl);scroll-padding-left:var(--pl)}
-[data-mtscroll] .mt-covers .mt-track{gap:calc(200 * var(--u))}
 [data-mtscroll] .mt-sleeve{width:calc(320 * var(--u));height:calc(320 * var(--u))}
 [data-mtscroll] .mt-sleeve .face,.cv4 .mt-sleeve .face{position:absolute;inset:0;z-index:1;border-radius:calc(4 * var(--u));overflow:hidden;background:var(--card)}
 [data-mtscroll] .mt-sleeve .face .back{opacity:0}
@@ -135,6 +126,22 @@
 [data-mtscroll] .mt-cm-grid figcaption{margin-top:12px;text-align:right}
 [data-mtscroll] .mt .mt-cm-all{display:flex;width:max-content;margin:28px 0 0 auto}
 [data-mtscroll] .mt-cm-ph:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+/* ── Cover art (3.7): four sleeves in a row, each with its record behind it. The record is the Cover art page's (.mt-sleeve .disc)
+   in % of the sleeve. --o 0 in, 1 out; --r degrees. At rest (no motion) the record sits half out. ── */
+[data-mtscroll] .mt-covers{overflow-x:clip}
+[data-mtscroll] .mt-cv{padding:calc(120 * var(--u)) calc(36 * var(--u))}
+[data-mtscroll] .mt-cv-head{margin-bottom:calc(48 * var(--u))}
+[data-mtscroll] .mt-cv-head h2{margin:0;font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em}
+[data-mtscroll] .mt-cv-head .lbl{margin:10px 0 0}
+[data-mtscroll] .mt-cv-grid{display:grid;grid-template-columns:repeat(4,1fr)}
+[data-mtscroll] .mt-cv-sleeve{position:relative;display:block;width:73.5%;aspect-ratio:1;--o:.5;--r:100}
+[data-mtscroll] .mt-cv-face{position:absolute;inset:0;z-index:1;overflow:hidden;border-radius:4px;background:var(--card);box-shadow:6px 0 18px -8px rgb(0 0 0 / .7)}
+[data-mtscroll] .mt-cv-face img{object-fit:cover}
+[data-mtscroll] .mt-cv-disc{position:absolute;inset:1.9%;border-radius:50%;overflow:hidden;pointer-events:none;background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222);box-shadow:inset 0 0 0 2px #050505,inset 0 0 0 3px rgba(255,255,255,.16);transform:translateX(calc(var(--o) * 36%)) rotate(calc(var(--r) * 1deg))}
+[data-mtscroll] .mt-cv-disc::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,transparent 0 16.5%,rgba(0,0,0,.5) 16.6% 17.2%,transparent 17.4% 97%,rgba(0,0,0,.65) 98.5%),repeating-radial-gradient(circle,rgba(0,0,0,.22) 0 .6px,rgba(255,255,255,.05) .6px 1.3px,rgba(0,0,0,0) 1.3px 2.1px),radial-gradient(circle,rgba(0,0,0,.28),rgba(0,0,0,.1) 60%,rgba(0,0,0,.34)),linear-gradient(rgba(8,10,14,.26),rgba(8,10,14,.26))}
+[data-mtscroll] .mt-cv-disc::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#070707 0 1.9%,rgba(255,255,255,.3) 2% 2.4%,transparent 2.5%),conic-gradient(from 18deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.2) 14deg,rgba(255,255,255,0) 32deg,rgba(255,255,255,0) 170deg,rgba(255,255,255,.13) 192deg,rgba(255,255,255,0) 214deg,rgba(255,255,255,0) 360deg);transform:rotate(calc(var(--r) * -1deg))}
+[data-mtscroll] .mt .mt-cv-all{display:flex;width:max-content;margin:28px 0 0 auto}
+[data-mtscroll] .mt-cv-sleeve:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 /* ── Statement (was About, 3.9): the sentence and the facts hold 7 columns, my portrait 5, the client marks run under both ── */
 [data-mtscroll] .mt-st{padding:calc(140 * var(--u)) calc(36 * var(--u)) 0}
 [data-mtscroll] .mt-st-in{display:grid;grid-template-columns:7fr 5fr;gap:calc(80 * var(--u))}
@@ -242,16 +249,7 @@
 
   /* Rows: snap rows, the snapped item centred. */
   [data-mtscroll] .mt-held .mt-stage{min-height:0;padding:48px 0 40px}
-  [data-mtscroll] .mt-rowhead,[data-mtscroll] .mt-mohead,[data-mtscroll] .mt-mofoot{padding-inline:16px;height:auto}
-  [data-mtscroll] .mt-rowhead h2{font-size:46px;margin:12px 0 4px}
-  [data-mtscroll] .mt-artist{margin-left:4px!important}
-  [data-mtscroll] .mt-rowhead .btn{position:static;margin-top:0}
-  [data-mtscroll] .mt-covers .mt-stage{display:flex;flex-direction:column}
-  [data-mtscroll] .mt-covers .mt-rowhead{display:contents}
-  [data-mtscroll] .mt-covers .mt-rowhead>*{margin-inline:16px}
-  [data-mtscroll] .mt-covers .mt-rowhead .btn{order:3;align-self:flex-start;margin:8px 16px 0}
-  [data-mtscroll] .mt-covers .mt-row{--cv:min(70vw,520px);margin-top:24px;padding:0 calc((100vw - var(--cv)) / 2) 72px;scroll-padding:0}
-  [data-mtscroll] .mt-covers .mt-track{gap:16px}
+  [data-mtscroll] .mt-mohead,[data-mtscroll] .mt-mofoot{padding-inline:16px;height:auto}
   [data-mtscroll] .mt-item{scroll-snap-align:center}
   [data-mtscroll] .mt-sleeve{width:var(--cv);height:var(--cv)}
   [data-mtscroll] .mt-sleeve .disc{display:none;left:calc(var(--cv) * .014);top:calc(var(--cv) * .014);width:calc(var(--cv) * .972);height:calc(var(--cv) * .972);transform:translateY(calc(var(--o,0) * 118px)) rotate(calc(var(--o,0) * 66deg))}
@@ -304,6 +302,11 @@
   [data-mtscroll] .mt-cm-head h2{font-size:46px}
   [data-mtscroll] .mt-cm-grid{grid-template-columns:1fr 1fr;gap:28px 10px}
   [data-mtscroll] .mt-cm-grid figcaption{margin-top:10px}
+  /* Cover art: two by two. */
+  [data-mtscroll] .mt-cv{padding:56px 16px}
+  [data-mtscroll] .mt-cv-head{margin-bottom:24px}
+  [data-mtscroll] .mt-cv-head h2{font-size:46px}
+  [data-mtscroll] .mt-cv-grid{grid-template-columns:1fr 1fr;gap:20px 0}
   /* Statement: one column, the portrait under the facts, the marks as a sideways row to the screen edges. */
   [data-mtscroll] .mt-st{padding:72px 16px 0}
   [data-mtscroll] .mt-st-in,[data-mtscroll] .mt-st-l,[data-mtscroll] .mt-st-b{display:block}
@@ -338,9 +341,6 @@
    the record whole, "See all covers" beside the heading to leave the height to the row. The record drops 118px and grows with the focused sleeve,
    past rows.css's 126px of room, so the row clipped its bottom (Julian). Phones on their side (under 480 tall) keep their own layout. */
 @media (min-width:600px) and (max-width:1023px) and (min-height:480px) and (orientation:landscape){
-  [data-mtscroll] .mt-covers .mt-stage{box-sizing:border-box;min-height:calc(100svh - 57px);padding:0;justify-content:center}
-  [data-mtscroll] .mt-covers .mt-rowhead .btn.btn{order:0;align-self:flex-end;margin:-48px 16px 0}
-  html[data-mtscroll] .mt-covers .mt-row.mt-row{--cv:min(70vw,520px,calc((100svh - 330px) / 1.08));margin-top:16px;padding-bottom:calc(126px + var(--cv) * .08)}
 }
 
 /* P: the phone frames (3.13), at 390 wide. */
@@ -358,7 +358,6 @@
   /* dark only: on the light page it showed as a grey band between the photos */
   @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .mt-hero .mt-scrim.mt-scrim.mt-scrim{background:none}}
   :root[data-theme="light"] .mt-hero .mt-scrim.mt-scrim.mt-scrim{background:none}
-  [data-mtscroll] .mt-covers .mt-row{--cv:calc(358 * var(--pu));padding-inline:calc(16 * var(--pu))}
   [data-mtscroll] .mt-photo{aspect-ratio:390/226}
   [data-mtscroll] .mt-fcols{grid-template-columns:1fr 1fr}
   [data-mtscroll] .mt-ph{font-size:150px}
@@ -395,7 +394,6 @@
   [data-mtscroll] .mt-cap .pl::before{content:" | ";content:" | " / ""}
   [data-mtscroll] .mt-ctas{left:auto;right:max(16px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 52px)}
   [data-mtscroll] .mt-ctas .btn{flex:none}
-  [data-mtscroll] .mt-covers .mt-row{--cv:min(70vw,calc(100svh - 140px))}
   [data-mtscroll] .mt-motion .mt-row{--fw:60vw}
   [data-mtscroll] .mt-ph{font-size:120px}
 }
@@ -428,8 +426,6 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 /* stacked layout (no hold) from 600px wide: the columns are wide, so the labels keep the phone's 18px (they fell to 11px, smaller than the lines around them) */
 /* phone: artist sits under the title's left edge, "See all covers" on the right, session photo square and held on the face, call link on one line */
 @media (max-width:599px){
-  [data-mtscroll] .mt-covers .mt-artist{margin-left:16px!important}
-  [data-mtscroll] .mt-covers .mt-rowhead .btn{align-self:flex-end;margin-left:auto!important;margin-right:16px!important}
   [data-mtscroll] .mt-book .mt-photo{aspect-ratio:1/1}
   [data-mtscroll] .mt-book .mt-photo img{object-fit:cover;object-position:50% 18%}
   [data-mtscroll] .mt-bar-call{white-space:nowrap;line-height:1.5!important}
@@ -551,26 +547,13 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 /* Cover art: the section is titled "Cover art" with "Design" under it, indented. v1: each
    record is pressed in one color from its cover, black label. v2: one large count bottom left; each cover is named
    under its sleeve and the ones not in front dim. */
-[data-mtscroll] .mt-covers .mt-rowhead h2{margin-bottom:calc(12 * var(--u))}
-[data-mtscroll] .mt-cvsub{margin:0 0 0 calc(24 * var(--u))!important}
 [data-mtscroll] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{background:radial-gradient(circle,#0b0b0b 0 16.5%,transparent 16.7%),var(--press,#222)}
-[data-mtscroll] .mt-cvcap{position:absolute;left:0;top:calc(100% + 16 * var(--u));margin:0;display:grid;gap:4px;white-space:nowrap;opacity:.85;transition:opacity .3s ease-out}
-[data-mtscroll] .mt-sleeve[data-on] .mt-cvcap{opacity:1}
 /* The artist line is the muted ink under the caption's .85 dim, so it sat at 3.3 to 4.5:1 on the covers not in front
    (audit). A quarter toward the foreground keeps it second to the title and clears 4.5:1 dimmed. */
-[data-mtscroll] .mt-cvcap .mute{color:color-mix(in oklab,var(--muted-foreground) 72%,var(--foreground))}
 /* Touch has no hover to lift it, so the caption sits at full there (the artist line would be 2.9:1 at rest). */
-@media (hover:none){[data-mtscroll] .mt-cvcap{opacity:1}}
-[data-mtscroll] .mt-cvn{position:absolute;left:calc(var(--fx) + 36 * var(--u));bottom:calc(40 * var(--u));margin:0;font:500 calc(64 * var(--u))/1 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
-[data-mtscroll] .mt-cvn span{font-size:.3em;letter-spacing:.14em;color:var(--mute);margin-left:.4em}
 @media (min-width:1024px) and (min-height:600px){
-  [data-mtscroll] .mt-covers .mt-artist{display:none}
-  [data-mtscroll] .mt-covers .mt-stage{position:relative}
 }
 @media not ((min-width:1024px) and (min-height:600px)){
-  [data-mtscroll] .mt-cvsub{margin-left:27px!important}
-  [data-mtscroll] .mt-covers .mt-artist{margin:10px 16px 0!important}
-  [data-mtscroll] .mt-cvcap,[data-mtscroll] .mt-cvn{display:none}
 }
 
 /* c1: the logo band is its own room. It began as off-white with black marks; Julian inverted it for the dark
@@ -589,7 +572,7 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 @media (pointer:coarse){
   [data-mtscroll] .mt-fline{align-items:center}
   /* 48: the hand-over scales these to .95 while they move */
-  [data-mtscroll] .mt .mt-rowhead .btn,[data-mtscroll] .mt .mt-st-more{min-height:48px}
+  [data-mtscroll] .mt .mt-st-more{min-height:48px}
 }
 @media (pointer:coarse) and (min-width:1024px) and (min-height:600px){[data-mtscroll] .mt-fcols :is(a,button){display:inline-flex;align-items:center;min-height:44px}[data-mtscroll] .mt-fcols p{margin-bottom:0}}
 /* Footer, desktop: a dark photo ground in both themes with light text and no halo */

@@ -6,23 +6,6 @@ html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-hero .mt-stage { transform
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-hero .mt-more { position: relative; z-index: 1; background: var(--bg); }
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion { position: relative; z-index: 2; background: var(--bg); }
 
-/* covers: Cover art rides in (the heading ahead of the row), sinks and dims as About slides over it, and the cover in focus is larger.
-   No lid: that needs the desktop hold. The title line rise is in rows.ts. */
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-rowhead > :is(h2, p) { translate: 0 calc((1 - var(--in, 1)) * 6svh); }
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-row { translate: 0 calc((1 - var(--in, 1)) * 10svh); }
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-stage { transform: translate3d(0, calc(var(--out, 0) * 12svh), 0) scale(calc(1 - var(--out, 0) * .04)); transform-origin: 50% 100%; opacity: calc(1 - var(--out, 0) * .6); }
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-sleeve { transition: scale .45s cubic-bezier(.23, 1, .32, 1); }
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-covers .mt-sleeve[data-on] { scale: 1.06; }
-
-/* flip: a tap turns a sleeve to its back and a second tap turns it back (rows.ts sets data-tp-fl). Mouse pointers keep their hover flip (rows.css). */
-@media not ((hover: hover) and (pointer: fine)) {
-  html[data-mt-motion][data-tp] .mt-sleeve[data-flip] { cursor: pointer; transition: --fl 1.05s cubic-bezier(.62, -.04, .18, 1.06), scale .45s cubic-bezier(.23, 1, .32, 1); }
-  html[data-mt-motion][data-tp] .mt-sleeve[data-flip][data-tp-fl] { --fl: 1; }
-  html[data-mt-motion][data-tp] .mt-sleeve[data-flip] .face { overflow: visible; background: none; }
-  html[data-mt-motion][data-tp] .mt-sleeve[data-flip] .face img { border-radius: calc(4 * var(--u)); background: var(--card); backface-visibility: hidden; -webkit-backface-visibility: hidden; transform: perspective(1500px) rotateY(calc(var(--fl) * 180deg)); }
-  html[data-mt-motion][data-tp] .mt-sleeve[data-flip] .face .back { opacity: 1; transform: perspective(1500px) rotateY(calc(180deg + var(--fl) * 180deg)); }
-  html[data-mt-motion][data-tp] .mt-sleeve[data-flip][data-tp-fl] .disc { opacity: 0; }
-}
 
 /* films: the film in the row gets its muted preview (rows.ts). The player is drawn over the poster, so the film is its box. */
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion .mt-film { position: relative; }
