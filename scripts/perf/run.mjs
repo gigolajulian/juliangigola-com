@@ -21,7 +21,7 @@
  */
 
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createServer } from "node:net";
 
 const argv = process.argv.slice(2);
@@ -56,10 +56,16 @@ const freePort = async () => {
   throw new Error("No free port between 3100 and 3199");
 };
 
-/** A build in `.next` made with JG_LOCAL=1 has the image proxy in its routes. */
+/* The Stripe key the build gets: CI's placeholder (.github/workflows/ci.yml) unless one is set. Without a key the paid
+   sessions show the fallback, no days (use-slots.ts). */
+const STRIPE_PK = process.env.NEXT_PUBLIC_STRIPE_PK || "pk_test_ci_placeholder";
+
+/** A build in `.next` made with JG_LOCAL=1 has the image proxy in its routes, and this key inlined in its client chunks. */
 const localBuild = () => {
   try {
-    return existsSync(".next/BUILD_ID") && readFileSync(".next/routes-manifest.json", "utf8").includes("/cdn-cgi/image/");
+    if (!existsSync(".next/BUILD_ID") || !readFileSync(".next/routes-manifest.json", "utf8").includes("/cdn-cgi/image/")) return false;
+    const dir = ".next/static/chunks";
+    return readdirSync(dir).some((f) => f.endsWith(".js") && readFileSync(`${dir}/${f}`, "utf8").includes(STRIPE_PK));
   } catch {
     return false;
   }
@@ -73,8 +79,7 @@ try {
   if (!base) {
     if (REBUILD || !localBuild()) {
       console.log("perf: building a local production build (JG_LOCAL=1)");
-      // the placeholder CI builds with (.github/workflows/ci.yml): without a key the paid sessions show the fallback, no days
-      code = await run("npx", ["next", "build"], { JG_LOCAL: "1", NEXT_PUBLIC_STRIPE_PK: process.env.NEXT_PUBLIC_STRIPE_PK || "pk_test_ci_placeholder" });
+      code = await run("npx", ["next", "build"], { JG_LOCAL: "1", NEXT_PUBLIC_STRIPE_PK: STRIPE_PK });
       if (code) throw new Error("build failed");
     } else {
       console.log("perf: reusing the local build in .next (--rebuild to make a new one)");
