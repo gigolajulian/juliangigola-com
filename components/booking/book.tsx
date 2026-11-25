@@ -229,7 +229,7 @@ export function SessionBook({ slug }: { slug: SessionSlug }) {
      it up already and this does nothing. */
   React.useLayoutEffect(() => {
     if (fromTab.current?.slug !== slug) {
-      /* Reached from a package card with `?slide` on (`data-nav-step`, page-transition.tsx): the page comes in from
+      /* Reached from a package card (`data-nav-step`, page-transition.tsx): the page comes in from
          the right as the cards leave to the left, and no cover goes up over it. By script, since the root attribute
          is gone before a CSS animation keyed on it would end. */
       const step = "navStep" in document.documentElement.dataset;

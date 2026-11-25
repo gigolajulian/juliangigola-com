@@ -140,8 +140,8 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       const out = a.dataset.back !== undefined || a.textContent?.trimStart().startsWith("←") || a.pathname === "/";
       const from = a.closest("header") ? "bar" : "page";
       set(out ? "out" : "in", from);
-      /* A booking step (`data-step`, components/booking/packages.tsx) travels sideways where `?slide` is on. */
-      if (a.dataset.step !== undefined && "slide" in root.dataset) root.dataset.navStep = "";
+      /* A booking step (`data-step`, components/booking/packages.tsx) travels sideways (v3.css). */
+      if (a.dataset.step !== undefined) root.dataset.navStep = "";
       else delete root.dataset.navStep;
       const here = sectionOf(location.pathname);
       /* Portfolio leads the bar, so the homepage's own screens

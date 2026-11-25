@@ -9,7 +9,7 @@ import { pad } from "@/lib/utils";
    first (Julian's mock, 2026-11-25). A card opens that session's calendar
    (/book/<slug>), whose rail counts this screen as step 01. Every word and
    figure is the catalog's. `data-step` on a link: the page moves right to left
-   on that trip where `?slide` is on (lib/flags/slide-flag.ts). */
+   on that trip (page-transition.tsx, v3.css). */
 
 /** The sessions with a price and a deposit: the ones a card can sell. */
 const CARDS = TAB_ORDER.map((x) => SESSIONS[x])

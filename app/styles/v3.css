@@ -1853,14 +1853,14 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pk-c{flex:none}
 .v3 .pk-c h2,.v3 .pk-more b{white-space:normal}
 .v3 .pk-more a{flex-wrap:wrap;padding:8px 0}}
-/* `?slide` (lib/flags/slide-flag.ts), on trial: a booking step travels right to left, and back the other way.
+/* A booking step travels right to left, and back the other way (Julian, 2026-11-25).
    Cards to calendar is a page trip (`data-nav-step`, page-transition.tsx): the page leaving is the snapshot here, the
    calendar arriving is moved by script (components/booking/book.tsx). The steps after it mount in place. */
 @media (prefers-reduced-motion:no-preference){
 :root:root:root[data-nav-step]::view-transition-old(root){animation:pk-off-l var(--dur-small) var(--ease-out-strong) both!important}
 :root:root:root[data-nav-step][data-nav="out"]::view-transition-old(root){animation-name:pk-off-r!important}
-:root[data-slide] .v3 #p-flow .f-body{animation:pk-step var(--dur-page) var(--ease-drawer) both}
-:root[data-slide] .v3 #p-flow .f-in>*{animation:none}}
+.v3 #p-flow .f-body{animation:pk-step var(--dur-page) var(--ease-drawer) both}
+.v3 #p-flow .f-in>*{animation:none}}
 @keyframes pk-off-l{to{opacity:0;transform:translateX(-7vw)}}
 @keyframes pk-off-r{to{opacity:0;transform:translateX(7vw)}}
 @keyframes pk-step{from{opacity:0;translate:32px 0}}
