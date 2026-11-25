@@ -15,7 +15,7 @@ const SAY = {
   missing: [404, "No such booking."],
   cancelled: [409, "This booking is already canceled."],
   past: [409, "This session has started."],
-  moves: [403, "This booking has been moved twice already. It can still be cancelled."],
+  moves: [403, "This booking has been moved twice already. It can still be canceled."],
   late: [403, "Your session is less than 24 hours away, so it can no longer be moved."],
 } as const;
 

@@ -161,7 +161,7 @@ export function ByQuote({
             <div className="mt-q-alt">
               {reply ? <p className="lbl mute">Replies {reply}</p> : null}
               <Link className="mt-link" href={o.call}>
-                Book a free 15 minute call
+                Book a free 15-minute call
               </Link>
             </div>
           </div>
