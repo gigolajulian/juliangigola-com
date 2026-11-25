@@ -240,7 +240,7 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
       >
         <div className="mt-mohead">
           <h2>Motion</h2>
-          <p className="lbl mute">Director and DP | {films.length} films</p>
+          <p className="lbl mute">Director and Director of Photography</p>
         </div>
         <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
           <div className="mt-track">
@@ -292,8 +292,8 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
           <p className="lbl mute">
             {films[cur].kind} <i aria-hidden>|</i> {films[cur].client}
           </p>
-          <Link className="btn mt-sm" href={films[cur].href}>
-            View more
+          <Link className="btn mt-sm" href="/portfolio/video">
+            Watch the films
           </Link>
         </div>
       </div>

@@ -83,19 +83,17 @@ export const COVER_PRESS: Partial<Record<string, string>> = {
   "whole-summer": "#b02a2e",
   "in-the-hoodie-on-your-sleeve": "#d4483c",
 } satisfies Record<CoverKey, string>;
-/* Four films on the home: Purgation, Pear VC, Wonderland and Dide O Del stay on /portfolio/video.
+/* Three films on the home; the rest are on /portfolio/video.
    Matched to content/site.json by title; kind is this screen's label. */
 /* Films the site hosts itself (public/films, 1080p, no sound, under the host's 25 MB a file), so they preload.
    The home plays these; the link still opens the film's page. */
 export const FILM_FILES: Record<string, string> = {
   "Director's Reel": "/films/directors-reel.mp4",
-  "Ladera Granola": "/films/ladera-granola.mp4",
 } satisfies Partial<Record<FilmTitle, string>>;
 export const FILM_PICKS = [
   ["Director's Reel", "Reel"],
-  ["Clean", "Music video"],
-  ["Ladera Granola", "Commercial"],
   ["The Description", "Music video"],
+  ["Dide O Del", "Music video"],
 ] as const satisfies readonly (readonly [title: string, kind: string])[];
 export type FilmTitle = (typeof FILM_PICKS)[number][0];
 
@@ -105,8 +103,6 @@ export type FilmTitle = (typeof FILM_PICKS)[number][0];
 export type FilmDress = { zoom?: number; startSec?: number; mark?: { src: string; w: number; h: number; name: string } };
 export const FILM_DRESS: Partial<Record<string, FilmDress>> = {
   "Director's Reel": { startSec: 4 },
-  Clean: { startSec: 48 },
-  "Ladera Granola": { zoom: 1.25, startSec: 17, mark: { src: "/clients/ladera-granola.webp", w: 432, h: 73, name: "Ladera" } },
   "The Description": { zoom: 1.1, startSec: 34, mark: { src: "/clients/empire.webp", w: 159, h: 160, name: "Empire" } },
 } satisfies Partial<Record<FilmTitle, FilmDress>>;
 
