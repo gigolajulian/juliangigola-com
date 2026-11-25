@@ -271,6 +271,11 @@ const csp = [
   ...(LOCAL ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
+const WITH_PAYMENT = 'camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")';
+const NO_PAYMENT = "camera=(), microphone=(), geolocation=(), payment=()";
+/** Pages that never take a payment in place. `public/_headers` lists the same for the prerendered copies. */
+const NO_PAYMENT_PATHS = ["/admin", "/admin/:path*", "/proof/:path*", "/delivery/:path*", "/visit", "/client/:path*"];
+
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -278,10 +283,10 @@ const securityHeaders = [
   // Send the origin cross-site, never the path — a project URL can name a
   // client before the work is public.
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  {
-    key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=()",
-  },
+  // Payment only for Stripe's frames: the deposit step's Apple Pay and Google Pay buttons live in a js.stripe.com
+  // iframe, and `payment=()` switched them off. Site-wide because the step opens in soft navigations from any page;
+  // the private routes below keep `payment=()`.
+  { key: "Permissions-Policy", value: WITH_PAYMENT },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   // A year, subdomains included. No `preload`: that is a one-way door onto a
   // list that is slow to leave, and it should be a deliberate decision rather
@@ -407,6 +412,9 @@ const nextConfig: NextConfig = {
       // that reaches a URL anyway. `/api/inbox` and `/api/leads` say the same on their own responses.
       { source: "/admin", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
       { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      // Last, so it overrides the site-wide Permissions-Policy: no payment on the private pages or the admin hosts.
+      ...NO_PAYMENT_PATHS.map((source) => ({ source, headers: [{ key: "Permissions-Policy", value: NO_PAYMENT }] })),
+      ...[ADMIN_HOST, LEADS_HOST].map((value) => ({ source: "/:path*", has: [{ type: "host" as const, value }], headers: [{ key: "Permissions-Policy", value: NO_PAYMENT }] })),
     ];
   },
 
