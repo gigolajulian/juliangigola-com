@@ -75,12 +75,17 @@
  },
  "REL-1": {
   "file": "lib/booking/deposit.ts",
-  "find": "if (!/^\\d+$/.test(t) || !sigs.length ||",
-  "replace": "if (!/^\\d+$/.test(t) ||"
+  "find": "const sigs = parts.filter(([k]) => k === \"v1\").map(([, v]) => v);",
+  "replace": "const sigs = parts.filter(([k]) => k === \"v1\").map(() => \"\");"
  },
  "JOB-1": {
   "file": "lib/booking/engine.ts",
   "find": "const had = await store.get<string>(intentKey(b.intent));",
   "replace": "const had = null as string | null;"
+ },
+ "REL-7": {
+  "file": ".github/workflows/ci.yml",
+  "find": "permissions:\n  contents: read\n",
+  "replace": ""
  }
 }
