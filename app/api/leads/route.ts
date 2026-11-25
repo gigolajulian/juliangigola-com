@@ -8,7 +8,8 @@ import { logged } from "@/lib/utils";
 /* ── the leads ───────────────────────────────────────────────────
  * The lead desk (`components/leads/desk.tsx`): one record per person, sealed
  * with LEADS_KEY (`lib/seal.ts`) and opened only on the server.
- * - GET: every lead's summary, newest first; `?id=` one lead whole.
+ * - GET: every lead's summary, newest first; `?id=` one lead whole. Trash empties itself here: the list is
+ *   the desk's only reader, so a lead 30 days in the trash is deleted for good when it is read.
  * - PATCH `{ id, ... }`: a lead changed by hand (`patchLead`), by its plain id, never its KV key.
  * - POST: a lead added by hand (a DM, a text, a referral), name, email, ig, phone, company, kind, stage, source, notes (`manualLead`).
  * - DELETE: the trash emptied, every lead in it deleted for good.
@@ -30,7 +31,9 @@ export async function GET(request: Request) {
     if (lead === undefined) return json({ error: UNOPENABLE }, 500);
     return lead ? json({ lead }) : json({ error: "Gone." }, 404);
   }
-  return json({ leads: await leadSummaries(g.kv, seal, Date.now()) });
+  const { leads, expired } = await leadSummaries(g.kv, seal, Date.now());
+  await Promise.all(expired.map((x) => buryLead(g.kv, seal, x)));
+  return json({ leads });
 }
 
 export async function PATCH(request: Request) {

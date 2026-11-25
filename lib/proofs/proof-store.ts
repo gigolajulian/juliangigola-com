@@ -3,6 +3,7 @@
 
 import type { InboxKV as KV } from "@/lib/kv";
 import type { Seal } from "@/lib/seal";
+import { logged } from "@/lib/utils";
 import { type Proof, aliasKey, isDateId, isOpen, proofDay, proofKey, publicId, shootIdTag } from "@/lib/proofs/proof-model";
 
 /* ── the gate's password ──────────────────────────────────────────
@@ -58,7 +59,7 @@ export async function passOk(
 }
 /** Why a client cannot see a gallery right now, or null when they can. Closed is the clock (or a missing gallery). */
 export async function shutReason(
-  p: Proof | null,
+  p: Proof | null | undefined,
   cookie: string | null | undefined,
   secret: string | undefined,
 ): Promise<"closed" | "offline" | "locked" | null> {
@@ -86,10 +87,12 @@ export async function findProof(kv: KV, s: Seal, id: string): Promise<Proof | nu
   const token = isDateId(id) ? await kv.get(aliasKey(id)) : null;
   return token ? readProof(kv, s, token) : null;
 }
-/** The gallery a link opens (page, frames, card): only by its public id, so a renamed gallery's old link closes. */
-export async function readPublic(kv: KV, s: Seal, id: string): Promise<Proof | null> {
-  const p = await findProof(kv, s, id);
-  return p && publicId(p) === id ? p : null;
+/** The gallery a link opens (page, frames, card): only by its public id, so a renamed gallery's old link closes.
+    `undefined` when it is there but will not open (a rotated LEADS_KEY, a bad record): logged, never thrown, so a
+    client's page shows the gallery closed rather than an error. */
+export async function readPublic(kv: KV, s: Seal, id: string): Promise<Proof | null | undefined> {
+  const p = await findProof(kv, s, id).catch(logged("proof open", id));
+  return p && publicId(p) === id ? p : p === undefined ? undefined : null;
 }
 /** A new shoot id: the shoot day Lightroom sent, else today in Pacific, and a tag no gallery or alias has. */
 export async function nextProofId(kv: KV, day: string = proofDay()): Promise<string> {

@@ -91,9 +91,9 @@ export const HEADS_UP_HOURS = 72;
 /* The share of the deposit a cancel returns now: 0.9 (1 before the fee), 0.7 or 0. Julian
    (2026-11-03, "refund by first time"): judged against the time first booked,
    so moving a session out and then cancelling does not earn a better refund.
-   A session moved earlier is judged by its new, earlier time. */
-export const refundShare = (r: { intent?: string; start: string; firstStart?: string; fee?: number }, now = Date.now()): number => {
-  if (!r.intent) return 0;
+   A session moved earlier is judged by its new, earlier time. Only for a paid booking: one with no deposit
+   refunds nothing, and its callers say so themselves. */
+export const refundShare = (r: { start: string; firstStart?: string; fee?: number }, now = Date.now()): number => {
   const hours = (Math.min(Date.parse(r.start), Date.parse(r.firstStart ?? r.start)) - now) / 36e5;
   return hours >= REFUND_HOURS ? (r.fee ? EARLY_SHARE : 1) : hours >= PART_HOURS ? PART_SHARE : 0;
 };
