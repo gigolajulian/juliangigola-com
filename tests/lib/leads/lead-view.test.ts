@@ -8,7 +8,15 @@ import { DAY_MS } from "@/lib/time-zone";
 
 const now = Date.now();
 const iso = (ms: number) => new Date(now + ms).toISOString();
-const summary: LeadSummary = { email: "ana@example.com", name: "Ana Test", stage: "Replied", stageAt: iso(0), firstAt: iso(0), lastAt: iso(0), unread: false };
+const summary: LeadSummary = {
+  email: "ana@example.com",
+  name: "Ana Test",
+  stage: "Replied",
+  stageAt: iso(0),
+  firstAt: iso(0),
+  lastAt: iso(0),
+  unread: false,
+};
 const full = (o: Partial<Lead> = {}): Lead => ({ ...summary, events: [], ...o });
 
 describe("leadView", () => {
@@ -23,12 +31,21 @@ describe("leadView", () => {
     const v = leadView(null, quoted, [{ id: "nudge1", name: "Nudge 1", subject: "Following up", body: "Hi {first}" }], now);
     expect(v.late).toBe(true);
     expect(v.nudgeStep).toBe("Nudge 1");
-    expect(v.primary).toMatchObject({ label: "Send Nudge 1", win: "Land the booking", mail: ["ana@example.com", "Following up", "Hi Ana"] });
+    expect(v.primary).toMatchObject({
+      label: "Send Nudge 1",
+      win: "Land the booking",
+      mail: ["ana@example.com", "Following up", "Hi Ana"],
+    });
   });
 
   it("finds the booking still to come", () => {
     const when = iso(2 * DAY_MS);
-    const v = leadView(full({ when, events: [{ at: iso(-DAY_MS), kind: "booking", ref: "bk1", note: "Portrait session" }] }), summary, [], now);
+    const v = leadView(
+      full({ when, events: [{ at: iso(-DAY_MS), kind: "booking", ref: "bk1", note: "Portrait session" }] }),
+      summary,
+      [],
+      now,
+    );
     expect(v.booked).toBe("bk1");
     expect(v.ahead).toBe(true);
     expect(v.which).toMatch(/^Portrait session on /);

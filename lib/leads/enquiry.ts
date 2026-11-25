@@ -105,7 +105,8 @@ export function visitContext(raw: string, place?: string): VisitContext | undefi
   return Object.keys(kept).length ? kept : undefined;
 }
 
-const FREE_MAIL = /^(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|msn|icloud|me|mac|aol|proton|protonmail|pm|gmx|mail|zoho|yandex|hey|fastmail)\./i;
+const FREE_MAIL =
+  /^(gmail|googlemail|yahoo|ymail|outlook|hotmail|live|msn|icloud|me|mac|aol|proton|protonmail|pm|gmx|mail|zoho|yandex|hey|fastmail)\./i;
 
 /* JPEG, PNG and HEIC only (Julian), pictures that never run.
    `image/` alone let an SVG in, and an SVG carries script: opened from
@@ -167,7 +168,9 @@ export const contextLines = (e: Enquiry): string[] => {
   const company = companySite(e.email);
   return [
     c.page ? `Sent from: ${c.page}` : null,
-    c.landing || c.referrer ? `Came in: ${[c.referrer || "direct", c.landing].filter(Boolean).join(" to ")}${c.utm ? ` (${c.utm})` : ""}` : null,
+    c.landing || c.referrer
+      ? `Came in: ${[c.referrer || "direct", c.landing].filter(Boolean).join(" to ")}${c.utm ? ` (${c.utm})` : ""}`
+      : null,
     c.trail?.length ? `Read: ${c.trail.join(", ")}` : null,
     c.place || c.device ? `Where: ${[c.place, c.device].filter(Boolean).join(", ")}` : null,
     company ? `Company: ${company}` : null,
@@ -211,12 +214,10 @@ export const DAILY_CAP = 200;
  * ─────────────────────────────────────────────────────────────── */
 
 /** `msg:<ms since epoch, padded>:<random>` — sorts oldest first. */
-export const enquiryKey = (at: number, nonce: string): string =>
-  `msg:${String(at).padStart(15, "0")}:${nonce}`;
+export const enquiryKey = (at: number, nonce: string): string => `msg:${String(at).padStart(15, "0")}:${nonce}`;
 
 /** The day bucket a timestamp belongs to, for the daily cap. */
-export const dayKey = (at: number): string =>
-  `count:${new Date(at).toISOString().slice(0, 10)}`;
+export const dayKey = (at: number): string => `count:${new Date(at).toISOString().slice(0, 10)}`;
 
 /**
  * The cooldown key for a sender.
@@ -262,10 +263,7 @@ export const MAX = {
  * seen. Returns whole seconds because that is what the form says out loud,
  * and rounds up so "1 second" never reads as "0".
  */
-export function cooldown(
-  wrote: number | null,
-  now: number,
-): { ok: true } | { ok: false; waitSeconds: number } {
+export function cooldown(wrote: number | null, now: number): { ok: true } | { ok: false; waitSeconds: number } {
   if (wrote === null) return { ok: true };
 
   const elapsed = now - wrote;
@@ -288,27 +286,18 @@ export function waitPhrase(seconds: number): string {
 }
 
 /** Field name → problem. Empty when the enquiry is sendable. */
-export function problems(values: {
-  name: string;
-  email: string;
-  message: string;
-}): Record<string, string> {
+export function problems(values: { name: string; email: string; message: string }): Record<string, string> {
   const errors: Record<string, string> = {};
 
   if (!values.name) errors.name = "Please add your name.";
-  else if (values.name.length > MAX.name)
-    errors.name = "That is longer than the form can send.";
+  else if (values.name.length > MAX.name) errors.name = "That is longer than the form can send.";
 
   if (!values.email) errors.email = "Please add an email so I can reply.";
-  else if (!looksLikeEmail(values.email))
-    errors.email = "That does not look like an email address.";
-  else if (values.email.length > MAX.email)
-    errors.email = "That is longer than the form can send.";
+  else if (!looksLikeEmail(values.email)) errors.email = "That does not look like an email address.";
+  else if (values.email.length > MAX.email) errors.email = "That is longer than the form can send.";
 
-  if (!values.message)
-    errors.message = "Please say a little about the project.";
-  else if (values.message.length > MAX.message)
-    errors.message = "Please trim this a little.";
+  if (!values.message) errors.message = "Please say a little about the project.";
+  else if (values.message.length > MAX.message) errors.message = "Please trim this a little.";
 
   return errors;
 }
@@ -319,8 +308,7 @@ export function problems(values: {
  * ended by a newline — a name of `x\r\nBcc: ...` must not be able to add
  * one. The message body may keep its newlines; it is a body.
  */
-const oneLine = (s: string): string =>
-  s.replace(/[\u0000-\u001f\u007f]+/g, " ").trim();
+const oneLine = (s: string): string => s.replace(/[\u0000-\u001f\u007f]+/g, " ").trim();
 
 /**
  * The enquiry as it will be stored, with everything trimmed to a known size.
@@ -345,9 +333,7 @@ export function enquiry(
   return {
     id,
     at: new Date(at).toISOString(),
-    type: (SHOOT_TYPES as readonly string[]).includes(values.type)
-      ? values.type
-      : "other",
+    type: (SHOOT_TYPES as readonly string[]).includes(values.type) ? values.type : "other",
     name: oneLine(values.name).slice(0, MAX.name),
     email: values.email.slice(0, MAX.email),
     detail: oneLine(values.detail).slice(0, MAX.detail),
@@ -379,21 +365,14 @@ export type NewBooking = {
 
 export function bookingEnquiry(p: NewBooking, at: number, id: string): Enquiry {
   const who = p.attendees?.[0] ?? {};
-  const message = [
-    p.additionalNotes?.trim(),
-    p.location ? `Location: ${p.location}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n\n");
+  const message = [p.additionalNotes?.trim(), p.location ? `Location: ${p.location}` : ""].filter(Boolean).join("\n\n");
   return {
     ...enquiry(
       {
         type: "other",
         name: who.name || "Unknown",
         email: who.email ?? "",
-        detail: [p.eventTitle || p.type || p.title, whenPT(p.startTime)]
-          .filter(Boolean)
-          .join(" · "),
+        detail: [p.eventTitle || p.type || p.title, whenPT(p.startTime)].filter(Boolean).join(" · "),
         message: message || "No notes.",
       },
       at,
@@ -452,8 +431,7 @@ const subjectOf = (e: Enquiry) => {
   return [`${type} inquiry`, e.name, job].filter(Boolean).join(" · ");
 };
 
-const esc = (s: string) =>
-  s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
 
 /** `looks`: each frame's look in the picker
     (`lib/leads/looks.json`), passed in so this module imports no
@@ -474,8 +452,7 @@ export const emailCopy = (
     "",
     e.message,
   ].filter((line) => line !== null);
-  const pick = (src: string) =>
-    [`https://juliangigola.com${src}`, looks[src]].filter(Boolean).join("  ");
+  const pick = (src: string) => [`https://juliangigola.com${src}`, looks[src]].filter(Boolean).join("  ");
   const tail = [
     ...(e.files?.length ? ["", `Their references, attached: ${e.files.join(", ")}`] : []),
     "",
@@ -486,11 +463,7 @@ export const emailCopy = (
   const lines = (l: string[]) => esc(l.join("\n")).replace(/\n/g, "<br>");
   return {
     subject: subjectOf(e),
-    text: [
-      ...head,
-      ...(e.picks?.length ? ["", "Picked from my work:", ...e.picks.map(pick)] : []),
-      ...tail,
-    ].join("\n"),
+    text: [...head, ...(e.picks?.length ? ["", "Picked from my work:", ...e.picks.map(pick)] : []), ...tail].join("\n"),
     html: [
       `<div style="font:14px/1.5 sans-serif">`,
       lines(head),
@@ -534,14 +507,11 @@ export const summary = (e: Enquiry): Summary => ({
  * mail, where his signature and his sent folder are.
  */
 export function replyLink(e: Enquiry): string {
-  const subject =
-    e.type === "booking" ? "Re: your booking" : `Re: your ${e.type} inquiry`;
+  const subject = e.type === "booking" ? "Re: your booking" : `Re: your ${e.type} inquiry`;
   const quoted = e.message
     .split("\n")
     .map((line) => `> ${line}`)
     .join("\n");
   const body = `Hi ${e.name.split(" ")[0]},\n\n\n\nOn ${e.at.slice(0, 10)} you wrote:\n${quoted}\n`;
-  return `mailto:${encodeURIComponent(e.email)}?subject=${encodeURIComponent(
-    subject,
-  )}&body=${encodeURIComponent(body)}`;
+  return `mailto:${encodeURIComponent(e.email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }

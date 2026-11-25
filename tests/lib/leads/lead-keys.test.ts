@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { leadKey } from "@/lib/leads/lead-keys";
 
-const p = (key: string, mod: Partial<{ metaKey: boolean; ctrlKey: boolean; altKey: boolean }> = {}) => ({ key, metaKey: false, ctrlKey: false, altKey: false, ...mod });
+const p = (key: string, mod: Partial<{ metaKey: boolean; ctrlKey: boolean; altKey: boolean }> = {}) => ({
+  key,
+  metaKey: false,
+  ctrlKey: false,
+  altKey: false,
+  ...mod,
+});
 
 describe("leadKey", () => {
   it("opens the palette with cmd or ctrl K, even while typing", () => {

@@ -7,9 +7,7 @@ import type { WorkItem } from "@/components/portfolio/work-tiles";
 /* Vectorscope: Cb across, Cr up, as a broadcast scope draws it. */
 const R = 128;
 const rgb = (u: number, v: number) =>
-  [140 + 1.402 * v, 140 - 0.344 * u - 0.714 * v, 140 + 1.772 * u].map((x) =>
-    Math.max(0, Math.min(255, x | 0)),
-  );
+  [140 + 1.402 * v, 140 - 0.344 * u - 0.714 * v, 140 + 1.772 * u].map((x) => Math.max(0, Math.min(255, x | 0)));
 const TARGETS = (
   [
     ["R", 255, 0, 0],
@@ -19,14 +17,7 @@ const TARGETS = (
     ["G", 0, 255, 0],
     ["YL", 255, 255, 0],
   ] as const
-).map(
-  ([k, r, g, b]) =>
-    [
-      k,
-      -0.1687 * r - 0.3313 * g + 0.5 * b,
-      0.5 * r - 0.4187 * g - 0.0813 * b,
-    ] as const,
-);
+).map(([k, r, g, b]) => [k, -0.1687 * r - 0.3313 * g + 0.5 * b, 0.5 * r - 0.4187 * g - 0.0813 * b] as const);
 
 /** Color view: draws the vectorscope on `cv` while the view is on, and turns a click on it into a pick. */
 export function useScopeDraw(
@@ -66,9 +57,7 @@ export function useScopeDraw(
     x.fillStyle = css.getPropertyValue("--mute");
     x.font = "9px IBM Plex Mono, monospace";
     x.textAlign = "center";
-    TARGETS.forEach(([t, u, v]) =>
-      x.fillText(t, m + u * k * 0.82, m - v * k * 0.82 + 3),
-    );
+    TARGETS.forEach(([t, u, v]) => x.fillText(t, m + u * k * 0.82, m - v * k * 0.82 + 3));
     for (const p of list) {
       const pts = scope?.[p.slug]?.p ?? [];
       for (let i = 0; i < pts.length; i += 2) {
@@ -89,10 +78,7 @@ export function useScopeDraw(
       x.closePath();
       x.fill();
       x.globalAlpha = 1;
-      const [r, g, b] = rgb(
-        Math.cos(pick.a) * pick.c,
-        Math.sin(pick.a) * pick.c,
-      );
+      const [r, g, b] = rgb(Math.cos(pick.a) * pick.c, Math.sin(pick.a) * pick.c);
       x.fillStyle = `rgb(${r},${g},${b})`;
       x.strokeStyle = css.getPropertyValue("--ink");
       x.lineWidth = 2;
@@ -120,10 +106,7 @@ export function useScopeDraw(
       k = (r.width / 2 - 6) / R;
     const u = (e.clientX - r.left - r.width / 2) / k,
       v = -(e.clientY - r.top - r.width / 2) / k;
-    const again =
-      pick &&
-      Math.hypot(u - Math.cos(pick.a) * pick.c, v - Math.sin(pick.a) * pick.c) <
-        10 / k;
+    const again = pick && Math.hypot(u - Math.cos(pick.a) * pick.c, v - Math.sin(pick.a) * pick.c) < 10 / k;
     setPick(again ? null : { a: ang(u, v), c: Math.min(R, Math.hypot(u, v)) });
   };
   return pickAt;

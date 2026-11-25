@@ -16,7 +16,11 @@ import { chromium, firefox, webkit } from "@playwright/test";
 const BASE = process.argv[2] || "http://localhost:3000";
 const ENGINES = (process.argv[3] || "chromium,firefox,webkit").split(",");
 const PAGES = ["/?intro=0", "/book?intro=0", "/portfolio", "/portraits", "/headshots", "/legal"];
-const SIZES = [[390, 844], [1440, 900], [2560, 1080]];
+const SIZES = [
+  [390, 844],
+  [1440, 900],
+  [2560, 1080],
+];
 const launchers = { chromium, firefox, webkit };
 
 /* Runs in the page: each paragraph's lines, from where its words land. */
@@ -56,7 +60,8 @@ function measure(desktop) {
     rows.slice(0, -1).forEach((l, i) => {
       const end = l.words[l.words.length - 1];
       const next = rows[i + 1].words[0];
-      if (/^(San|Bay|South|Silicon)$/.test(end) || (/^\d+$/.test(end) && /^(minutes?|hours?|looks?|outfits?)\b/.test(next))) problems.push(`"${end} / ${next}" split`);
+      if (/^(San|Bay|South|Silicon)$/.test(end) || (/^\d+$/.test(end) && /^(minutes?|hours?|looks?|outfits?)\b/.test(next)))
+        problems.push(`"${end} / ${next}" split`);
     });
     if (problems.length || warn) out.push({ text: text.slice(0, 50).replace(/\s+/g, " "), problems, warn });
   }
@@ -68,7 +73,11 @@ for (const name of ENGINES) {
   const browser = await launchers[name].launch();
   for (const [w, h] of SIZES) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h } });
-    await ctx.addInitScript(() => { try { sessionStorage.setItem("jg-intro", "1"); } catch {} });
+    await ctx.addInitScript(() => {
+      try {
+        sessionStorage.setItem("jg-intro", "1");
+      } catch {}
+    });
     const page = await ctx.newPage();
     for (const path of PAGES) {
       try {

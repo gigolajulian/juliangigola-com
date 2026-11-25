@@ -1,6 +1,10 @@
 import { expect, it, vi } from "vitest";
 
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: () => { throw new Error("no worker"); } }));
+vi.mock("@opennextjs/cloudflare", () => ({
+  getCloudflareContext: () => {
+    throw new Error("no worker");
+  },
+}));
 
 const { later } = await import("@/lib/later");
 

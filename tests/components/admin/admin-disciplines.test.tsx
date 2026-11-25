@@ -35,13 +35,7 @@ const base = {
 
 describe("AdminDisciplines", () => {
   it("lists both groups and filters by project name", () => {
-    render(
-      <AdminDisciplines
-        {...base}
-        projects={[project("valgur", "editorial"), project("ana", "portraits")]}
-        onOpened={() => {}}
-      />,
-    );
+    render(<AdminDisciplines {...base} projects={[project("valgur", "editorial"), project("ana", "portraits")]} onOpened={() => {}} />);
     expect(screen.getByText("Work")).toBeTruthy();
     expect(screen.getByText("Sessions")).toBeTruthy();
     fireEvent.change(screen.getByPlaceholderText("Filter by discipline or project"), {

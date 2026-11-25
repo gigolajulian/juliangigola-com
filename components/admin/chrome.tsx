@@ -8,16 +8,16 @@ import type { FullView as Column } from "@/components/admin/editor/use-full-view
 /** The switch at the head of a column. Only where there are columns. */
 export function FullSwitch({ which, full, setFull }: { which: Column; full: Column | null; setFull: (c: Column | null) => void }) {
   return (
-  <div className="sticky top-0 z-10 flex justify-end bg-background pb-2 max-xl:hidden">
-    <button
-      type="button"
-      onClick={() => setFull(full === which ? null : which)}
-      aria-pressed={full === which}
-      className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
-    >
-      {full === which ? "Close full screen" : "Full screen"}
-    </button>
-  </div>
+    <div className="sticky top-0 z-10 flex justify-end bg-background pb-2 max-xl:hidden">
+      <button
+        type="button"
+        onClick={() => setFull(full === which ? null : which)}
+        aria-pressed={full === which}
+        className="label text-muted-foreground transition-colors duration-200 hoverable:hover:text-foreground"
+      >
+        {full === which ? "Close full screen" : "Full screen"}
+      </button>
+    </div>
   );
 }
 
@@ -62,19 +62,9 @@ export function EditorBar({
       {status.kind === "working" || awaitingDeploy ? (
         <div
           role="progressbar"
-          aria-label={
-            awaitingDeploy ? "Waiting for the deploy" : "Publishing"
-          }
-          aria-valuenow={
-            status.kind === "working" && status.total
-              ? status.done
-              : undefined
-          }
-          aria-valuemax={
-            status.kind === "working" && status.total
-              ? status.total
-              : undefined
-          }
+          aria-label={awaitingDeploy ? "Waiting for the deploy" : "Publishing"}
+          aria-valuenow={status.kind === "working" && status.total ? status.done : undefined}
+          aria-valuemax={status.kind === "working" && status.total ? status.total : undefined}
           className="pointer-events-none absolute inset-x-0 -bottom-px z-30 h-px overflow-hidden bg-border"
         >
           {status.kind === "working" && status.total ? (
@@ -108,10 +98,7 @@ export function EditorBar({
        * behind a gesture nobody knows is available; a second line costs
        * 36px on a tool that has the room, and everything stays visible
        * and in the same place. */}
-      <nav
-        className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border py-2"
-        aria-label="Editor sections"
-      >
+      <nav className="flex flex-wrap items-center gap-x-3 gap-y-2 border-b border-border py-2" aria-label="Editor sections">
         {/* A segmented control rather than three underlined words.
          *
          * These are the three halves of the tool and the one thing you
@@ -121,10 +108,7 @@ export function EditorBar({
          * obvious from across the desk, which is the same argument the
          * hero index makes for `bg-secondary` on its current row. */}
         {TABS.map((group, g) => (
-          <span
-            key={g}
-            className="flex max-w-full flex-wrap border border-border p-0.5"
-          >
+          <span key={g} className="flex max-w-full flex-wrap border border-border p-0.5">
             {group.map((t) => (
               <button
                 key={t.id}
@@ -146,10 +130,7 @@ export function EditorBar({
                   </span>
                 ) : null}
                 {moved.has(t.id) ? (
-                  <span
-                    aria-label=", unpublished edits"
-                    className="ml-1.5 inline-block h-1 w-1 bg-current align-middle"
-                  />
+                  <span aria-label=", unpublished edits" className="ml-1.5 inline-block h-1 w-1 bg-current align-middle" />
                 ) : null}
               </button>
             ))}
@@ -190,25 +171,13 @@ export function EditorBar({
            * `aria-live` so the change is announced rather than only
            * coloured, the whole point of this label is a state change you
            * are not necessarily watching for. */}
-          <span
-            aria-live="polite"
-            className="label flex items-center gap-2"
-          >
+          <span aria-live="polite" className="label flex items-center gap-2">
             {/* Julian: a thinking orb while it works, and while
                 the deploy is watched for; the dot otherwise. */}
             {status.kind === "working" || awaitingDeploy ? (
-              <Orb
-                state={awaitingDeploy ? "searching" : "working"}
-                size={20}
-              />
+              <Orb state={awaitingDeploy ? "searching" : "working"} size={20} />
             ) : (
-              <span
-                aria-hidden
-                className={cn(
-                  "block size-1.5 rounded-full",
-                  dirty || committed ? "bg-foreground" : "bg-live",
-                )}
-              />
+              <span aria-hidden className={cn("block size-1.5 rounded-full", dirty || committed ? "bg-foreground" : "bg-live")} />
             )}
             {/* Each word is a new node when the state changes, so
               `emerge` fades it in, "published" is the one completion
@@ -216,16 +185,12 @@ export function EditorBar({
             {dirty ? (
               <span className="emerge text-foreground">unpublished</span>
             ) : awaitingDeploy ? (
-              <span className="emerge text-muted-foreground">
-                published &middot; going live
-              </span>
+              <span className="emerge text-muted-foreground">published &middot; going live</span>
             ) : committed ? (
               // The watch gave up, or there was no `/BUILD_ID` to watch.
               // The commit happened; whether it landed is unknown, and
               // green would claim otherwise.
-              <span className="emerge text-muted-foreground">
-                published
-              </span>
+              <span className="emerge text-muted-foreground">published</span>
             ) : (
               // Nothing pending. Either a deploy was seen landing, or this
               // page has published nothing, and it was itself served by

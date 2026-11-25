@@ -8,7 +8,8 @@ describe("instagramHandle", () => {
   it("stores a pasted handle, @handle or profile URL the same way", () => {
     expect(instagramHandle("rice666s")).toBe("rice666s");
     expect(instagramHandle("  @Rice666s ")).toBe("rice666s");
-    expect(instagramHandle("https://www.instagram.com/rice666s/?hl=en")).toBe("rice666s");  });
+    expect(instagramHandle("https://www.instagram.com/rice666s/?hl=en")).toBe("rice666s");
+  });
 
   it("refuses anything outside Instagram's alphabet or opening with a dot", () => {
     expect(instagramHandle("javascript:alert(1)")).toBeNull();

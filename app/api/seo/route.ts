@@ -95,7 +95,19 @@ async function windowStats(key: string, gsc: string | undefined, days: number) {
 /* Each page's Cloudflare visits and Google clicks and impressions, in total
    and by day along `dates`, busiest first. */
 function pageTable(dates: string[], byPageDay: Rum, google: Search) {
-  const pages = new Map<string, { path: string; visits: number; byDay: number[]; clicksByDay: number[]; imprByDay: number[]; clicks: number; impressions: number; position: number | null }>();
+  const pages = new Map<
+    string,
+    {
+      path: string;
+      visits: number;
+      byDay: number[];
+      clicksByDay: number[];
+      imprByDay: number[];
+      clicks: number;
+      impressions: number;
+      position: number | null;
+    }
+  >();
   const page = (path: string) => {
     let p = pages.get(path);
     if (!p) {
@@ -157,7 +169,10 @@ async function searchStats(secret: string | undefined, days: number) {
       pageDays: pageDays.map((r) => ({ path: sitePath(r.keys![0]), date: r.keys![1], clicks: r.clicks, impressions: r.impressions })),
       queries: q.slice(0, 8),
       // Just off page one: where a little work moves the most.
-      nearPageOne: q.filter((r) => r.position > 10 && r.position <= 20).sort((x, y) => y.impressions - x.impressions).slice(0, 6),
+      nearPageOne: q
+        .filter((r) => r.position > 10 && r.position <= 20)
+        .sort((x, y) => y.impressions - x.impressions)
+        .slice(0, 6),
     };
   } catch (e) {
     return { error: errorText(e) };

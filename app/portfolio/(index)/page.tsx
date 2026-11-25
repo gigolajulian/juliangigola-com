@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description:
     "Fashion editorials, brand campaigns, portraits, musician press photos, cover art and music videos by Julian Gigola, photographer in the San Francisco Bay Area.",
   alternates: { canonical: "/portfolio" },
-...shareOg("Portfolio","Fashion editorials, brand campaigns, portraits, press photos and cover art by Julian Gigola."),
+  ...shareOg("Portfolio", "Fashion editorials, brand campaigns, portraits, press photos and cover art by Julian Gigola."),
 };
 
 /* Julian's order from the Work Order arrange page, then any project it
@@ -23,8 +23,7 @@ const rank = (slug: string) => {
 /* Off the V3 portfolio grid; the project page stays up. */
 const HIDDEN = ["realestate"];
 const WORK_PROJECTS = PROJECTS.filter((p) => !HIDDEN.includes(p.slug));
-const WORK: WorkPayload[] = WORK_PROJECTS
-  .map((p, i) => [p, i] as const)
+const WORK: WorkPayload[] = WORK_PROJECTS.map((p, i) => [p, i] as const)
   .sort((a, b) => rank(a[0].slug) - rank(b[0].slug) || a[1] - b[1])
   .map(([p]) => ({
     s: p.slug,
@@ -41,7 +40,8 @@ const CHIP = Object.fromEntries(CATEGORIES.map((c) => [c.slug, categoryLabel(c)]
    cell with a Front / Back switch, not two squares. */
 function sleeves(out: FrameItem[], f: FrameItem) {
   const prev = out[out.length - 1];
-  if (prev && !prev.back && /-b\.\w+$/.test(f.src) && prev.src === f.src.replace(/-b(\.\w+)$/, "-a$1")) prev.back = { src: f.src, alt: f.alt.trim() };
+  if (prev && !prev.back && /-b\.\w+$/.test(f.src) && prev.src === f.src.replace(/-b(\.\w+)$/, "-a$1"))
+    prev.back = { src: f.src, alt: f.alt.trim() };
   else out.push(f);
   return out;
 }
@@ -52,9 +52,17 @@ const FRAME_CHIPS = ["automotive", "graduation", "coverart", "events", "headshot
 const FRAMES = Object.fromEntries(
   CATEGORIES.filter((c) => FRAME_CHIPS.includes(c.slug)).map((c) => [
     categoryLabel(c),
-    WORK_PROJECTS.filter((p) => p.categories.some((k) => k.slug === c.slug)).flatMap((p) =>
-      p.images.map((f) => ({ s: p.slug, src: f.src, alt: f.alt ?? p.name, wide: f.width > f.height * 1.05, sq: Math.abs(f.width / f.height - 1) < 0.02 })),
-    ).reduce(sleeves, [] as FrameItem[]),
+    WORK_PROJECTS.filter((p) => p.categories.some((k) => k.slug === c.slug))
+      .flatMap((p) =>
+        p.images.map((f) => ({
+          s: p.slug,
+          src: f.src,
+          alt: f.alt ?? p.name,
+          wide: f.width > f.height * 1.05,
+          sq: Math.abs(f.width / f.height - 1) < 0.02,
+        })),
+      )
+      .reduce(sleeves, [] as FrameItem[]),
   ]),
 );
 

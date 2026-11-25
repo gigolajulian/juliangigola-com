@@ -20,11 +20,7 @@ export const WAVE = 0.15; // s, the second wave after the first
 const LOAD_CAP_MS = 3000; // the longest a wall waits for its photographs
 
 /** Where a frame starts and how long after the first it leaves. */
-type Path = (
-  f: HTMLElement,
-  r: DOMRect,
-  rank: number,
-) => { x: number; y: number; delay: number; duration?: number; ease?: string };
+type Path = (f: HTMLElement, r: DOMRect, rank: number) => { x: number; y: number; delay: number; duration?: number; ease?: string };
 
 /** Out along the line from the middle of the screen, in two waves. */
 const radial: Path = (_f, r, rank) => {

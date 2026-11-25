@@ -34,15 +34,13 @@ export function Connect({
           .
         </li>
         <li>
-          <span className="text-foreground">2.</span> Repository access:{" "}
-          <em>Only select repositories</em> &rarr; <code>juliangigola-com</code>
-          . Permissions: <em>Contents</em> &rarr; <em>Read and write</em>.
-          Nothing else. That is the only thing this page does.
+          <span className="text-foreground">2.</span> Repository access: <em>Only select repositories</em> &rarr;{" "}
+          <code>juliangigola-com</code>. Permissions: <em>Contents</em> &rarr; <em>Read and write</em>. Nothing else. That is the only thing
+          this page does.
         </li>
         <li>
-          <span className="text-foreground">3.</span> Give it an expiry you are
-          happy with, then paste it below. It is kept in this browser only, and
-          sent only to GitHub.
+          <span className="text-foreground">3.</span> Give it an expiry you are happy with, then paste it below. It is kept in this browser
+          only, and sent only to GitHub.
         </li>
       </ol>
 
@@ -85,10 +83,7 @@ export function PublishStatus({ status }: { status: Status }) {
       // Announced, because the outcome of a publish is the whole point and it
       // happens away from where the pointer is.
       role="status"
-      className={cn(
-        "flex items-center gap-2 text-sm",
-        status.kind === "error" ? "text-accent" : "text-muted-foreground",
-      )}
+      className={cn("flex items-center gap-2 text-sm", status.kind === "error" ? "text-accent" : "text-muted-foreground")}
     >
       {status.kind === "working" ? <Orb state="connecting" size={20} /> : null}
       {status.message}

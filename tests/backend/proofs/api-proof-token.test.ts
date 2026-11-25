@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PATCH, POST } from "@/app/api/proof/[token]/route";
 import { sealer } from "@/lib/seal";
 import { readLog } from "@/lib/leads/activity-log";
-import type { Proof } from "@/lib/proofs/proof-model";
+import { proofKey, type Proof } from "@/lib/proofs/proof-model";
 import { readProof, writeProof } from "@/lib/proofs/proof-store";
 import { FakeKV, LEADS_KEY } from "../fakes";
 
@@ -15,11 +15,30 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 
 const TOKEN = "AbCdEfGh12345678";
 let kv: FakeKV;
+let saves: string[];
 const seal = async () => (await sealer(LEADS_KEY))!;
 beforeEach(async () => {
   kv = new FakeKV();
-  ctx.env = { INBOX: kv, LEADS_KEY, PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) } };
-  const p = { token: TOKEN, name: "Test", included: 2, price: 15, days: 14, createdAt: new Date().toISOString(), frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })), selects: [], notes: {}, views: 0 };
+  saves = [];
+  // Autosave's own limit: the first five saves go through here, the rest are refused.
+  ctx.env = {
+    INBOX: kv,
+    LEADS_KEY,
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
+    DOWNLOAD_LIMIT: { limit: async ({ key }: { key: string }) => ({ success: saves.push(key) <= 5 }) },
+  };
+  const p = {
+    token: TOKEN,
+    name: "Test",
+    included: 2,
+    price: 15,
+    days: 14,
+    createdAt: new Date().toISOString(),
+    frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })),
+    selects: [],
+    notes: {},
+    views: 0,
+  };
   await writeProof(kv as never, await seal(), p as Proof);
 });
 
@@ -29,6 +48,27 @@ const post = (body: unknown, token = TOKEN) => POST(req("POST", body), { params:
 const stored = async () => (await readProof(kv as never, await seal(), TOKEN))!;
 
 describe("/api/proof/[token]", () => {
+  it("rate-limits the picks autosave under its own kind, before the body is read", async () => {
+    for (let i = 0; i < 5; i++) expect((await patch({ email: "a@example.com", selects: ["a"] })).status).toBe(200);
+    const res = await patch("not json");
+    expect(res.status).toBe(429);
+    expect(saves.every((k) => k.startsWith("selects:"))).toBe(true);
+  });
+
+  it("answers JSON when the gallery will not open", async () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    kv.data.get(proofKey(TOKEN))!.value = "not-sealed";
+    for (const res of [
+      await patch({ email: "a@example.com", selects: ["a"] }),
+      await post({ action: "track", email: "a@example.com" }),
+      await post({ action: "unlock", password: "x" }),
+    ]) {
+      expect(res.status).toBe(500);
+      expect(await res.json()).toEqual({ error: "This gallery cannot be opened right now." });
+    }
+    errors.mockRestore();
+  });
+
   it("is a 404 for an unknown or malformed token", async () => {
     expect((await patch({ email: "a@example.com", selects: ["a"] }, "ZzZzZzZz87654321")).status).toBe(404);
     expect((await post({ action: "track", email: "a@example.com" }, "../x")).status).toBe(404);
@@ -52,7 +92,9 @@ describe("/api/proof/[token]", () => {
     expect((await patch({ email: "a@example.com", selects: ["c"] })).status).toBe(409);
     // On the client's activity log: the selects, with the frame count.
     const s = await seal();
-    expect((await readLog(kv as never, s, await s.id("a@example.com"))).find((e) => e.kind === "selects")).toMatchObject({ note: "2 frames, Test" });
+    expect((await readLog(kv as never, s, await s.id("a@example.com"))).find((e) => e.kind === "selects")).toMatchObject({
+      note: "2 frames, Test",
+    });
   });
 
   it("records a gate open as a lead, but not from a reserved test address", async () => {

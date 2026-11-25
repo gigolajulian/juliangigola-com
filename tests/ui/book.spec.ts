@@ -26,26 +26,58 @@ for (const r of [...RATIOS, SHORT]) {
     // exception: in a wide editorial card the times run in their own column
     // beside the month and scroll there (2026-10-21), the month never does.
     // The V3 stepper (`.f-main`) or the classic card's region.
-    const inner = await page.locator("[role=region].tp, .flow .f-main").first().evaluate((e) =>
-      [e, ...e.querySelectorAll("*")].filter((n) => !n.classList.contains("ed-times") && /(auto|scroll)/.test(getComputedStyle(n).overflowY) && n.scrollHeight > n.clientHeight + 1).length);
+    const inner = await page
+      .locator("[role=region].tp, .flow .f-main")
+      .first()
+      .evaluate(
+        (e) =>
+          [e, ...e.querySelectorAll("*")].filter(
+            (n) =>
+              !n.classList.contains("ed-times") &&
+              /(auto|scroll)/.test(getComputedStyle(n).overflowY) &&
+              n.scrollHeight > n.clientHeight + 1,
+          ).length,
+      );
     expect(inner, "picker scrolls inside").toBe(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), "sideways scroll").toBe(true);
 
     // Scrolled to the end: Confirm on screen, above the footer, and no time under its bar.
     await page.evaluate(() => scrollTo(0, document.documentElement.scrollHeight));
     // at the end, and held there over two frames
-    await expect.poll(() => page.evaluate(() => new Promise<boolean>((done) => {
-      const y = scrollY;
-      requestAnimationFrame(() => requestAnimationFrame(() => done(scrollY === y && scrollY + innerHeight >= document.documentElement.scrollHeight - 1)));
-    })), { message: "scrolled to the end" }).toBe(true);
+    await expect
+      .poll(
+        () =>
+          page.evaluate(
+            () =>
+              new Promise<boolean>((done) => {
+                const y = scrollY;
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => done(scrollY === y && scrollY + innerHeight >= document.documentElement.scrollHeight - 1)),
+                );
+              }),
+          ),
+        { message: "scrolled to the end" },
+      )
+      .toBe(true);
     const c = await confirm.evaluate((b) => {
-      const q = b.getBoundingClientRect(), bar = b.parentElement!.getBoundingClientRect();
+      const q = b.getBoundingClientRect(),
+        bar = b.parentElement!.getBoundingClientRect();
       const foot = document.querySelector("footer")?.getBoundingClientRect();
-      const slots = [...document.querySelectorAll("[data-slot]")].filter((n) => (n as HTMLElement).offsetParent && !n.closest('[aria-hidden="true"]'));
+      const slots = [...document.querySelectorAll("[data-slot]")].filter(
+        (n) => (n as HTMLElement).offsetParent && !n.closest('[aria-hidden="true"]'),
+      );
       const last = Math.max(...slots.map((n) => n.getBoundingClientRect().bottom));
       const bp = document.querySelector(".book-page");
       const zoom = bp ? parseFloat(getComputedStyle(bp).zoom) || 1 : 1;
-      return { top: q.top, bottom: q.bottom, barTop: bar.top, footTop: foot?.top ?? Infinity, gap: bar.top - last, zoom, ed: !!b.closest(".ed") };
+      return {
+        top: q.top,
+        bottom: q.bottom,
+        barTop: bar.top,
+        footTop: foot?.top ?? Infinity,
+        gap: bar.top - last,
+        zoom,
+        ed: !!b.closest(".ed"),
+      };
     });
     expect(c.bottom, "Confirm on screen").toBeLessThanOrEqual(r.height + 1);
     expect(c.bottom, "Confirm above the footer").toBeLessThanOrEqual(c.footTop + 1);

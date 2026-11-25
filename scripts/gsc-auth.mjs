@@ -52,7 +52,8 @@ const code = await new Promise((resolve, reject) => {
     const got = url.searchParams.get("code");
     res.end(got ? "Connected. You can close this tab." : `Google said: ${url.searchParams.get("error")}`);
     server.close();
-    got ? resolve(got) : reject(new Error(url.searchParams.get("error") ?? "no code"));
+    if (got) resolve(got);
+    else reject(new Error(url.searchParams.get("error") ?? "no code"));
   }).listen(PORT, "127.0.0.1", () => {
     console.log("Opening Google sign-in. Choose hello@juliangigola.com and allow.");
     spawn("cmd", ["/c", "start", "", consent.replace(/&/g, "^&")], { stdio: "ignore", detached: true }).unref();

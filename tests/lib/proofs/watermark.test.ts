@@ -75,7 +75,15 @@ describe("proof watermark", () => {
     const draw = images.input;
     images.input = (s: ReadableStream) => {
       const real = draw(s) as { transform: (t: { fit?: string }) => unknown };
-      return { ...real, transform: (t: { fit?: string }) => (t.fit === "scale-down" ? (() => { throw new Error("images down"); })() : real.transform(t)) };
+      return {
+        ...real,
+        transform: (t: { fit?: string }) =>
+          t.fit === "scale-down"
+            ? (() => {
+                throw new Error("images down");
+              })()
+            : real.transform(t),
+      };
     };
     expect(await text(await servedSize(env, { token: "T", watermark: true }, "a", "https://x", true))).toBe("marked");
     expect(r2.has("T/a.t800.wm1.jpg")).toBe(false);

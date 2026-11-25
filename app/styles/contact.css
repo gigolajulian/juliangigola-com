@@ -19,14 +19,6 @@
   }
 }
 
-/* The Google Calendar booking frame on a session page's Book screen
-   (`contact-screen.tsx`). Its page cannot be styled from here, so on the
-   dark theme it is turned over: white to near black, and the hue turned back
-   so Google's blue stays blue. */
-:root:not([data-theme="light"]) .booking-embed {
-  filter: invert(0.9) hue-rotate(180deg);
-}
-
 /* Primaries solid under a finger. The 72% glass is drawn over by the
    liquid under a mouse; a phone has no liquid, and the glass over
    the dark ground read as a grey, disabled button. */
@@ -36,13 +28,6 @@
   }
   .action:not(:disabled, [aria-disabled="true"]) {
     background-color: var(--foreground);
-  }
-}
-/* The bar's dark links lay over the first door's dark top: the door
-   starts under the bar there, on paper. */
-@media (hover: hover) and (pointer: fine) {
-  :where(:root[data-hover]) .group:hover > .door-veil {
-    opacity: 0.65;
   }
 }
 /* The bar lies over the first door; its photograph starts under the bar
@@ -95,26 +80,6 @@
     transform: none;
   }
 }
-/* Julian: the first field's light runs up into the card's corner and
-   takes its radius (the card's 16px inside its border), and two fields
-   side by side split the gap between them rather than overlap. */
-@media (min-width: 40rem) {
-  .contact-card .contact-pair > .contact-field:first-child::before {
-    top: calc(-1 * clamp(1rem, 3vh, 1.5rem));
-    border-radius: 15px 15px 0 0;
-  }
-}
-@media (min-width: 40rem) and (max-height: 56rem), (pointer: coarse) and (min-width: 40rem) and (orientation: portrait) {
-  .contact-card .contact-pair > .contact-field:first-child::before {
-    inset-inline-end: -0.75rem;
-    border-radius: 15px 0 0 0;
-  }
-  .contact-card .contact-pair > .contact-field:last-child::before {
-    top: calc(-1 * clamp(1rem, 3vh, 1.5rem));
-    inset-inline-start: -0.75rem;
-    border-radius: 0 15px 0 0;
-  }
-}
 
 /* ── the inquiry card in depth ──
    The card grows toward you under the pointer, and once somebody
@@ -123,61 +88,10 @@
    until they press Inquire. From a tablet up; on a phone the card is
    the screen already. */
 @media (min-width: 40rem) {
-  /* Flat scales, not a step toward the eye in 3D: drawn once at its
-     size and lifted by `translateZ`, the form stayed soft in focus. A
-     2D scale is drawn again sharp once it settles. 1.042 and 1.053 are
-     what 56px and 70px toward the eye came to at 1400px. */
-  .contact-card {
-    transform: translateX(0) scale(1);
-    transition:
-      transform var(--dur-2xl) var(--ease-out-strong),
-      box-shadow var(--dur-2xl) var(--ease-out-strong);
-  }
-  /* Never a scroll bar on it (Julian). It still scrolls if a short
-     window needs it; the wheel and the keys reach the fields. */
-  .contact-card [data-scroll] {
-    scrollbar-width: none;
-  }
-  .contact-card [data-scroll]::-webkit-scrollbar {
-    display: none;
-  }
   .contact-inquire > :not(.contact-card, style) {
     transition:
       opacity var(--dur-2xl) var(--ease-out-strong),
       filter var(--dur-2xl) var(--ease-out-strong);
-  }
-  /* Further forward (was 44px, now about 1.05x) and a step toward
-     the middle, as on hover, still clear of the text on the left. */
-  .contact-card:focus-within {
-    transform: translateX(-3rem) scale(1.053);
-    box-shadow: 0 50px 90px -40px rgb(0 0 0 / 0.6);
-  }
-  /* The booking card stays at the hover step: a pick focuses a button
-     in it, and the second step moved the times 8px under the finger.
-     The form keeps the deeper step. */
-  .contact-card:has(.ed):focus-within {
-    transform: translateX(-3rem) scale(1.042);
-    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
-  }
-  /* Dimmed, not blurred. The column by name: as `> :not(…)` Chrome
-     restyled the whole page on every hover anywhere. */
-  .contact-inquire:has(.contact-card:focus-within) > .contact-copy {
-    opacity: 0.35;
-  }
-  .contact-inquire:has(.contact-card:focus-within) > .enquiry-backdrop {
-    opacity: 0.5;
-  }
-}
-@media (min-width: 40rem) and (hover: hover) and (pointer: fine) {
-  /* The edge's line and glow quieter under the pointer. The beam
-     sets its strength inline, hence !important. */
-  .contact-card:hover {
-    --beam-strength: 0.5 !important;
-  }
-  /* Bigger, and a step toward the middle. */
-  .contact-card:hover:not(:focus-within) {
-    transform: translateX(-3rem) scale(1.042);
-    box-shadow: 0 36px 70px -36px rgb(0 0 0 / 0.5);
   }
 }
 /* A short window with a mouse: a laptop at 150% scaling is about 620px
@@ -188,19 +102,8 @@
   .contact-inquire {
     padding-top: 5.25rem;
   }
-  .contact-card form {
-    gap: 0.5rem;
-  }
-  .contact-card textarea {
-    height: 2.75rem;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .contact-card,
-  .contact-card:hover,
-  .contact-card:focus-within {
-    transform: none !important;
-  }
   .contact-inquire > * {
     filter: none !important;
   }
@@ -299,190 +202,9 @@
   opacity: 1;
   transition-duration: var(--dur-lg);
 }
-
-/* The navbar's name grows under the pointer, round its own middle so
-   it swells in place: from the link's left edge it slid down and to
-   the right. On the name inside, not the link, whose transform the
-   homepage's handoff from the masthead owns. Lands with a touch of
-   give, lets go quicker. */
-/* And it turns white with a thin outline in the ink, faded in. The
-   name is a picture drawn in the ink, so the white is a filter over
-   it: taken to black, inverted, and four one pixel shadows round it
-   for the line. The same list of steps at rest, each doing nothing,
-   so the two states blend rather than snap. */
-/* No line now, on either ground; the edge stays transparent, kept so
-   the two states still blend. */
-.logo-grow > :not(.sr-only) {
-  --logo-edge: transparent;
-  transform-origin: center;
-  filter: brightness(1) invert(0) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)
-    drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
-  transition:
-    scale var(--dur-md) var(--ease-out-strong),
-    filter var(--dur-md) var(--ease-out-strong);
-}
-@media (hover: hover) and (pointer: fine) {
-  .logo-grow:hover > :not(.sr-only) {
-    filter: brightness(0) invert(1) drop-shadow(1px 0 0 var(--logo-edge))
-      drop-shadow(-1px 0 0 var(--logo-edge)) drop-shadow(0 1px 0 var(--logo-edge))
-      drop-shadow(0 -1px 0 var(--logo-edge));
-    transition:
-      scale var(--dur-xl) var(--ease-spring),
-      filter 450ms var(--ease-out-strong);
-  }
-}
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .logo-grow:hover > :not(.sr-only) {
-    scale: 1.06;
-  }
-}
-/* White vanished into the light ground: there it turns the grey of
-   the nav's words instead. */
-@media (hover: hover) and (pointer: fine) {
-  :root[data-theme="light"] .logo-grow:hover > :not(.sr-only) {
-    filter: brightness(0) invert(0.25) drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent)
-      drop-shadow(0 0 0 transparent) drop-shadow(0 0 0 transparent);
-  }
-}
-
-/* The Google Calendar booking frame on /book (`book-picker.tsx`). Its page
-   cannot be styled from here, so on the dark theme it is turned over: white
-   to near black, and the hue turned back so Google's blue stays blue. */
-:root:not([data-theme="light"]) .booking-embed {
-  filter: invert(0.9) hue-rotate(180deg);
-}
-/* The calendar fades up each time the session changes. */
-.booking-embed {
-  animation: jg-fade-in var(--dur-xl) var(--ease-out-strong) both;
-}
-/* The way round when the times do not load (`book-times.tsx`) is drawn in
-   the site's colours too. */
-:root:not([data-theme="light"]) .booking-embed.times-down {
-  filter: none;
-}
 /* Its Try again is solid on desktop too, as on a phone. */
 .times-down .action:not(:disabled, [aria-disabled="true"]) {
   background-color: var(--foreground);
-}
-/* The site's own time picker (`time-picker.tsx`) is drawn in the site's
-   colours, so it is not turned over like the frames. */
-:root:not([data-theme="light"]) .booking-embed.tp {
-  filter: none;
-}
-
-/* The time picker's open days: a hairline of the accent, the one touch of
-   colour, so the days that can be booked read before the ones that cannot
-   (`time-picker.tsx`). */
-.tp .tp-open {
-  border-color: color-mix(in oklab, var(--accent) var(--tp-tint, 55%), var(--border));
-}
-
-/* The booking page is one window only side by side, from lg. Stacked
-   under it (an upright iPad) it is taller than the screen, and the
-   strips' lock from 40rem (strip.css) left the times and Confirm out of
-   reach of a finger, with the footer drawn across the card. */
-@media (min-width: 40rem) and (max-width: 63.99rem) {
-  html:has(.book-page[data-quiet-footer]),
-  body:has(.book-page[data-quiet-footer]) {
-    height: auto;
-    overflow: visible;
-  }
-}
-
-/* Julian, 1280x720: "scale down". On a short desktop the whole booking
-   page is drawn at 80%, so it lays out as a 900px-tall window would,
-   rather than squeezing the picker's gaps and boxes to fit. The height
-   is given back so the page still fills the window. */
-@media (min-width: 64rem) and (max-height: 50rem) {
-  .book-page {
-    zoom: 0.8;
-    height: calc(100% / 0.8);
-    /* Julian: the card too large. Narrower here than the dial's 2.2. */
-    --card-w: 1.5fr !important;
-  }
-}
-
-/* The inquiry form in the Sessions booking card (`book-here.tsx`). The
-   card's pane is a size container, so the gaps follow the card's height:
-   close on a laptop, open on a tall screen, the form in the middle. */
-.book-form form {
-  gap: clamp(1rem, 3.2cqh, 2.25rem);
-}
-/* Name and email side by side wherever the card has the width, as on the
-   short screens (`contact-pair`, devices.css), so the form keeps one shape. */
-@container (min-width: 30rem) {
-  .book-form .contact-pair {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1.5rem;
-  }
-  /* Their light splits the gap, as on the Inquiries card: at -2rem
-     Name's ran 10px into Email. */
-  .book-form .contact-pair > .contact-field:first-child::before {
-    inset-inline-end: -0.75rem;
-  }
-  .book-form .contact-pair > .contact-field:last-child::before {
-    inset-inline-start: -0.75rem;
-  }
-}
-/* A big screen's card: the whole form set larger, so it fills the card
-   as it does on a laptop rather than sitting small in the middle. */
-@container (min-height: 50rem) and (min-width: 56rem) {
-  .book-form {
-    zoom: 1.2;
-  }
-}
-@container (min-height: 62rem) and (min-width: 70rem) {
-  .book-form {
-    zoom: 1.4;
-  }
-}
-/* A short card: the shoot type as a dropdown rather than six chips on
-   rows of their own. */
-@container (max-height: 38rem) {
-  .book-form form {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    column-gap: 1.5rem;
-    align-items: end;
-  }
-  .book-form form > * {
-    grid-column: 1 / -1;
-  }
-  .book-form form > fieldset {
-    display: none;
-  }
-}
-/* A laptop's short card (1333x620: 303px for 495 of form): the inquiry
-   whole in it, Inquire in sight, as a phone on its side has it
-   (devices.css). The fields one line each, the message
-   two. */
-@container (max-height: 26rem) {
-  [data-scroll]:has(> .book-form) {
-    padding-block: 0.75rem;
-  }
-  .book-form {
-    gap: 0.5rem;
-  }
-  .book-form form {
-    row-gap: 0.25rem;
-  }
-  .book-form :is(.contact-field :is(input, textarea), #field-type) {
-    margin-top: 0;
-    padding-block: 0.25rem;
-    min-height: 32px;
-  }
-  .book-form .contact-field textarea {
-    height: 2.25rem;
-  }
-  .book-form button[type="submit"] {
-    min-height: 0;
-    padding-block: 0.5rem;
-  }
-}
-.book-form [data-sent] {
-  align-self: center;
-  border: 0;
 }
 
 /* The booking form, once a time is picked, in a short card (QA,
@@ -500,11 +222,9 @@
    card is not a size container, so it gets the same by width. */
 @container card (min-height: 30rem) {
   .tp [data-part="days"] { padding-top: 0.75rem; }
-  .tp [data-part="days"] ~ .grow.basis-0 { min-height: 1.5rem; }
 }
 @media (max-width: 39.99rem) {
   .tp [data-part="days"] { padding-top: 0.75rem; }
-  .tp [data-part="days"] ~ .grow.basis-0 { min-height: 1.75rem; }
 }
 @container card (max-height: 38rem) {
   /* The room under Book it on the form, not the scroller: a scroller's
@@ -546,39 +266,4 @@
 /* A phone: the time over a full-width Book it, as Confirm sits. */
 /* The note in the booking form: never a bar past its five lines, and the
    scrollbar in the card's own colours where one appears. */
-.tp-notes {
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: color-mix(in oklab, var(--foreground) 35%, transparent) transparent;
-}
-.tp-notes::-webkit-scrollbar { width: 6px; }
-.tp-notes::-webkit-scrollbar-track { background: transparent; }
-.tp-notes::-webkit-scrollbar-thumb { background: color-mix(in oklab, var(--foreground) 35%, transparent); border-radius: 3px; }
 
-/* Preview (`?cross=1`, Julian's mock of): a card opened in
-   place (`book-sheet.tsx`, `chrome`). The wall runs full bleed, no edge
-   fade and no pale wash over it, oversized so its blur has no rim. The
-   bar stays over it at half, the strip's panel and the footer clear over
-   it with a fifth of the ground under the footer's words. */
-.cross-wall::after {
-  display: none;
-}
-.questions-wall.cross-wall {
-  filter: blur(9px);
-}
-.cross-wall .inquire-wall {
-  mask: none;
-  -webkit-mask: none;
-}
-html[data-sheet] main.rise {
-  transform: none;
-}
-html[data-sheet] :has(> .strip-count),
-html[data-sheet] footer {
-  position: relative;
-  z-index: 39;
-  border-color: transparent;
-}
-html[data-sheet] footer {
-  background: linear-gradient(transparent, color-mix(in oklab, var(--background) 20%, transparent) 45%);
-}

@@ -30,9 +30,7 @@ import { cn } from "@/lib/utils";
  * to the work filed under it.
  */
 export type SitemapTarget =
-  | { kind: "project"; slug: string }
-  | { kind: "field"; anchor: string }
-  | { kind: "projects"; discipline?: string };
+  { kind: "project"; slug: string } | { kind: "field"; anchor: string } | { kind: "projects"; discipline?: string };
 
 type SitemapProject = {
   slug: string;
@@ -103,8 +101,7 @@ export function AdminSitemap({
    */
   const [find, setFind] = React.useState("");
   const needle = find.trim().toLowerCase();
-  const hit = (...fields: string[]) =>
-    needle === "" || fields.some((f) => f.toLowerCase().includes(needle));
+  const hit = (...fields: string[]) => needle === "" || fields.some((f) => f.toLowerCase().includes(needle));
 
   const live = projects.filter((p) => !hidden.has(p.slug));
 
@@ -136,9 +133,7 @@ export function AdminSitemap({
       .filter((c) => c.branch === page.href)
       .map((c) => {
         const catHit = pageHit || hit(c.name, c.slug);
-        const work = live.filter(
-          (p) => p.category === c.name && (catHit || hit(p.name, p.slug)),
-        );
+        const work = live.filter((p) => p.category === c.name && (catHit || hit(p.name, p.slug)));
         return { c, work, keep: catHit || work.length > 0 };
       })
       .filter((k) => k.keep);
@@ -157,12 +152,7 @@ export function AdminSitemap({
        twenty-one without a word - a sitemap that quietly omits a quarter of
        the work is worse than no sitemap. So they get a branch, named for what
        is wrong with them. */
-    const orphans =
-      page.href === "/portfolio"
-        ? live.filter(
-            (p) => !named.has(p.category) && (pageHit || hit(p.name, p.slug)),
-          )
-        : [];
+    const orphans = page.href === "/portfolio" ? live.filter((p) => !named.has(p.category) && (pageHit || hit(p.name, p.slug))) : [];
 
     return {
       page,
@@ -172,35 +162,20 @@ export function AdminSitemap({
     };
   }).filter((n) => n.keep);
 
-  const withheld = projects.filter(
-    (p) => hidden.has(p.slug) && hit(p.name, p.slug, p.category),
-  );
+  const withheld = projects.filter((p) => hidden.has(p.slug) && hit(p.name, p.slug, p.category));
 
   const total = PAGES.length + categories.length + live.length;
   const showing =
     tree.length +
     tree.reduce((n, t) => n + t.kids.length, 0) +
-    tree.reduce(
-      (n, t) =>
-        n + t.orphans.length + t.kids.reduce((m, k) => m + k.work.length, 0),
-      0,
-    ) +
+    tree.reduce((n, t) => n + t.orphans.length + t.kids.reduce((m, k) => m + k.work.length, 0), 0) +
     withheld.length;
 
   return (
     <section>
       <div className="flex items-baseline justify-between gap-3 border-b border-border pb-2">
-        <h2
-          className={cn(
-            "font-display uppercase tracking-[0]",
-            compact ? "text-lg" : "text-2xl",
-          )}
-        >
-          Sitemap
-        </h2>
-        <span className="label tabular-nums text-muted-foreground">
-          {total}
-        </span>
+        <h2 className={cn("font-display uppercase tracking-[0]", compact ? "text-lg" : "text-2xl")}>Sitemap</h2>
+        <span className="label tabular-nums text-muted-foreground">{total}</span>
       </div>
 
       <input
@@ -217,11 +192,7 @@ export function AdminSitemap({
           <span>
             {showing} of {total}
           </span>
-          <button
-            type="button"
-            onClick={() => setFind("")}
-            className="hoverable:hover:text-foreground"
-          >
+          <button type="button" onClick={() => setFind("")} className="hoverable:hover:text-foreground">
             Clear
           </button>
         </p>
@@ -229,8 +200,7 @@ export function AdminSitemap({
 
       {!compact ? (
         <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
-          As the draft would leave it. Dimmed projects are hidden and will not
-          be published, linked, or listed in{" "}
+          As the draft would leave it. Dimmed projects are hidden and will not be published, linked, or listed in{" "}
           <code className="text-foreground">sitemap.xml</code>.
         </p>
       ) : null}
@@ -256,20 +226,14 @@ export function AdminSitemap({
             const body = (
               <>
                 <span className="flex-1 truncate text-sm">{p.label}</span>
-                <span className="label shrink-0 text-muted-foreground">
-                  {p.note ?? p.href}
-                </span>
+                <span className="label shrink-0 text-muted-foreground">{p.note ?? p.href}</span>
               </>
             );
 
             return (
               <Twig key={p.href}>
                 {onGo && p.target ? (
-                  <button
-                    type="button"
-                    onClick={() => onGo(p.target!)}
-                    className={cn(row, "w-full text-left")}
-                  >
+                  <button type="button" onClick={() => onGo(p.target!)} className={cn(row, "w-full text-left")}>
                     {body}
                   </button>
                 ) : (
@@ -299,41 +263,26 @@ export function AdminSitemap({
                                   // single row that tells you nothing. What
                                   // is curated about cover art is which
                                   // releases lead the homepage rack.
-                                  c.slug === "coverart" ||
-                                    c.slug === "cover-art"
+                                  c.slug === "coverart" || c.slug === "cover-art"
                                     ? { kind: "field", anchor: "coverArt" }
                                     : { kind: "projects", discipline: c.name },
                                 )
                               }
                               className={cn(row, "w-full text-left")}
                             >
-                              <span className="flex-1 truncate text-sm">
-                                {c.name}
-                              </span>
-                              <span className="label shrink-0 tabular-nums text-muted-foreground">
-                                {work.length || "0"}
-                              </span>
+                              <span className="flex-1 truncate text-sm">{c.name}</span>
+                              <span className="label shrink-0 tabular-nums text-muted-foreground">{work.length || "0"}</span>
                             </button>
                           ) : (
                             <Open href={c.href} origin={origin} className={row}>
-                              <span className="flex-1 truncate text-sm">
-                                {c.name}
-                              </span>
-                              <span className="label shrink-0 tabular-nums text-muted-foreground">
-                                {work.length || "0"}
-                              </span>
+                              <span className="flex-1 truncate text-sm">{c.name}</span>
+                              <span className="label shrink-0 tabular-nums text-muted-foreground">{work.length || "0"}</span>
                             </Open>
                           )}
 
                           {work.length ? (
                             <div className="border-l border-border pl-4">
-                              <Tiles
-                                projects={work}
-                                origin={origin}
-                                onGo={onGo}
-                                onReorder={onReorder}
-                                compact={compact}
-                              />
+                              <Tiles projects={work} origin={origin} onGo={onGo} onReorder={onReorder} compact={compact} />
                             </div>
                           ) : null}
                         </Twig>
@@ -344,36 +293,20 @@ export function AdminSitemap({
                         {onGo ? (
                           <button
                             type="button"
-                            onClick={() =>
-                              onGo({ kind: "projects", discipline: "Unfiled" })
-                            }
+                            onClick={() => onGo({ kind: "projects", discipline: "Unfiled" })}
                             className={cn(row, "w-full text-left")}
                           >
-                            <span className="flex-1 truncate text-sm text-muted-foreground">
-                              Unfiled
-                            </span>
-                            <span className="label shrink-0 tabular-nums text-muted-foreground">
-                              {orphans.length}
-                            </span>
+                            <span className="flex-1 truncate text-sm text-muted-foreground">Unfiled</span>
+                            <span className="label shrink-0 tabular-nums text-muted-foreground">{orphans.length}</span>
                           </button>
                         ) : (
                           <span className={cn(row, "text-muted-foreground")}>
-                            <span className="flex-1 truncate text-sm">
-                              Unfiled
-                            </span>
-                            <span className="label shrink-0 tabular-nums">
-                              {orphans.length}
-                            </span>
+                            <span className="flex-1 truncate text-sm">Unfiled</span>
+                            <span className="label shrink-0 tabular-nums">{orphans.length}</span>
                           </span>
                         )}
                         <div className="border-l border-border pl-4">
-                          <Tiles
-                            projects={orphans}
-                            origin={origin}
-                            onGo={onGo}
-                            compact={compact}
-                            dim
-                          />
+                          <Tiles projects={orphans} origin={origin} onGo={onGo} compact={compact} dim />
                         </div>
                       </Twig>
                     ) : null}
@@ -386,22 +319,14 @@ export function AdminSitemap({
       </div>
 
       {needle !== "" && showing === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">
-          Nothing matches &ldquo;{find.trim()}&rdquo;.
-        </p>
+        <p className="mt-6 text-sm text-muted-foreground">Nothing matches &ldquo;{find.trim()}&rdquo;.</p>
       ) : null}
 
       {withheld.length > 0 ? (
         <Group title="Hidden" count={withheld.length}>
           {/* Shown, not omitted. A project you have taken down is exactly the
               one you will want to find again. */}
-          <Tiles
-            projects={withheld}
-            origin={origin}
-            onGo={onGo}
-            compact={compact}
-            dim
-          />
+          <Tiles projects={withheld} origin={origin} onGo={onGo} compact={compact} dim />
         </Group>
       ) : null}
     </section>
@@ -430,15 +355,12 @@ function Branch({ children }: { children: React.ReactNode }) {
  */
 function Twig({ children }: { children: React.ReactNode }) {
   return (
-    <li className="relative pl-4 before:absolute before:left-0 before:top-[0.95rem] before:h-px before:w-3 before:bg-border">
-      {children}
-    </li>
+    <li className="relative pl-4 before:absolute before:left-0 before:top-[0.95rem] before:h-px before:w-3 before:bg-border">{children}</li>
   );
 }
 
 /** One row of the tree, control or link alike. */
-const row =
-  "flex items-baseline gap-3 py-1.5 transition-colors duration-200 hoverable:hover:text-foreground";
+const row = "flex items-baseline gap-3 py-1.5 transition-colors duration-200 hoverable:hover:text-foreground";
 
 function Tiles({
   projects,
@@ -493,12 +415,7 @@ function Tiles({
                 to recognise, and a name under each is what makes the ones
                 that look alike tell apart. Smaller in the rail, where a tile
                 is three rems wide. */}
-            <span
-              className={cn(
-                "mt-1 block truncate text-muted-foreground",
-                compact ? "text-[0.55rem] leading-tight" : "label",
-              )}
-            >
+            <span className={cn("mt-1 block truncate text-muted-foreground", compact ? "text-[0.55rem] leading-tight" : "label")}>
               {p.name}
             </span>
           </>
@@ -536,10 +453,7 @@ function Tiles({
               onReorder && "cursor-grab active:cursor-grabbing",
               "transition-opacity duration-150",
               dragging === p.slug && "opacity-30",
-              over === p.slug &&
-                dragging !== null &&
-                dragging !== p.slug &&
-                "outline outline-2 outline-offset-1 outline-foreground",
+              over === p.slug && dragging !== null && dragging !== p.slug && "outline outline-2 outline-offset-1 outline-foreground",
             )}
           >
             {onGo ? (
@@ -552,18 +466,12 @@ function Tiles({
                 type="button"
                 onClick={() => onGo({ kind: "project", slug: p.slug })}
                 title={`Edit ${p.name} (/work/${p.slug})`}
-                className={cn(
-                  "group block w-full cursor-pointer text-left press",
-                )}
+                className={cn("group block w-full cursor-pointer text-left press")}
               >
                 {cover}
               </button>
             ) : (
-              <Open
-                href={`/portfolio/${p.slug}`}
-                origin={origin}
-                className="group block"
-              >
+              <Open href={`/portfolio/${p.slug}`} origin={origin} className="group block">
                 <span title={`${p.name} (/work/${p.slug})`}>{cover}</span>
               </Open>
             )}
@@ -581,49 +489,26 @@ function Tiles({
  * rendering a relative link that would navigate away from the editor and
  * lose an unpublished draft.
  */
-function Open({
-  href,
-  origin,
-  className,
-  children,
-}: {
-  href: string;
-  origin: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
+function Open({ href, origin, className, children }: { href: string; origin: string; className?: string; children: React.ReactNode }) {
   if (!origin) return <span className={className}>{children}</span>;
   return (
     <a
       href={`${origin}${href}`}
       target="_blank"
       rel="noreferrer"
-      className={cn(
-        "transition-colors duration-200 hoverable:hover:text-foreground",
-        className,
-      )}
+      className={cn("transition-colors duration-200 hoverable:hover:text-foreground", className)}
     >
       {children}
     </a>
   );
 }
 
-function Group({
-  title,
-  count,
-  children,
-}: {
-  title: string;
-  count?: number;
-  children: React.ReactNode;
-}) {
+function Group({ title, count, children }: { title: string; count?: number; children: React.ReactNode }) {
   return (
     <div className="mt-6">
       <p className="label flex items-baseline justify-between gap-3 pb-2 text-muted-foreground">
         <span className="truncate">{title}</span>
-        {count !== undefined ? (
-          <span className="tabular-nums">{count}</span>
-        ) : null}
+        {count !== undefined ? <span className="tabular-nums">{count}</span> : null}
       </p>
       {children}
     </div>

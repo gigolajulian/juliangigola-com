@@ -14,20 +14,14 @@ export function useFoundField(wanted: { anchor: string; nonce: number } | null) 
       if (!el) return;
       // At most one field is marked: React may replace the node whose
       // listener would have cleared it.
-      document
-        .querySelectorAll("[data-found]")
-        .forEach((n) => n.removeAttribute("data-found"));
+      document.querySelectorAll("[data-found]").forEach((n) => n.removeAttribute("data-found"));
       el.scrollIntoView({ block: "start", behavior: "smooth" });
       // An attribute, not a class: React rewrites `className` on the next
       // render. Cleared and reflowed first so the same row twice restarts it.
       el.removeAttribute("data-found");
       void el.offsetWidth;
       el.setAttribute("data-found", "");
-      el.addEventListener(
-        "animationend",
-        () => el.removeAttribute("data-found"),
-        { once: true },
-      );
+      el.addEventListener("animationend", () => el.removeAttribute("data-found"), { once: true });
     });
     return () => cancelAnimationFrame(id);
   }, [wanted]);

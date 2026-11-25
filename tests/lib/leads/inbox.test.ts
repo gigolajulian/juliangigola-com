@@ -81,7 +81,13 @@ describe("enquiry", () => {
 describe("visitContext", () => {
   it("keeps the site's own paths and a referrer's host, drops the rest", () => {
     const c = visitContext(
-      JSON.stringify({ page: "/book/portraits", path: "javascript:alert(1)", referrer: "https://www.google.com/search?q=x", device: "fridge", trail: ["/a", "nope", "/b"] }),
+      JSON.stringify({
+        page: "/book/portraits",
+        path: "javascript:alert(1)",
+        referrer: "https://www.google.com/search?q=x",
+        device: "fridge",
+        trail: ["/a", "nope", "/b"],
+      }),
       "San Jose",
     );
     expect(c).toEqual({ page: "/book/portraits", referrer: "www.google.com", trail: ["/a", "/b"], place: "San Jose" });
@@ -109,7 +115,10 @@ describe("uploads and picks", () => {
     expect(await takeUploads([jpeg("a.jpg")], 0)).toEqual([]);
   });
   it("takes picks of the site's shape, CRLF split, capped", () => {
-    expect(takePicks("/work/zoe/16.jpg\r\nhttps://evil.x/a.jpg\r\n/work/../x.jpg\n/hero/a.jpg")).toEqual(["/work/zoe/16.jpg", "/hero/a.jpg"]);
+    expect(takePicks("/work/zoe/16.jpg\r\nhttps://evil.x/a.jpg\r\n/work/../x.jpg\n/hero/a.jpg")).toEqual([
+      "/work/zoe/16.jpg",
+      "/hero/a.jpg",
+    ]);
     expect(takePicks(Array(12).fill("/covers/a.jpg").join("\n"))).toHaveLength(8);
   });
 });
@@ -126,7 +135,11 @@ describe("context and copy", () => {
     expect(contextLines(e)).toEqual(["Sent from: /book", "Came in: google.com to / (ig)", "Company: https://studio.co"]);
   });
   it("writes a subject that names the job and an escaped HTML body", () => {
-    const e = enquiry({ ...base, message: "<b>a lookbook shoot</b> for spring with a long enough line to be cut somewhere near sixty" }, 0, "i");
+    const e = enquiry(
+      { ...base, message: "<b>a lookbook shoot</b> for spring with a long enough line to be cut somewhere near sixty" },
+      0,
+      "i",
+    );
     const m = emailCopy(e);
     expect(m.subject.startsWith("Portrait inquiry · Ana Ruiz · ")).toBe(true);
     expect(m.subject.endsWith("…")).toBe(true);
@@ -146,7 +159,11 @@ describe("context and copy", () => {
     expect(s).not.toHaveProperty("message");
     expect(s).not.toHaveProperty("detail");
     expect(s.deposit).toBe("https://stripe");
-    const b = bookingEnquiry({ eventTitle: "Portraits", startTime: "2026-11-21T22:00:00Z", attendees: [{ name: "Kai", email: "k@x.co" }] }, 0, "b");
+    const b = bookingEnquiry(
+      { eventTitle: "Portraits", startTime: "2026-11-21T22:00:00Z", attendees: [{ name: "Kai", email: "k@x.co" }] },
+      0,
+      "b",
+    );
     expect(b.type).toBe("booking");
     expect(b.detail).toBe("Portraits · Sat, Nov 21, 2:00 PM PST");
     expect(b.message).toBe("No notes.");

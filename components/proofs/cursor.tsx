@@ -37,10 +37,11 @@ export function ProofCursor() {
       x = e.clientX;
       y = e.clientY;
       if (e.target !== last) read(e.target as Element);
-      if (!frame) frame = requestAnimationFrame(() => {
-        frame = 0;
-        el.style.transform = `translate3d(${x}px,${y}px,0)`;
-      });
+      if (!frame)
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          el.style.transform = `translate3d(${x}px,${y}px,0)`;
+        });
     };
     // The page scrolls under a still pointer, and a pick flips the ring: read what is under it again.
     const again = () => read(document.elementFromPoint?.(x, y) ?? null); // jsdom has none
@@ -61,8 +62,12 @@ export function ProofCursor() {
   }, []);
   return (
     <div ref={ref} className="proof-cur" data-mac={mac || undefined} aria-hidden="true">
-      <svg className="proof-cur-a" viewBox="0 0 13 20"><path d="M.5 .5V16.5L4.5 12.8 7.3 19 9.8 17.9 7.1 11.8H12.5Z" /></svg>
-      <svg className="proof-cur-p" viewBox="0 0 16 16"><path d="M8 1V15M1 8H15" /></svg>
+      <svg className="proof-cur-a" viewBox="0 0 13 20">
+        <path d="M.5 .5V16.5L4.5 12.8 7.3 19 9.8 17.9 7.1 11.8H12.5Z" />
+      </svg>
+      <svg className="proof-cur-p" viewBox="0 0 16 16">
+        <path d="M8 1V15M1 8H15" />
+      </svg>
     </div>
   );
 }

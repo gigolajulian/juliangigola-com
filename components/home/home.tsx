@@ -22,7 +22,11 @@ import { useBackHome } from "./back";
    300ms even when the module is already here. */
 let InquiryCard: typeof import("./inquiry-card").InquiryCard | undefined;
 let inqMod: Promise<unknown> | undefined;
-const warmInq = () => (inqMod ??= import("./inquiry-card").then((m) => (InquiryCard = m.InquiryCard), () => (inqMod = undefined)));
+const warmInq = () =>
+  (inqMod ??= import("./inquiry-card").then(
+    (m) => (InquiryCard = m.InquiryCard),
+    () => (inqMod = undefined),
+  ));
 
 /* v4 homepage (docs/mt-decisions.md): the screens at their resting
    state, with HomeIntro and MotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
@@ -48,9 +52,13 @@ export function Home({ data }: { data: HomeData }) {
   const [inqUsed, setInqUsed] = React.useState(false);
   if (inq && !inqUsed) setInqUsed(true);
   const [, inqIn] = React.useReducer((n: number) => n + 1, 0);
-  React.useEffect(() => void (inq && !InquiryCard && warmInq().then(inqIn)), [inq]);
   React.useEffect(() => {
-    const io = window.IntersectionObserver ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmInq(), io?.disconnect()), { rootMargin: "100% 0px" }) : null;
+    if (inq && !InquiryCard) void warmInq().then(inqIn);
+  }, [inq]);
+  React.useEffect(() => {
+    const io = window.IntersectionObserver
+      ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmInq(), io?.disconnect()), { rootMargin: "100% 0px" })
+      : null;
     document.querySelectorAll(".mt-quote, #contact").forEach((el) => io?.observe(el));
     const idle = () => ("requestIdleCallback" in window ? requestIdleCallback(warmInq, { timeout: 3000 }) : setTimeout(warmInq, 1500));
     if (document.readyState === "complete") idle();
@@ -93,7 +101,12 @@ export function Home({ data }: { data: HomeData }) {
     // a link to one of these from the home itself changes the hash without a load
     addEventListener("hashchange", arrive);
     document.addEventListener("click", go, true);
-    return () => (clearTimeout(t), removeEventListener("load", land), removeEventListener("hashchange", arrive), document.removeEventListener("click", go, true));
+    return () => (
+      clearTimeout(t),
+      removeEventListener("load", land),
+      removeEventListener("hashchange", arrive),
+      document.removeEventListener("click", go, true)
+    );
   }, []);
   return (
     <CardsCtx.Provider value={cards}>
@@ -104,7 +117,13 @@ export function Home({ data }: { data: HomeData }) {
         <HomeFilms films={data.films} />
         <HomeCovers />
         <HomeAbout disciplines={data.disciplines} />
-        <BookOnline open={book} opener={bookOpener} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
+        <BookOnline
+          open={book}
+          opener={bookOpener}
+          onClose={() => setBook(null)}
+          quotePhoto={quotePhoto}
+          onRowPick={() => setQuotePhoto(null)}
+        />
         <ByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
         <HomeCommissions frames={data.commissions} />
         <HomeFoot />

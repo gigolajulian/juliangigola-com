@@ -54,20 +54,10 @@ const VM = "76979871";
   eq(parseVideoUrl(`https://www.youtube.com/live/${YT}`), yt, "a stream");
   eq(parseVideoUrl(`https://www.youtube.com/v/${YT}`), yt, "the old flash path");
   eq(parseVideoUrl(YT), yt, "a bare id, which people do paste");
-  eq(
-    parseVideoUrl(`  https://www.youtube.com/watch?v=${YT}  `),
-    yt,
-    "surrounded by the whitespace a paste brings",
-  );
+  eq(parseVideoUrl(`  https://www.youtube.com/watch?v=${YT}  `), yt, "surrounded by the whitespace a paste brings");
 
   // The share link carries a playlist and a referrer; neither is the video.
-  eq(
-    parseVideoUrl(
-      `https://www.youtube.com/watch?v=${YT}&list=PLabc&index=2&si=xyz`,
-    ),
-    yt,
-    "extra query parameters are ignored",
-  );
+  eq(parseVideoUrl(`https://www.youtube.com/watch?v=${YT}&list=PLabc&index=2&si=xyz`), yt, "extra query parameters are ignored");
 }
 
 /* ── Vimeo, every shape ───────────────────────────────────────── */
@@ -76,20 +66,12 @@ const VM = "76979871";
 
   eq(parseVideoUrl(`https://vimeo.com/${VM}`), vm, "plain");
   eq(parseVideoUrl(`https://player.vimeo.com/video/${VM}`), vm, "the player");
-  eq(
-    parseVideoUrl(`https://vimeo.com/channels/staffpicks/${VM}`),
-    vm,
-    "in a channel",
-  );
+  eq(parseVideoUrl(`https://vimeo.com/channels/staffpicks/${VM}`), vm, "in a channel");
   eq(parseVideoUrl(`https://vimeo.com/album/123/video/${VM}`), vm, "in an album");
 
   // An unlisted link is the id then a privacy hash. The hash is not the id,
   // and getting that the wrong way round embeds nothing.
-  eq(
-    parseVideoUrl(`https://vimeo.com/${VM}/3b5d1f9a2c`),
-    vm,
-    "unlisted: the id comes first, the hash second",
-  );
+  eq(parseVideoUrl(`https://vimeo.com/${VM}/3b5d1f9a2c`), vm, "unlisted: the id comes first, the hash second");
   eq(parseVideoUrl(`vimeo.com/${VM}`), vm, "no scheme");
 }
 
@@ -147,11 +129,7 @@ const VM = "76979871";
   const vm = { id: "b", title: "t", provider: "vimeo", videoId: VM, section: "music" };
   ok(posterFor(yt).includes("hqdefault"), "YouTube falls back to one that always exists");
   eq(posterFor(vm), null, "Vimeo has no guessable still");
-  eq(
-    posterFor({ ...yt, poster: "https://i.ytimg.com/vi/x/2.jpg" }),
-    "https://i.ytimg.com/vi/x/2.jpg",
-    "a chosen still wins",
-  );
+  eq(posterFor({ ...yt, poster: "https://i.ytimg.com/vi/x/2.jpg" }), "https://i.ytimg.com/vi/x/2.jpg", "a chosen still wins");
 }
 
 /* ── the embed, and where it points ──────────────────────────── */
@@ -161,15 +139,9 @@ const VM = "76979871";
 
   // The no-cookie domain, because this site has no cookie banner to justify
   // the ordinary one's advertising cookie — and it is the host the CSP names.
-  ok(
-    embedUrl(yt).startsWith(`https://www.youtube-nocookie.com/embed/${YT}?`),
-    "YouTube plays from the no-cookie domain",
-  );
+  ok(embedUrl(yt).startsWith(`https://www.youtube-nocookie.com/embed/${YT}?`), "YouTube plays from the no-cookie domain");
   ok(embedUrl(vm).includes("dnt=1"), "Vimeo is asked not to track");
-  ok(
-    embedUrl(yt).includes("autoplay=1") && embedUrl(vm).includes("autoplay=1"),
-    "the click was the press of play, so it plays",
-  );
+  ok(embedUrl(yt).includes("autoplay=1") && embedUrl(vm).includes("autoplay=1"), "the click was the press of play, so it plays");
   ok(embedUrl(yt).includes("playsinline=1"), "and does not take over an iPhone");
 
   eq(watchUrl(yt), `https://www.youtube.com/watch?v=${YT}`, "watch there instead");
@@ -178,7 +150,11 @@ const VM = "76979871";
 
 /* ── the two sections ─────────────────────────────────────────── */
 {
-  eq(SECTIONS.map((s) => s.id), ["music", "commercial"], "two, in this order");
+  eq(
+    SECTIONS.map((s) => s.id),
+    ["music", "commercial"],
+    "two, in this order",
+  );
   eq(sectionName("music"), "Music video", "as Julian named them");
   eq(sectionName("commercial"), "Commercial", "and the other one");
 
@@ -187,7 +163,11 @@ const VM = "76979871";
     { id: "2", title: "b", provider: "vimeo", videoId: VM, section: "commercial" },
     { id: "3", title: "c", provider: "youtube", videoId: YT, section: "music" },
   ];
-  eq(inSection(list, "music").map((v) => v.id), ["1", "3"], "split by section");
+  eq(
+    inSection(list, "music").map((v) => v.id),
+    ["1", "3"],
+    "split by section",
+  );
   eq(
     inSection(list, "commercial").map((v) => v.id),
     ["2"],

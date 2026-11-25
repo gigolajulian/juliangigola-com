@@ -38,7 +38,9 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
     const t = sessionGet("theme");
     const l = t === "light" || (t !== "dark" && matchMedia("(prefers-color-scheme: light)").matches);
     html.dataset.theme = l ? "light" : "dark";
-    document.querySelectorAll('meta[name="theme-color"]').forEach((m) => m.setAttribute("content", l ? THEME_COLOR.light : THEME_COLOR.dark));
+    document
+      .querySelectorAll('meta[name="theme-color"]')
+      .forEach((m) => m.setAttribute("content", l ? THEME_COLOR.light : THEME_COLOR.dark));
   }, []);
 
   React.useEffect(() => {
@@ -54,11 +56,7 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
     };
     window.addEventListener("keydown", onKey);
 
-    if (
-      !numerals ||
-      !matches("fine") ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
+    if (!numerals || !matches("fine") || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       if (readout) readout.textContent = "FOCUS LOCKED";
       return () => window.removeEventListener("keydown", onKey);
     }
@@ -85,8 +83,7 @@ export function NotFoundScene({ children }: { children: React.ReactNode }) {
       scene.toggleAttribute("data-locked", pct > 92);
       if (readout && pct !== last) {
         last = pct;
-        readout.textContent =
-          pct > 92 ? "FOCUS LOCKED" : `FOCUS ${String(pct).padStart(3, "0")}%`;
+        readout.textContent = pct > 92 ? "FOCUS LOCKED" : `FOCUS ${String(pct).padStart(3, "0")}%`;
       }
     };
     window.addEventListener("pointermove", onMove, { passive: true });

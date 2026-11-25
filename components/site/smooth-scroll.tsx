@@ -13,16 +13,30 @@ let live: Lenis | null = null;
  *  there smoothly (the wordmark on the homepage, chrome.tsx). */
 export function scrollTop(glide = false) {
   // 1.2s ease-in-out for the glide: Lenis's lerp lurched 75% in 200ms, then crawled (Julian, #833).
-  if (live) live.scrollTo(0, glide ? { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true } : { immediate: true, force: true });
+  if (live)
+    live.scrollTo(
+      0,
+      glide
+        ? { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true }
+        : { immediate: true, force: true },
+    );
   else scrollTo({ top: 0, behavior: glide ? "smooth" : "instant" });
 }
 
 /** Glides to `y` with the same 1.2s ease as the wordmark's trip to the top, then calls `done` (once, also if the glide is cut short). */
 export function glideTo(y: number, done: () => void) {
   let over = false;
-  const end = () => void (over || ((over = true), done()));
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return scrollTo({ top: y, behavior: "instant" }), end();
-  if (live) live.scrollTo(y, { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true, onComplete: end });
+  const end = () => {
+    if (over) return;
+    over = true;
+    done();
+  };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    scrollTo({ top: y, behavior: "instant" });
+    return end();
+  }
+  if (live)
+    live.scrollTo(y, { duration: 1.2, easing: (t) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2), force: true, onComplete: end });
   else {
     scrollTo({ top: y, behavior: "smooth" });
     addEventListener("scrollend", end, { once: true });
@@ -34,8 +48,10 @@ export function glideTo(y: number, done: () => void) {
 /** Puts the page at `y` now, and Lenis with it: a glide it still had from the last page otherwise carried on over a restored scroll (#1313). */
 export function jumpTo(y: number) {
   // resize first: Lenis clamps to the limit it measured, which is still the last page's on a Back (row below the fold for 20 frames)
-  if (live) live.resize(), live.scrollTo(y, { immediate: true, force: true });
-  else scrollTo(0, y);
+  if (live) {
+    live.resize();
+    live.scrollTo(y, { immediate: true, force: true });
+  } else scrollTo(0, y);
 }
 
 /** Where the page is headed: Lenis's target while it glides, the scroll itself otherwise. */
@@ -80,7 +96,8 @@ export function SmoothScroll() {
     // Skip if reduced motion is requested
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // Native scroll in proof galleries: Lenis's glide read as a delay on a Mac trackpad.
-    if (location.pathname.startsWith("/proof/") || location.pathname.startsWith("/delivery/") || location.pathname.startsWith("/contract/")) return;
+    if (location.pathname.startsWith("/proof/") || location.pathname.startsWith("/delivery/") || location.pathname.startsWith("/contract/"))
+      return;
 
     // A lerp follows the wheel as it moves instead of replaying a fixed
     // 1.2s glide on every event, which read as lag on a trackpad.

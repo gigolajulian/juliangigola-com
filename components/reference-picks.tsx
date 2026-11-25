@@ -97,24 +97,24 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
       URL.revokeObjectURL(u[i].url);
       return u.filter((_, j) => j !== i);
     });
-  const toggle = (src: string) =>
-    setPicks((p) => (p.includes(src) ? p.filter((s) => s !== src) : room > 0 ? [...p, src] : p));
+  const toggle = (src: string) => setPicks((p) => (p.includes(src) ? p.filter((s) => s !== src) : room > 0 ? [...p, src] : p));
 
-  const thumbs = uploads.length + picks.length ? (
-    <ul className="mt-4 flex flex-wrap gap-2">
-      {uploads.map((u, i) => (
-        <Thumb key={u.url} label={u.file.name} onRemove={() => drop(i)}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- a local blob */}
-          <img src={u.url} alt="" className="size-full object-cover" />
-        </Thumb>
-      ))}
-      {picks.map((src) => (
-        <Thumb key={src} label="my photograph" onRemove={() => toggle(src)}>
-          <Image src={src} alt="" width={128} height={128} sizes="64px" className="size-full object-cover" />
-        </Thumb>
-      ))}
-    </ul>
-  ) : null;
+  const thumbs =
+    uploads.length + picks.length ? (
+      <ul className="mt-4 flex flex-wrap gap-2">
+        {uploads.map((u, i) => (
+          <Thumb key={u.url} label={u.file.name} onRemove={() => drop(i)}>
+            {/* eslint-disable-next-line @next/next/no-img-element -- a local blob */}
+            <img src={u.url} alt="" className="size-full object-cover" />
+          </Thumb>
+        ))}
+        {picks.map((src) => (
+          <Thumb key={src} label="my photograph" onRemove={() => toggle(src)}>
+            <Image src={src} alt="" width={128} height={128} sizes="64px" className="size-full object-cover" />
+          </Thumb>
+        ))}
+      </ul>
+    ) : null;
 
   /* V3 (/contact, /contact/form): Upload references and Pick from my work,
      two buttons. A PNG or JPEG dragged within 30px of Upload pulls the
@@ -133,7 +133,10 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
     // Measured on the wrapper, which never moves, so the pull does not feed back.
     const near = (e: DragEvent) => {
       const r = wrap.getBoundingClientRect();
-      const d = Math.hypot(e.clientX - Math.min(Math.max(e.clientX, r.left), r.right), e.clientY - Math.min(Math.max(e.clientY, r.top), r.bottom));
+      const d = Math.hypot(
+        e.clientX - Math.min(Math.max(e.clientX, r.left), r.right),
+        e.clientY - Math.min(Math.max(e.clientY, r.top), r.bottom),
+      );
       return { d, x: e.clientX - (r.left + r.width / 2), y: e.clientY - (r.top + r.height / 2) };
     };
     const rest = () => {
@@ -175,7 +178,9 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
       <div className="fld refs">
         <input ref={refs} type="file" name="refs" multiple hidden tabIndex={-1} />
         <input type="hidden" name="picks" value={picks.join("\n")} />
-        <span className="lbl mute">References <span>· up to {MAX_REFS}</span></span>
+        <span className="lbl mute">
+          References <span>· up to {MAX_REFS}</span>
+        </span>
         <div className="acts">
           <span ref={upw} className="upw">
             <label className={cn("btn up", over && "over", room <= 0 && "full")}>
@@ -193,7 +198,9 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
               {/* Both in one cell, so the button keeps the wider one's width; hover shows the second. */}
               <span className="swap">
                 <span>Upload references</span>
-                <span className="drag" aria-hidden="true">Drag a JPG or PNG here</span>
+                <span className="drag" aria-hidden="true">
+                  Drag a JPG or PNG here
+                </span>
               </span>
             </label>
           </span>
@@ -241,15 +248,7 @@ export function ReferencePicks({ resync, v3 }: { resync: unknown; v3?: boolean }
   );
 }
 
-function Thumb({
-  label,
-  onRemove,
-  children,
-}: {
-  label: string;
-  onRemove: () => void;
-  children: React.ReactNode;
-}) {
+function Thumb({ label, onRemove, children }: { label: string; onRemove: () => void; children: React.ReactNode }) {
   return (
     <li className="emerge group relative size-16">
       {/* The photograph clipped to its own frame, so the remove button's
@@ -322,11 +321,7 @@ function PickPanel({
               · {picks.length} picked{room <= 0 ? ", that is the most" : ""}
             </span>
           </p>
-          <button
-            type="button"
-            onClick={() => dialog.current?.close()}
-            className="label action px-5 py-2"
-          >
+          <button type="button" onClick={() => dialog.current?.close()} className="label action px-5 py-2">
             Done
           </button>
         </div>
@@ -349,75 +344,69 @@ function PickPanel({
           ))}
         </div>
         <div className="relative flex min-h-0 flex-1">
-        <div
-          ref={list}
-          onScroll={fill}
-          className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        >
-          {!groups ? (
-            <p className="label text-muted-foreground">Loading</p>
-          ) : (
-            <ul
-              // Four a row, three on a phone.
-              className="grid grid-cols-3 gap-2 sm:grid-cols-4"
-            >
-              {groups[lit]?.frames.map(([src, w, h, project]) => {
-                const n = picks.indexOf(src);
-                return (
-                  <li key={src}>
-                    <button
-                      type="button"
-                      onClick={() => toggle(src)}
-                      aria-pressed={n >= 0}
-                      aria-label={project}
-                      title={project}
-                      disabled={n < 0 && room <= 0}
-                      className={cn(
-                        "relative block w-full overflow-hidden rounded-[6px] outline-offset-2 transition-[opacity,outline-color,scale] duration-200 disabled:opacity-40",
-                        // A little larger under the hand: it can be picked.
-                        "hoverable:hover:enabled:scale-[1.03]",
-                        n >= 0 ? "outline outline-2 outline-foreground" : "outline outline-1 outline-transparent hoverable:hover:outline-border",
-                        // Sleeves are square, and shown whole.
-                        groups[lit]?.name === "Cover art" ? "aspect-square" : "aspect-[3/4]",
-                      )}
-                    >
-                      <Image
-                        src={src}
-                        alt=""
-                        width={w}
-                        height={h}
-                        sizes="160px"
-                        loading="lazy"
-                        className="size-full object-cover"
-                      />
-                      {n >= 0 ? (
-                        <span className="label absolute right-1.5 top-1.5 grid size-6 place-items-center rounded-full bg-foreground text-background">
-                          {n + 1}
-                        </span>
-                      ) : null}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
-        </div>
-        {/* The page's rail, stood upright: a hairline track, the ink
+          <div
+            ref={list}
+            onScroll={fill}
+            className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {!groups ? (
+              <p className="label text-muted-foreground">Loading</p>
+            ) : (
+              <ul
+                // Four a row, three on a phone.
+                className="grid grid-cols-3 gap-2 sm:grid-cols-4"
+              >
+                {groups[lit]?.frames.map(([src, w, h, project]) => {
+                  const n = picks.indexOf(src);
+                  return (
+                    <li key={src}>
+                      <button
+                        type="button"
+                        onClick={() => toggle(src)}
+                        aria-pressed={n >= 0}
+                        aria-label={project}
+                        title={project}
+                        disabled={n < 0 && room <= 0}
+                        className={cn(
+                          "relative block w-full overflow-hidden rounded-[6px] outline-offset-2 transition-[opacity,outline-color,scale] duration-200 disabled:opacity-40",
+                          // A little larger under the hand: it can be picked.
+                          "hoverable:hover:enabled:scale-[1.03]",
+                          n >= 0
+                            ? "outline outline-2 outline-foreground"
+                            : "outline outline-1 outline-transparent hoverable:hover:outline-border",
+                          // Sleeves are square, and shown whole.
+                          groups[lit]?.name === "Cover art" ? "aspect-square" : "aspect-[3/4]",
+                        )}
+                      >
+                        <Image src={src} alt="" width={w} height={h} sizes="160px" loading="lazy" className="size-full object-cover" />
+                        {n >= 0 ? (
+                          <span className="label absolute right-1.5 top-1.5 grid size-6 place-items-center rounded-full bg-foreground text-background">
+                            {n + 1}
+                          </span>
+                        ) : null}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
+          {/* The page's rail, stood upright: a hairline track, the ink
             filling down it as the photographs go by. Pressed or
             dragged, it scrolls there. */}
-        <div
-          aria-hidden
-          onPointerDown={(e) => {
-            e.currentTarget.setPointerCapture(e.pointerId);
-            seek(e);
-          }}
-          onPointerMove={(e) => e.buttons && seek(e)}
-          className="absolute bottom-6 right-2 top-0 w-3 cursor-pointer touch-none"
-        >
-          <span className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-[color-mix(in_oklab,var(--foreground)_20%,var(--background))]">
-            <span ref={bar} className="block w-full rounded-full bg-foreground" style={{ height: "0%" }} />
-          </span>
-        </div>
+          <div
+            aria-hidden
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId);
+              seek(e);
+            }}
+            onPointerMove={(e) => e.buttons && seek(e)}
+            className="absolute bottom-6 right-2 top-0 w-3 cursor-pointer touch-none"
+          >
+            <span className="absolute inset-y-0 left-1/2 w-[3px] -translate-x-1/2 rounded-full bg-[color-mix(in_oklab,var(--foreground)_20%,var(--background))]">
+              <span ref={bar} className="block w-full rounded-full bg-foreground" style={{ height: "0%" }} />
+            </span>
+          </div>
         </div>
       </div>
     </dialog>

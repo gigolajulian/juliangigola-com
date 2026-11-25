@@ -4,16 +4,7 @@ import { CoverPage } from "@/components/cover/cover-page";
 import { SESSION_SEO } from "@/lib/og/seo";
 import { projectFacts, shareMeta } from "@/lib/og/share";
 import { ProjectView } from "@/components/portfolio/project";
-import {
-  LINKABLE,
-  UNLISTED,
-  COVER_ART,
-  COVER_RELEASES,
-  getProject,
-  isDisciplineGallery,
-  nextAfter,
-  nextDiscipline,
-} from "@/lib/work/work";
+import { LINKABLE, UNLISTED, COVER_ART, COVER_RELEASES, getProject, isDisciplineGallery, nextAfter, nextDiscipline } from "@/lib/work/work";
 
 /* ── the case study ───────────────────────────────────────────────
  * The old site rendered a project as a grid of thumbnails with the credits
@@ -31,9 +22,7 @@ export function generateStaticParams() {
   return LINKABLE.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata(
-  props: PageProps<"/portfolio/[slug]">,
-): Promise<Metadata> {
+export async function generateMetadata(props: PageProps<"/portfolio/[slug]">): Promise<Metadata> {
   const { slug } = await props.params;
   const project = getProject(slug);
   if (!project) return {};
@@ -56,9 +45,7 @@ export async function generateMetadata(
        off the site and can be found on it anyway - by the one listing he
        does not control. `follow`, because the links out of it are to work
        that is published. */
-    ...(UNLISTED.has(project.slug)
-      ? { robots: { index: false, follow: true } }
-      : {}),
+    ...(UNLISTED.has(project.slug) ? { robots: { index: false, follow: true } } : {}),
     openGraph: card.openGraph,
     twitter: card.twitter,
   };
@@ -91,7 +78,11 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
     : (() => {
         const next = nextAfter(project);
         return next
-          ? { href: `/portfolio/${next.slug}`, name: `Next: ${next.name}`, cover: next.images.find((f) => f.width <= f.height) ?? next.images[0] }
+          ? {
+              href: `/portfolio/${next.slug}`,
+              name: `Next: ${next.name}`,
+              cover: next.images.find((f) => f.width <= f.height) ?? next.images[0],
+            }
           : undefined;
       })();
 

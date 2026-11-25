@@ -12,15 +12,7 @@ export const duration = (min: number) => (min >= 120 ? `${min / 60} hours` : `${
 export type Window = readonly [number, number];
 
 /** Open hours per weekday (0 Sunday), minutes after midnight Pacific; null is closed. */
-export const HOURS: (Window | null)[] = [
-  [600, 1140],
-  null,
-  null,
-  [600, 1140],
-  [600, 1140],
-  [600, 1140],
-  [600, 1140],
-];
+export const HOURS: (Window | null)[] = [[600, 1140], null, null, [600, 1140], [600, 1140], [600, 1140], [600, 1140]];
 
 /** The week, plus dates ("2026-11-10") that differ from it: a window, or null for closed. */
 export type Hours = { week: (Window | null)[]; days?: Record<string, Window | null> };

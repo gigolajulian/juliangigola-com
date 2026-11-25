@@ -4,7 +4,8 @@ import { builds, FLY, gather, slides, streams } from "@/lib/motion/gather";
 /* Where each frame flies in from, and the flight home handed to GSAP.
    The window and the elements are plain stand-ins. */
 
-const rect = (left: number, top: number, w = 100, h = 100) => ({ left, top, width: w, height: h, right: left + w, bottom: top + h }) as DOMRect;
+const rect = (left: number, top: number, w = 100, h = 100) =>
+  ({ left, top, width: w, height: h, right: left + w, bottom: top + h }) as DOMRect;
 const el = (col?: number, order = 0) => {
   const style: Record<string, string> = {};
   return {

@@ -60,8 +60,7 @@ try {
   const overrides = JSON.parse(readFileSync("content/projects.json", "utf8"));
   const featured = new Set(site.featured ?? []);
 
-  const thumb = async (path) =>
-    sharp(path).resize(BLUR_WIDTH, BLUR_WIDTH, { fit: "fill" }).greyscale().raw().toBuffer();
+  const thumb = async (path) => sharp(path).resize(BLUR_WIDTH, BLUR_WIDTH, { fit: "fill" }).greyscale().raw().toBuffer();
   const distance = (a, b) => a.reduce((s, v, i) => s + Math.abs(v - b[i]), 0) / a.length;
 
   const sized = {};
@@ -72,10 +71,7 @@ try {
   const cut = async (source, src, w) => {
     const target = onDisk(variant(src, w));
     if (!fresh(source, target)) {
-      await sharp(source)
-        .resize({ width: w, withoutEnlargement: true })
-        .jpeg({ quality: 82, mozjpeg: true })
-        .toFile(target);
+      await sharp(source).resize({ width: w, withoutEnlargement: true }).jpeg({ quality: 82, mozjpeg: true }).toFile(target);
       made += 1;
     }
     (sized[src] ??= []).push(w);
@@ -86,9 +82,7 @@ try {
      retina cover as much as a harvested one does. */
   for (const project of [...PROJECTS, ...(overrides.projects ?? [])]) {
     const sequence = overrides.frames?.[project.slug];
-    const images = sequence
-      ? sequence.map((s) => project.images.find((f) => f.src === s)).filter(Boolean)
-      : project.images;
+    const images = sequence ? sequence.map((s) => project.images.find((f) => f.src === s)).filter(Boolean) : project.images;
     const cover = project.cover?.src;
     if (!cover || !existsSync(onDisk(cover))) continue;
 

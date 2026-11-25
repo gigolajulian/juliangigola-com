@@ -40,12 +40,20 @@ import { DAY_MS } from "@/lib/time-zone";
 
 const CLASSIC = "/admin";
 // The small copy the client's grid uses: every frame on the desk is a thumbnail. Once delivered the proof copies are gone: the finals' small copies stand in.
-const frame = (p: ProofRow, id: string) => (p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${publicId(p)}/f/${id}?w=${THUMB_W}`);
+const frame = (p: ProofRow, id: string) =>
+  p.deliveredAt ? `/delivery/${publicId(p)}/f/${id}?w=${THUMB_W}` : `/proof/${publicId(p)}/f/${id}?w=${THUMB_W}`;
 const first = (p: ProofRow) => (p.deliveredAt ? p.finals?.[0] : p.frames[0]);
 /** A gallery row's line: frames, finals, addresses seen and when it was sent. */
 const rowLine = (p: ProofRow) => {
   const n = p.viewers ? Object.keys(p.viewers).length : 0;
-  return [`${p.frames.length} frames`, p.finals?.length ? `${p.finals.length} finals` : null, p.viewers ? `${n} ${n === 1 ? "email" : "emails"}` : null, p.sentAt ? `sent ${stampPT(p.sentAt)}` : null].filter(Boolean).join(" · ");
+  return [
+    `${p.frames.length} frames`,
+    p.finals?.length ? `${p.finals.length} finals` : null,
+    p.viewers ? `${n} ${n === 1 ? "email" : "emails"}` : null,
+    p.sentAt ? `sent ${stampPT(p.sentAt)}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 };
 
 function Tile({ k, v }: { k: string; v: string }) {
@@ -53,7 +61,9 @@ function Tile({ k, v }: { k: string; v: string }) {
     <Card variant="muted" padding={3} width="100%">
       <VStack gap={1}>
         <Text type="supporting">{k}</Text>
-        <Text type="large" weight="semibold" hasTabularNumbers>{v}</Text>
+        <Text type="large" weight="semibold" hasTabularNumbers>
+          {v}
+        </Text>
       </VStack>
     </Card>
   );
@@ -68,7 +78,9 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   const [making, setMaking] = React.useState(false);
   const [wide, setWide] = React.useState(false);
   const load = React.useCallback(() => {
-    proofApi<{ proofs: ProofRow[] }>({ path: "?list" }).then((o) => setList(o.proofs)).catch((e: unknown) => setError(loadErrorText(e)));
+    proofApi<{ proofs: ProofRow[] }>({ path: "/list" })
+      .then((o) => setList(o.proofs))
+      .catch((e: unknown) => setError(loadErrorText(e)));
   }, []);
   React.useEffect(load, [load]);
   // Same as the leads desk: follow html[data-theme], light only when it says light, read before Theme mounts.
@@ -117,9 +129,20 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
   };
 
   const nav = (
-    <SideNav header={<SideNavHeading heading="Proofs" subheading="Julian Gigola" />} topContent={<Button label="New gallery" variant="primary" width="100%" onClick={startNew} />}>
+    <SideNav
+      header={<SideNavHeading heading="Proofs" subheading="Julian Gigola" />}
+      topContent={<Button label="New gallery" variant="primary" width="100%" onClick={startNew} />}
+    >
       <SideNavSection title="Desk" isHeaderHidden>
-        <SideNavItem label="Galleries" isSelected endContent={<Text type="supporting" hasTabularNumbers>{open.length}</Text>} />
+        <SideNavItem
+          label="Galleries"
+          isSelected
+          endContent={
+            <Text type="supporting" hasTabularNumbers>
+              {open.length}
+            </Text>
+          }
+        />
         <SideNavItem label="Leads" href="/admin/leads" />
       </SideNavSection>
       <SideNavSection title="Setup" isHeaderHidden>
@@ -132,7 +155,9 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
     <VStack gap={4}>
       <VStack gap={1}>
         <Text type="supporting">New galleries arrive from Lightroom Publish</Text>
-        <Heading level={1}>{list ? (waiting ? `${waiting} waiting on clients` : "Nothing waiting on clients") : "Loading galleries"}</Heading>
+        <Heading level={1}>
+          {list ? (waiting ? `${waiting} waiting on clients` : "Nothing waiting on clients") : "Loading galleries"}
+        </Heading>
       </VStack>
       {error ? <Text color="secondary">{error}</Text> : null}
       <HStack gap={wide ? 3 : 2}>
@@ -155,30 +180,62 @@ export function ProofsDesk({ embedded = false, initial }: { embedded?: boolean; 
           />
         ))}
       </List>
-      {list && !all.length ? <Text type="supporting">No galleries yet. Publish a collection from Lightroom under Client proofs.</Text> : null}
+      {list && !all.length ? (
+        <Text type="supporting">No galleries yet. Publish a collection from Lightroom under Client proofs.</Text>
+      ) : null}
     </VStack>
   );
 
-  const detail = cur ? <Gallery key={cur.token} p={cur} changed={load} onBack={wide ? undefined : () => setSel(null)} gone={closed} /> : null;
+  const detail = cur ? (
+    <Gallery key={cur.token} p={cur} changed={load} onBack={wide ? undefined : () => setSel(null)} gone={closed} />
+  ) : null;
 
   const body = wide ? (
     <Layout
       height="fill"
       start={embedded ? undefined : nav}
-      content={<LayoutContent padding={6} label="Galleries">{galleries}</LayoutContent>}
-      end={<LayoutPanel width={560} padding={6} hasDivider label="Gallery">{detail ?? <Text type="supporting">Pick a gallery to see it here.</Text>}</LayoutPanel>}
+      content={
+        <LayoutContent padding={6} label="Galleries">
+          {galleries}
+        </LayoutContent>
+      }
+      end={
+        <LayoutPanel width={560} padding={6} hasDivider label="Gallery">
+          {detail ?? <Text type="supporting">Pick a gallery to see it here.</Text>}
+        </LayoutPanel>
+      }
     />
   ) : (
     <VStack gap={4}>{detail ?? galleries}</VStack>
   );
-  if (embedded) return wide ? body : <Layout height="fill" content={<LayoutContent padding={4} label="Proofs">{body}</LayoutContent>} />;
+  if (embedded)
+    return wide ? (
+      body
+    ) : (
+      <Layout
+        height="fill"
+        content={
+          <LayoutContent padding={4} label="Proofs">
+            {body}
+          </LayoutContent>
+        }
+      />
+    );
   if (!mode) return null;
   return (
     <Theme theme={neutralTheme} mode={mode}>
       {/* The site sets mono capitals everywhere; Astryx sets its own type here, in the site's text face. */}
       {/* The site's global `button, ::placeholder` caps (and h2, h3) reach Astryx buttons, rows and titles: here, not in globals.css, so public CSS stays the same. */}
       <style>{`[data-astryx-desk="proofs"] :is(button,h2,h3),[data-astryx-desk="proofs"] ::placeholder{text-transform:none;letter-spacing:normal}`}</style>
-      <div data-astryx-desk="proofs" style={{ height: wide ? "calc(100dvh - 48px)" : undefined, textTransform: "none", letterSpacing: "normal", ["--font-family-body" as string]: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)' }}>
+      <div
+        data-astryx-desk="proofs"
+        style={{
+          height: wide ? "calc(100dvh - 48px)" : undefined,
+          textTransform: "none",
+          letterSpacing: "normal",
+          ["--font-family-body" as string]: 'var(--font-v2-text, "Helvetica Neue", Helvetica, Arial, sans-serif)',
+        }}
+      >
         {body}
       </div>
     </Theme>
@@ -192,7 +249,7 @@ function NewGallery({ done }: { done: (token?: string) => void }) {
   const [note, setNote] = React.useState<string | null>(null);
   const create = async () => {
     try {
-      const o = await proofApi<{ token: string }>({ method: "POST", body: JSON.stringify({ action: "create", name, email }) });
+      const o = await proofApi<{ token: string }>({ method: "POST", path: "/gallery", body: JSON.stringify({ name, email }) });
       done(o.token);
     } catch (e) {
       setNote(errorText(e));
@@ -208,7 +265,11 @@ function NewGallery({ done }: { done: (token?: string) => void }) {
           <Button label="Create" variant="primary" isDisabled={!name.trim()} clickAction={create} />
           <Button label="Cancel" variant="ghost" onClick={() => done()} />
         </HStack>
-        {note ? <Text type="supporting" role="status">{note}</Text> : null}
+        {note ? (
+          <Text type="supporting" role="status">
+            {note}
+          </Text>
+        ) : null}
       </VStack>
     </Card>
   );
@@ -224,8 +285,17 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const [finalsSubject, setFinalsSubject] = React.useState("Your photos are ready");
   const [sub, setSub] = React.useState(p.subhead ?? "");
   const [tab, setTab] = React.useState<"gallery" | "activity" | "selects">("gallery");
-  const [set, setSet] = React.useState({ balance: String(p.balance ?? 0), included: String(p.included), price: String(p.price), days: String(p.days) });
-  const changedSet = set.balance !== String(p.balance ?? 0) || set.included !== String(p.included) || set.price !== String(p.price) || set.days !== String(p.days);
+  const [set, setSet] = React.useState({
+    balance: String(p.balance ?? 0),
+    included: String(p.included),
+    price: String(p.price),
+    days: String(p.days),
+  });
+  const changedSet =
+    set.balance !== String(p.balance ?? 0) ||
+    set.included !== String(p.included) ||
+    set.price !== String(p.price) ||
+    set.days !== String(p.days);
   const people = Object.keys(p.viewers ?? {}).length;
   const x = extraFrames(p.selects.length, p.included, p.price);
   const thumbs = (p.deliveredAt ? (p.finals ?? []).map((f) => f.id) : p.submittedAt ? p.selects : p.frames.map((f) => f.id)).slice(0, 6);
@@ -238,16 +308,21 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const who = viewer?.split(/\s+/)[0] || "client";
   const left = clock && p.closesAt ? Math.max(1, Math.ceil((Date.parse(p.closesAt) - clock) / DAY_MS)) : 0;
   const closesIn = `closes in ${left} ${left === 1 ? "day" : "days"}`;
-  const nextLine = !remind ? "" : remind.state === "sent" ? `Reminded ${stampPT(remind.at)}. No more reminders for this stage.`
-    : remind.state === "locked" ? `The reminder opens ${stampPT(remind.opensAt)}, in the last 5 days.`
-    : remind.stage === "finals" ? `Not downloaded yet. The delivery ${closesIn}.`
-    : `${viewer ? who : "The client"} has picked ${p.viewers?.[(p.email ?? "").trim().toLowerCase()]?.picks.length ?? 0} of ${p.included}. The gallery ${closesIn}.`;
+  const nextLine = !remind
+    ? ""
+    : remind.state === "sent"
+      ? `Reminded ${stampPT(remind.at)}. No more reminders for this stage.`
+      : remind.state === "locked"
+        ? `The reminder opens ${stampPT(remind.opensAt)}, in the last 5 days.`
+        : remind.stage === "finals"
+          ? `Not downloaded yet. The delivery ${closesIn}.`
+          : `${viewer ? who : "The client"} has picked ${p.viewers?.[(p.email ?? "").trim().toLowerCase()]?.picks.length ?? 0} of ${p.included}. The gallery ${closesIn}.`;
 
   // Same calls and messages as the classic ProofCard.
   const act = async (body: Record<string, unknown>, method = "POST", done?: string) => {
     setNote(null);
     try {
-      await proofApi({ method, body: JSON.stringify({ token: p.token, ...body }) });
+      await proofApi({ method, path: method === "PATCH" ? "/gallery" : "/action", body: JSON.stringify({ token: p.token, ...body }) });
       if (done) setNote(done);
       setPreview(null);
       changed();
@@ -257,7 +332,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   };
   const showPreview = async () => {
     try {
-      const o = await proofApi<{ html: string; subject: string }>({ path: `?preview=${p.token}` });
+      const o = await proofApi<{ html: string; subject: string }>({ path: `/preview?token=${p.token}` });
       setPreview(o.html);
       setSubject(o.subject);
     } catch (e) {
@@ -267,7 +342,7 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
   const showReminder = async () => {
     setNote(null);
     try {
-      setReminder(await proofApi<{ html: string; subject: string; to: string; cc: string[] }>({ path: `?remind=${p.token}` }));
+      setReminder(await proofApi<{ html: string; subject: string; to: string; cc: string[] }>({ path: `/remind?token=${p.token}` }));
     } catch (e) {
       setNote(errorText(e));
     }
@@ -281,22 +356,28 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
     }
   };
   const reopen = () => {
-    if (confirm(`Reopen "${p.name}"? ${p.email ?? "The client"} can change the selects they sent, and Lightroom pulls them again.`)) return act({ action: "reopen" }, "POST", "Reopened. They can change their selects.");
+    if (confirm(`Reopen "${p.name}"? ${p.email ?? "The client"} can change the selects they sent, and Lightroom pulls them again.`))
+      return act({ action: "reopen" }, "POST", "Reopened. They can change their selects.");
   };
   const relink = () => {
-    if (confirm(`Give "${p.name}" a new link? The old link stops working. Nothing is mailed: send the new one yourself.`)) return act({ action: "relink" }, "POST", "New link made. Copy it to send.");
+    if (confirm(`Give "${p.name}" a new link? The old link stops working. Nothing is mailed: send the new one yourself.`))
+      return act({ action: "relink" }, "POST", "New link made. Copy it to send.");
   };
   const sendReminder = () => act({ action: "remind" }, "POST", "Reminder sent.").then(() => setReminder(null));
   const saveSettings = () => act({ balance: set.balance, included: set.included, price: set.price, days: set.days }, "PATCH", "Saved.");
   const savePass = () => act({ password: pass }, "PATCH", "Password saved.").then(() => setPass(""));
   const send = () => act({ action: "send", subject }, "POST", "Sent.");
   const sendFinals = () =>
-    confirm(`Send ${p.finals!.length} finals to ${p.email}? The gallery becomes the delivery, open 60 days, and the proof previews are removed.`) ? act({ action: "deliver", subject: finalsSubject }, "POST", "Finals sent.") : undefined;
+    confirm(
+      `Send ${p.finals!.length} finals to ${p.email}? The gallery becomes the delivery, open 60 days, and the proof previews are removed.`,
+    )
+      ? act({ action: "deliver", subject: finalsSubject }, "POST", "Finals sent.")
+      : undefined;
   // Close: only a draft nobody has been sent, so a client's gallery can never vanish from here. Frames are web previews, never originals.
   const close = async () => {
     if (!confirm(`Close the draft "${p.name}"? Its web previews are removed. Nothing in Lightroom changes.`)) return;
     try {
-      await proofApi({ method: "DELETE", path: `?token=${p.token}` });
+      await proofApi({ method: "DELETE", path: `/gallery?token=${p.token}` });
       gone();
     } catch (e) {
       setNote(errorText(e));
@@ -314,17 +395,29 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
         <Timeline p={p} />
         {remind && remind.state !== "never" ? (
           <HStack gap={3} vAlign="center">
-            <div style={{ flex: 1, minWidth: 0 }}><Text type="supporting">{nextLine}</Text></div>
-            {remind.state === "ready" && !reminder ? <Button label={`Remind ${who}`} variant="primary" size="sm" clickAction={showReminder} /> : null}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <Text type="supporting">{nextLine}</Text>
+            </div>
+            {remind.state === "ready" && !reminder ? (
+              <Button label={`Remind ${who}`} variant="primary" size="sm" clickAction={showReminder} />
+            ) : null}
             {remind.state === "locked" ? <Button label={`Remind ${who}`} size="sm" isDisabled /> : null}
           </HStack>
         ) : null}
         {reminder ? (
           <Card variant="muted" padding={3} width="100%">
             <VStack gap={2}>
-              <Text type="supporting">To {reminder.to}{reminder.cc.length ? `, copy to ${reminder.cc.join(", ")}` : ""}. One reminder per stage: after this one, no more.</Text>
+              <Text type="supporting">
+                To {reminder.to}
+                {reminder.cc.length ? `, copy to ${reminder.cc.join(", ")}` : ""}. One reminder per stage: after this one, no more.
+              </Text>
               <Text weight="semibold">{reminder.subject}</Text>
-              <iframe title="Reminder preview" srcDoc={reminder.html} sandbox="" style={{ height: 380, width: "100%", border: 0, borderRadius: 8, background: "#fff" }} />
+              <iframe
+                title="Reminder preview"
+                srcDoc={reminder.html}
+                sandbox=""
+                style={{ height: 380, width: "100%", border: 0, borderRadius: 8, background: "#fff" }}
+              />
               <HStack gap={2}>
                 <Button label="Send reminder" variant="primary" clickAction={sendReminder} />
                 <Button label="Cancel" variant="ghost" onClick={() => setReminder(null)} />
@@ -360,9 +453,21 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
           <MetadataList>
             <MetadataListItem label="Draft">{p.createdAt ? stampPT(p.createdAt) : "waiting"}</MetadataListItem>
             <MetadataListItem label="Sent">{p.sentAt ? `${stampPT(p.sentAt)} to ${p.email}` : "Not sent"}</MetadataListItem>
-            <MetadataListItem label="Opened">{p.firstViewAt ? `${stampPT(p.firstViewAt)} · ${p.views} ${p.views === 1 ? "view" : "views"}` : "Not opened"}</MetadataListItem>
-            <MetadataListItem label="Selects in">{p.submittedAt ? `${stampPT(p.submittedAt)} · ${p.selects.length}${x.n ? `, ${x.n} extra` : ""}` : `${p.selects.length} selected so far`}</MetadataListItem>
-            {x.n || p.paid || p.balance ? <MetadataListItem label="Paid">{p.paid ? `$${(p.paid.amount / 100).toFixed(2)} · Stripe${p.paid.pending ? " · bank, clearing" : ""}${p.paid.failed ? " · bank payment failed, follow up" : ""}` : "Not paid"}</MetadataListItem> : null}
+            <MetadataListItem label="Opened">
+              {p.firstViewAt ? `${stampPT(p.firstViewAt)} · ${p.views} ${p.views === 1 ? "view" : "views"}` : "Not opened"}
+            </MetadataListItem>
+            <MetadataListItem label="Selects in">
+              {p.submittedAt
+                ? `${stampPT(p.submittedAt)} · ${p.selects.length}${x.n ? `, ${x.n} extra` : ""}`
+                : `${p.selects.length} selected so far`}
+            </MetadataListItem>
+            {x.n || p.paid || p.balance ? (
+              <MetadataListItem label="Paid">
+                {p.paid
+                  ? `$${(p.paid.amount / 100).toFixed(2)} · Stripe${p.paid.pending ? " · bank, clearing" : ""}${p.paid.failed ? " · bank payment failed, follow up" : ""}`
+                  : "Not paid"}
+              </MetadataListItem>
+            ) : null}
             <MetadataListItem label="In Lightroom">{p.pulledAt ? stampPT(p.pulledAt) : "waiting"}</MetadataListItem>
           </MetadataList>
           <HStack gap={2} vAlign="end">
@@ -370,25 +475,74 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
             {email !== (p.email ?? "") ? <Button label="Save" clickAction={() => act({ email }, "PATCH", "Saved.")} /> : null}
           </HStack>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 12 }}>
-            {([["balance", "Shoot balance, $"], ["included", "Included frames"], ["price", "Each extra, $"], ["days", p.sentAt ? "Days open (set at send)" : "Days open once sent"]] as const).map(([k, label]) => (
-              <TextInput key={k} label={label} value={set[k]} isDisabled={k === "days" && !!p.sentAt} onChange={(v) => setSet((o) => ({ ...o, [k]: v }))} />
+            {(
+              [
+                ["balance", "Shoot balance, $"],
+                ["included", "Included frames"],
+                ["price", "Each extra, $"],
+                ["days", p.sentAt ? "Days open (set at send)" : "Days open once sent"],
+              ] as const
+            ).map(([k, label]) => (
+              <TextInput
+                key={k}
+                label={label}
+                value={set[k]}
+                isDisabled={k === "days" && !!p.sentAt}
+                onChange={(v) => setSet((o) => ({ ...o, [k]: v }))}
+              />
             ))}
           </div>
           {changedSet ? <Button label="Save" clickAction={saveSettings} /> : null}
-          <Switch label="Online" description="Off: the gallery, its photos and downloads say offline at once" value={!p.offline} onChange={(on) => act({ offline: !on }, "PATCH", on ? "Online." : "Offline.")} />
+          <Switch
+            label="Online"
+            description="Off: the gallery, its photos and downloads say offline at once"
+            value={!p.offline}
+            onChange={(on) => act({ offline: !on }, "PATCH", on ? "Online." : "Offline.")}
+          />
           <HStack gap={2} vAlign="end">
-            <TextInput label={p.hasPass ? "Password, set" : "Password"} isOptional type="password" value={pass} onChange={setPass} placeholder={p.hasPass ? "Type a new one to change it" : "None: anyone with the link"} />
+            <TextInput
+              label={p.hasPass ? "Password, set" : "Password"}
+              isOptional
+              type="password"
+              value={pass}
+              onChange={setPass}
+              placeholder={p.hasPass ? "Type a new one to change it" : "None: anyone with the link"}
+            />
             {pass ? <Button label="Save" clickAction={savePass} /> : null}
-            {p.hasPass && !pass ? <Button label="Remove" variant="ghost" clickAction={() => act({ password: "" }, "PATCH", "Password removed.")} /> : null}
+            {p.hasPass && !pass ? (
+              <Button label="Remove" variant="ghost" clickAction={() => act({ password: "" }, "PATCH", "Password removed.")} />
+            ) : null}
           </HStack>
           <HStack gap={2} vAlign="end">
             <TextInput label="Gate subheading" isOptional value={sub} onChange={setSub} placeholder="Client name or shoot date" />
-            {sub !== (p.subhead ?? "") ? <Button label="Save" clickAction={() => act({ subhead: sub }, "PATCH", "Subheading saved.")} /> : null}
+            {sub !== (p.subhead ?? "") ? (
+              <Button label="Save" clickAction={() => act({ subhead: sub }, "PATCH", "Subheading saved.")} />
+            ) : null}
           </HStack>
-          <Switch label="File names on thumbnails" description="The client sees each Lightroom file name under its photo" value={!!p.labels} onChange={(on) => act({ labels: on }, "PATCH", on ? "File names on." : "File names off.")} />
-          <Selector label="Notifications" size="sm" value={p.notify ?? "selects"} onChange={(v) => act({ notify: v }, "PATCH", "Notifications saved.")}
-            options={[{ value: "each", label: "Each action as it happens" }, { value: "daily", label: "Daily summary" }, { value: "selects", label: "Selects in only" }, { value: "off", label: "Off" }]} />
-          <Switch label="Watermark" description="Julian Gigola in the bottom third of every frame" value={!!p.watermark} onChange={(on) => act({ watermark: on }, "PATCH", on ? "Watermark on." : "Watermark off.")} />
+          <Switch
+            label="File names on thumbnails"
+            description="The client sees each Lightroom file name under its photo"
+            value={!!p.labels}
+            onChange={(on) => act({ labels: on }, "PATCH", on ? "File names on." : "File names off.")}
+          />
+          <Selector
+            label="Notifications"
+            size="sm"
+            value={p.notify ?? "selects"}
+            onChange={(v) => act({ notify: v }, "PATCH", "Notifications saved.")}
+            options={[
+              { value: "each", label: "Each action as it happens" },
+              { value: "daily", label: "Daily summary" },
+              { value: "selects", label: "Selects in only" },
+              { value: "off", label: "Off" },
+            ]}
+          />
+          <Switch
+            label="Watermark"
+            description="Julian Gigola in the bottom third of every frame"
+            value={!!p.watermark}
+            onChange={(on) => act({ watermark: on }, "PATCH", on ? "Watermark on." : "Watermark off.")}
+          />
           <LinkPreview p={p} save={(card) => act({ card }, "PATCH", card ? "Link preview saved." : "Link preview back to auto.")} />
         </VStack>
       ) : null}
@@ -399,19 +553,34 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
         p.selects.length ? (
           <VStack gap={2}>
             <Text>
-              {p.selects.length} selected{x.n ? `, ${x.n} extra` : ""}{p.paid ? `, $${(p.paid.amount / 100).toFixed(2)} paid` : ""}{p.submittedAt ? `. Sent ${stampPT(p.submittedAt)}${p.submittedBy ? ` by ${p.submittedBy}` : ""}.` : ". Not sent yet: the latest address's picks."}
+              {p.selects.length} selected{x.n ? `, ${x.n} extra` : ""}
+              {p.paid ? `, $${(p.paid.amount / 100).toFixed(2)} paid` : ""}
+              {p.submittedAt
+                ? `. Sent ${stampPT(p.submittedAt)}${p.submittedBy ? ` by ${p.submittedBy}` : ""}.`
+                : ". Not sent yet: the latest address's picks."}
             </Text>
             <List hasDividers>
-              {p.selects.map((id) => <ListItem key={id} startContent={<Thumbnail src={frame(p, id)} alt="" label={file(id)} />} label={file(id)} description={p.notes[id]} />)}
+              {p.selects.map((id) => (
+                <ListItem
+                  key={id}
+                  startContent={<Thumbnail src={frame(p, id)} alt="" label={file(id)} />}
+                  label={file(id)}
+                  description={p.notes[id]}
+                />
+              ))}
             </List>
             {p.message ? <Text color="secondary">&ldquo;{p.message}&rdquo;</Text> : null}
           </VStack>
-        ) : <Text type="supporting">No selects yet.</Text>
+        ) : (
+          <Text type="supporting">No selects yet.</Text>
+        )
       ) : null}
 
       <Card variant="muted" padding={3} width="100%">
         <HStack gap={2} vAlign="center">
-          <div style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}><Text type="supporting">{p.url.replace(/^https?:\/\//, "")}</Text></div>
+          <div style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            <Text type="supporting">{p.url.replace(/^https?:\/\//, "")}</Text>
+          </div>
           <Button label="Copy link" size="sm" variant="ghost" onClick={() => copy(p.url, "Link")} />
           <Button label="New link" size="sm" variant="ghost" clickAction={relink} />
         </HStack>
@@ -421,24 +590,43 @@ function Gallery({ p, changed, onBack, gone }: { p: ProofRow; changed: () => voi
         <VStack gap={2}>
           <Text type="supporting">To {p.email}</Text>
           <TextInput label="Subject" value={subject} onChange={setSubject} />
-          <iframe title="Email preview" srcDoc={preview} sandbox="" style={{ height: 560, width: "100%", border: 0, borderRadius: 8, background: "#fff" }} />
+          <iframe
+            title="Email preview"
+            srcDoc={preview}
+            sandbox=""
+            style={{ height: 560, width: "100%", border: 0, borderRadius: 8, background: "#fff" }}
+          />
         </VStack>
       ) : null}
 
-      {p.finals?.length && !p.deliveredAt ? <TextInput label="Finals mail subject" value={finalsSubject} onChange={setFinalsSubject} /> : null}
+      {p.finals?.length && !p.deliveredAt ? (
+        <TextInput label="Finals mail subject" value={finalsSubject} onChange={setFinalsSubject} />
+      ) : null}
       <HStack gap={2} wrap="wrap">
-        {!p.sentAt && !preview ? <Button label="Preview email" variant="primary" isDisabled={!p.email || !p.frames.length} clickAction={showPreview} /> : null}
+        {!p.sentAt && !preview ? (
+          <Button label="Preview email" variant="primary" isDisabled={!p.email || !p.frames.length} clickAction={showPreview} />
+        ) : null}
         {!p.sentAt && preview ? <Button label={`Send to ${p.email}`} variant="primary" clickAction={send} /> : null}
-        {p.finals?.length && !p.deliveredAt ? <Button label={`Send finals to ${p.email ?? "…"}`} variant="primary" isDisabled={!p.email} clickAction={sendFinals} /> : null}
-        {(p.sentAt && !p.submittedAt) || p.deliveredAt ? <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} /> : null}
+        {p.finals?.length && !p.deliveredAt ? (
+          <Button label={`Send finals to ${p.email ?? "…"}`} variant="primary" isDisabled={!p.email} clickAction={sendFinals} />
+        ) : null}
+        {(p.sentAt && !p.submittedAt) || p.deliveredAt ? (
+          <Button label="Extend 7 days" clickAction={() => act({ action: "extend", days: 7 }, "POST", "Seven more days.")} />
+        ) : null}
         {p.submittedAt ? <Button label="Copy file names" onClick={() => copy(p.selects.map(file).join("\n"), "File names")} /> : null}
         {p.submittedAt ? <Button label="Reopen for changes" clickAction={reopen} /> : null}
         {/* Opens Lightroom (plugin 1.2.9, `Link.lua`) and runs Sync with proof on this gallery only. */}
-        {p.selects.length ? <Button label="Sync in Lightroom" href={`lightroom://com.juliangigola.export/sync?token=${encodeURIComponent(p.token)}`} /> : null}
+        {p.selects.length ? (
+          <Button label="Sync in Lightroom" href={`lightroom://com.juliangigola.export/sync?token=${encodeURIComponent(p.token)}`} />
+        ) : null}
         <Button label="Open gallery" href={p.url} target="_blank" rel="noreferrer" />
         {!p.sentAt ? <Button label="Close draft" variant="destructive" clickAction={close} /> : null}
       </HStack>
-      {note ? <Text type="supporting" role="status">{note}</Text> : null}
+      {note ? (
+        <Text type="supporting" role="status">
+          {note}
+        </Text>
+      ) : null}
     </VStack>
   );
 }
@@ -450,7 +638,12 @@ function LinkPreview({ p, save }: { p: ProofRow; save: (card: CardCrop | null) =
   // Behind a button: the card is drawn on first fetch, so nothing loads until he asks.
   const [shown, setShown] = React.useState(false);
   if (!f) return null;
-  if (!shown) return <HStack><Button label="Link preview" size="sm" variant="ghost" onClick={() => setShown(true)} /></HStack>;
+  if (!shown)
+    return (
+      <HStack>
+        <Button label="Link preview" size="sm" variant="ghost" onClick={() => setShown(true)} />
+      </HStack>
+    );
   const sized = p.frames.filter((x) => x.w && x.h);
   // The card is cached an hour: a new crop is a new address.
   const v = p.card ? `${p.card.id}-${p.card.x}-${p.card.y}-${p.card.w}` : f.id;
@@ -472,16 +665,38 @@ function LinkPreview({ p, save }: { p: ProofRow; save: (card: CardCrop | null) =
       <Text type="supporting">Link preview</Text>
       {p.watermark && !p.hasPass && !pastCloseDate(p) ? (
         // eslint-disable-next-line @next/next/no-img-element -- the gallery's share card from the Worker
-        <img src={`/proof/${publicId(p)}/card?v=${v}`} alt="Link preview" style={{ width: "100%", aspectRatio: "1800 / 945", objectFit: "cover", borderRadius: 4 }} />
-      ) : <Text type="supporting">Drawn while the gallery is open, watermarked and without a password.</Text>}
+        <img
+          src={`/proof/${publicId(p)}/card?v=${v}`}
+          alt="Link preview"
+          style={{ width: "100%", aspectRatio: "1800 / 945", objectFit: "cover", borderRadius: 4 }}
+        />
+      ) : (
+        <Text type="supporting">Drawn while the gallery is open, watermarked and without a password.</Text>
+      )}
       <HStack gap={2} vAlign="end">
-        <Selector label="Frame" size="sm" value={f.id} isDisabled={!sized.length}
+        <Selector
+          label="Frame"
+          size="sm"
+          value={f.id}
+          isDisabled={!sized.length}
           onChange={pickFrame}
-          options={(sized.includes(f) ? sized : [f, ...sized]).map((x) => ({ value: x.id, label: `#${p.frames.indexOf(x) + 1} · ${x.file}` }))} />
+          options={(sized.includes(f) ? sized : [f, ...sized]).map((x) => ({
+            value: x.id,
+            label: `#${p.frames.indexOf(x) + 1} · ${x.file}`,
+          }))}
+        />
         {p.card ? <Button label="Auto" size="sm" variant="ghost" clickAction={auto} /> : null}
       </HStack>
-      <Slider label="Crop" min={0} max={100} value={Math.round(at * 100)} valueDisplay="none" isDisabled={!f.w || !f.h}
-        onChange={(n: number) => setAt(n / 100)} onChangeEnd={cropDone} />
+      <Slider
+        label="Crop"
+        min={0}
+        max={100}
+        value={Math.round(at * 100)}
+        valueDisplay="none"
+        isDisabled={!f.w || !f.h}
+        onChange={(n: number) => setAt(n / 100)}
+        onChangeEnd={cropDone}
+      />
     </VStack>
   );
 }

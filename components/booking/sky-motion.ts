@@ -20,7 +20,10 @@ export function useSkyCalendar(on: boolean, cal: React.RefObject<HTMLDivElement 
   const parts = () => {
     const body = cal.current?.closest(".f-body") ?? cal.current?.parentElement;
     // the days and the picker's blocks around them; never a block that holds another target
-    return [...(cal.current?.children ?? []), ...(body?.querySelectorAll(".cal-top, .sky-ruler, .sky-rows, .fig.scrub") ?? [])] as HTMLElement[];
+    return [
+      ...(cal.current?.children ?? []),
+      ...(body?.querySelectorAll(".cal-top, .sky-ruler, .sky-rows, .fig.scrub") ?? []),
+    ] as HTMLElement[];
   };
   const before = (dir: number) => {
     const flip = flipNow();
@@ -38,7 +41,18 @@ export function useSkyCalendar(on: boolean, cal: React.RefObject<HTMLDivElement 
     if (p.dir) {
       // the next week or month slides in from the side the arrow points to
       const op = days.map((t) => Number(getComputedStyle(t).opacity));
-      gsap.fromTo(days, { autoAlpha: 0, x: 28 * p.dir }, { autoAlpha: (i: number) => op[i], x: 0, duration: 0.5, ease: "expo.out", stagger: { each: 0.012, from: p.dir > 0 ? "start" : "end" }, clearProps: "opacity,visibility,transform" });
+      gsap.fromTo(
+        days,
+        { autoAlpha: 0, x: 28 * p.dir },
+        {
+          autoAlpha: (i: number) => op[i],
+          x: 0,
+          duration: 0.5,
+          ease: "expo.out",
+          stagger: { each: 0.012, from: p.dir > 0 ? "start" : "end" },
+          clearProps: "opacity,visibility,transform",
+        },
+      );
       return;
     }
     // New days grow out from the picked one's row, nearest first.
@@ -59,7 +73,19 @@ export function useSkyCalendar(on: boolean, cal: React.RefObject<HTMLDivElement 
       onEnter: (els) => {
         // to each day's own opacity: a closed day sits at .45, and fading it to 1 first flashed it
         const op = els.map((t) => Number(getComputedStyle(t).opacity));
-        return g.fromTo(els, { autoAlpha: 0, scale: 0.92, y: 8 }, { autoAlpha: (i: number) => op[i], scale: 1, y: 0, duration: 0.45, ease: "expo.out", stagger: (_i: number, t: Element) => near(t) * 0.035, clearProps: "opacity,visibility,transform" });
+        return g.fromTo(
+          els,
+          { autoAlpha: 0, scale: 0.92, y: 8 },
+          {
+            autoAlpha: (i: number) => op[i],
+            scale: 1,
+            y: 0,
+            duration: 0.45,
+            ease: "expo.out",
+            stagger: (_i: number, t: Element) => near(t) * 0.035,
+            clearProps: "opacity,visibility,transform",
+          },
+        );
       },
     });
   });
@@ -77,6 +103,10 @@ export function useSkyTimesIn(box: React.RefObject<HTMLDivElement | null>, day: 
     const el = box.current;
     const gsap = both();
     if (!el || !gsap || calm()) return;
-    gsap.fromTo(el.querySelectorAll("[data-slot], .rl, .grp"), { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.45, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" });
+    gsap.fromTo(
+      el.querySelectorAll("[data-slot], .rl, .grp"),
+      { autoAlpha: 0, y: 10 },
+      { autoAlpha: 1, y: 0, duration: 0.45, ease: "expo.out", stagger: 0.025, clearProps: "opacity,visibility,transform" },
+    );
   }, [day, box]);
 }

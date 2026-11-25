@@ -34,7 +34,10 @@ async function all<T extends { id: string }>(key: string, path: string): Promise
   const out: T[] = [];
   let after = "";
   for (;;) {
-    const page = (await stripe(key, `${path}${path.includes("?") ? "&" : "?"}limit=100${after ? `&starting_after=${after}` : ""}`)) as { data?: T[]; has_more?: boolean };
+    const page = (await stripe(key, `${path}${path.includes("?") ? "&" : "?"}limit=100${after ? `&starting_after=${after}` : ""}`)) as {
+      data?: T[];
+      has_more?: boolean;
+    };
     out.push(...(page.data ?? []));
     if (!page.has_more || !page.data?.length) return out;
     after = page.data[page.data.length - 1].id;
@@ -61,12 +64,21 @@ export async function importStripe(env: LeadStore, key: string, dry: boolean): P
   for (const pi of intents) {
     if (pi.metadata?.proof) continue;
     const email = payer(pi);
-    if (!email.includes("@")) { noEmail++; continue; }
+    if (!email.includes("@")) {
+      noEmail++;
+      continue;
+    }
     const deposit = isDeposit(pi);
     todo.push({
       email,
       c: {
-        event: { at: iso(pi.created), kind: "payment", ref: pi.id, note: deposit ? "Deposit" : pi.description || "Stripe", amount: (pi.amount_received ?? pi.amount ?? 0) / 100 },
+        event: {
+          at: iso(pi.created),
+          kind: "payment",
+          ref: pi.id,
+          note: deposit ? "Deposit" : pi.description || "Stripe",
+          amount: (pi.amount_received ?? pi.amount ?? 0) / 100,
+        },
         name: pi.metadata?.name || charge(pi)?.name || undefined,
         past: true,
       },
@@ -79,9 +91,24 @@ export async function importStripe(env: LeadStore, key: string, dry: boolean): P
     const email = pi ? payer(pi) : "";
     const total = (sofar.get(r.payment_intent!) ?? 0) + r.amount;
     sofar.set(r.payment_intent!, total);
-    if (!email.includes("@")) { noEmail++; continue; }
+    if (!email.includes("@")) {
+      noEmail++;
+      continue;
+    }
     const full = total >= (pi!.amount_received ?? pi!.amount ?? Infinity);
-    todo.push({ email, c: { event: { at: iso(r.created), kind: "refund", ref: full ? `refund-${r.payment_intent}` : `refund-${r.payment_intent}-${total}`, note: "Stripe", amount: r.amount / 100 }, past: true } });
+    todo.push({
+      email,
+      c: {
+        event: {
+          at: iso(r.created),
+          kind: "refund",
+          ref: full ? `refund-${r.payment_intent}` : `refund-${r.payment_intent}-${total}`,
+          note: "Stripe",
+          amount: r.amount / 100,
+        },
+        past: true,
+      },
+    });
   }
   todo.sort((a, b) => a.c.event.at.localeCompare(b.c.event.at));
 
@@ -96,7 +123,10 @@ export async function importStripe(env: LeadStore, key: string, dry: boolean): P
       had.set(id, new Set([...(await readLog(env.INBOX, seal, id)), ...(lead?.events ?? [])].map((e) => `${e.kind}|${e.ref}`)));
     }
     const sig = `${c.event.kind}|${c.event.ref}`;
-    if (had.get(id)!.has(sig)) { count.already++; continue; }
+    if (had.get(id)!.has(sig)) {
+      count.already++;
+      continue;
+    }
     had.get(id)!.add(sig);
     people.add(id);
     count[c.event.kind === "payment" ? "payments" : "refunds"]++;

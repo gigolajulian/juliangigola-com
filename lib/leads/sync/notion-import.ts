@@ -11,7 +11,6 @@ import { readLead, writeLead } from "../lead-store";
 import { isPaper, isStage, type Lead, type LeadEvent } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
 
-
 /** What the script sends per person. Strings only, cut to size here. */
 export type NotionPerson = {
   email: string;
@@ -29,7 +28,15 @@ export type NotionPerson = {
   rows: { ref: string; at: string; note: string }[];
 };
 
-export type NotionCount = { dry: boolean; created: number; filled: number; unchanged: number; gone: number; skipped: number; lines: number };
+export type NotionCount = {
+  dry: boolean;
+  created: number;
+  filled: number;
+  unchanged: number;
+  gone: number;
+  skipped: number;
+  lines: number;
+};
 
 const FIELDS = ["name", "phone", "ig", "company", "source", "kind", "notes"] as const;
 const str = (v: unknown, max: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : undefined);
@@ -43,9 +50,15 @@ export async function importNotion(kv: KV, s: Sealer, people: unknown, dry: bool
     const rows = (Array.isArray(raw?.rows) ? raw.rows : [])
       .map((r) => ({ ref: str(r?.ref, 80), at: day(r?.at), note: str(r?.note, 200) }))
       .filter((r): r is { ref: string; at: string; note: string } => !!(r.ref && r.at && r.note));
-    if (!email || !rows.length) { count.skipped++; continue; }
+    if (!email || !rows.length) {
+      count.skipped++;
+      continue;
+    }
     const id = await s.id(email);
-    if ((await Promise.all((await s.ids(email)).map((i) => kv.get(`gone:${i}`)))).some((v: unknown) => v !== null)) { count.gone++; continue; }
+    if ((await Promise.all((await s.ids(email)).map((i) => kv.get(`gone:${i}`)))).some((v: unknown) => v !== null)) {
+      count.gone++;
+      continue;
+    }
 
     const before = await readLead(kv, s, id);
     const fresh: LeadEvent[] = rows
@@ -61,11 +74,23 @@ export async function importNotion(kv: KV, s: Sealer, people: unknown, dry: bool
       const v = str(raw[f], f === "notes" ? 4000 : 200);
       // The name only replaces the bare address the lead was made with.
       const empty = f === "name" ? !lead.name || lead.name.toLowerCase() === lead.email : !lead[f];
-      if (v && empty) { lead[f] = v; changed = true; }
+      if (v && empty) {
+        lead[f] = v;
+        changed = true;
+      }
     }
-    if (lead.quote === undefined && typeof raw.quote === "number" && raw.quote > 0 && raw.quote < 1e7) { lead.quote = raw.quote; changed = true; }
-    if (!lead.contract && isPaper(raw.contract)) { lead.contract = raw.contract; changed = true; }
-    if (!changed) { count.unchanged++; continue; }
+    if (lead.quote === undefined && typeof raw.quote === "number" && raw.quote > 0 && raw.quote < 1e7) {
+      lead.quote = raw.quote;
+      changed = true;
+    }
+    if (!lead.contract && isPaper(raw.contract)) {
+      lead.contract = raw.contract;
+      changed = true;
+    }
+    if (!changed) {
+      count.unchanged++;
+      continue;
+    }
     lead.events = [...lead.events, ...fresh].sort((a, b) => a.at.localeCompare(b.at)).slice(-50);
     if (first < lead.firstAt) lead.firstAt = first;
     count[before ? "filled" : "created"]++;

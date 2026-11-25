@@ -14,7 +14,8 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 
 const SECRET = "worker-key-for-tests";
 const OAUTH = JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" });
-const call = (auth = `Bearer ${SECRET}`) => POST(new Request("https://juliangigola.com/api/leads/sheet", { method: "POST", headers: { authorization: auth } }));
+const call = (auth = `Bearer ${SECRET}`) =>
+  POST(new Request("https://juliangigola.com/api/leads/sheet", { method: "POST", headers: { authorization: auth } }));
 
 let kv: FakeKV;
 let sent: { url: string; body: string }[];
@@ -42,10 +43,16 @@ describe("POST /api/leads/sheet", () => {
   });
 
   it("makes the sheet once, copies both tabs after a change, then skips until the next one", async () => {
-    await recordLead(ctx.env as never, "a@example.com", { event: { at: "2026-11-11T10:00:00Z", kind: "inquiry", ref: "msg:a" }, name: "Ana" });
+    await recordLead(ctx.env as never, "a@example.com", {
+      event: { at: "2026-11-11T10:00:00Z", kind: "inquiry", ref: "msg:a" },
+      name: "Ana",
+    });
     expect(await kv.get(SHEET_DIRTY)).toBe("1");
     expect(await (await call()).json()).toEqual({ sheet: "synced" });
-    expect(sent.map((s) => s.url)).toEqual(["https://sheets.googleapis.com/v4/spreadsheets", "https://sheets.googleapis.com/v4/spreadsheets/S1:batchUpdate"]);
+    expect(sent.map((s) => s.url)).toEqual([
+      "https://sheets.googleapis.com/v4/spreadsheets",
+      "https://sheets.googleapis.com/v4/spreadsheets/S1:batchUpdate",
+    ]);
     const paste = JSON.parse(sent[1].body).requests.filter((r: { pasteData?: unknown }) => r.pasteData);
     expect(paste).toHaveLength(2);
     expect(paste[0].pasteData.data).toContain("a@example.com");
@@ -55,7 +62,9 @@ describe("POST /api/leads/sheet", () => {
     expect(await (await call()).json()).toEqual({ sheet: "clean" });
     expect(sent).toHaveLength(2);
 
-    await recordLead(ctx.env as never, "a@example.com", { event: { at: "2026-11-11T11:00:00Z", kind: "payment", ref: "pi_1", amount: 100 } });
+    await recordLead(ctx.env as never, "a@example.com", {
+      event: { at: "2026-11-11T11:00:00Z", kind: "payment", ref: "pi_1", amount: 100 },
+    });
     expect(await (await call()).json()).toEqual({ sheet: "synced" });
     expect(sent.map((s) => s.url).at(-1)).toBe("https://sheets.googleapis.com/v4/spreadsheets/S1:batchUpdate");
     expect(sent).toHaveLength(3);

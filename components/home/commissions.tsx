@@ -33,26 +33,41 @@ export function HomeCommissions({ frames }: { frames: HomeFrame[] }) {
   return (
     <section className="mt-comm" data-mt="comm" data-cur={cur} ref={ref}>
       <div className="mt-comm-pin">
-      <div className="mt-comm-head">
-        <h2>Commissions</h2>
-        <div className="mt-comm-now" aria-hidden>
-          <span className="lbl mt-count"><span className="ln"><span data-mt-count>{pad(cur + 1)}</span></span>/{pad(frames.length)}</span>
-          <span className="lbl mt-cur"><span className="ln"><span data-mt-name>{frames[cur].name}</span> <span className="mute">{frames[cur].meta}</span></span></span>
+        <div className="mt-comm-head">
+          <h2>Commissions</h2>
+          <div className="mt-comm-now" aria-hidden>
+            <span className="lbl mt-count">
+              <span className="ln">
+                <span data-mt-count>{pad(cur + 1)}</span>
+              </span>
+              /{pad(frames.length)}
+            </span>
+            <span className="lbl mt-cur">
+              <span className="ln">
+                <span data-mt-name>{frames[cur].name}</span> <span className="mute">{frames[cur].meta}</span>
+              </span>
+            </span>
+          </div>
         </div>
-      </div>
-      <div className="sheet mt-sheet">
-        {frames.map((f, n) => (
-          <figure key={f.src} data-i={n}>
-            <Image src={f.src} alt={f.name} fill sizes={n === 0 ? "50vw" : "25vw"} />
-            <figcaption className="lbl">
-              <span>{pad(n + 1)} <span className="nm">{f.name}</span></span>
-              <span className="mute">{f.meta}</span>
-            </figcaption>
-            <Link className="tile" href={projectHref(f.slug)} aria-label={f.name} />
-          </figure>
-        ))}
-      </div>
-      <div className="mt-comm-foot"><Link className="btn mt-comm-all" href="/portfolio">See all projects</Link></div>
+        <div className="sheet mt-sheet">
+          {frames.map((f, n) => (
+            <figure key={f.src} data-i={n}>
+              <Image src={f.src} alt={f.name} fill sizes={n === 0 ? "50vw" : "25vw"} />
+              <figcaption className="lbl">
+                <span>
+                  {pad(n + 1)} <span className="nm">{f.name}</span>
+                </span>
+                <span className="mute">{f.meta}</span>
+              </figcaption>
+              <Link className="tile" href={projectHref(f.slug)} aria-label={f.name} />
+            </figure>
+          ))}
+        </div>
+        <div className="mt-comm-foot">
+          <Link className="btn mt-comm-all" href="/portfolio">
+            See all projects
+          </Link>
+        </div>
       </div>
       <div className="mt-masonry">
         {masonry(frames).map((col, c) => (
@@ -79,9 +94,13 @@ export function HomeCommissions({ frames }: { frames: HomeFrame[] }) {
         {/* Native sideways row (its touch and reduced-motion form); the drift adds a transform to .mt-logos-track. */}
         <div className="mt-logos-row" role="group" tabIndex={0} aria-label="Clients">
           <div className="mt-logos-track">
-            <span className="set"><Marks /></span>
+            <span className="set">
+              <Marks />
+            </span>
             {/* The endless loop's second copy, shown by the drift (MOTION-HOOKS.md). */}
-            <span className="set" data-copy aria-hidden><Marks hidden /></span>
+            <span className="set" data-copy aria-hidden>
+              <Marks hidden />
+            </span>
           </div>
         </div>
       </div>

@@ -1,19 +1,20 @@
-import { LEAD_PREFIX } from "@/lib/leads/leads";
-import { buryLead, findLead, leadSummaries, readLead, trashedIds, writeLead } from "@/lib/leads/lead-store";
+import { buryLead, findLead, leadSummaries, openLead, trashedIds, UNOPENABLE, writeLead } from "@/lib/leads/lead-store";
 import { manualLead } from "@/lib/leads/lead-crm";
 import { patchLead } from "@/lib/leads/lead-patch";
 import { gate, noSeal, sealedGate } from "@/lib/admin/gate";
 import { bodyOf, json } from "@/lib/http";
+import { logged } from "@/lib/utils";
 
 /* ── the leads ───────────────────────────────────────────────────
  * The lead desk (`components/leads/desk.tsx`): one record per person, sealed
  * with LEADS_KEY (`lib/seal.ts`) and opened only on the server.
  * - GET: every lead's summary, newest first; `?id=` one lead whole.
- * - PATCH `{ key: "lead:<id>", ... }`: a lead changed by hand (`patchLead`).
+ * - PATCH `{ id, ... }`: a lead changed by hand (`patchLead`), by its plain id, never its KV key.
  * - POST: a lead added by hand (a DM, a text, a referral), name, email, ig, phone, company, kind, stage, source, notes (`manualLead`).
  * - DELETE: the trash emptied, every lead in it deleted for good.
  * The rest of the desk's data sits beside this route: push, templates,
  * invoices, invoice-from, invoice-photo, tasks, log, stats, csv, import.
+ * A lead that will not open (a rotated LEADS_KEY) answers a JSON 500; the list leaves it out.
  * Behind the /admin gate (`lib/admin/gate.ts`), never cached.
  * ─────────────────────────────────────────────────────────────── */
 
@@ -25,7 +26,8 @@ export async function GET(request: Request) {
   const seal = g.s;
   const id = new URL(request.url).searchParams.get("id");
   if (id) {
-    const lead = await readLead(g.kv, seal, id);
+    const lead = await openLead(g.kv, seal, id);
+    if (lead === undefined) return json({ error: UNOPENABLE }, 500);
     return lead ? json({ lead }) : json({ error: "Gone." }, 404);
   }
   return json({ leads: await leadSummaries(g.kv, seal, Date.now()) });
@@ -36,7 +38,7 @@ export async function PATCH(request: Request) {
   if (g.error) return g.error;
   const given = await bodyOf(request);
   if (!given) return json({ error: "Not JSON." }, 400);
-  if (typeof given.key !== "string" || !given.key.startsWith(LEAD_PREFIX)) return json({ error: "Unknown." }, 400);
+  if (typeof given.id !== "string" || !given.id) return json({ error: "Unknown." }, 400);
   const seal = g.s;
   if (!seal) return noSeal();
   const r = await patchLead(g.kv, seal, given, g.notion);
@@ -53,8 +55,11 @@ export async function POST(request: Request) {
   const lead = manualLead(given, new Date().toISOString());
   if ("error" in lead) return json(lead, 400);
   const id = await seal.id(lead.email);
-  if (await readLead(g.kv, seal, id)) return json({ error: "That person is already a lead.", id }, 409);
-  const on = lead.email.includes("@") ? await findLead(g.kv, seal, lead.email) : null;
+  const had = await openLead(g.kv, seal, id);
+  if (had === undefined) return json({ error: UNOPENABLE }, 500);
+  if (had) return json({ error: "That person is already a lead.", id }, 409);
+  const on = lead.email.includes("@") ? await findLead(g.kv, seal, lead.email).catch(logged("lead open")) : null;
+  if (on === undefined) return json({ error: UNOPENABLE }, 500);
   if (on?.lead) return json({ error: `That address is on ${on.lead.name}'s lead.`, id: on.id }, 409);
   // A lead deleted for good left `gone:<id>` so an import does not bring it back; one added by hand clears it.
   await Promise.all((await seal.ids(lead.email)).map((i) => g.kv.delete(`gone:${i}`)));

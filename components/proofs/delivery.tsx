@@ -29,7 +29,17 @@ const size = (b: number) => (b >= 1e9 ? `${(b / 1e9).toFixed(1)} GB` : `${Math.m
 const ordinal = (i: number) => pad(i + 1);
 
 /** The delivery's door: the cover photo beside (or above) a header, a line and the email. */
-function SplitGate({ cover, sub, subhead, onEnter }: { cover: string; sub: string; subhead?: string | null; onEnter: (email: string) => void }) {
+function SplitGate({
+  cover,
+  sub,
+  subhead,
+  onEnter,
+}: {
+  cover: string;
+  sub: string;
+  subhead?: string | null;
+  onEnter: (email: string) => void;
+}) {
   const [value, setValue] = React.useState("");
   const [bad, setBad] = React.useState(false);
   return (
@@ -47,7 +57,9 @@ function SplitGate({ cover, sub, subhead, onEnter }: { cover: string; sub: strin
           else setBad(true);
         }}
       >
-        <Link className="proof-word" href="/">Julian Gigola</Link>
+        <Link className="proof-word" href="/">
+          Julian Gigola
+        </Link>
         <div>
           <h1>Your photos.</h1>
           {subhead ? <p className="proof-sub">{subhead}</p> : null}
@@ -55,10 +67,27 @@ function SplitGate({ cover, sub, subhead, onEnter }: { cover: string; sub: strin
         </div>
         <label>
           <span className="proof-lab">Your email</span>
-          <input type="email" inputMode="email" autoComplete="email" required value={value} onChange={(e) => { setValue(e.target.value); setBad(false); }} aria-invalid={bad || undefined} />
+          <input
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            required
+            value={value}
+            onChange={(e) => {
+              setValue(e.target.value);
+              setBad(false);
+            }}
+            aria-invalid={bad || undefined}
+          />
         </label>
-        {bad ? <p className="proof-err" role="alert">That email does not look right.</p> : null}
-        <button type="submit" className="proof-btn" data-off={!isEmail(value) || undefined}>Open photos</button>
+        {bad ? (
+          <p className="proof-err" role="alert">
+            That email does not look right.
+          </p>
+        ) : null}
+        <button type="submit" className="proof-btn" data-off={!isEmail(value) || undefined}>
+          Open photos
+        </button>
       </form>
     </div>
   );
@@ -90,7 +119,9 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const src = React.useCallback((f: { id: string; v: number }) => `/delivery/${id}/f/${f.id}?v=${f.v}`, [id]);
   const total = finals.reduce((n, f) => n + f.bytes, 0);
   const sizeOf = (fs: Final[]) => size(fs.reduce((n, f) => n + f.bytes, 0));
-  const closes = initial.closesAt ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: TZ }).format(new Date(initial.closesAt)) : null;
+  const closes = initial.closesAt
+    ? new Intl.DateTimeFormat("en-US", { month: "long", day: "numeric", timeZone: TZ }).format(new Date(initial.closesAt))
+    : null;
   // The last days say so on the page. Read after mount: server and phone can disagree near midnight.
   const clock = useClock();
   const soon = clock ? closingSoon(initial.closesAt, clock) : null;
@@ -107,7 +138,13 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
   const doneKey = email ? keyOf(email) : null;
 
   const track = React.useCallback(
-    (b: Record<string, unknown>) => fetch(`/api/proof/${id}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "track", ...b }), keepalive: true }).catch(() => {}),
+    (b: Record<string, unknown>) =>
+      fetch(`/api/proof/${id}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ action: "track", ...b }),
+        keepalive: true,
+      }).catch(() => {}),
     [id],
   );
   /** Logged first, then the browser takes the file: a plain link, so phones save it their own way. */
@@ -168,40 +205,74 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
       <div inert={walling || open !== null || undefined}>
         <ProofCursor />
         <header className="proof-top dlv-top">
-          <Link className="proof-word" href="/">Julian Gigola</Link>
+          <Link className="proof-word" href="/">
+            Julian Gigola
+          </Link>
           <span />
           {/* The tabs top right (Julian's mock comments); the count lives in the intro line only. */}
           {models.length ? (
             <nav className="proof-tabs" aria-label="Photos">
-              <button type="button" data-on={view !== "all" || undefined} onClick={() => go("models")}>BY MODEL</button>
-              <button type="button" data-on={view === "all" || undefined} onClick={() => go("all")}>ALL PHOTOS</button>
+              <button type="button" data-on={view !== "all" || undefined} onClick={() => go("models")}>
+                BY MODEL
+              </button>
+              <button type="button" data-on={view === "all" || undefined} onClick={() => go("all")}>
+                ALL PHOTOS
+              </button>
             </nav>
-          ) : <p className="proof-meta"><b>{finals.length}</b> photos</p>}
+          ) : (
+            <p className="proof-meta">
+              <b>{finals.length}</b> photos
+            </p>
+          )}
         </header>
 
         {one ? (
           <div className="proof-intro dlv-intro dlv-mh">
-            <button type="button" className="dlv-back" onClick={() => go("models")}>&larr; All models</button>
-            <p className="proof-lab">Model · {one[1].length} photos · {sizeOf(one[1])}</p>
+            <button type="button" className="dlv-back" onClick={() => go("models")}>
+              &larr; All models
+            </button>
+            <p className="proof-lab">
+              Model · {one[1].length} photos · {sizeOf(one[1])}
+            </p>
             {/* A numbered model reads SUBJECT02 in the tiles' heavy face; a named model keeps its name. */}
             <h1>{/^\d+$/.test(modelLabel(one[0])) ? `SUBJECT${modelLabel(one[0])}` : modelLabel(one[0])}</h1>
-            <button type="button" className="proof-btn" data-done={done[one[0]] ? "" : undefined} onClick={() => download(one[0], zipHref(one[0]))}>
+            <button
+              type="button"
+              className="proof-btn"
+              data-done={done[one[0]] ? "" : undefined}
+              onClick={() => download(one[0], zipHref(one[0]))}
+            >
               {zipLabel(one[0], `Download zip · ${sizeOf(one[1])}`)}
             </button>
           </div>
         ) : (
           <div className="proof-intro dlv-intro">
-            <p className="proof-lab">Finals · {models.length ? `${models.length} models · ` : ""}{finals.length} photos · {size(total)}{soon !== null && closes ? ` · ${soon} ${soon === 1 ? "day" : "days"} left` : ""}</p>
+            <p className="proof-lab">
+              Finals · {models.length ? `${models.length} models · ` : ""}
+              {finals.length} photos · {size(total)}
+              {soon !== null && closes ? ` · ${soon} ${soon === 1 ? "day" : "days"} left` : ""}
+            </p>
             <h1>Your photos.</h1>
             {initial.subhead ? <p className="proof-sub">{initial.subhead}</p> : null}
             <p className="proof-mu" style={{ marginTop: 18 }}>
-              {models.length ? "Full size JPEGs, grouped by model. Open a model to see its photos, take one model as a zip, or take everything at once." : "Full size JPEGs. Save the ones you want, or all of them at once."}
+              {models.length
+                ? "Full size JPEGs, grouped by model. Open a model to see its photos, take one model as a zip, or take everything at once."
+                : "Full size JPEGs. Save the ones you want, or all of them at once."}
             </p>
             <div className="dlv-dl">
-              <button type="button" className="proof-btn" data-done={done.all ? "" : undefined} onClick={() => download("all", `/delivery/${id}/zip`)}>
+              <button
+                type="button"
+                className="proof-btn"
+                data-done={done.all ? "" : undefined}
+                onClick={() => download("all", `/delivery/${id}/zip`)}
+              >
                 {zipLabel("all", `Download all · ${size(total)}`)}
               </button>
-              {closes ? <p className="proof-mu"><b>Closes {closes}</b>. Keep a copy.</p> : null}
+              {closes ? (
+                <p className="proof-mu">
+                  <b>Closes {closes}</b>. Keep a copy.
+                </p>
+              ) : null}
             </div>
           </div>
         )}
@@ -213,31 +284,39 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
               const top = fs.find((f) => f.top) ?? fs[0];
               const under = fs.filter((f) => f !== top).slice(0, 3);
               return (
-              <div key={k} className="dlv-card">
-                <div className="dlv-cover">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
-                  <img src={`${src(top)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
-                  <span className="dlv-num" aria-hidden="true">{modelLabel(k)}</span>
-                  <button type="button" className="proof-open" aria-label={`Open model ${modelLabel(k)}`} onClick={() => go(k)} />
+                <div key={k} className="dlv-card">
+                  <div className="dlv-cover">
+                    {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
+                    <img src={`${src(top)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
+                    <span className="dlv-num" aria-hidden="true">
+                      {modelLabel(k)}
+                    </span>
+                    <button type="button" className="proof-open" aria-label={`Open model ${modelLabel(k)}`} onClick={() => go(k)} />
+                  </div>
+                  {under.length ? (
+                    <button type="button" className="dlv-minis" tabIndex={-1} aria-hidden="true" onClick={() => go(k)}>
+                      {under.map((f) => (
+                        <span key={f.id} className="dlv-mini">
+                          {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
+                          <img src={`${src(f)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
+                          <i className="dlv-mn">{ordinal(fs.indexOf(f))}</i>
+                        </span>
+                      ))}
+                    </button>
+                  ) : null}
+                  <div className="dlv-cap">
+                    <span>{fs.length} photos</span>
+                    <button type="button" className="dlv-zip" data-done={done[k] ? "" : undefined} onClick={() => download(k, zipHref(k))}>
+                      {done[k] ? (
+                        zipLabel(k, "")
+                      ) : (
+                        <>
+                          Download zip<span className="dlv-sz"> · {sizeOf(fs)}</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
-                {under.length ? (
-                  <button type="button" className="dlv-minis" tabIndex={-1} aria-hidden="true" onClick={() => go(k)}>
-                    {under.map((f) => (
-                      <span key={f.id} className="dlv-mini">
-                        {/* eslint-disable-next-line @next/next/no-img-element -- private final, 800px copy */}
-                        <img src={`${src(f)}&w=800`} alt="" loading={i < 6 ? "eager" : "lazy"} draggable={false} />
-                        <i className="dlv-mn">{ordinal(fs.indexOf(f))}</i>
-                      </span>
-                    ))}
-                  </button>
-                ) : null}
-                <div className="dlv-cap">
-                  <span>{fs.length} photos</span>
-                  <button type="button" className="dlv-zip" data-done={done[k] ? "" : undefined} onClick={() => download(k, zipHref(k))}>
-                    {done[k] ? zipLabel(k, "") : <>Download zip<span className="dlv-sz"> · {sizeOf(fs)}</span></>}
-                  </button>
-                </div>
-              </div>
               );
             })}
           </div>
@@ -246,9 +325,19 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
             {shown.map((f, i) => (
               <div key={f.id} className="proof-cell">
                 {/* eslint-disable-next-line @next/next/no-img-element -- private finals from the Worker, not the image CDN */}
-                <img src={`${src(f)}&w=800`} alt="" loading={i < 8 ? "eager" : "lazy"} width={f.w || undefined} height={f.h || undefined} draggable={false} />
+                <img
+                  src={`${src(f)}&w=800`}
+                  alt=""
+                  loading={i < 8 ? "eager" : "lazy"}
+                  width={f.w || undefined}
+                  height={f.h || undefined}
+                  draggable={false}
+                />
                 <button type="button" className="proof-open" aria-label={`Open photo ${i + 1}`} onClick={() => setOpen(i)} />
-                <span className="proof-no">{ordinal(i)}{initial.labels ? ` · ${f.file}` : ""}</span>
+                <span className="proof-no">
+                  {ordinal(i)}
+                  {initial.labels ? ` · ${f.file}` : ""}
+                </span>
               </div>
             ))}
           </div>
@@ -261,7 +350,12 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
           sub={initial.subhead}
           grid={grid}
           isEmail={isEmail}
-          words={{ lab: `Finals · ${models.length ? `${models.length} models · ` : ""}${finals.length} photos`, title: "Your photos.", cta: "Open photos", note: closes ? `The link closes ${closes}.` : "Your photos at full resolution." }}
+          words={{
+            lab: `Finals · ${models.length ? `${models.length} models · ` : ""}${finals.length} photos`,
+            title: "Your photos.",
+            cta: "Open photos",
+            note: closes ? `The link closes ${closes}.` : "Your photos at full resolution.",
+          }}
           onAccept={(name, address) => enter(address, name)}
           onDone={() => setOpened(true)}
         />
@@ -270,8 +364,13 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
       {open !== null && shown[open] ? (
         <div className="proof-lb" role="dialog" aria-modal="true" aria-label={`Photo ${open + 1}`}>
           <div className="proof-lt">
-            <span>{one ? `${modelLabel(one[0])} · ` : ""}{ordinal(open)} / {shown.length}</span>
-            <button type="button" className="proof-close" onClick={() => setOpen(null)}>Close</button>
+            <span>
+              {one ? `${modelLabel(one[0])} · ` : ""}
+              {ordinal(open)} / {shown.length}
+            </span>
+            <button type="button" className="proof-close" onClick={() => setOpen(null)}>
+              Close
+            </button>
           </div>
           <div
             className="proof-li"
@@ -282,17 +381,31 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
               swipe.current = null;
             }}
           >
-            <button type="button" className="proof-arr l" aria-label="Previous" onClick={() => setOpen(step(open, -1))}>&larr;</button>
+            <button type="button" className="proof-arr l" aria-label="Previous" onClick={() => setOpen(step(open, -1))}>
+              &larr;
+            </button>
             {/* eslint-disable-next-line @next/next/no-img-element -- private final, 2000px copy */}
             <img src={src(shown[open])} alt={`Photo ${open + 1}`} />
-            <button type="button" className="proof-arr r" aria-label="Next" onClick={() => setOpen(step(open, 1))}>&rarr;</button>
+            <button type="button" className="proof-arr r" aria-label="Next" onClick={() => setOpen(step(open, 1))}>
+              &rarr;
+            </button>
           </div>
           <div className="proof-lf">
-            <span>{shown[open].file} · {size(shown[open].bytes)}</span>
+            <span>
+              {shown[open].file} · {size(shown[open].bytes)}
+            </span>
             <div className="proof-acts">
               {/* The 2000px copy, for posting and texting. */}
-              <button type="button" className="proof-btn ghost" onClick={() => download(shown[open].id, `/delivery/${id}/web/${shown[open].id}`)}>Save for web</button>
-              <button type="button" className="proof-btn" onClick={() => download(shown[open].id, `/delivery/${id}/dl/${shown[open].id}`)}>Save</button>
+              <button
+                type="button"
+                className="proof-btn ghost"
+                onClick={() => download(shown[open].id, `/delivery/${id}/web/${shown[open].id}`)}
+              >
+                Save for web
+              </button>
+              <button type="button" className="proof-btn" onClick={() => download(shown[open].id, `/delivery/${id}/dl/${shown[open].id}`)}>
+                Save
+              </button>
             </div>
           </div>
         </div>

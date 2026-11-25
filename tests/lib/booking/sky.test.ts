@@ -44,7 +44,18 @@ test("parts of the day and the sun hint", () => {
 });
 
 test("weather: WMO codes in plain words, read at the start's Pacific hour", () => {
-  expect([0, 2, 3, 45, 53, 63, 75, 81, 86, 95].map(weatherWord)).toEqual(["Clear", "Partly cloudy", "Cloudy", "Fog", "Drizzle", "Rain", "Snow", "Showers", "Snow", "Thunderstorms"]);
+  expect([0, 2, 3, 45, 53, 63, 75, 81, 86, 95].map(weatherWord)).toEqual([
+    "Clear",
+    "Partly cloudy",
+    "Cloudy",
+    "Fog",
+    "Drizzle",
+    "Rain",
+    "Snow",
+    "Showers",
+    "Snow",
+    "Thunderstorms",
+  ]);
   const hourly = { time: ["2026-11-26T10:00", "2026-11-26T11:00"], temperature_2m: [58.4, 61.6], weather_code: [3, 0] };
   expect(weatherAt(hourly, at("2026-11-26", "11:30", "-08:00"))).toBe("Clear, 62°");
   expect(weatherAt(hourly, at("2026-11-27", "11:00", "-08:00"))).toBeNull(); // past the forecast

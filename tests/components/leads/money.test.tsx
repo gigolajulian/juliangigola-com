@@ -4,12 +4,30 @@ import { MoneyDesk } from "@/components/leads/money";
 
 afterEach(() => vi.unstubAllGlobals());
 
-const txn = (id: string, what: string) => ({ id, at: new Date().toISOString(), type: "charge", amount: 10000, fee: 320, net: 9680, currency: "usd", status: "available", what });
+const txn = (id: string, what: string) => ({
+  id,
+  at: new Date().toISOString(),
+  type: "charge",
+  amount: 10000,
+  fee: 320,
+  net: 9680,
+  currency: "usd",
+  status: "available",
+  what,
+});
 
 describe("MoneyDesk", () => {
   it("shows the balance and pages the transactions with Show more", async () => {
-    const fetch = vi.fn(async (url: string) =>
-      new Response(JSON.stringify(url.includes("after=t1") ? { txns: [txn("t2", "Iris deposit")], more: false } : { available: 124000, pending: 31000, txns: [txn("t1", "Mara deposit")], more: true }), { status: 200 }),
+    const fetch = vi.fn(
+      async (url: string) =>
+        new Response(
+          JSON.stringify(
+            url.includes("after=t1")
+              ? { txns: [txn("t2", "Iris deposit")], more: false }
+              : { available: 124000, pending: 31000, txns: [txn("t1", "Mara deposit")], more: true },
+          ),
+          { status: 200 },
+        ),
     );
     vi.stubGlobal("fetch", fetch);
     render(<MoneyDesk />);

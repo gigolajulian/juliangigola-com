@@ -17,7 +17,8 @@ const r = (n: number) => Math.round(n * 10) / 10;
 function strokePath(p: Pt[]): string {
   if (p.length === 1) return `M${r(p[0][0])} ${r(p[0][1])} L${r(p[0][0] + 0.1)} ${r(p[0][1])}`;
   let d = `M${r(p[0][0])} ${r(p[0][1])}`;
-  for (let i = 1; i < p.length - 1; i++) d += ` Q${r(p[i][0])} ${r(p[i][1])} ${r((p[i][0] + p[i + 1][0]) / 2)} ${r((p[i][1] + p[i + 1][1]) / 2)}`;
+  for (let i = 1; i < p.length - 1; i++)
+    d += ` Q${r(p[i][0])} ${r(p[i][1])} ${r((p[i][0] + p[i + 1][0]) / 2)} ${r((p[i][1] + p[i + 1][1]) / 2)}`;
   const l = p[p.length - 1];
   return `${d} L${r(l[0])} ${r(l[1])}`;
 }
@@ -27,7 +28,10 @@ export function SignPad({ onChange }: { onChange: (mark: string | null) => void 
   const box = React.useRef<SVGSVGElement>(null);
   const live = React.useRef<Pt[] | null>(null);
   const all = React.useRef<Pt[][]>([]);
-  const draw = (s: Pt[][]) => { all.current = s; setStrokes(s); };
+  const draw = (s: Pt[][]) => {
+    all.current = s;
+    setStrokes(s);
+  };
 
   const at = (e: { clientX: number; clientY: number }): Pt => {
     const b = box.current!.getBoundingClientRect();
@@ -76,11 +80,19 @@ export function SignPad({ onChange }: { onChange: (mark: string | null) => void 
         onPointerCancel={up}
         onLostPointerCapture={up}
       >
-        {strokes.map((p, i) => <path key={i} d={strokePath(p)} />)}
+        {strokes.map((p, i) => (
+          <path key={i} d={strokePath(p)} />
+        ))}
       </svg>
-      <span className="ctr-pad-x" aria-hidden>×</span>
-      <span className="ctr-pad-hint" aria-hidden>Sign here</span>
-      <button type="button" className="ctr-pad-clear" onClick={clear} hidden={!strokes.length}>Clear</button>
+      <span className="ctr-pad-x" aria-hidden>
+        ×
+      </span>
+      <span className="ctr-pad-hint" aria-hidden>
+        Sign here
+      </span>
+      <button type="button" className="ctr-pad-clear" onClick={clear} hidden={!strokes.length}>
+        Clear
+      </button>
     </div>
   );
 }

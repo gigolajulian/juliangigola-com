@@ -5,12 +5,6 @@
     opacity: 0;
   }
 }
-@keyframes jg-fade-up {
-  from {
-    opacity: 0;
-    translate: 3vw 0;
-  }
-}
 
 /* ── the selected work: a tile a discipline ──
    Julian: the best photo from each discipline (`DISCIPLINE_TILES`),

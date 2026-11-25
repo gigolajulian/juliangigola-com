@@ -10,7 +10,16 @@ const call = deskCall as unknown as Mock;
 
 describe("LicencesDesk", () => {
   it("lists leads with a licence, soonest end first", () => {
-    render(<LicencesDesk leads={[lead("Late", { licence: { use: "Web", end: "2027-06-01" } } as never), lead("None"), lead("Soon", { licence: { use: "Print", end: "2027-01-01" } } as never)]} open={() => {}} />);
+    render(
+      <LicencesDesk
+        leads={[
+          lead("Late", { licence: { use: "Web", end: "2027-06-01" } } as never),
+          lead("None"),
+          lead("Soon", { licence: { use: "Print", end: "2027-01-01" } } as never),
+        ]}
+        open={() => {}}
+      />,
+    );
     const names = screen.getAllByRole("button").map((b) => b.textContent);
     expect(names.indexOf("Soon")).toBeLessThan(names.indexOf("Late"));
     expect(screen.queryByText("None")).toBeNull();

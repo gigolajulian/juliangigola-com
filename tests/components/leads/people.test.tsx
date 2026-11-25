@@ -18,7 +18,9 @@ describe("People", () => {
   });
 
   it("removes a person and shows why a save failed", async () => {
-    const onSave = vi.fn(async (_: Person[]) => { throw new Error("KV down"); });
+    const onSave = vi.fn(async (_: Person[]) => {
+      throw new Error("KV down");
+    });
     render(<People people={[ana]} onSave={onSave} />);
     expect(screen.getByText("ana@studio.com · 408 555 0100")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Remove" }));

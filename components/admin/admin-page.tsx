@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
-import { useSequence, srcOf, type DragProps } from "@/lib/admin/admin-sequence";
+import { useSequence, srcOf, type DragProps } from "@/components/admin/use-sequence";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import type { Copy, Credit } from "@/lib/work/work-types";
 import { cn, pad } from "@/lib/utils";
@@ -64,10 +64,7 @@ export function AdminPage({
     (f: FrameRef): Dims => {
       if (typeof f !== "string" && !isTextRef(f)) return f;
       const src = srcOf(f);
-      return (
-        project.frames.find((p) => p.src === src) ??
-        measured[src] ?? { width: 4, height: 5 }
-      );
+      return project.frames.find((p) => p.src === src) ?? measured[src] ?? { width: 4, height: 5 };
     },
     [project.frames, measured],
   );
@@ -109,11 +106,7 @@ export function AdminPage({
   const words = copy ?? published;
   const setWords = (patch: Partial<Copy>) => {
     const next = { ...words, ...patch };
-    onCopy(
-      next.title === published.title && next.intent === published.intent
-        ? null
-        : next,
-    );
+    onCopy(next.title === published.title && next.intent === published.intent ? null : next);
   };
   const edited = frames !== null || copy !== null;
   const staged = list.filter((f) => uploads[`public${srcOf(f)}`]).length;
@@ -124,11 +117,7 @@ export function AdminPage({
           so Add and Undo are never a long scroll away on a 40-frame page. */}
       <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background/95 px-6 py-3 backdrop-blur sm:px-10">
         <div className="flex items-center gap-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
-          >
+          <button type="button" onClick={onClose} className="label border border-border px-3 py-2 press hoverable:hover:bg-card">
             &larr; Projects
           </button>
           <p className="label text-muted-foreground">
@@ -177,14 +166,7 @@ export function AdminPage({
       </div>
 
       {seq.busy || seq.error ? (
-        <p
-          className={cn(
-            "label px-6 pt-4 sm:px-10",
-            seq.error && "text-destructive",
-          )}
-        >
-          {seq.error || seq.busy}
-        </p>
+        <p className={cn("label px-6 pt-4 sm:px-10", seq.error && "text-destructive")}>{seq.error || seq.busy}</p>
       ) : null}
 
       {/* ── the header, as the page has it ── */}
@@ -195,9 +177,7 @@ export function AdminPage({
             way the published one does. */}
         <textarea
           value={words.title}
-          onChange={(e) =>
-            setWords({ title: e.target.value.replace(/\n/g, " ") })
-          }
+          onChange={(e) => setWords({ title: e.target.value.replace(/\n/g, " ") })}
           rows={1}
           aria-label="Title"
           placeholder="Title"
@@ -260,9 +240,7 @@ export function AdminPage({
                 last={i === list.length - 1}
                 dragProps={seq.dragProps(i)}
                 dragging={seq.dragging === i}
-                over={
-                  seq.over === i && seq.dragging !== null && seq.dragging !== i
-                }
+                over={seq.over === i && seq.dragging !== null && seq.dragging !== i}
                 onChange={(patch) => seq.setText(i, patch)}
                 onMove={(d) => seq.reorder(i, i + d)}
                 onRemove={() => seq.drop(i)}
@@ -293,16 +271,8 @@ export function AdminPage({
                     locked={photos.length === 1}
                     dragProps={seq.dragProps(i)}
                     dragging={seq.dragging === i}
-                    over={
-                      seq.over === i &&
-                      seq.dragging !== null &&
-                      seq.dragging !== i
-                    }
-                    onMeasured={(w, h) =>
-                      setMeasured((m) =>
-                        m[src] ? m : { ...m, [src]: { width: w, height: h } },
-                      )
-                    }
+                    over={seq.over === i && seq.dragging !== null && seq.dragging !== i}
+                    onMeasured={(w, h) => setMeasured((m) => (m[src] ? m : { ...m, [src]: { width: w, height: h } }))}
                     onMove={(delta) => seq.reorder(i, i + delta)}
                     onRemove={() => seq.drop(i)}
                     onTextAfter={() => seq.addText(i + 1)}
@@ -320,14 +290,10 @@ export function AdminPage({
       </div>
 
       <p className="label mx-auto mt-12 max-w-[100rem] px-6 pb-10 text-muted-foreground sm:px-10">
-        This is the page as it will be published, with the controls on it. Drag
-        a photograph to move it, or use its arrows. The arrows are the way on a
-        touch screen and with a keyboard. The title and the paragraph under it
-        are typed in place; the credits are edited at the foot. The first
-        photograph opens the project and is the card shown on every index. A
-        passage sits on the page exactly where it sits here. Removing a
-        photograph takes it out of the sequence and keeps the file. Nothing is
-        live until you press Publish.
+        This is the page as it will be published, with the controls on it. Drag a photograph to move it, or use its arrows. The arrows are
+        the way on a touch screen and with a keyboard. The title and the paragraph under it are typed in place; the credits are edited at
+        the foot. The first photograph opens the project and is the card shown on every index. A passage sits on the page exactly where it
+        sits here. Removing a photograph takes it out of the sequence and keeps the file. Nothing is live until you press Publish.
       </p>
     </article>
   );
@@ -389,12 +355,7 @@ function FrameCell({
           src={pending}
           alt=""
           draggable={false}
-          onLoad={(e) =>
-            onMeasured(
-              e.currentTarget.naturalWidth,
-              e.currentTarget.naturalHeight,
-            )
-          }
+          onLoad={(e) => onMeasured(e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : (
@@ -409,34 +370,19 @@ function FrameCell({
         />
       )}
 
-      <span className="label absolute left-3 top-3 bg-background/80 px-2 py-1 tabular-nums">
-        {ordinal === 1 ? "CVR" : pad(ordinal)}
-      </span>
+      <span className="label absolute left-3 top-3 bg-background/80 px-2 py-1 tabular-nums">{ordinal === 1 ? "CVR" : pad(ordinal)}</span>
 
       <span className="absolute bottom-3 right-3 flex items-center gap-1">
-        <Ctl
-          label={`Move frame ${ordinal} earlier`}
-          disabled={index === 0}
-          onClick={() => onMove(-1)}
-        >
+        <Ctl label={`Move frame ${ordinal} earlier`} disabled={index === 0} onClick={() => onMove(-1)}>
           &larr;
         </Ctl>
-        <Ctl
-          label={`Move frame ${ordinal} later`}
-          disabled={last}
-          onClick={() => onMove(1)}
-        >
+        <Ctl label={`Move frame ${ordinal} later`} disabled={last} onClick={() => onMove(1)}>
           &rarr;
         </Ctl>
         <Ctl label={`Add text after frame ${ordinal}`} onClick={onTextAfter}>
           T
         </Ctl>
-        <Ctl
-          label={`Remove frame ${ordinal}`}
-          disabled={locked}
-          onClick={onRemove}
-          className="hoverable:hover:text-destructive"
-        >
+        <Ctl label={`Remove frame ${ordinal}`} disabled={locked} onClick={onRemove} className="hoverable:hover:text-destructive">
           &times;
         </Ctl>
       </span>
@@ -481,25 +427,13 @@ function Passage({
       <div className="mx-auto max-w-prose">
         <div className="mb-4 flex items-center gap-1">
           <span className="label mr-3 text-muted-foreground">Passage</span>
-          <Ctl
-            label="Move passage earlier"
-            disabled={index === 0}
-            onClick={() => onMove(-1)}
-          >
+          <Ctl label="Move passage earlier" disabled={index === 0} onClick={() => onMove(-1)}>
             &larr;
           </Ctl>
-          <Ctl
-            label="Move passage later"
-            disabled={last}
-            onClick={() => onMove(1)}
-          >
+          <Ctl label="Move passage later" disabled={last} onClick={() => onMove(1)}>
             &rarr;
           </Ctl>
-          <Ctl
-            label="Remove passage"
-            onClick={onRemove}
-            className="hoverable:hover:text-destructive"
-          >
+          <Ctl label="Remove passage" onClick={onRemove} className="hoverable:hover:text-destructive">
             &times;
           </Ctl>
         </div>
@@ -558,9 +492,7 @@ function Ctl({
  * takes a row alone, portraits and squares pair up. Sequence is preserved
  * exactly; this only decides where the line breaks are, never the order.
  */
-function pair<T extends { width: number; height: number }>(
-  frames: T[],
-): T[][] {
+function pair<T extends { width: number; height: number }>(frames: T[]): T[][] {
   const twoUp = (f: { width: number; height: number }) => f.height >= f.width;
   const rows: T[][] = [];
 

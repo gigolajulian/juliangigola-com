@@ -7,7 +7,13 @@ describe("secretJson", () => {
   });
 
   it("names the secret but never quotes it when it is not JSON", () => {
-    const err = (() => { try { secretJson("hunter2-not-json", "GCAL_OAUTH"); } catch (e) { return String(e); } })();
+    const err = (() => {
+      try {
+        secretJson("hunter2-not-json", "GCAL_OAUTH");
+      } catch (e) {
+        return String(e);
+      }
+    })();
     expect(err).toBe("Error: GCAL_OAUTH is not valid JSON");
     expect(err).not.toContain("hunter2");
   });

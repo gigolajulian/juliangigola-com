@@ -25,9 +25,8 @@ const unit = (n: unknown, max = 1) => typeof n === "number" && Number.isFinite(n
 export function parseBeacon(body: unknown): Beacon | null {
   const b = body as Partial<Beacon> | null;
   if (!b || typeof b.p !== "string" || !PATH.test(b.p) || /^\/(admin|api)(\/|$)/.test(b.p)) return null;
-  if (typeof b.v !== "boolean" || !unit(b.d) || !DEVICES.includes(b.dev as Beacon["dev"]) || !Array.isArray(b.c) || b.c.length > MAX_CLICKS) return null;
-  const c = b.c.filter(
-    (k): k is [number, number, string] => Array.isArray(k) && unit(k[0]) && unit(k[1], 50) && typeof k[2] === "string",
-  );
+  if (typeof b.v !== "boolean" || !unit(b.d) || !DEVICES.includes(b.dev as Beacon["dev"]) || !Array.isArray(b.c) || b.c.length > MAX_CLICKS)
+    return null;
+  const c = b.c.filter((k): k is [number, number, string] => Array.isArray(k) && unit(k[0]) && unit(k[1], 50) && typeof k[2] === "string");
   return { p: b.p, v: b.v, d: b.d as number, dev: b.dev as Beacon["dev"], c: c.map(([x, y, l]) => [x, y, l.slice(0, 40)]) };
 }

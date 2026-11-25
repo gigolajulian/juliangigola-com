@@ -22,7 +22,10 @@ describe("masonry", () => {
   });
 
   it("places every frame exactly once and is empty for none", () => {
-    const out = masonry([1.2, 0.8, 1.5, 0.7, 1].map(frame)).flat().map((c) => c.i).sort();
+    const out = masonry([1.2, 0.8, 1.5, 0.7, 1].map(frame))
+      .flat()
+      .map((c) => c.i)
+      .sort();
     expect(out).toEqual([0, 1, 2, 3, 4]);
     expect(masonry([])).toEqual([[], []]);
   });

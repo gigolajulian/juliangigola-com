@@ -56,11 +56,17 @@ describe("confirmMail", () => {
     expect(fee.text).toContain("Until Thu, Nov 19, 10:00 AM PST you can cancel for 90% back.");
     expect(confirmMail({ ...base, kind: "headsup", deposit }).text).toContain("you can cancel for a full refund.");
     // Moved out from an earlier first time: judged by that one.
-    expect(confirmMail({ ...base, kind: "headsup", firstStart: "2026-11-20T18:00:00Z", deposit }).text).toContain("Until Wed, Nov 18, 10:00 AM PST");
+    expect(confirmMail({ ...base, kind: "headsup", firstStart: "2026-11-20T18:00:00Z", deposit }).text).toContain(
+      "Until Wed, Nov 18, 10:00 AM PST",
+    );
   });
 
   it("writes the reminder and the deposit receipt", () => {
-    const m = confirmMail({ ...base, kind: "reminder", deposit: { ref: "pi_1234567890abc", at: "2026-11-01T18:00:00Z", card: "Visa 4242" } });
+    const m = confirmMail({
+      ...base,
+      kind: "reminder",
+      deposit: { ref: "pi_1234567890abc", at: "2026-11-01T18:00:00Z", card: "Visa 4242" },
+    });
     expect(m.subject).toBe("Tomorrow: Portraits, 10:00 AM");
     expect(m.text).toContain("See you tomorrow.");
     expect(m.text).toContain("Ref: pi_12345678");
@@ -85,7 +91,11 @@ describe("sendConfirm", () => {
   it("sends from book@ to the client", async () => {
     const mail = new FakeEmail();
     expect(await sendConfirm(mail as never, base)).toBe(confirmMail(base).subject);
-    expect(mail.sent[0]).toMatchObject({ to: { email: "ana@example.com" }, from: { email: "book@juliangigola.com" }, replyTo: "hello@juliangigola.com" });
+    expect(mail.sent[0]).toMatchObject({
+      to: { email: "ana@example.com" },
+      from: { email: "book@juliangigola.com" },
+      replyTo: "hello@juliangigola.com",
+    });
   });
 
   it("retries without the inline logo, linking it instead", async () => {
@@ -125,10 +135,35 @@ describe("sendCancelled", () => {
 });
 
 describe("confirmOf", () => {
-  const rec: BookingRecord = { id: "abcdef1234567890", eventId: "ev", slug: "portraits", session: "Portraits", start: "2026-11-21T18:00:00Z", end: "2026-11-21T19:00:00Z", firstStart: "2026-11-21T18:00:00Z", timeZone: "America/Los_Angeles", name: "Ana Lee", email: "ana@example.com", where: "Studio", at: "2026-11-10T00:00:00Z" };
+  const rec: BookingRecord = {
+    id: "abcdef1234567890",
+    eventId: "ev",
+    slug: "portraits",
+    session: "Portraits",
+    start: "2026-11-21T18:00:00Z",
+    end: "2026-11-21T19:00:00Z",
+    firstStart: "2026-11-21T18:00:00Z",
+    timeZone: "America/Los_Angeles",
+    name: "Ana Lee",
+    email: "ana@example.com",
+    where: "Studio",
+    at: "2026-11-10T00:00:00Z",
+  };
   const manage = base.manage;
   // The literal the booking route and the reminder cron built before `confirmOf`.
-  const old = (r: BookingRecord): Confirm => ({ name: r.name, email: r.email, session: r.session, call: r.call, start: r.start, end: r.end, where: r.where, uid: r.id, manage, firstStart: r.firstStart, ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r), fee: r.fee } } : {}) });
+  const old = (r: BookingRecord): Confirm => ({
+    name: r.name,
+    email: r.email,
+    session: r.session,
+    call: r.call,
+    start: r.start,
+    end: r.end,
+    where: r.where,
+    uid: r.id,
+    manage,
+    firstStart: r.firstStart,
+    ...(r.intent ? { deposit: { ref: r.intent, at: r.at, amount: depositPaid(r), fee: r.fee } } : {}),
+  });
   const same = (a: Confirm, b: Confirm) => {
     const [x, y] = [confirmMail(a), confirmMail(b)];
     expect([y.subject, y.html, y.text]).toEqual([x.subject, x.html, x.text]);
@@ -136,7 +171,20 @@ describe("confirmOf", () => {
 
   it("mails a call booking as /api/book did", () => {
     const call = { ...rec, slug: "call", session: "Wedding call", call: true, where: "https://meet.google.com/x" };
-    same({ name: call.name, email: call.email, session: call.session, call: true, start: call.start, end: call.end, where: call.where, uid: call.id, manage }, { ...confirmOf(call, manage), call: true });
+    same(
+      {
+        name: call.name,
+        email: call.email,
+        session: call.session,
+        call: true,
+        start: call.start,
+        end: call.end,
+        where: call.where,
+        uid: call.id,
+        manage,
+      },
+      { ...confirmOf(call, manage), call: true },
+    );
   });
 
   it("mails a deposit booking, its reminder and a reschedule as before", () => {

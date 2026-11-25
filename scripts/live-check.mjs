@@ -32,8 +32,7 @@ for (const page of pages) {
   if (!res.ok) failures.push(`${res.status} page ${page}`);
   if (res.headers.get("cf-cache-status") === "HIT") failures.push(`HIT (edge cache) ${page}`);
   const html = await res.text();
-  for (const [, file] of html.matchAll(/["'](\/_next\/static\/[^"'?#]+\.(?:css|js))/g))
-    if (!assets.has(file)) assets.set(file, page);
+  for (const [, file] of html.matchAll(/["'](\/_next\/static\/[^"'?#]+\.(?:css|js))/g)) if (!assets.has(file)) assets.set(file, page);
 }
 
 for (const [file, page] of assets) {
@@ -45,7 +44,9 @@ for (const [file, page] of assets) {
 if (origin === "https://juliangigola.com") {
   const { sha } = await (await fetch(`${origin}/api/build`, { headers: { "cache-control": "no-cache" } })).json();
   const { execFileSync } = await import("node:child_process");
-  const head = execFileSync("git", ["ls-remote", "https://github.com/gigolajulian/juliangigola-com.git", "refs/heads/main"], { encoding: "utf8" }).split(/\s/)[0];
+  const head = execFileSync("git", ["ls-remote", "https://github.com/gigolajulian/juliangigola-com.git", "refs/heads/main"], {
+    encoding: "utf8",
+  }).split(/\s/)[0];
   if (sha !== head) failures.push(`live build ${String(sha).slice(0, 7)} is not main ${head.slice(0, 7)}`);
   else console.log(`live build is main ${head.slice(0, 7)}`);
 }

@@ -4,7 +4,16 @@ import { BoardDesk } from "@/components/leads/board";
 import type { LeadSummary } from "@/lib/leads/leads";
 
 const iso = new Date().toISOString();
-const ana = { id: "a", email: "ana@x.com", name: "Ana", stage: "Inquiry", stageAt: iso, firstAt: iso, lastAt: iso, quote: 1800 } as LeadSummary;
+const ana = {
+  id: "a",
+  email: "ana@x.com",
+  name: "Ana",
+  stage: "Inquiry",
+  stageAt: iso,
+  firstAt: iso,
+  lastAt: iso,
+  quote: 1800,
+} as LeadSummary;
 
 describe("BoardDesk", () => {
   it("puts a lead in its stage column and moves it on drop", () => {

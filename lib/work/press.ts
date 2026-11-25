@@ -52,5 +52,4 @@ export const PRESS: Client[] = [
  * of logos somewhere else. Julian: the client logos need to be more
  * integrated.
  */
-export const markFor = (slug: string): Client | undefined =>
-  PRESS.find((c) => c.href === `/portfolio/${slug}`);
+export const markFor = (slug: string): Client | undefined => PRESS.find((c) => c.href === `/portfolio/${slug}`);

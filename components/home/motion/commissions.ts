@@ -52,7 +52,7 @@ export const commissionsDrivers: Driver[] = [
         s.w = set.offsetWidth;
         if (!s.w) return;
         // a row wider than one set needs more copies to stay full
-        for (let n = Math.ceil(row.clientWidth / s.w) + 1; track.children.length < n; ) {
+        for (let n = Math.ceil(row.clientWidth / s.w) + 1; track.children.length < n;) {
           extra.push(track.appendChild(copy.cloneNode(true)) as Element);
         }
       };

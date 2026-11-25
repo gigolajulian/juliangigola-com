@@ -6,7 +6,20 @@ import type { Project, Category, Frame } from "./work-types";
 import { CONTENT } from "../content";
 import { REEL } from "./videos";
 import { DISCIPLINE_COVERS } from "./added";
-import { getProject, projectsIn, CATEGORIES, PROJECTS, COVER_RELEASES, FEATURED, categoryLabel, categoryHref, altContext, isOwnGallery, withBlur, type BandTile } from "./work";
+import {
+  getProject,
+  projectsIn,
+  CATEGORIES,
+  PROJECTS,
+  COVER_RELEASES,
+  FEATURED,
+  categoryLabel,
+  categoryHref,
+  altContext,
+  isOwnGallery,
+  withBlur,
+  type BandTile,
+} from "./work";
 
 /**
  * The disciplines the homepage cycles through, each with a frame to show for
@@ -79,8 +92,7 @@ const archiveFrame = (src: string, alt: string): Frame => {
   // Naming a frame that does not exist is an editorial mistake, not a runtime
   // condition to paper over — and a silent fallback here would put the wrong
   // photograph at the top of the homepage.
-  if (!project || !found)
-    throw new Error(`Cover override names a frame not in the archive: ${src}`);
+  if (!project || !found) throw new Error(`Cover override names a frame not in the archive: ${src}`);
   return { ...found, alt: `${alt}. ${altContext(project)}` };
 };
 
@@ -89,10 +101,7 @@ const COVER_OVERRIDES: Record<string, Frame> = {
      project in its path, so the credit fell back to the first portrait
      project and the cover linked to OPAL. Pointing at the archive frame lets
      `frameProject` name the shoot the photograph is from. */
-  portraits: archiveFrame(
-    "/work/fauxtopia/01.jpg",
-    "Model in a fur-trimmed hooded coat on the shoreline at sunset",
-  ),
+  portraits: archiveFrame("/work/fauxtopia/01.jpg", "Model in a fur-trimmed hooded coat on the shoreline at sunset"),
   // Exactly 4:5, so it fills the cover column with nothing cropped at all —
   // the only frame in the archive that does.
   editorial: archiveFrame(
@@ -159,9 +168,7 @@ export const categoryFrame = (categorySlug: string): Frame | null => {
   // cost this discipline its picked cover, not the whole build.
   const picked = DISCIPLINE_COVERS[categorySlug];
   if (picked) {
-    const found = PROJECTS.flatMap((p) => p.images).find(
-      (f) => f.src === picked,
-    );
+    const found = PROJECTS.flatMap((p) => p.images).find((f) => f.src === picked);
     if (found) return found;
   }
 
@@ -171,9 +178,7 @@ export const categoryFrame = (categorySlug: string): Frame | null => {
   const project = projectsIn(categorySlug)[0];
   if (!project) return null;
 
-  return (
-    project.images.find((f) => f.height > f.width) ?? project.images[0] ?? null
-  );
+  return project.images.find((f) => f.height > f.width) ?? project.images[0] ?? null;
 };
 
 /**
@@ -186,8 +191,7 @@ export const categoryFrame = (categorySlug: string): Frame | null => {
  * Frames outside `/work/<slug>/` — the hand-made ones in `/hero/` — have no
  * project, and the caller falls back to the category's lead.
  */
-const frameProject = (frame: Frame): Project | undefined =>
-  getProject(frame.src.split("/")[2] ?? "");
+const frameProject = (frame: Frame): Project | undefined => getProject(frame.src.split("/")[2] ?? "");
 
 /**
  * The disciplines the cover cycles through, in order.
@@ -225,9 +229,7 @@ const DEFAULT_DISCIPLINE_SLUGS = [
  * row in the work index regardless; seven of the thirteen were already on the
  * site without being on the cover before any of this was editable.
  */
-const DISCIPLINE_SLUGS = CONTENT.heroDisciplines.length
-  ? CONTENT.heroDisciplines
-  : DEFAULT_DISCIPLINE_SLUGS;
+const DISCIPLINE_SLUGS = CONTENT.heroDisciplines.length ? CONTENT.heroDisciplines : DEFAULT_DISCIPLINE_SLUGS;
 
 /**
  * Where the unit of work is not a frame.
@@ -269,11 +271,7 @@ const videoFrame = (): Frame | null => {
   const film = CONTENT.videos[0];
   if (!film) return null;
 
-  const still =
-    film.poster ??
-    (film.provider === "youtube"
-      ? `https://i.ytimg.com/vi/${film.videoId}/maxresdefault.jpg`
-      : null);
+  const still = film.poster ?? (film.provider === "youtube" ? `https://i.ytimg.com/vi/${film.videoId}/maxresdefault.jpg` : null);
   if (!still) return null;
 
   return {
@@ -285,9 +283,7 @@ const videoFrame = (): Frame | null => {
   };
 };
 
-export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) =>
-  CATEGORIES.find((c) => c.slug === slug),
-)
+export const DISCIPLINES: Discipline[] = DISCIPLINE_SLUGS.map((slug) => CATEGORIES.find((c) => c.slug === slug))
   .filter((c): c is Category => Boolean(c))
   .map((category) => {
     const inCategory = projectsIn(category.slug);
@@ -353,8 +349,7 @@ const MEDIUM: Record<string, string> = {
   coverart: "Design",
   video: "Video",
 };
-const mediumOf = (disciplineSlug: string): string =>
-  MEDIUM[disciplineSlug] ?? "Photo";
+const mediumOf = (disciplineSlug: string): string => MEDIUM[disciplineSlug] ?? "Photo";
 
 /* The homepage's selected work, a tile a discipline (Julian: the best
    photo from each, leading to its project): the frame picked for it in
@@ -375,32 +370,19 @@ const mediumOf = (disciplineSlug: string): string =>
    on the motion page. */
 /* Julian's order for the homepage's Commissions: event coverage in,
    Chroma out. */
-const TILE_SLUGS = [
-  "campaigns",
-  "artist-presskit",
-  "editorial",
-  "portraits",
-  "mixed-media",
-  "events",
-  "coverart",
-  "video",
-];
+const TILE_SLUGS = ["campaigns", "artist-presskit", "editorial", "portraits", "mixed-media", "events", "coverart", "video"];
 /* Julian's picks: Cover Art keeps its photograph of the covers laid out
    and shows The River on hover; Mixed media shows Wrapped Up and
    Metamorphosis on hover; Artist presskit is Valgur; Chroma is Liminal,
    with a good blue one on hover (Julian: maybe Analogue Dreams): its
    frame 06, the bluest of the set with a subject in it. */
-const TILE_PICKS: Record<
-  string,
-  { frame?: Frame; project?: string; hover?: string; hoverFrame?: Frame }
-> = {
+const TILE_PICKS: Record<string, { frame?: Frame; project?: string; hover?: string; hoverFrame?: Frame }> = {
   coverart: { hoverFrame: COVER_RELEASES.find((r) => r.slug === "the-river")?.frames[0] },
   "mixed-media": { project: "wrapped-up", hover: "metamorphosis" },
   "artist-presskit": { project: "valgur" },
   chroma: {
     project: "liminal",
-    hoverFrame: getProject("analogue-dreams")
-      ?.images.find((f) => f.src.endsWith("/06.jpg")),
+    hoverFrame: getProject("analogue-dreams")?.images.find((f) => f.src.endsWith("/06.jpg")),
   },
 };
 const tileDiscipline = (slug: string): Discipline | undefined => {
@@ -419,27 +401,19 @@ const tileDiscipline = (slug: string): Discipline | undefined => {
     frame,
   };
 };
-export const DISCIPLINE_TILES: (BandTile & { medium: string; count: number; category: string })[] = TILE_SLUGS.map(
-  tileDiscipline,
-)
+export const DISCIPLINE_TILES: (BandTile & { medium: string; count: number; category: string })[] = TILE_SLUGS.map(tileDiscipline)
   .filter((d): d is Discipline => Boolean(d))
   .map((d) => {
     const pick = TILE_PICKS[d.slug] ?? {};
     const shown = pick.project ? getProject(pick.project) : undefined;
-    const slug =
-      shown?.slug ?? (d.credit?.href ?? `/portfolio/${d.slug}`).split("/")[2] ?? d.slug;
+    const slug = shown?.slug ?? (d.credit?.href ?? `/portfolio/${d.slug}`).split("/")[2] ?? d.slug;
     const project = getProject(slug);
     const frame = pick.frame ?? shown?.cover ?? d.frame;
     const favorite =
       (pick.hover ? getProject(pick.hover) : undefined) ??
-      FEATURED.find(
-        (p) => p.slug !== slug && p.categories.some((c) => c.slug === d.slug),
-      ) ??
+      FEATURED.find((p) => p.slug !== slug && p.categories.some((c) => c.slug === d.slug)) ??
       projectsIn(d.slug).find((p) => p.slug !== slug);
-    const best =
-      pick.hoverFrame ??
-      favorite?.cover ??
-      project?.images.find((f) => f.src !== frame.src);
+    const best = pick.hoverFrame ?? favorite?.cover ?? project?.images.find((f) => f.src !== frame.src);
     const client = shown?.name ?? d.credit?.name;
     return {
       slug,
@@ -462,4 +436,3 @@ export const DISCIPLINE_TILES: (BandTile & { medium: string; count: number; cate
         : {}),
     };
   });
-

@@ -14,8 +14,7 @@ export const pad = (n: number) => String(n).padStart(2, "0");
  * thing worth rejecting is what cannot be an address.
  * Nobody gets turned away, so a one-letter ending like a@b.c passes too.
  */
-export const looksLikeEmail = (value: string): boolean =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+export const looksLikeEmail = (value: string): boolean => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
 /** An address a server keeps: at most 200 characters, and `looksLikeEmail` once trimmed. Check `typeof` first on unknown input. */
 export const isEmail = (v: string): boolean => v.length <= 200 && looksLikeEmail(v.trim());

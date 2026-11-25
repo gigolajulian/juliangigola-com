@@ -66,7 +66,11 @@ function useEvery(run: boolean, n: number) {
 function Phrase({ copy }: { copy?: boolean }) {
   return (
     <span className="mt-ph" aria-hidden data-copy={copy || undefined}>
-      {[...PHRASE].map((ch, j) => <span key={j} style={{ "--j": j } as React.CSSProperties}>{ch === " " ? " " : ch}</span>)}
+      {[...PHRASE].map((ch, j) => (
+        <span key={j} style={{ "--j": j } as React.CSSProperties}>
+          {ch === " " ? " " : ch}
+        </span>
+      ))}
     </span>
   );
 }
@@ -83,38 +87,71 @@ export function HomeFoot() {
         {/* one still behind the links, dimmed by the scrim.
             The next still sits under it unseen, so it is loaded by the time it shows. */}
         <div className="mt-fwall" aria-hidden ref={wall}>
-          {stills.map((src, n) => <Image key={src} src={src} alt="" fill sizes="100vw" style={n ? { opacity: 0 } : undefined} />)}
+          {stills.map((src, n) => (
+            <Image key={src} src={src} alt="" fill sizes="100vw" style={n ? { opacity: 0 } : undefined} />
+          ))}
         </div>
         <div className="mt-fscrim" aria-hidden />
         <nav className="mt-fcols lbl" aria-label="Footer">
           <div>
             <p className="mute">Inquire</p>
             {QUOTE_OPTS.map((o) => (
-              <p key={o.key}><button type="button" onClick={(e) => cards.inquire("quote", o.key, e.currentTarget)}>{o.name}</button></p>
+              <p key={o.key}>
+                <button type="button" onClick={(e) => cards.inquire("quote", o.key, e.currentTarget)}>
+                  {o.name}
+                </button>
+              </p>
             ))}
           </div>
           <div>
             <p className="mute">Book online</p>
             {BOOK_ROWS.map((r) => (
-              <p key={r.slug}><button type="button" onClick={(e) => cards.book(r.slug, e.currentTarget)}>{r.name}</button></p>
+              <p key={r.slug}>
+                <button type="button" onClick={(e) => cards.book(r.slug, e.currentTarget)}>
+                  {r.name}
+                </button>
+              </p>
             ))}
           </div>
           <div>
             <p className="mute">Pages</p>
-            <p><Link href="/portfolio">Portfolio</Link></p>
-            <p><Link href="/book">Sessions</Link></p>
-            <p><Link href="/about">About</Link></p>
+            <p>
+              <Link href="/portfolio">Portfolio</Link>
+            </p>
+            <p>
+              <Link href="/book">Sessions</Link>
+            </p>
+            <p>
+              <Link href="/about">About</Link>
+            </p>
           </div>
           <div>
             <p className="mute">Reach</p>
-            <p><a href="mailto:hello@juliangigola.com"><span className="dk">hello@juliangigola.com</span><span className="po">Email me</span></a></p>
-            <p><a href="https://instagram.com/juliangigola" rel="noopener"><span className="dk">Instagram&nbsp;</span>@juliangigola</a></p>
+            <p>
+              <a href="mailto:hello@juliangigola.com">
+                <span className="dk">hello@juliangigola.com</span>
+                <span className="po">Email me</span>
+              </a>
+            </p>
+            <p>
+              <a href="https://instagram.com/juliangigola" rel="noopener">
+                <span className="dk">Instagram&nbsp;</span>@juliangigola
+              </a>
+            </p>
             <p className="mute mt-based">Based</p>
-            <p><span className="dk">San Francisco Bay Area</span><span className="po">SF Bay Area</span></p>
+            <p>
+              <span className="dk">San Francisco Bay Area</span>
+              <span className="po">SF Bay Area</span>
+            </p>
           </div>
         </nav>
         <div className="mt-phrase">
-          <button type="button" className="mt-ph-btn" aria-describedby="mt-ph-hint" onClick={(e) => cards.inquire("footer", undefined, e.currentTarget)}>
+          <button
+            type="button"
+            className="mt-ph-btn"
+            aria-describedby="mt-ph-hint"
+            onClick={(e) => cards.inquire("footer", undefined, e.currentTarget)}
+          >
             {/* The name is real text, the letter-by-letter rows are hidden from it: an aria-label over split letters fails label-in-name (WCAG 2.5.3). */}
             <span className="sr-only">{PHRASE}</span>
             <span className="mt-ph-row">
@@ -124,13 +161,22 @@ export function HomeFoot() {
             </span>
           </button>
           {/* Outside the button, so the hint is its description, not part of its name; aria-hidden so it is not read again as its own line. */}
-          <span className="sr-only" id="mt-ph-hint" aria-hidden>Opens the inquiry card</span>
+          <span className="sr-only" id="mt-ph-hint" aria-hidden>
+            Opens the inquiry card
+          </span>
         </div>
         <div className="mt-fline lbl mute">
           <span>&copy; {year} Julian Gigola</span>
-          {time ? <span className="mt-ftime"><span className="dk">San Jose </span><span className="t">{time}</span></span> : null}
+          {time ? (
+            <span className="mt-ftime">
+              <span className="dk">San Jose </span>
+              <span className="t">{time}</span>
+            </span>
+          ) : null}
           <Link href="/legal">Legal</Link>
-          <button type="button" className="po" onClick={() => scrollTop()}>Top <span aria-hidden>&uarr;</span></button>
+          <button type="button" className="po" onClick={() => scrollTop()}>
+            Top <span aria-hidden>&uarr;</span>
+          </button>
         </div>
       </div>
     </footer>

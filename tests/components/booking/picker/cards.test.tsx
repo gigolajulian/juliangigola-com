@@ -15,7 +15,9 @@ vi.mock("@/components/booking/deposit-step", async (orig) => ({
   DepositStep: ({ body, rows, head }: { body: object; rows: [string, string][]; head?: React.ReactNode }) => (
     <div data-testid="deposit" data-body={JSON.stringify(body)}>
       {head}
-      {rows.map(([k, v]) => <p key={k}>{`${k}: ${v}`}</p>)}
+      {rows.map(([k, v]) => (
+        <p key={k}>{`${k}: ${v}`}</p>
+      ))}
     </div>
   ),
 }));
@@ -43,7 +45,10 @@ const answer = (length = 60) => ({
 type Call = [string, RequestInit | undefined];
 const calls = () => (fetch as unknown as { mock: { calls: Call[] } }).mock.calls;
 function stubFetch(book: () => Response = () => Response.json({ id: "b1" })) {
-  vi.stubGlobal("fetch", vi.fn(async (url: string) => (url.startsWith("/api/slots") ? Response.json(answer()) : book())));
+  vi.stubGlobal(
+    "fetch",
+    vi.fn(async (url: string) => (url.startsWith("/api/slots") ? Response.json(answer()) : book())),
+  );
 }
 
 /* The same wiring as TimePicker: the hook, then the card for the time on show. */
@@ -51,7 +56,13 @@ function Card(props: Props) {
   const c = usePicker(props);
   const steps = useStepsLayout(c);
   if (c.state === "fallback") return <>{props.fallback}</>;
-  if (!c.days || !c.pick || c.held) return <p role="status">Loading<JgLoad done={c.state === "ready" && !!c.days} onDone={c.unhold} /></p>;
+  if (!c.days || !c.pick || c.held)
+    return (
+      <p role="status">
+        Loading
+        <JgLoad done={c.state === "ready" && !!c.days} onDone={c.unhold} />
+      </p>
+    );
   const [t, ap] = clock(c.pick.min);
   const [until] = clock(c.pick.min + c.length);
   const date = fromIso(c.pick.date);
@@ -92,7 +103,10 @@ const day = (name: string) => screen.getByRole("button", { name });
 
 describe("usePicker", () => {
   it("falls back when the times cannot be read", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => Response.json({ status: "error" })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => Response.json({ status: "error" })),
+    );
     const { result } = renderHook(() => usePicker({ path: "julian/call", title: "Pick", fallback: null }));
     await waitFor(() => expect(result.current.state).toBe("fallback"));
   });
@@ -148,45 +162,14 @@ describe("EditorialCard", () => {
     expect((day("Continue") as HTMLButtonElement).disabled).toBe(false);
   });
 
-  it("opens the details after Continue and says when the time was taken", async () => {
-    stubFetch(() => Response.json({ error: "That time was just taken. Pick another.", code: "taken" }, { status: 409 }));
-    render(<Card path="julian/call" title="Pick a time" fallback={null} />);
+  it("hands the picked time to the reschedule on Continue, with no form of its own", async () => {
+    stubFetch();
+    const onPicked = vi.fn();
+    render(<Card path="julian/call" title="Pick a time" fallback={null} onPicked={onPicked} />);
     fireEvent.click(await screen.findByRole("button", { name: "11:00 AM" }));
     fireEvent.click(day("Continue"));
-    const email = await screen.findByRole("textbox", { name: "Email" }, { timeout: 3000 });
-    fireEvent.change(screen.getByRole("textbox", { name: "First name" }), { target: { value: "Ana" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Last name" }), { target: { value: "Lee" } });
-    fireEvent.change(email, { target: { value: "ana@example.com" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Phone" }), { target: { value: "(408) 555 0134" } });
-    fireEvent.click(screen.getByRole("button", { name: "Book it" }));
-
-    expect((await screen.findByRole("alert")).textContent).toBe("That time was just taken. Pick another.");
-    const [url, init] = calls().find(([u]) => u === "/api/book")!;
-    expect(url).toBe("/api/book");
-    expect(JSON.parse(String(init?.body))).toMatchObject({ slug: "call", name: "Ana Lee", email: "ana@example.com", phone: "+14085550134", via: "Video", start: "2026-11-19T19:00:00.000Z" });
-    // The times are asked for again, fresh.
-    await waitFor(() => expect(calls().some(([u]) => u.startsWith("/api/slots") && u.endsWith("&fresh"))).toBe(true));
-  });
-
-  it("takes a paid session to its deposit instead of booking", async () => {
-    vi.stubEnv("NEXT_PUBLIC_STRIPE_PK", "pk_test_123");
-    stubFetch();
-    render(<Card path="julian/portraits" title="Pick a time" fallback={null} />);
-    fireEvent.click(await screen.findByRole("button", { name: "10:00 AM" }));
-    fireEvent.click(day("Continue"));
-    const email = await screen.findByRole("textbox", { name: "Email" }, { timeout: 3000 });
-    expect(screen.getByText("Next: $250 deposit")).toBeTruthy();
-    fireEvent.change(screen.getByRole("textbox", { name: "First name" }), { target: { value: "Ana" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Last name" }), { target: { value: "Lee" } });
-    fireEvent.change(email, { target: { value: "ana@example.com" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Phone" }), { target: { value: "4085550134" } });
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-
-    const step = await screen.findByTestId("deposit");
-    expect(JSON.parse(step.dataset.body!)).toMatchObject({ slug: "portraits", name: "Ana Lee", email: "ana@example.com", phone: "+14085550134", start: "2026-11-19T18:00:00.000Z" });
-    expect(screen.getByText("$250")).toBeTruthy();
-    expect(screen.getByText("Session: Session, 60 min")).toBeTruthy();
-    expect(calls().some(([u]) => u === "/api/book")).toBe(false);
+    await waitFor(() => expect(onPicked).toHaveBeenCalledWith("2026-11-19T19:00:00.000Z"), { timeout: 3000 });
+    expect(screen.queryByRole("textbox")).toBeNull();
   });
 });
 

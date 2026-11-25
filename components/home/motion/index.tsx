@@ -29,7 +29,16 @@ export function MotionLayer() {
   React.useEffect(() => {
     const root = document.querySelector<HTMLElement>(".v3home.mt");
     if (!root) return;
-    const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...barDrivers]);
+    const stop = startEngine(root, [
+      ...heroDrivers,
+      ...rowsDrivers,
+      ...commissionsDrivers,
+      ...aboutDrivers,
+      ...quoteDrivers,
+      ...footDrivers,
+      ...depthDrivers,
+      ...barDrivers,
+    ]);
     const stopReveal = startReveal(root);
     const still = matches("calm") ? heroStill(root) : null;
     return () => (stop(), stopReveal(), still?.());
@@ -39,7 +48,9 @@ export function MotionLayer() {
   // shortcut: the cause on this page is not found, drop this once it is.
   React.useEffect(() => {
     const vv = window.visualViewport;
-    const fix = () => void (scrollX && scrollTo(0, scrollY));
+    const fix = () => {
+      if (scrollX) scrollTo(0, scrollY);
+    };
     vv?.addEventListener("scroll", fix);
     return () => vv?.removeEventListener("scroll", fix);
   }, []);

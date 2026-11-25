@@ -24,7 +24,11 @@ const band = (x: number) => (x * BAND) / (BAND + Math.abs(x));
 
 export function Drift({ k }: { k: string }) {
   React.useEffect(() => {
-    if (!CSS.supports("animation-timeline: view()") || !matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches) return;
+    if (
+      !CSS.supports("animation-timeline: view()") ||
+      !matchMedia("(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)").matches
+    )
+      return;
     const grid = document.querySelector<HTMLElement>("#p-work .wgrid");
     if (!grid) return;
     const tiles = [...grid.querySelectorAll<HTMLElement>(".wt")];
@@ -35,16 +39,24 @@ export function Drift({ k }: { k: string }) {
           const t = e.target as HTMLElement;
           t.toggleAttribute("data-v4d", e.isIntersecting);
           if (e.isIntersecting) near.add(t);
-          else (near.delete(t), t.style.removeProperty("translate"));
+          else {
+            near.delete(t);
+            t.style.removeProperty("translate");
+          }
         }),
-      { rootMargin: "50% 0px" }
+      { rootMargin: "50% 0px" },
     );
     tiles.forEach((t) => io.observe(t));
     // a gallery keeps the loop for `data-v4lag` and the long-frame watch, without the lag
     const lagOn = !grid.classList.contains("wframes");
 
     const col = new Map(tiles.map((t, i) => [t, i]));
-    let s = { x: 0, v: 0 }, y = scrollY, at = 0, raf = 0, cols = 4, long = 0;
+    let s = { x: 0, v: 0 },
+      y = scrollY,
+      at = 0,
+      raf = 0,
+      cols = 4,
+      long = 0;
     const clear = () => tiles.forEach((el) => el.style.removeProperty("translate"));
     const tick = (now: number) => {
       const dt = frameDt(now, at);

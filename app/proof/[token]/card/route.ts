@@ -17,6 +17,11 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   if (c === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
   if (!c) return new Response("Not found", { status: 404 });
   return new Response(c.body, {
-    headers: { "content-type": "image/jpeg", "cache-control": "public, max-age=3600", "x-robots-tag": "noindex, nofollow, noimageindex", etag: c.etag },
+    headers: {
+      "content-type": "image/jpeg",
+      "cache-control": "public, max-age=3600",
+      "x-robots-tag": "noindex, nofollow, noimageindex",
+      etag: c.etag,
+    },
   });
 }

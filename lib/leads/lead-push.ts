@@ -11,7 +11,6 @@ import { sha256Hex } from "@/lib/token";
  * desk is the only thing that turns this on.
  * ─────────────────────────────────────────────────────────────── */
 
-
 // 12 bytes of the hash: 24 hex.
 const keyOf = async (endpoint: string) => `push:${(await sha256Hex(endpoint)).slice(0, 24)}`;
 

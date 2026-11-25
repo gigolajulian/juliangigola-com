@@ -29,16 +29,3 @@
     min-height: 0;
   }
 }
-
-/* ── glass costs a tablet more than it is worth ──
-   A backdrop filter re-reads the pixels behind it every frame, and on the
-   iPad thirty of them moving at once came out as plates painted twice and
-   cells that arrived empty. Where the pointer is a finger, the plates on
-   the homepage's work tiles are filled rather than blurred, and the ones
-   that only show on hover, which a touch screen never shows, drop it. */
-@media (pointer: coarse) {
-  :root .glass-surface.opacity-0 {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-}

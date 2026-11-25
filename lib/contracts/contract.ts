@@ -43,11 +43,13 @@ export const UNSET = /\bto be set\b/i;
 export type Signature = { name: string; email: string; ip: string; ua: string; at: string; hash: string; mark?: string; typed?: true };
 
 /** Path data from the pad: M, L and Q with plain numbers, nothing that could run or link. */
-export const isMark = (v: string): boolean => v.length >= 8 && v.length <= 40000 && /^M[\d\s.,MLQ-]+$/.test(v) && (v.match(/\d+(\.\d+)?/g)?.length ?? 0) >= 4;
+export const isMark = (v: string): boolean =>
+  v.length >= 8 && v.length <= 40000 && /^M[\d\s.,MLQ-]+$/.test(v) && (v.match(/\d+(\.\d+)?/g)?.length ?? 0) >= 4;
 /** First and last name at least: two words with letters in them. */
 export const isFullName = (n: string) => n.split(/\s+/).filter((w) => /\p{L}/u.test(w)).length >= 2;
 /** The drawn mark as an inline SVG. Only ever given path data that passed `isMark`. */
-export const markSvg = (d: string, attrs = "") => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" ${attrs}><path d="${d}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+export const markSvg = (d: string, attrs = "") =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" ${attrs}><path d="${d}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 export type Contract = {
   id: string;
@@ -72,11 +74,18 @@ export const isContractId = (v: string): boolean => /^[0-9A-Za-z]{16}$/.test(v);
 export const contractUrl = (id: string) => `https://juliangigola.com/contract/${id}`;
 
 const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
-const longDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(new Date(iso));
+const longDay = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(new Date(iso));
 
 /** A template's fields filled from a lead. Unknown values stay readable blanks for him to fill. */
-export function fillContract(body: string, l: Pick<Lead, "name" | "when" | "quote" | "licence"> & Partial<Pick<Lead, "kind" | "deposit" | "events">>, today = new Date().toISOString()): string {
-  const usage = l.licence ? `${l.licence.use || "Licensed use"}, until ${new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}` : "Personal use";
+export function fillContract(
+  body: string,
+  l: Pick<Lead, "name" | "when" | "quote" | "licence"> & Partial<Pick<Lead, "kind" | "deposit" | "events">>,
+  today = new Date().toISOString(),
+): string {
+  const usage = l.licence
+    ? `${l.licence.use || "Licensed use"}, until ${new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}`
+    : "Personal use";
   return body
     .replace(/\{client\}/g, l.name)
     .replace(/\{date\}/g, l.when ? longDay(l.when) : "to be set")
@@ -92,11 +101,16 @@ export function cleanContractTemplates(v: unknown): ContractTemplate[] {
   return v
     .filter((t): t is ContractTemplate => !!t && typeof t === "object" && typeof t.name === "string" && typeof t.body === "string")
     .slice(0, 20)
-    .map((t, i) => ({ id: typeof t.id === "string" && t.id ? t.id.slice(0, 40) : `c${i}`, name: t.name.slice(0, 60), body: t.body.slice(0, 20000) }));
+    .map((t, i) => ({
+      id: typeof t.id === "string" && t.id ? t.id.slice(0, 40) : `c${i}`,
+      name: t.name.slice(0, 60),
+      body: t.body.slice(0, 20000),
+    }));
 }
 
 /** The business block on the contract: name, address and email from the invoice details. */
-export const fromLines = (f: Partial<InvoiceFrom> | null | undefined) => [f?.name, f?.a1, f?.a2, f?.a3, f?.email].filter((x): x is string => !!x?.trim()).map((x) => x.trim());
+export const fromLines = (f: Partial<InvoiceFrom> | null | undefined) =>
+  [f?.name, f?.a1, f?.a2, f?.a3, f?.email].filter((x): x is string => !!x?.trim()).map((x) => x.trim());
 
 const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 
@@ -109,17 +123,30 @@ export function cleanDraft(given: Record<string, unknown>): { to: Contract["to"]
   if (!name) return { error: "The client's name, please." };
   const email = clip(to.email, 200);
   if (email && !isEmail(email)) return { error: "That email does not look right." };
-  return { to: { name, email, ...(clip(to.address, 300) ? { address: clip(to.address, 300) } : {}) }, text, ...(typeof given.template === "string" ? { template: given.template.slice(0, 40) } : {}) };
+  return {
+    to: { name, email, ...(clip(to.address, 300) ? { address: clip(to.address, 300) } : {}) },
+    text,
+    ...(typeof given.template === "string" ? { template: given.template.slice(0, 40) } : {}),
+  };
 }
 
 /** A new contract, or the draft changed. A signed one never changes. */
-export function draft(c: Contract | null, lead: string, d: { to: Contract["to"]; text: string; template?: string }, at: string): Contract | { error: string } {
+export function draft(
+  c: Contract | null,
+  lead: string,
+  d: { to: Contract["to"]; text: string; template?: string },
+  at: string,
+): Contract | { error: string } {
   if (c?.signed) return { error: "Signed contracts are locked." };
   return { ...(c ?? { id: newToken(), lead, createdAt: at }), ...d, updatedAt: at };
 }
 
 /** The client's signature, or why it was refused. `seen` is the hash the page showed them. */
-export async function sign(c: Contract, by: { name: unknown; email: unknown; agree: unknown; seen: unknown; mark?: unknown; typed?: unknown; ip: string; ua: string }, at: string): Promise<(Contract & { signed: Signature }) | { error: string; status: number }> {
+export async function sign(
+  c: Contract,
+  by: { name: unknown; email: unknown; agree: unknown; seen: unknown; mark?: unknown; typed?: unknown; ip: string; ua: string },
+  at: string,
+): Promise<(Contract & { signed: Signature }) | { error: string; status: number }> {
   if (c.signed) return { error: "This contract is already signed.", status: 409 };
   const name = clip(by.name, 120);
   if (!isFullName(name)) return { error: "Type your first and last name.", status: 400 };
@@ -129,9 +156,19 @@ export async function sign(c: Contract, by: { name: unknown; email: unknown; agr
   if (by.agree !== true) return { error: "Tick I agree to sign.", status: 400 };
   const hash = await sha256Hex(c.text);
   if (by.seen !== hash) return { error: "This contract changed since you opened it. Reload the page to read the new text.", status: 409 };
-  return { ...c, signed: { name, email: by.email.trim(), ip: by.ip.slice(0, 64), ua: by.ua.slice(0, 400), at, hash, ...(typed ? { typed: true as const } : { mark: by.mark as string }) } };
+  return {
+    ...c,
+    signed: {
+      name,
+      email: by.email.trim(),
+      ip: by.ip.slice(0, 64),
+      ua: by.ua.slice(0, 400),
+      at,
+      hash,
+      ...(typed ? { typed: true as const } : { mark: by.mark as string }),
+    },
+  };
 }
-
 
 /** One contract, opened. Null for a malformed id or a missing record; throws when the record is there but cannot be opened (a rotated LEADS_KEY), like `readLead`. */
 export async function readContract(kv: KV, s: Seal, id: string): Promise<Contract | null> {
@@ -162,13 +199,22 @@ export const publicContract = async (c: Contract) => ({
 export type PublicContract = Awaited<ReturnType<typeof publicContract>>;
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-const stamp = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "long" }).format(new Date(iso));
+const stamp = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "long" }).format(new Date(iso));
 
 /** The signed copy: one self-contained page, printable to PDF. Everything the client typed is escaped. */
 export function signedCopy(c: Contract): string {
   const s = c.signed;
   const rows: [string, string][] = s
-    ? [["Signed by", s.name], ["Email", s.email], ["Signed at", stamp(s.at)], ["IP address", s.ip], ["Device", s.ua], ["SHA-256 of the text", s.hash], ["Contract", contractUrl(c.id)]]
+    ? [
+        ["Signed by", s.name],
+        ["Email", s.email],
+        ["Signed at", stamp(s.at)],
+        ["IP address", s.ip],
+        ["Device", s.ua],
+        ["SHA-256 of the text", s.hash],
+        ["Contract", contractUrl(c.id)],
+      ]
     : [["Status", "Not signed yet"]];
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
 <title>Contract, ${esc(c.to.name)}</title>

@@ -52,7 +52,5 @@ export function springSettled(s: SpringState, target: number) {
  */
 export function launchSpeed(sv: number, d: number, zeta: number) {
   const cap = OMEGA * Math.abs(d) * (zeta < 1 ? 1.25 : 1);
-  return Math.sign(sv) === Math.sign(d)
-    ? Math.sign(sv) * Math.min(Math.abs(sv * 1000), cap)
-    : sv * 1000;
+  return Math.sign(sv) === Math.sign(d) ? Math.sign(sv) * Math.min(Math.abs(sv * 1000), cap) : sv * 1000;
 }

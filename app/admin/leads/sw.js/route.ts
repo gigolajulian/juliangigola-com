@@ -38,7 +38,9 @@ self.addEventListener("notificationclick", (e) => {
     return open ? open.focus() : self.clients.openWindow(HOME);
   }));
 });
-${offline ? `
+${
+  offline
+    ? `
 /* Offline shell: the page itself network-first, the build's files
    cache-first (their names change with each build). Never the API, so no
    lead data is stored here.
@@ -53,7 +55,9 @@ self.addEventListener("fetch", (e) => {
   } else if (path.startsWith("/_next/static/") || path.startsWith("/leads-app/")) {
     e.respondWith(caches.match(r).then((m) => m || fetch(r).then((res) => keep(r, res))));
   }
-});` : ""}
+});`
+    : ""
+}
 `;
 
 export function GET() {
