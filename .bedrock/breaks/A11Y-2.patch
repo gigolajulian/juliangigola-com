@@ -1,0 +1,13 @@
+diff --git a/app/styles/v4pages.css b/app/styles/v4pages.css
+index 867fd0bd..40cf417a 100644
+--- a/app/styles/v4pages.css
++++ b/app/styles/v4pages.css
+@@ -239,7 +239,7 @@ html:root .cv4a .cv4b{display:flex;flex-wrap:wrap;gap:12px}
+    `data-v4d` (components/portfolio/drift.tsx): only tiles near the screen move, since each moving
+    tile is its own compositor layer. ── */
+ @supports (animation-timeline: view()) {
+-  @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
++  @media (hover: hover) and (pointer: fine) {
+     html:root .v3 #p-work .wgrid:not(.square) .wt .ph { view-timeline: --v4p3 block; }
+     html:root .v3 #p-work .wgrid:not(.square) .wt .ph > img { scale: 1.18; }
+     html:root .v3 #p-work .wgrid:not(.square) .wt[data-v4d] .ph > img { animation: v4p3-drift linear both !important; animation-timeline: --v4p3 !important; }

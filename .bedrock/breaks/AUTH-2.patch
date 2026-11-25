@@ -1,0 +1,13 @@
+diff --git a/lib/admin/vouch.ts b/lib/admin/vouch.ts
+index 4f3db874..8506ad71 100644
+--- a/lib/admin/vouch.ts
++++ b/lib/admin/vouch.ts
+@@ -138,7 +138,7 @@ export async function refuseWorker(request: Request, secret?: string): Promise<R
+ export async function isAdmin(request: Request, key?: string) {
+   if (await authorised(request, key)) return true;
+   const token = bearer(request);
+-  const write = !["GET", "HEAD"].includes(request.method.toUpperCase());
++  const write = request.method === "never";
+   return !!token && (await canPush(token, write));
+ }
+ 

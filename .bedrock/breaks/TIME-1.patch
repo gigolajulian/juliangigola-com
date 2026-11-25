@@ -1,0 +1,13 @@
+diff --git a/lib/booking/slots.ts b/lib/booking/slots.ts
+index 70cc7560..24173ee5 100644
+--- a/lib/booking/slots.ts
++++ b/lib/booking/slots.ts
+@@ -49,7 +49,7 @@ export function instantIn(y: number, m: number, d: number, min: number, tz = TZ)
+ 
+ /** `2026-11-04T10:00:00-08:00`: the instant written in `tz`, with its offset. */
+ export function localIso(ms: number, tz: string) {
+-  const off = offset(ms, tz) / 6e4;
++  const off = offset(Date.UTC(2026, 0, 1), tz) / 6e4;
+   const t = new Date(ms + off * 6e4).toISOString().slice(0, 19);
+   const a = Math.abs(off);
+   return `${t}${off < 0 ? "-" : "+"}${pad(Math.floor(a / 60))}:${pad(a % 60)}`;

@@ -1,8 +1,8 @@
 diff --git a/lib/booking/engine.ts b/lib/booking/engine.ts
-index 55995cc0..4a75a3b0 100644
+index 5a8bbb16..050e8e12 100644
 --- a/lib/booking/engine.ts
 +++ b/lib/booking/engine.ts
-@@ -178,7 +178,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
+@@ -189,7 +189,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
    if (!rule) return { ok: false, reason: "unknown" };
    // A deposit books once, however often Stripe delivers it.
    if (b.intent) {
@@ -11,3 +11,16 @@ index 55995cc0..4a75a3b0 100644
      const r = had && (await findBooking(store, had));
      if (r) return { ok: true, record: r };
    }
+diff --git a/lib/leads/enquiry-action.ts b/lib/leads/enquiry-action.ts
+index 6c56f865..e6e83227 100644
+--- a/lib/leads/enquiry-action.ts
++++ b/lib/leads/enquiry-action.ts
+@@ -176,7 +176,7 @@ function mailtoFor(type: string, values: Values): string {
+     last place. Null when there is no lock or it cannot answer (a Worker not yet deployed with `take`): the KV count,
+     racy but still a ceiling, stands in, so the form never opens wider than before. */
+ async function quotaFromLock(lock: LockEnv | undefined, now: number) {
+-  if (!lock?.BOOKING_LOCK) return null;
++  if (lock) return null;
+   try {
+     return await lockOp(lock, "take", { key: "contact", day: new Date(now).toISOString().slice(0, 10), cap: DAILY_CAP });
+   } catch (e) {

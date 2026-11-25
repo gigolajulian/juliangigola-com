@@ -1,0 +1,10 @@
+diff --git a/public/.well-known/security.txt b/public/.well-known/security.txt
+index d535b0ac..28c94eb0 100644
+--- a/public/.well-known/security.txt
++++ b/public/.well-known/security.txt
+@@ -1,4 +1,4 @@
+-Contact: mailto:hello@juliangigola.com
++Contact: mailto:nobody@example.com
+ Expires: 2027-11-25T00:00:00.000Z
+ Policy: https://juliangigola.com/.well-known/security-policy.txt
+ Preferred-Languages: en
