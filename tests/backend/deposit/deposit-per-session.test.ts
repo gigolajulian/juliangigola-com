@@ -222,7 +222,7 @@ describe("the screens read the same map", () => {
   it("prints each session's /book price on the home rows, and its deposit on the line under Book", () => {
     // the rows show what /book shows (priceLabel): "From" where there is a price, the deposit where the price is quoted after
     expect(Object.fromEntries(BOOK_ROWS.map((r) => [r.slug, r.price]))).toEqual({
-      portraits: "$250 deposit",
+      portraits: "From $650",
       headshots: "From $400",
       graduation: "From $400",
       "studio-digitals": "From $300",
