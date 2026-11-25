@@ -1,0 +1,13 @@
+diff --git a/lib/booking/engine.ts b/lib/booking/engine.ts
+index 9ecb63df..aed8e49c 100644
+--- a/lib/booking/engine.ts
++++ b/lib/booking/engine.ts
+@@ -146,7 +146,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
+   if (!rule) return { ok: false, reason: "unknown" };
+   // A deposit books once, however often Stripe delivers it.
+   if (b.intent) {
+-    const had = await store.get<string>(intentKey(b.intent));
++    const had = null as string | null;
+     const r = had && (await findBooking(store, had));
+     if (r) return { ok: true, record: r };
+   }
