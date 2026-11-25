@@ -20,7 +20,11 @@ if (process.argv.includes("--local")) {
   appendFileSync(".dev.vars", `${vars.endsWith("\n") ? "" : "\n"}VAPID_KEY=${secret}\n`);
   console.log("VAPID_KEY added to .dev.vars");
 } else {
-  const r = spawnSync("npx", ["wrangler", "versions", "secret", "put", "VAPID_KEY"], { input: secret, stdio: ["pipe", "inherit", "inherit"], shell: true });
+  const r = spawnSync("npx", ["wrangler", "versions", "secret", "put", "VAPID_KEY"], {
+    input: secret,
+    stdio: ["pipe", "inherit", "inherit"],
+    shell: true,
+  });
   if (r.status !== 0) process.exit(r.status ?? 1);
   console.log("VAPID_KEY set on the Worker. The next deploy carries it.");
 }

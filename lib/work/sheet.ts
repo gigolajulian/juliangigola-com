@@ -10,7 +10,10 @@ export function tailHole(frames: Frame[]) {
     for (let r = 0; ; r++) {
       const row = (rows[r] ??= [false, false, false]);
       const c = [0, 1, 2].find((c) => c + n <= 3 && row.slice(c, c + n).every((x) => !x));
-      if (c !== undefined) { row.fill(true, c, c + n); break; }
+      if (c !== undefined) {
+        row.fill(true, c, c + n);
+        break;
+      }
     }
   }
   const last = rows[rows.length - 1];

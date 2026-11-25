@@ -101,11 +101,7 @@ export function plainSrc(url: string): string | null {
   return /^https?:\//.test(rest) ? rest.replace(/^(https?:)\/+/, "$1//") : `/${rest}`;
 }
 
-export default function cloudflareImageLoader({
-  src,
-  width,
-  quality,
-}: ImageLoaderProps): string {
+export default function cloudflareImageLoader({ src, width, quality }: ImageLoaderProps): string {
   const options = [
     `width=${width}`,
     // 78 for every picture that is looked at rather than inspected: a
@@ -118,9 +114,7 @@ export default function cloudflareImageLoader({
   // An absolute URL is somebody else's. A provider's still is sized anyway;
   // anything else is already complete.
   if (!src.startsWith("/")) {
-    return CDN && POSTER_HOSTS.test(src)
-      ? `${ORIGIN}/cdn-cgi/image/${options.join(",")}/${src}`
-      : src;
+    return CDN && POSTER_HOSTS.test(src) ? `${ORIGIN}/cdn-cgi/image/${options.join(",")}/${src}` : src;
   }
 
   // The sized copy when there is one, with or without the resizer. The

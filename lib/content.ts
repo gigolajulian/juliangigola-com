@@ -15,12 +15,7 @@
 // `work.ts`, for the old category redirects) and is transpiled outside the
 // app's path mapping, where `@/` does not resolve.
 import raw from "../content/site.json";
-import {
-  isValidId,
-  type Provider,
-  type Video,
-  type VideoSection,
-} from "./work/videos";
+import { isValidId, type Provider, type Video, type VideoSection } from "./work/videos";
 import { contentChecks, isRecord } from "./json";
 
 export type Testimonial = {
@@ -120,21 +115,16 @@ export type SiteContent = {
 const { fail, str } = contentChecks("content/site.json");
 
 /** A string, or null for "not set yet" — which several fields treat as meaningful. */
-const strOrNull = (v: unknown, path: string): string | null =>
-  v === null ? null : str(v, path);
+const strOrNull = (v: unknown, path: string): string | null => (v === null ? null : str(v, path));
 
 const strList = (v: unknown, path: string): string[] =>
-  Array.isArray(v)
-    ? v.map((x, i) => str(x, `${path}[${i}]`))
-    : fail(path, "an array", v);
+  Array.isArray(v) ? v.map((x, i) => str(x, `${path}[${i}]`)) : fail(path, "an array", v);
 
 const money = (v: unknown, path: string): number | null => {
   if (v === null) return null;
   // Finite and non-negative: `Infinity` and `-1` both parse as numbers and
   // both would render as a price.
-  return typeof v === "number" && Number.isFinite(v) && v >= 0
-    ? v
-    : fail(path, "a price in dollars or null", v);
+  return typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : fail(path, "a price in dollars or null", v);
 };
 
 /** Absent, null or "": an optional field left out. */
@@ -169,14 +159,8 @@ const session = (v: unknown, path: string): SessionType => {
   };
 };
 
-const list = <T>(
-  v: unknown,
-  path: string,
-  each: (x: unknown, p: string) => T,
-): T[] =>
-  Array.isArray(v)
-    ? v.map((x, i) => each(x, `${path}[${i}]`))
-    : fail(path, "an array", v);
+const list = <T>(v: unknown, path: string, each: (x: unknown, p: string) => T): T[] =>
+  Array.isArray(v) ? v.map((x, i) => each(x, `${path}[${i}]`)) : fail(path, "an array", v);
 
 /**
  * A link, held to a scheme a browser may safely follow.
@@ -242,18 +226,14 @@ function posterOrUndefined(value: unknown, path: string): string | undefined {
     return fail(path, "a full https URL", url);
   }
   if (parsed.protocol !== "https:") return fail(path, "an https URL", url);
-  if (!POSTER_HOSTS.includes(parsed.hostname))
-    return fail(path, `a still on ${POSTER_HOSTS.join(" or ")}`, url);
+  if (!POSTER_HOSTS.includes(parsed.hostname)) return fail(path, `a still on ${POSTER_HOSTS.join(" or ")}`, url);
 
   return url;
 }
 
 function year(value: unknown, path: string): number | undefined {
   if (blank(value)) return undefined;
-  return typeof value === "number" &&
-    Number.isInteger(value) &&
-    value >= 1990 &&
-    value <= 2100
+  return typeof value === "number" && Number.isInteger(value) && value >= 1990 && value <= 2100
     ? value
     : fail(path, "a four-digit year", value);
 }
@@ -266,8 +246,7 @@ function video(v: unknown, path: string): Video {
     : fail(path + ".provider", PROVIDERS.join(" or "), v.provider);
 
   const videoId = str(v.videoId, `${path}.videoId`);
-  if (!isValidId(provider, videoId))
-    fail(`${path}.videoId`, `a ${provider} id`, videoId);
+  if (!isValidId(provider, videoId)) fail(`${path}.videoId`, `a ${provider} id`, videoId);
 
   const section = VIDEO_SECTIONS.includes(v.section as VideoSection)
     ? (v.section as VideoSection)

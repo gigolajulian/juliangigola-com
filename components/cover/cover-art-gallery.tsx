@@ -39,25 +39,34 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
   const shut = React.useRef(0);
   React.useEffect(() => {
     const ac = new AbortController();
-    const fine = matchMedia("(hover:hover) and (pointer:fine)"), calm = matchMedia("(prefers-reduced-motion: reduce)");
+    const fine = matchMedia("(hover:hover) and (pointer:fine)"),
+      calm = matchMedia("(prefers-reduced-motion: reduce)");
     const ok = () => fine.matches && !calm.matches;
     list.current?.querySelectorAll<HTMLElement>(".mt-sleeve").forEach((it) => {
       sleeveTilt(it, ok, { signal: ac.signal });
       const slug = it.dataset.snd;
       if (!slug) return;
       let wait = 0;
-      it.addEventListener("pointerenter", (e) => {
-        if (e.pointerType === "touch" || !ok() || performance.now() - shut.current < 1200) return;
-        wait = window.setTimeout(() => {
-          // Browsers block sound before a first click or key: do not even ask for the file until then.
-          if (ac.signal.aborted || navigator.userActivation?.hasBeenActive === false) return;
-          playSound(slug);
-        }, 4300);
-      }, { signal: ac.signal });
-      it.addEventListener("pointerleave", () => {
-        clearTimeout(wait);
-        if (held.current !== slug) stopSound(slug);
-      }, { signal: ac.signal });
+      it.addEventListener(
+        "pointerenter",
+        (e) => {
+          if (e.pointerType === "touch" || !ok() || performance.now() - shut.current < 1200) return;
+          wait = window.setTimeout(() => {
+            // Browsers block sound before a first click or key: do not even ask for the file until then.
+            if (ac.signal.aborted || navigator.userActivation?.hasBeenActive === false) return;
+            playSound(slug);
+          }, 4300);
+        },
+        { signal: ac.signal },
+      );
+      it.addEventListener(
+        "pointerleave",
+        () => {
+          clearTimeout(wait);
+          if (held.current !== slug) stopSound(slug);
+        },
+        { signal: ac.signal },
+      );
     });
     return () => {
       ac.abort();
@@ -67,10 +76,7 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
 
   // The lightbox pages through every side in order, so arrowing off side A
   // lands on side B rather than skipping to the next release.
-  const frames = React.useMemo(
-    () => releases.flatMap((r) => r.frames),
-    [releases],
-  );
+  const frames = React.useMemo(() => releases.flatMap((r) => r.frames), [releases]);
   const lightbox = useLightbox(frames);
 
   // Closing the viewer, or arrowing to another release in it, ends the clip. The back of the same sleeve does not.
@@ -81,17 +87,14 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
     stopSound();
   };
   const shown = frames[lightbox.index]?.src;
-  const viewing = lightbox.open ? releases.find((r) => r.frames.some((f) => f.src === shown))?.slug ?? "" : "";
+  const viewing = lightbox.open ? (releases.find((r) => r.frames.some((f) => f.src === shown))?.slug ?? "") : "";
   React.useEffect(() => {
     if (snd && viewing && viewing !== held.current) quiet();
   }, [snd, viewing]);
 
   // A cell opens at its own position in that flat sequence. Keyed by `src`,
   // which is unique per side.
-  const positions = React.useMemo(
-    () => new Map(frames.map((f, i) => [f.src, i])),
-    [frames],
-  );
+  const positions = React.useMemo(() => new Map(frames.map((f, i) => [f.src, i])), [frames]);
 
   // `?cover=<slug>`: a cover clicked on the home (components/home/rows.tsx) arrives open in the viewer, on side A, with no history entry of its own: one Back goes home.
   React.useEffect(() => {
@@ -132,10 +135,21 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
               >
                 <span className="disc" aria-hidden />
                 <span className="face">
-                  <Image data-frame={front.src} src={front.src} alt={front.alt} fill sizes="34vw" priority={i < 3} style={{ background: front.color }} />
+                  <Image
+                    data-frame={front.src}
+                    src={front.src}
+                    alt={front.alt}
+                    fill
+                    sizes="34vw"
+                    priority={i < 3}
+                    style={{ background: front.color }}
+                  />
                 </span>
                 {/* Named the way the home names its covers: a mono caption under the sleeve, no band over the art. */}
-                <span className="cv4c" aria-hidden><span>{release.title}</span><span className="mute">{release.artist}</span></span>
+                <span className="cv4c" aria-hidden>
+                  <span>{release.title}</span>
+                  <span className="mute">{release.artist}</span>
+                </span>
               </button>
             </li>
           );
@@ -151,7 +165,13 @@ export function CoverArtGallery({ releases }: { releases: CoverRelease[] }) {
           lightbox.onOpenChange(o);
         }}
         // counted by release, as the page's own count is: a sleeve's back is the same record
-        place={[Math.max(0, releases.findIndex((r) => r.frames.some((f) => f.src === shown))) + 1, releases.length]}
+        place={[
+          Math.max(
+            0,
+            releases.findIndex((r) => r.frames.some((f) => f.src === shown)),
+          ) + 1,
+          releases.length,
+        ]}
         note={snd ? <CoverSound slug={viewing} onPlay={() => (held.current = viewing)} /> : undefined}
       />
       {/* On the body: `main` carries a transform, and a fixed line inside it would sit at the foot of the page. */}

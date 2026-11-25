@@ -1,7 +1,7 @@
 import * as React from "react";
 import { withGsap } from "@/lib/motion/gsap-lazy";
 import { STEP_AT, type PickedTime, type Step } from "@/components/booking/picker/parts";
-import { localDayKey } from "@/components/booking/flow";
+import { localDayKey } from "@/components/booking/picker/dates";
 import { sessionGet, sessionSet } from "@/lib/storage";
 
 type Layout = {
@@ -37,11 +37,13 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     if (!dir || !el || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     // Booked rises in; any other step slides in from the side it comes from.
     const up = step === "done";
-    withGsap((gsap) => gsap.fromTo(
-      el.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor"),
-      { autoAlpha: 0, x: up ? 0 : 28 * dir, y: up ? 14 : 0 },
-      { autoAlpha: 1, x: 0, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" },
-    ));
+    withGsap((gsap) =>
+      gsap.fromTo(
+        el.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor"),
+        { autoAlpha: 0, x: up ? 0 : 28 * dir, y: up ? 14 : 0 },
+        { autoAlpha: 1, x: 0, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" },
+      ),
+    );
   }, [step]);
   /* A day picked in a month brings its times up on a phone, where the
      card is as tall as it needs and the page scrolls. */
@@ -130,11 +132,16 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     if (!first.current) return void (first.current = true);
     const cells = [...box.querySelectorAll<HTMLElement>(".ed-day, .ed-cell, .ed-blank")];
     const at = (k: number) => (view === "week" ? k * 0.06 : (k % 7) * 0.03 + Math.floor(k / 7) * 0.06);
-    let tw: gsap.core.Tween[] = [], gone = false;
+    let tw: gsap.core.Tween[] = [],
+      gone = false;
     withGsap((gsap) => {
       if (gone) return;
       tw = cells.map((c, k) =>
-        gsap.fromTo(c, { autoAlpha: 0, y: 10, rotationX: -35, transformPerspective: 500, transformOrigin: "50% 0%" }, { autoAlpha: 1, y: 0, rotationX: 0, duration: 0.45, delay: at(k), ease: "expo.out", clearProps: "opacity,visibility,transform" }),
+        gsap.fromTo(
+          c,
+          { autoAlpha: 0, y: 10, rotationX: -35, transformPerspective: 500, transformOrigin: "50% 0%" },
+          { autoAlpha: 1, y: 0, rotationX: 0, duration: 0.45, delay: at(k), ease: "expo.out", clearProps: "opacity,visibility,transform" },
+        ),
       );
     });
     return () => {
@@ -152,11 +159,24 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     if (!matchMedia("(pointer: coarse)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (sessionGet("ed-nudged")) return;
     const seen = () => sessionSet("ed-nudged", "1");
-    let tl: gsap.core.Timeline | undefined, gone = false;
-    const play = () => withGsap((gsap) => { if (!gone) tl = gsap.timeline({ delay: 1.1, onStart: seen }).to(row, { x: -8, duration: 0.4, ease: "power2.out" }).to(row, { x: 0, duration: 0.5, ease: "power2.inOut" }); });
+    let tl: gsap.core.Timeline | undefined,
+      gone = false;
+    const play = () =>
+      withGsap((gsap) => {
+        if (!gone)
+          tl = gsap
+            .timeline({ delay: 1.1, onStart: seen })
+            .to(row, { x: -8, duration: 0.4, ease: "power2.out" })
+            .to(row, { x: 0, duration: 0.5, ease: "power2.inOut" });
+      });
     /* Not behind the opening splash: the delay starts once it has lifted. */
     const root = document.documentElement;
-    const watch = new MutationObserver(() => { if (!root.hasAttribute("data-intro")) { watch.disconnect(); play(); } });
+    const watch = new MutationObserver(() => {
+      if (!root.hasAttribute("data-intro")) {
+        watch.disconnect();
+        play();
+      }
+    });
     if (root.hasAttribute("data-intro")) watch.observe(root, { attributes: true, attributeFilter: ["data-intro"] });
     else play();
     /* Undone without spending the visit's nudge: it only counts once it has really started. */
@@ -178,9 +198,11 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     /* The days follow the finger once it is clearly sideways, give at the start of the calendar,
        and a flick or a third of the row turns the week; less springs back. */
     onPointerMove: (e) => {
-      const s = swipe.current, row = daysBox.current?.firstElementChild as HTMLElement | null;
+      const s = swipe.current,
+        row = daysBox.current?.firstElementChild as HTMLElement | null;
       if (!s || !row) return;
-      const dx = e.clientX - s.x, dy = e.clientY - s.y;
+      const dx = e.clientX - s.x,
+        dy = e.clientY - s.y;
       if (!s.drag) {
         if (Math.abs(dx) < 10 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
         s.drag = true;
@@ -198,7 +220,8 @@ export function usePickerLayout({ step, pick, days, view, anchor, week, month, c
     onPointerUp: (e) => {
       const s = swipe.current;
       if (!s) return;
-      const dx = e.clientX - s.x, dy = e.clientY - s.y;
+      const dx = e.clientX - s.x,
+        dy = e.clientY - s.y;
       const row = daysBox.current?.firstElementChild as HTMLElement | null;
       if (s.drag && row) {
         s.done = true;

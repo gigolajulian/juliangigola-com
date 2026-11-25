@@ -14,7 +14,27 @@ const FLIP = 1300; // the idle wall's card turn, ms
 
 type Part = { el: HTMLElement; lag: number; col: number; lastY: number };
 
-type State = { cols: Part[]; figs: Part[]; caps: HTMLElement[]; letters: HTMLElement[]; photos: HTMLElement[]; texts: HTMLElement[]; ctas: HTMLElement | null; more: HTMLElement | null; name: HTMLElement | null; scroll: number; mode: "" | "d" | "p" | "t"; exit: number; unit: number; sizeKey: string; wallH: number; out: boolean; drop: number; toned: number; tonedY: number };
+type State = {
+  cols: Part[];
+  figs: Part[];
+  caps: HTMLElement[];
+  letters: HTMLElement[];
+  photos: HTMLElement[];
+  texts: HTMLElement[];
+  ctas: HTMLElement | null;
+  more: HTMLElement | null;
+  name: HTMLElement | null;
+  scroll: number;
+  mode: "" | "d" | "p" | "t";
+  exit: number;
+  unit: number;
+  sizeKey: string;
+  wallH: number;
+  out: boolean;
+  drop: number;
+  toned: number;
+  tonedY: number;
+};
 
 const ink = (n: Node) => {
   const r = document.createRange();
@@ -31,7 +51,10 @@ function park(ctas: HTMLElement | null, on: boolean, why: "out" | "past" = "out"
   ctas.toggleAttribute("data-park-" + why, on);
   const out = ctas.hasAttribute("data-park-out") || ctas.hasAttribute("data-park-past");
   ctas.style.pointerEvents = out ? "none" : "";
-  for (const a of ctas.querySelectorAll("a,button")) out ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
+  for (const a of ctas.querySelectorAll("a,button")) {
+    if (out) a.setAttribute("tabindex", "-1");
+    else a.removeAttribute("tabindex");
+  }
 }
 
 /* The name's way out, the same on every layout: it rides down out of the window and is over as See the work's top edge enters it.
@@ -58,7 +81,9 @@ const PAD = 12;
 
 /* The tagline's colour, a letter at a time: black or white with what is under it, grey over the white page (mtscroll.css holds the
    colours). Each wall photo is read once into a 12 by 16 grid of brightness; a letter looks up the cells under it. No blend mode, so no Safari layer rules. */
-const GW = 12, GH = 16, LIGHT = 120; // LIGHT: a cell this bright (0 to 255) takes black text
+const GW = 12,
+  GH = 16,
+  LIGHT = 120; // LIGHT: a cell this bright (0 to 255) takes black text
 const LUM = new WeakMap<HTMLImageElement, { src: string; g: Uint8ClampedArray | null }>();
 function grid(im: HTMLImageElement) {
   if (!im.complete || !im.naturalWidth) return null;
@@ -66,7 +91,7 @@ function grid(im: HTMLImageElement) {
   const had = LUM.get(im);
   if (had && had.src === src) return had.g;
   // another host with no CORS mode (a preview reads live's resizer): unreadable, and WebKit logs the try even when caught
-  if (foreign(src, im)) return LUM.set(im, { src, g: null }), null;
+  if (foreign(src, im)) return (LUM.set(im, { src, g: null }), null);
   let g: Uint8ClampedArray | null = null;
   try {
     const c = document.createElement("canvas");
@@ -103,12 +128,22 @@ function toneCaptions(st: Pick<State, "letters" | "photos" | "toned" | "tonedY">
      iPhone that was a photo lying under another one. The name block takes no pointer events, so it is not in the way.
      While a swap develops, the incoming photo counts once it has cut in. Off screen there is nothing to hit: bare page. */
   const hit = (r: DOMRect) =>
-    document.elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2).find((n): n is HTMLImageElement => n instanceof HTMLImageElement && wallEl.contains(n) && n.complete && !!n.naturalWidth && (!n.classList.contains("mt-dev") || n.hasAttribute("data-on"))) ?? null;
+    document
+      .elementsFromPoint(r.left + r.width / 2, r.top + r.height / 2)
+      .find(
+        (n): n is HTMLImageElement =>
+          n instanceof HTMLImageElement &&
+          wallEl.contains(n) &&
+          n.complete &&
+          !!n.naturalWidth &&
+          (!n.classList.contains("mt-dev") || n.hasAttribute("data-on")),
+      ) ?? null;
   let wd: Element | null = null;
   let same: HTMLImageElement | null | undefined;
   const ts: string[] = [];
   for (let n = 0; n < st.letters.length; n++) {
-    const w = st.letters[n], r = rs[n];
+    const w = st.letters[n],
+      r = rs[n];
     ts[n] = "";
     if (!r.width) continue;
     const cy = r.top + r.height / 2;
@@ -129,10 +164,13 @@ function toneCaptions(st: Pick<State, "letters" | "photos" | "toned" | "tonedY">
       else {
         // object-fit: cover, centred: where the letter falls in the whole picture
         const b = im.getBoundingClientRect();
-        const k = Math.max(b.width / im.naturalWidth, b.height / im.naturalHeight), dw = im.naturalWidth * k, dh = im.naturalHeight * k;
+        const k = Math.max(b.width / im.naturalWidth, b.height / im.naturalHeight),
+          dw = im.naturalWidth * k,
+          dh = im.naturalHeight * k;
         const at = (x: number) => Math.floor(clamp((x - b.left + (dw - b.width) / 2) / dw, 0, 0.999) * GW);
         const row = Math.floor(clamp((cy - b.top + (dh - b.height) / 2) / dh, 0, 0.999) * GH) * GW;
-        const c0 = at(Math.max(r.left, b.left)), c1 = at(Math.min(r.right, b.right));
+        const c0 = at(Math.max(r.left, b.left)),
+          c1 = at(Math.min(r.right, b.right));
         let sum = 0;
         for (let c = c0; c <= c1; c++) sum += g[row + c];
         // a letter across the photo's edge belongs to whichever side holds most of it: the hit test alone is off by a pixel there
@@ -212,7 +250,9 @@ export const heroDrivers: Driver[] = [
       const part = (n: HTMLElement, a: number, c: number): Part => ({ el: n, lag: a, col: c, lastY: 0 });
       const st: State = {
         cols: [...el.querySelectorAll<HTMLElement>(".mt-col")].map((n) => part(n, Number(n.dataset.lag) || 0, Number(n.dataset.col))),
-        figs: [...el.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].map((n) => part(n, 0, Number(n.style.getPropertyValue("--c2")) || 0)),
+        figs: [...el.querySelectorAll<HTMLElement>(".mt-col:not(.side) figure")].map((n) =>
+          part(n, 0, Number(n.style.getPropertyValue("--c2")) || 0),
+        ),
         ...parts(el),
         more: el.querySelector<HTMLElement>(".mt-more .btn"),
         name: el.querySelector<HTMLElement>("[data-mt-name]"),
@@ -238,12 +278,16 @@ export const heroDrivers: Driver[] = [
       let due = 0;
       const sweep = () => {
         due = 0;
-        const top = hdr?.offsetHeight ?? 60, c = st.ctas;
-        const over = el.getBoundingClientRect().bottom <= top, up = !!c && c.getBoundingClientRect().bottom <= top;
+        const top = hdr?.offsetHeight ?? 60,
+          c = st.ctas;
+        const over = el.getBoundingClientRect().bottom <= top,
+          up = !!c && c.getBoundingClientRect().bottom <= top;
         const wallOff = over || up || !!c?.hasAttribute("data-park-out");
         for (const a of links()) {
           const off = a.closest(".mt-more") ? over : wallOff;
-          if ((a.getAttribute("tabindex") === "-1") !== off) off ? a.setAttribute("tabindex", "-1") : a.removeAttribute("tabindex");
+          if ((a.getAttribute("tabindex") === "-1") === off) continue;
+          if (off) a.setAttribute("tabindex", "-1");
+          else a.removeAttribute("tabindex");
         }
         park(c, over || up, "past");
       };
@@ -313,7 +357,8 @@ function heroFrame(st: State, p: number, el: HTMLElement, ctx: Ctx) {
     // the ground under the last row is in the page's unit, like the button that sits in it
     const target = p * Math.max(0, st.wallH * u + TAIL * ctx.u - Math.max(ctx.vh, 600));
     // a 0.64 follow, frame-rate independent
-    st.scroll = st.scroll < 0 || Math.abs(target - st.scroll) < 0.1 ? target : st.scroll + (target - st.scroll) * (1 - Math.pow(0.36, ctx.dt / 16.7));
+    st.scroll =
+      st.scroll < 0 || Math.abs(target - st.scroll) < 0.1 ? target : st.scroll + (target - st.scroll) * (1 - Math.pow(0.36, ctx.dt / 16.7));
     const S = st.scroll;
     /* Where the wall ends: with three columns the left one ends lowest and the right one
        highest, a stair down to the left, so "See the work" on the right has the open corner. The markup's lags

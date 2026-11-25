@@ -4,14 +4,7 @@ import * as React from "react";
 import { flushSync } from "react-dom";
 import { Dialog, VisuallyHidden } from "radix-ui";
 import type { Frame } from "@/lib/work/work-types";
-import {
-  zoomOpen,
-  zoomClose,
-  lockScroll,
-  pushHistory,
-  DECODE_CAP_MS,
-  type ZoomTrip,
-} from "@/components/cover/zoom";
+import { zoomOpen, zoomClose, lockScroll, pushHistory, DECODE_CAP_MS, type ZoomTrip } from "@/components/cover/zoom";
 import { pictureFor, Stage } from "./stage";
 import { useSwipe } from "./use-swipe";
 
@@ -31,8 +24,7 @@ import { useSwipe } from "./use-swipe";
 
 /** The box the trip starts from and lands in: the frame's clipping cell
     where it has one, the picture itself elsewhere. */
-const boxOf = (el: HTMLElement): HTMLElement =>
-  el.closest<HTMLElement>(".strip-cell, button, a") ?? el;
+const boxOf = (el: HTMLElement): HTMLElement => el.closest<HTMLElement>(".strip-cell, button, a") ?? el;
 
 const rectOf = (el: Element) => {
   const r = el.getBoundingClientRect();
@@ -45,14 +37,10 @@ const markViewer = (on: boolean) => {
   else document.documentElement.removeAttribute("data-viewer");
 };
 
-const viewerBox = () =>
-  document.querySelector<HTMLElement>("[data-zoom-box]");
-const viewerPicture = () =>
-  document.querySelector<HTMLImageElement>("[data-zoom-box] img[data-lightbox-picture]");
-const viewerBackdrop = () =>
-  document.querySelector<HTMLElement>("[data-zoom-backdrop]");
-const viewerChrome = () =>
-  Array.from(document.querySelectorAll<HTMLElement>("[data-zoom-chrome]"));
+const viewerBox = () => document.querySelector<HTMLElement>("[data-zoom-box]");
+const viewerPicture = () => document.querySelector<HTMLImageElement>("[data-zoom-box] img[data-lightbox-picture]");
+const viewerBackdrop = () => document.querySelector<HTMLElement>("[data-zoom-backdrop]");
+const viewerChrome = () => Array.from(document.querySelectorAll<HTMLElement>("[data-zoom-chrome]"));
 
 /* The full-size picture, fetched and decoded before the trip starts.
    The viewer asks for `100vw`; the frame in the strip asked for a third
@@ -64,8 +52,7 @@ const viewerChrome = () =>
    commas of their own. Capped, so a slow connection never holds the
    press. */
 function warm(from: HTMLElement | null): Promise<void> {
-  const img =
-    from instanceof HTMLImageElement ? from : from?.querySelector("img");
+  const img = from instanceof HTMLImageElement ? from : from?.querySelector("img");
   const set = img?.srcset ?? "";
   if (!set) return Promise.resolve();
   const want = window.innerWidth * (window.devicePixelRatio || 1);
@@ -77,10 +64,7 @@ function warm(from: HTMLElement | null): Promise<void> {
   if (!pick) return Promise.resolve();
   const copy = new window.Image();
   copy.src = pick.url;
-  return Promise.race([
-    copy.decode().catch(() => {}),
-    new Promise<void>((r) => window.setTimeout(r, DECODE_CAP_MS)),
-  ]).then(() => undefined);
+  return Promise.race([copy.decode().catch(() => {}), new Promise<void>((r) => window.setTimeout(r, DECODE_CAP_MS))]).then(() => undefined);
 }
 
 /** Is enough of this frame in the window, and visible, to travel to? */
@@ -100,10 +84,7 @@ const onScreen = (el: HTMLElement | null) => {
 
 /** Where the frame lives now, whether or not it is on screen: the close
     scrolls it into view itself. Absent means shrink to the middle. */
-const homeOf = (el: HTMLElement | null) =>
-  el && el.isConnected && Number(getComputedStyle(el).opacity) >= 0.05
-    ? boxOf(el)
-    : null;
+const homeOf = (el: HTMLElement | null) => (el && el.isConnected && Number(getComputedStyle(el).opacity) >= 0.05 ? boxOf(el) : null);
 
 /**
  * Which frame is open, and how it got there.
@@ -142,45 +123,41 @@ export function useLightbox(frames: Frame[]) {
   /** The history entry, taken off once the close has landed. */
   const unpush = React.useRef<(() => void) | null>(null);
 
-  const close = React.useCallback(
-    (to: HTMLElement | null) => {
-      if (pending.current) {
-        pending.current = false;
-        markViewer(false);
-        return;
-      }
-      if (closing.current) return;
-      closing.current = true;
-      // Before the rects are read: the trip flies the fitted picture home.
-      flushSync(() => setSettled(false));
-      unlock.current?.();
-      unlock.current = null;
-      // An open still in flight is stopped where it is, and the way home
-      // starts from there.
-      const box = viewerBox();
-      const dragged = box?.parentElement?.style.transform;
-      const startRect =
-        trip.current?.interrupt() ?? (dragged && box ? rectOf(box) : null);
-      trip.current = zoomClose({
-        box,
-        picture: viewerPicture(),
-        to,
-        startRect,
-        backdrop: viewerBackdrop,
-        chrome: viewerChrome,
-        unmount: () => flushSync(() => setOpen(false)),
-      });
-      trip.current.finished.finally(() => {
-        unpush.current?.();
-        unpush.current = null;
-        trip.current = null;
-        closing.current = false;
-        markViewer(false);
-        opener.current?.focus({ preventScroll: true });
-      });
-    },
-    [],
-  );
+  const close = React.useCallback((to: HTMLElement | null) => {
+    if (pending.current) {
+      pending.current = false;
+      markViewer(false);
+      return;
+    }
+    if (closing.current) return;
+    closing.current = true;
+    // Before the rects are read: the trip flies the fitted picture home.
+    flushSync(() => setSettled(false));
+    unlock.current?.();
+    unlock.current = null;
+    // An open still in flight is stopped where it is, and the way home
+    // starts from there.
+    const box = viewerBox();
+    const dragged = box?.parentElement?.style.transform;
+    const startRect = trip.current?.interrupt() ?? (dragged && box ? rectOf(box) : null);
+    trip.current = zoomClose({
+      box,
+      picture: viewerPicture(),
+      to,
+      startRect,
+      backdrop: viewerBackdrop,
+      chrome: viewerChrome,
+      unmount: () => flushSync(() => setOpen(false)),
+    });
+    trip.current.finished.finally(() => {
+      unpush.current?.();
+      unpush.current = null;
+      trip.current = null;
+      closing.current = false;
+      markViewer(false);
+      opener.current?.focus({ preventScroll: true });
+    });
+  }, []);
 
   /** `entry: false` takes no history entry, so Back leaves the page with the viewer: a cover opened on arrival from the home (QA on #1313: it took two Backs). */
   const show = (i: number, el?: HTMLElement | null, entry = true) => {
@@ -239,12 +216,7 @@ export function useLightbox(frames: Frame[]) {
      the backdrop, before the picture goes there. */
   const closeTo = () => {
     const src = frames[index]?.src;
-    const home =
-      index === originAt.current && origin.current
-        ? origin.current
-        : src
-          ? pictureFor(src)
-          : null;
+    const home = index === originAt.current && origin.current ? origin.current : src ? pictureFor(src) : null;
     close(homeOf(home));
   };
   // Leaving the page with the viewer up (an `entry: false` open): the next page keeps no lock and no viewer mark, and its own scroll.
@@ -268,10 +240,7 @@ export function useLightbox(frames: Frame[]) {
     closeRef.current();
   };
 
-  const step = React.useCallback(
-    (delta: number) => setIndex((i) => (i + delta + count) % count),
-    [count],
-  );
+  const step = React.useCallback((delta: number) => setIndex((i) => (i + delta + count) % count), [count]);
 
   // Arrow keys page through the sequence. Radix handles Escape and the focus
   // trap once the viewer is up; before that, Escape abandons the press.
@@ -322,16 +291,9 @@ export function Lightbox({
       <Dialog.Portal>
         {/* The backdrop and the chrome start unseen and are faded by the
             trip on their own curves (`components/cover/zoom.ts`). */}
-        <Dialog.Overlay
-          data-zoom-backdrop
-          className="fixed inset-0 z-50 bg-background/95"
-          style={{ opacity: 0 }}
-        />
+        <Dialog.Overlay data-zoom-backdrop className="fixed inset-0 z-50 bg-background/95" style={{ opacity: 0 }} />
 
-        <Dialog.Content
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex flex-col outline-none"
-        >
+        <Dialog.Content aria-modal="true" className="fixed inset-0 z-50 flex flex-col outline-none">
           <VisuallyHidden.Root>
             <Dialog.Title>{`${name}, frame ${at} of ${of}`}</Dialog.Title>
           </VisuallyHidden.Root>
@@ -373,20 +335,11 @@ export function Lightbox({
           >
             {/* Read out as it changes: the counter is the one thing that
                 says where in the sequence a keyboard visitor is. */}
-            <p
-              data-zoom-chrome
-              aria-live="polite"
-              className="label text-muted-foreground"
-              style={{ opacity: 0 }}
-            >
+            <p data-zoom-chrome aria-live="polite" className="label text-muted-foreground" style={{ opacity: 0 }}>
               {at} / {of}
             </p>
 
-            <div
-              data-zoom-chrome
-              className="flex items-center gap-2"
-              style={{ opacity: 0 }}
-            >
+            <div data-zoom-chrome className="flex items-center gap-2" style={{ opacity: 0 }}>
               <LightboxButton onClick={() => step(-1)} label="Previous frame">
                 &larr;
               </LightboxButton>
@@ -413,15 +366,7 @@ export function Lightbox({
   );
 }
 
-function LightboxButton({
-  onClick,
-  label,
-  children,
-}: {
-  onClick: () => void;
-  label: string;
-  children: React.ReactNode;
-}) {
+function LightboxButton({ onClick, label, children }: { onClick: () => void; label: string; children: React.ReactNode }) {
   return (
     <button
       type="button"

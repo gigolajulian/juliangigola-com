@@ -5,7 +5,7 @@ import { jumpTo, scrollGoal } from "@/components/site/smooth-scroll";
 import { holdLanding } from "@/components/site/page-transition";
 import { paintedCopy } from "@/components/cover/lightbox/painted";
 import { media } from "@/lib/device";
-import { lastPopAt } from "@/lib/nav-memo";
+import { takePop } from "@/lib/nav-memo";
 import { sessionJson } from "@/lib/storage";
 import { tell } from "./motion/engine";
 
@@ -72,12 +72,12 @@ function leaves(e: MouseEvent) {
 }
 
 let firstMount = true;
-/** Just back: a Back or Forward inside the site, or the page itself loaded by one (a link that left the app, then Back). */
+/** Just back: a Back or Forward inside the site, or the page itself loaded by one (a link that left the app, then Back).
+    Read once per mount: the Back (lib/nav-memo.ts) and the document's own load each count for one home only. */
 const returned = () => {
   const first = firstMount;
   firstMount = false;
-  // the home counts as a return only when it mounts just after a Back or Forward (lib/nav-memo.ts hears them)
-  if (Date.now() - lastPopAt() < 2000) return true;
+  if (takePop()) return true;
   const nav = first ? (performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined) : undefined;
   return nav?.type === "back_forward";
 };
@@ -85,20 +85,18 @@ const returned = () => {
 /** On the home: keeps the spot at every link off it (a cover keeps its own over it, rows.tsx), and puts the kept spot back
     after a Back, before the first paint, then holds it each frame for a moment while the blocks above settle, until the visitor scrolls. */
 export function useBackHome() {
+  // a ref: React's dev double effect would read the Back twice
+  const back = React.useRef<boolean | null>(null);
   React.useLayoutEffect(() => {
+    back.current ??= returned();
     // capture: before React's own click handlers, so a cover's spot (rows.tsx keepFlip) is the one kept
     const save = (e: MouseEvent) => leaves(e) && keepSpot(spotHere());
     document.addEventListener("click", save, true);
     const at = sessionJson<Spot>(BACK);
     // taken a tick on, not now: React's dev double mount read it once and dropped it
-    const t = setTimeout(() => {
-      try {
-        sessionStorage.removeItem(BACK);
-        history.scrollRestoration = "auto";
-      } catch {}
-    });
+    const t = setTimeout(dropSpot);
     const off = () => (clearTimeout(t), document.removeEventListener("click", save, true));
-    if (!at || typeof at.off !== "number" || !returned()) return off;
+    if (!at || typeof at.off !== "number" || !back.current) return off;
     const spot = at;
     const go = () => {
       const y = yOf(spot);
@@ -110,17 +108,22 @@ export function useBackHome() {
     if (row && !media("held").matches) row.scrollLeft = spot.x;
     // Back into Cover art: the sleeves' lazy art painted grey for up to 1.3s on an iPhone. Load and decode it now, with the rest.
     const items = row && spot.b === "covers" ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
-    const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0, i = step ? Math.min(items.length - 1, Math.max(0, Math.round(spot.x / step))) : 0;
+    const step = items.length > 1 ? items[1].offsetLeft - items[0].offsetLeft : 0,
+      i = step ? Math.min(items.length - 1, Math.max(0, Math.round(spot.x / step))) : 0;
     // the caption names that cover from the first paint, not the first one for a frame or two until the row's scroll event (Julian)
     // the told sleeve takes its focus scale at once, not over the .45s scale transition (touch-parity.css): reset with the lifted ones below
-    if (items.length && !media("held").matches) items.forEach((it) => (it.style.transition = "none")), tell(row!.closest("section")!, { cur: i }, false);
+    if (items.length && !media("held").matches) {
+      items.forEach((it) => (it.style.transition = "none"));
+      tell(row!.closest("section")!, { cur: i }, false);
+    }
     for (const it of items.slice(Math.max(0, i - 1), i + 2)) {
       const im = it.querySelector<HTMLImageElement>(".face img:not(.back)");
       if (!im) continue;
       im.loading = "eager";
       im.fetchPriority = "high";
       // the copy the viewer just showed goes under it, so the sleeve is never grey while its own size loads (Julian: "shouldnt cut out like that")
-      const url = paintedCopy(im.dataset.frame ?? ""), face = im.parentElement!;
+      const url = paintedCopy(im.dataset.frame ?? ""),
+        face = im.parentElement!;
       // the image only: the shorthand also cleared the card colour, so the disc showed through until it decoded
       if (url) Object.assign(face.style, { backgroundImage: `url("${url}")`, backgroundSize: "cover", backgroundPosition: "center" });
       const shown = im.decode().catch(() => {});
@@ -133,12 +136,15 @@ export function useBackHome() {
     const unlift = requestAnimationFrame(() => requestAnimationFrame(() => lifted.forEach((it) => (it.style.transition = ""))));
     // rAF runs before each paint, so a block above that grows is answered in the same frame
     const end = performance.now() + 900;
-    let raf = 0, done = false, goal = scrollGoal(); // after go(): Lenis's target is the restore spot
+    let raf = 0,
+      done = false,
+      goal = scrollGoal(); // after go(): Lenis's target is the restore spot
     const stop = () => ((done = true), cancelAnimationFrame(raf));
     raf = requestAnimationFrame(function hold(now) {
       // the visitor's scroll wins: Lenis heads somewhere else as soon as a wheel or touch lands, whether or not its event reached us
       // (a wheel 0.3s after Back was held for 0.6s, Safari). Only a move of its target counts: it starts stale from the last page.
-      const g = scrollGoal(), moved = g !== goal && Math.abs(g - yOf(spot)) > 2;
+      const g = scrollGoal(),
+        moved = g !== goal && Math.abs(g - yOf(spot)) > 2;
       goal = g;
       if (done || moved) return stop();
       go();

@@ -13,5 +13,6 @@ describe("instagramHandle", () => {
   ])("keeps %s as %s", (raw, want) => expect(instagramHandle(raw)).toBe(want));
 
   it.each([".hidden", "..", "javascript:alert(1)", "a".repeat(31), "", "a b", "@/x", "<b>"])("refuses %s", (raw) =>
-    expect(instagramHandle(raw)).toBeNull());
+    expect(instagramHandle(raw)).toBeNull(),
+  );
 });

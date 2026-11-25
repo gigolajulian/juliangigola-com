@@ -99,7 +99,8 @@ for (const path of SWIPE_PAGES) {
                   sign > 0
                     ? Math.min(before.max, ...before.at.filter((a) => a > from + 1))
                     : Math.max(0, ...before.at.filter((a) => a < from - 1));
-                if (Math.abs(to - next) > 2) misses.push(`${sign > 0 ? "on" : "back"} from ${Math.round(from)}: ${Math.round(to)}, not ${Math.round(next)}`);
+                if (Math.abs(to - next) > 2)
+                  misses.push(`${sign > 0 ? "on" : "back"} from ${Math.round(from)}: ${Math.round(to)}, not ${Math.round(next)}`);
               }
               await page.waitForTimeout(400);
             }

@@ -4,7 +4,13 @@ import { WorkCanvas } from "@/components/portfolio/canvas";
 import type { WorkItem } from "@/components/portfolio/work-tiles";
 import { PROJECTS, categoryLabel } from "@/lib/work/work";
 
-const list: WorkItem[] = PROJECTS.slice(0, 8).map((p) => ({ slug: p.slug, name: p.name, disciplines: p.categories.map(categoryLabel), credits: "", cover: p.cover.src }));
+const list: WorkItem[] = PROJECTS.slice(0, 8).map((p) => ({
+  slug: p.slug,
+  name: p.name,
+  disciplines: p.categories.map(categoryLabel),
+  credits: "",
+  cover: p.cover.src,
+}));
 
 describe("WorkCanvas", () => {
   it("goes back on Esc", () => {

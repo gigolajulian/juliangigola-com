@@ -1,7 +1,6 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
-import { lockOp } from "@/lib/booking/engine";
+import { lockOp, todayPT } from "@/lib/booking/engine";
 import { cleanHours, type Hours } from "@/lib/booking/rules";
-import { TZ } from "@/lib/time-zone";
 import { refuseAdmin } from "@/lib/admin/vouch";
 import { bodyOf, json, upstreamError } from "@/lib/http";
 
@@ -34,8 +33,7 @@ export async function PUT(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
   const denied = await refuseAdmin(request, env.INBOX_KEY);
   if (denied) return denied;
-  const today = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(new Date());
-  const hours = cleanHours(await bodyOf(request), today);
+  const hours = cleanHours(await bodyOf(request), todayPT());
   if (!hours) return json({ error: "Those hours do not read right." }, 400);
   return held(() => lockOp(env, "setHours", hours));
 }

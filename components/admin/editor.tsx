@@ -15,7 +15,7 @@ import { AdminSeo } from "@/components/admin/admin-seo";
 import { AdminVideos } from "@/components/admin/admin-videos";
 import type { Draft } from "@/lib/admin/publish";
 import { ClientFields, ContactFields, CoverArtFields, HomeFields, QuoteFields, SessionFields } from "@/components/admin/editor/fields";
-import type { PendingUpload } from "@/lib/admin/admin-sequence";
+import type { PendingUpload } from "@/components/admin/use-sequence";
 import { CreditDesk } from "@/components/admin/admin-credits";
 import { byCodeUnit, cn } from "@/lib/utils";
 import { remapSlugs } from "@/components/admin/editor/remap-slugs";
@@ -23,7 +23,15 @@ import { Connect, PublishStatus } from "@/components/admin/editor/connect";
 import type { AdminEditorProps } from "@/components/admin/editor/props";
 import { useDeployWatch } from "@/components/admin/editor/use-deploy-watch";
 
-import { changedSlugs, draftProjects, movedTabs, withListDraft, withProjectOverride, type SetListDraft, type SetOverride } from "@/components/admin/editor/draft";
+import {
+  changedSlugs,
+  draftProjects,
+  movedTabs,
+  withListDraft,
+  withProjectOverride,
+  type SetListDraft,
+  type SetOverride,
+} from "@/components/admin/editor/draft";
 import { useFoundField } from "@/components/admin/editor/use-found-field";
 import { useCreditDesk } from "@/components/admin/use-credit-desk";
 import { EditorBar, FullSwitch } from "@/components/admin/chrome";
@@ -76,12 +84,11 @@ export function AdminEditor({
   const [full, setFull] = useFullView();
   const whole = (which: FullView) => <FullSwitch which={which} full={full} setFull={setFull} />;
   /** Which discipline is expanded in the Disciplines view. */
-  const [openDiscipline, setOpenDiscipline] = React.useState<string | null>(
-    null,
-  );
+  const [openDiscipline, setOpenDiscipline] = React.useState<string | null>(null);
 
   const manifestDraft = useManifestDraft(published, initialTrash);
-  const { listDraft, setListDraft, trash, setTrash, overrides, setOverrides, order, setOrder, covers, setCovers, avatars, setAvatars } = manifestDraft;
+  const { listDraft, setListDraft, trash, setTrash, overrides, setOverrides, order, setOrder, covers, setCovers, avatars, setAvatars } =
+    manifestDraft;
   const { hidden, unlisted, bts } = listDraft;
   const { categories: recategorised, frames: reframed, credits: recredited, copy: recopied, slugs: reslugged } = overrides;
   /** The project open in the page-shaped editor, which replaces the tabs
@@ -95,9 +102,7 @@ export function AdminEditor({
    * with a manifest naming files the repo does not have — a project rendering
    * holes — and an abandoned draft would leave the files behind for good.
    */
-  const [uploads, setUploads] = React.useState<Record<string, PendingUpload>>(
-    {},
-  );
+  const [uploads, setUploads] = React.useState<Record<string, PendingUpload>>({});
 
   /**
    * Whether anything is unpublished.
@@ -127,19 +132,7 @@ export function AdminEditor({
         },
         reslugged,
       ),
-    [
-      hidden,
-      unlisted,
-      recategorised,
-      reframed,
-      recredited,
-      recopied,
-      reslugged,
-      order,
-      covers,
-      avatars,
-      bts,
-    ],
+    [hidden, unlisted, recategorised, reframed, recredited, recopied, reslugged, order, covers, avatars, bts],
   );
 
   /** One project's hidden, unlisted or BTS entry changed, from the project list. */
@@ -168,7 +161,6 @@ export function AdminEditor({
     () => draftProjects(projects, order, recategorised, categories, reframed),
     [projects, order, recategorised, categories, reframed],
   );
-
 
   useFoundField(wanted);
 
@@ -221,19 +213,20 @@ export function AdminEditor({
      projects as currently displayed, since `order` may name only some of
      them — and written back whole for the same reason it is there. */
   const reorderSlugs = (from: string, to: string) => {
-    const full = moveBefore(orderedProjects.map((p) => p.slug), from, to, (s) => s);
+    const full = moveBefore(
+      orderedProjects.map((p) => p.slug),
+      from,
+      to,
+      (s) => s,
+    );
     if (full) setOrder(full);
   };
 
-  const set = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) =>
-    setDraft((d) => ({ ...d, [key]: value }));
+  const set = <K extends keyof SiteContent>(key: K, value: SiteContent[K]) => setDraft((d) => ({ ...d, [key]: value }));
 
-  const unknownSlugs = draft.featured.filter(
-    (s) => s.trim() !== "" && !known.has(s),
-  );
+  const unknownSlugs = draft.featured.filter((s) => s.trim() !== "" && !known.has(s));
 
   const desk = useCreditDesk(projects, recredited, avatars, uploads, setAvatars, setUploads);
-
 
   /* Three columns from `xl`: the site on the left, the work in the middle,
   the result on the right. Below that they stack in the same order. At `2xl`
@@ -249,286 +242,283 @@ export function AdminEditor({
   const leadsWide = !page && view === "leads";
   return (
     <EditorStagingProvider value={staging}>
-    <CreditDesk value={desk}>
-      <div
-        className={cn(
-          "mt-10 grid gap-10 xl:min-h-0 xl:flex-1 2xl:gap-12",
-          // The page editor takes the preview's column as well: it is the
-          // preview, of one page, and it wants the width.
-          full
-            ? // Seen from above: the sitemap and the preview as many covers
-              // across as fit. Over the whole window, the site's bar and the
-              // page margins included (Julian: see everything).
-              "xl:fixed xl:inset-0 xl:z-50 xl:m-0 xl:grid-rows-[minmax(0,1fr)] xl:bg-background xl:px-10 xl:pt-6 xl:grid-cols-1 2xl:grid-cols-1 [&_[data-map-grid]]:grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] [&_[data-preview-grid]]:grid-cols-[repeat(auto-fill,minmax(9rem,1fr))]"
-            : leadsWide
-              ? "xl:grid-cols-1 2xl:grid-cols-1"
-              : page
-              ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
-              : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
-        )}
-      >
-        {/* Not a tab any more. The sitemap is what the site currently is, which
+      <CreditDesk value={desk}>
+        <div
+          className={cn(
+            "mt-10 grid gap-10 xl:min-h-0 xl:flex-1 2xl:gap-12",
+            // The page editor takes the preview's column as well: it is the
+            // preview, of one page, and it wants the width.
+            full
+              ? // Seen from above: the sitemap and the preview as many covers
+                // across as fit. Over the whole window, the site's bar and the
+                // page margins included (Julian: see everything).
+                "xl:fixed xl:inset-0 xl:z-50 xl:m-0 xl:grid-rows-[minmax(0,1fr)] xl:bg-background xl:px-10 xl:pt-6 xl:grid-cols-1 2xl:grid-cols-1 [&_[data-map-grid]]:grid-cols-[repeat(auto-fill,minmax(7rem,1fr))] [&_[data-preview-grid]]:grid-cols-[repeat(auto-fill,minmax(9rem,1fr))]"
+              : leadsWide
+                ? "xl:grid-cols-1 2xl:grid-cols-1"
+                : page
+                  ? "xl:grid-cols-[17rem_1fr] 2xl:grid-cols-[1fr_5fr]"
+                  : "xl:grid-cols-[17rem_1fr_23rem] 2xl:grid-cols-[1fr_minmax(34rem,1.6fr)_26rem]",
+          )}
+        >
+          {/* Not a tab any more. The sitemap is what the site currently is, which
           is context for every edit rather than a place to go — and it redraws
           as the draft changes, so it doubles as a readout of what hiding
           something will actually do. */}
-        {/* Each column its own scroller. Sticky positioning did this job while
+          {/* Each column its own scroller. Sticky positioning did this job while
           the page scrolled as one document; now the grid is exactly one
           screen tall, so `min-h-0` is what lets a track shrink below its
           content and `overflow-y-auto` is what gives that content somewhere
           to go. Without `min-h-0` a grid track floors at its content height
           and the whole page grows again. */}
-        <aside
-          aria-label="Site map"
-          className={cn(
-            "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
-            full && full !== "map" && "xl:hidden",
-            // The lead desk wants the whole width, and the site map is no context for it.
-            leadsWide && "hidden",
-          )}
-        >
-          {whole("map")}
-          <AdminSitemap
-            projects={orderedProjects.map((p) => ({
-              slug: p.slug,
-              name: p.name,
-              category: p.category,
-              cover: p.cover,
-            }))}
-            hidden={hidden}
-            categories={categoryLinks}
-            origin={origin}
-            onGo={go}
-            onReorder={reorderSlugs}
-            compact
-          />
-        </aside>
+          <aside
+            aria-label="Site map"
+            className={cn(
+              "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
+              full && full !== "map" && "xl:hidden",
+              // The lead desk wants the whole width, and the site map is no context for it.
+              leadsWide && "hidden",
+            )}
+          >
+            {whole("map")}
+            <AdminSitemap
+              projects={orderedProjects.map((p) => ({
+                slug: p.slug,
+                name: p.name,
+                category: p.category,
+                cover: p.cover,
+              }))}
+              hidden={hidden}
+              categories={categoryLinks}
+              origin={origin}
+              onGo={go}
+              onReorder={reorderSlugs}
+              compact
+            />
+          </aside>
 
-        <div
-          className={cn(
-            "min-w-0 xl:min-h-0 xl:overflow-y-auto",
-            !leadsWide && "xl:pb-10",
-            full && full !== "work" && "xl:hidden",
-          )}
-        >
-          {whole("work")}
-          {/* Not a gate: the form works from what the last build published,
+          <div className={cn("min-w-0 xl:min-h-0 xl:overflow-y-auto", !leadsWide && "xl:pb-10", full && full !== "work" && "xl:hidden")}>
+            {whole("work")}
+            {/* Not a gate: the form works from what the last build published,
             so the token is asked for only at the commit. A stored token
             reconnects on mount, so the usual visit never sees this. */}
-          {/* Not on the lead desk: it publishes nothing, and above it the box
+            {/* Not on the lead desk: it publishes nothing, and above it the box
             pushed the desk off the screen. */}
-          {!sha && !leadsWide ? (
-            <Connect
-              token={token}
-              setToken={setToken}
-              onConnect={() => load(token.trim())}
-              status={status}
-            />
-          ) : null}
+            {!sha && !leadsWide ? <Connect token={token} setToken={setToken} onConnect={() => load(token.trim())} status={status} /> : null}
 
-          {/* Three views over one draft, rather than three pages. Everything the
+            {/* Three views over one draft, rather than three pages. Everything the
             tabs switch between edits the same object, and the preview beside
             them reflects all of it — so moving between them never loses work
             and never needs saving first. */}
-          {/* Sticky to the top of its own column.
-           *
-           * The column is a scroller now and the form inside it is long — four
-           * sections, a picker, seventy projects — so a tab row that scrolls
-           * away takes the only way between views with it, and Publish along
-           * with it. Pinned, the two things you always want are always there.
-           * `bg-background` is not decoration: without it the form scrolls
-           * through the row. */}
-          {/* One sticky block, not two stacked ones. Pinning the tabs and the
+            {/* Sticky to the top of its own column.
+             *
+             * The column is a scroller now and the form inside it is long — four
+             * sections, a picker, seventy projects — so a tab row that scrolls
+             * away takes the only way between views with it, and Publish along
+             * with it. Pinned, the two things you always want are always there.
+             * `bg-background` is not decoration: without it the form scrolls
+             * through the row. */}
+            {/* One sticky block, not two stacked ones. Pinning the tabs and the
             index separately means the second has to be offset by the height
             of the first, and that number is a guess about a font — it was 13px
             short, which is 13px of form scrolling through the gap between
             them. Nested inside one pinned container they simply sit together
             and nothing has to be measured. */}
-          <EditorBar
-            status={status}
-            awaitingDeploy={awaitingDeploy}
-            view={view}
-            setView={setView}
-            unread={unread}
-            moved={moved}
-            dirty={dirty}
-            committed={committed}
-            sha={sha}
-            publish={publish}
-          />
-
-          {page
-            ? (() => {
-                const p = orderedProjects.find((x) => x.slug === page);
-                if (!p) return null;
-                return (
-                  <AdminPage
-                    project={p}
-                    disciplines={categories}
-                    overrides={overrides}
-                    onClose={() => {
-                      setPage(null);
-                      setView("projects");
-                      setOpened(p.slug);
-                    }}
-                  />
-                );
-              })()
-            : null}
-          {/* The lead and proofs desks are their own pages: Astryx stays out of the editor. */}
-          {!page && view === "leads" ? (
-            <ul className="grid max-w-md gap-1 py-6">
-              {([["Leads", "/admin/leads"], ["Proofs", "/admin/proofs"]] as const).map(([t, href]) => (
-                <li key={t}><a href={href} className="flex min-h-[52px] items-center justify-between border-b border-border text-[17px] hoverable:hover:text-accent">{t}<span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">↗</span></a></li>
-              ))}
-            </ul>
-          ) : null}
-          {!page && view === "inbox" ? <AdminInbox onUnread={setUnread} /> : null}
-          {!page && view === "traffic" ? <AdminTraffic /> : null}
-          {!page && view === "seo" ? <AdminSeo /> : null}
-
-          {!page && view === "coverart" ? <CoverArtFields draft={draft} set={set} releases={releases} /> : null}
-
-          {!page && view === "video" ? (
-            <AdminVideos
-              videos={draft.videos}
-              onChange={(next) => set("videos", next)}
+            <EditorBar
+              status={status}
+              awaitingDeploy={awaitingDeploy}
+              view={view}
+              setView={setView}
+              unread={unread}
+              moved={moved}
+              dirty={dirty}
+              committed={committed}
+              sha={sha}
+              publish={publish}
             />
-          ) : null}
 
-          {!page && view === "disciplines" ? (
-            <AdminDisciplines
-              disciplines={categories}
-              /* In the draft's running order, so the list this view drags is
+            {page
+              ? (() => {
+                  const p = orderedProjects.find((x) => x.slug === page);
+                  if (!p) return null;
+                  return (
+                    <AdminPage
+                      project={p}
+                      disciplines={categories}
+                      overrides={overrides}
+                      onClose={() => {
+                        setPage(null);
+                        setView("projects");
+                        setOpened(p.slug);
+                      }}
+                    />
+                  );
+                })()
+              : null}
+            {/* The lead and proofs desks are their own pages: Astryx stays out of the editor. */}
+            {!page && view === "leads" ? (
+              <ul className="grid max-w-md gap-1 py-6">
+                {(
+                  [
+                    ["Leads", "/admin/leads"],
+                    ["Proofs", "/admin/proofs"],
+                  ] as const
+                ).map(([t, href]) => (
+                  <li key={t}>
+                    <a
+                      href={href}
+                      className="flex min-h-[52px] items-center justify-between border-b border-border text-[17px] hoverable:hover:text-accent"
+                    >
+                      {t}
+                      <span aria-hidden="true" className="font-mono text-[13px] text-muted-foreground">
+                        ↗
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+            {!page && view === "inbox" ? <AdminInbox onUnread={setUnread} /> : null}
+            {!page && view === "traffic" ? <AdminTraffic /> : null}
+            {!page && view === "seo" ? <AdminSeo /> : null}
+
+            {!page && view === "coverart" ? <CoverArtFields draft={draft} set={set} releases={releases} /> : null}
+
+            {!page && view === "video" ? <AdminVideos videos={draft.videos} onChange={(next) => set("videos", next)} /> : null}
+
+            {!page && view === "disciplines" ? (
+              <AdminDisciplines
+                disciplines={categories}
+                /* In the draft's running order, so the list this view drags is
                the list the site will publish — including the projects added
                in this session, which the manifest has never seen. */
-              projects={orderedProjects}
-              hidden={hidden}
-              onOrder={setOrder}
-              covers={covers}
-              onCover={(category, src) =>
-                setCovers((c) => {
-                  const next = { ...c };
-                  // Removed rather than stored as null, so going back to the
-                  // derived cover leaves no entry behind to publish.
-                  if (src) next[category] = src;
-                  else delete next[category];
-                  return next;
-                })
-              }
-              opened={openDiscipline}
-              onOpened={setOpenDiscipline}
-            />
-          ) : null}
+                projects={orderedProjects}
+                hidden={hidden}
+                onOrder={setOrder}
+                covers={covers}
+                onCover={(category, src) =>
+                  setCovers((c) => {
+                    const next = { ...c };
+                    // Removed rather than stored as null, so going back to the
+                    // derived cover leaves no entry behind to publish.
+                    if (src) next[category] = src;
+                    else delete next[category];
+                    return next;
+                  })
+                }
+                opened={openDiscipline}
+                onOpened={setOpenDiscipline}
+              />
+            ) : null}
 
-          {!page && view === "projects" ? (
-            <>
-              <AdminProjects
-                token={token}
-                /* The draft's running order, not the build's. The list here
+            {!page && view === "projects" ? (
+              <>
+                <AdminProjects
+                  token={token}
+                  /* The draft's running order, not the build's. The list here
                  and the list in Disciplines are the same list, and showing
                  one in an order the other has already changed is how you
                  stop trusting either. */
-                projects={orderedProjects}
-                listDraft={listDraft}
-                onListDraft={listEdit}
-                changed={changed}
-                onRemoved={setTrash}
-                disciplines={categories}
-                overrides={overrides}
-                publishedBts={baseline.manifest.bts}
-                opened={opened}
-                onOpened={setOpened}
-                onOpenPage={(slug) => {
-                  setOpened(slug);
-                  setPage(slug);
-                }}
-                query={filter}
-                onQuery={setFilter}
-              />
-              <AdminTrash token={token} trash={trash} onChanged={setTrash} />
+                  projects={orderedProjects}
+                  listDraft={listDraft}
+                  onListDraft={listEdit}
+                  changed={changed}
+                  onRemoved={setTrash}
+                  disciplines={categories}
+                  overrides={overrides}
+                  publishedBts={baseline.manifest.bts}
+                  opened={opened}
+                  onOpened={setOpened}
+                  onOpenPage={(slug) => {
+                    setOpened(slug);
+                    setPage(slug);
+                  }}
+                  query={filter}
+                  onQuery={setFilter}
+                />
+                <AdminTrash token={token} trash={trash} onChanged={setTrash} />
 
-              {/* Adding a project belongs with the projects, not on every tab.
+                {/* Adding a project belongs with the projects, not on every tab.
                 Reached only once the token has proved itself against the repo:
                 the form commits several files at once, and a rejected token
                 halfway through would leave photographs in the branch with no
                 manifest pointing at them. */}
-              <AdminNewProject
-                token={token}
-                categories={categories}
-                existingSlugs={known}
-              />
-            </>
-          ) : null}
+                <AdminNewProject token={token} categories={categories} existingSlugs={known} />
+              </>
+            ) : null}
 
-          {/* One area at a time, so switching tabs is not a scroll and the
+            {/* One area at a time, so switching tabs is not a scroll and the
             widest column holds only the fields you came for. The panels are
             top-level components (`components/admin/editor/fields.tsx`), so their type
             is stable across renders and the pickers inside keep their state. */}
-          {!page && view === "home" ? <HomeFields draft={draft} set={set} releases={releases} releaseLimit={releaseLimit} slugs={slugs} unknownSlugs={unknownSlugs} projects={projects} hidden={hidden} heroChoices={heroChoices} /> : null}
-          {!page && view === "clients" ? <ClientFields draft={draft} set={set} clients={clients} /> : null}
-          {!page && view === "sessions" ? <SessionFields draft={draft} set={set} /> : null}
-          {!page && view === "testimonials" ? <QuoteFields draft={draft} set={set} /> : null}
-          {!page && view === "contact" ? <ContactFields draft={draft} set={set} /> : null}
+            {!page && view === "home" ? (
+              <HomeFields
+                draft={draft}
+                set={set}
+                releases={releases}
+                releaseLimit={releaseLimit}
+                slugs={slugs}
+                unknownSlugs={unknownSlugs}
+                projects={projects}
+                hidden={hidden}
+                heroChoices={heroChoices}
+              />
+            ) : null}
+            {!page && view === "clients" ? <ClientFields draft={draft} set={set} clients={clients} /> : null}
+            {!page && view === "sessions" ? <SessionFields draft={draft} set={set} /> : null}
+            {!page && view === "testimonials" ? <QuoteFields draft={draft} set={set} /> : null}
+            {!page && view === "contact" ? <ContactFields draft={draft} set={set} /> : null}
 
-          {/* The slug list, shared by every field that takes one, so it has to
+            {/* The slug list, shared by every field that takes one, so it has to
             outlive the tab that uses it. */}
-          <datalist id="project-slugs">
-            {slugs.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
+            <datalist id="project-slugs">
+              {slugs.map((s) => (
+                <option key={s} value={s} />
+              ))}
+            </datalist>
 
-          {/* The token and the status line, under every tab. Publish itself is
+            {/* The token and the status line, under every tab. Publish itself is
             up in the app bar; what stays down here is the thing you set once
             and the thing you read after pressing it. Not on the lead desk:
             nothing there is published, and pinned it covered the open lead. */}
-          {leadsWide ? null : (
-          <div className="sticky bottom-0 mt-12 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
-            {sha ? (
-              <>
-                <PublishStatus status={status} />
-                <button
-                  type="button"
-                  onClick={forget}
-                  className="label ml-auto border border-border px-4 py-2 press hoverable:hover:bg-card active:scale-[0.98]"
-                >
-                  Forget token
-                </button>
-              </>
-            ) : (
-              <p className="label max-w-prose text-muted-foreground">
-                Arrange anything you like. Publishing needs the GitHub token at
-                the top of this column, and nothing is committed until then.
-              </p>
+            {leadsWide ? null : (
+              <div className="sticky bottom-0 mt-12 flex flex-wrap items-center gap-4 border-t border-border bg-background py-6">
+                {sha ? (
+                  <>
+                    <PublishStatus status={status} />
+                    <button
+                      type="button"
+                      onClick={forget}
+                      className="label ml-auto border border-border px-4 py-2 press hoverable:hover:bg-card active:scale-[0.98]"
+                    >
+                      Forget token
+                    </button>
+                  </>
+                ) : (
+                  <p className="label max-w-prose text-muted-foreground">
+                    Arrange anything you like. Publishing needs the GitHub token at the top of this column, and nothing is committed until
+                    then.
+                  </p>
+                )}
+              </div>
             )}
           </div>
-          )}
-        </div>
 
-        {/* Sticky, so it stays beside the field being edited on a long form.
+          {/* Sticky, so it stays beside the field being edited on a long form.
           Below `xl` it drops under the form rather than squeezing both. */}
-        {page || leadsWide ? null : (
-          <aside
-            aria-label="Preview"
-            className={cn(
-              "min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10",
-              full && full !== "preview" && "xl:hidden",
-            )}
-          >
-            {whole("preview")}
-            {/* Ordered too: the preview's whole job is to be what publishing
+          {page || leadsWide ? null : (
+            <aside
+              aria-label="Preview"
+              className={cn("min-w-0 xl:min-h-0 xl:overflow-y-auto xl:pb-10", full && full !== "preview" && "xl:hidden")}
+            >
+              {whole("preview")}
+              {/* Ordered too: the preview's whole job is to be what publishing
             would produce, and the homepage band it draws is in running
             order. */}
-            <AdminPreview
-              draft={draft}
-              projects={orderedProjects}
-              hidden={hidden}
-            />
-          </aside>
-        )}
-      </div>
-    </CreditDesk>
+              <AdminPreview draft={draft} projects={orderedProjects} hidden={hidden} />
+            </aside>
+          )}
+        </div>
+      </CreditDesk>
     </EditorStagingProvider>
   );
-
 }

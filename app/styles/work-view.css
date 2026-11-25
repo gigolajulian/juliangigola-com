@@ -39,27 +39,7 @@ img[data-fade][data-loaded] {
 }
 
 /* ── the 404's room ───────────────────────────────────────────────
- * Two glows that drift, and a dot that blinks like a record light. Used by
- * `app/not-found.tsx` and nowhere else; both stop under reduced motion at
- * the call site. */
-@keyframes jg-drift-a {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-  50% {
-    transform: translate3d(5vw, -4vh, 0) scale(1.16);
-  }
-}
-@keyframes jg-drift-b {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1.08);
-  }
-  50% {
-    transform: translate3d(-6vw, 4vh, 0) scale(0.94);
-  }
-}
+ * A dot that blinks like a record light (`.nf-dot`, v3.css). */
 @keyframes jg-blink {
   0%,
   48% {
@@ -68,52 +48,6 @@ img[data-fade][data-loaded] {
   49%,
   100% {
     opacity: 0.18;
-  }
-}
-
-/* ── the colour panel ─────────────────────────────────────────────
- * While it is out the page is the work in its colour
- * (`components/portfolio/use-scope-draw.ts`), and the rack under it, discipline
- * titles and all, steps away. Hidden rather than removed: which projects
- * the lit chip puts on the page is read from it.
- * ─────────────────────────────────────────────────────────────── */
-@media (min-width: 40rem) {
-  /* Julian: a transition when colour is clicked. The rack goes back into
-     the dark as the panel comes in, rather than cutting to an empty page
-     for the moment before the sets are dealt out of the scope
-     (`ColourGrid`); and comes back up when it closes. */
-  main .strip-band,
-  main .work-list {
-    transition:
-      opacity 280ms var(--ease-out-strong),
-      scale 280ms var(--ease-out-strong);
-  }
-  [data-scope-open] main .strip-band,
-  [data-scope-open] main .work-list {
-    visibility: hidden;
-    opacity: 0;
-    scale: 0.97;
-    transition:
-      opacity 280ms var(--ease-out-strong),
-      scale 280ms var(--ease-out-strong),
-      visibility 0s 280ms;
-  }
-}
-@media (min-width: 40rem) and (prefers-reduced-motion: reduce) {
-  main .strip-band,
-  main .work-list,
-  [data-scope-open] main .strip-band,
-  [data-scope-open] main .work-list {
-    transition: none;
-  }
-}
-/* A set and its photographs arrive: up from a few pixels under, out of
-   nothing, one after another on the delays the component writes. */
-@keyframes scope-in {
-  from {
-    opacity: 0;
-    translate: 0 8px;
-    scale: 0.98;
   }
 }
 
@@ -152,54 +86,6 @@ body:has([data-fit-page]) footer {
   animation-duration: var(--dur-2xl);
 }
 
-/* The `?tune` sliders for the cover's name (`warp-tuner.tsx`), dev only. */
-.warp-tuner {
-  position: fixed;
-  left: 16px;
-  bottom: 16px;
-  z-index: 100;
-  display: grid;
-  gap: 10px;
-  width: 280px;
-  padding: 14px 16px;
-  border: 1px solid var(--border);
-  font: 400 11px/1.3 var(--font-mono);
-  color: var(--foreground);
-}
-.warp-tuner label {
-  display: grid;
-  gap: 4px;
-}
-.warp-tuner span {
-  display: flex;
-  justify-content: space-between;
-  color: var(--muted-foreground);
-}
-.warp-tuner b {
-  font-weight: 500;
-  color: var(--foreground);
-  font-variant-numeric: tabular-nums;
-}
-.warp-tuner input {
-  width: 100%;
-  accent-color: var(--foreground);
-}
-.warp-tuner[data-corner="right"] {
-  left: auto;
-  right: 16px;
-}
-.warp-tuner p {
-  margin: 0;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-}
-.warp-tuner button {
-  padding: 8px;
-  border: 1px solid var(--border);
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-}
-
 /* ── the section titles ──────────────────────────────────────────────
  * Julian: the logo and the page titles (h1) in Inter Tight Black, the
  * section titles (h2) in Archivo 900 capitals (capitalize them all; they
@@ -228,13 +114,6 @@ h2:not(.label) {
    hand elsewhere still draws it. */
 .strip-cell:focus-visible:hover {
   outline: none;
-}
-
-/* The vertical discipline name comes up at once: no wait before the
-   first word, a quicker rise. */
-:is(.discipline-title, [data-discipline-page] .project-plate) > h2 .title-word {
-  animation-duration: var(--dur-xl);
-  animation-delay: calc(var(--i, 0) * 40ms);
 }
 
 /* The colour page's covers tip toward the pointer as the portfolio's
@@ -311,20 +190,6 @@ h2:not(.label) {
   }
 }
 
-/* ── small things from the scan ──────────────────────────────────
- * The page's own count showed faintly through the photo viewer, behind
- * the viewer's (an iPad: "01 / 06" under "1 / 6"). */
-:root[data-viewer] .strip-count {
-  visibility: hidden;
-}
-/* The homepage's ask over the wall: the muted lines ("hello@",
-   "Next", the line under the question, the doors' lines) were faint
-   over a bright tile, under 4.5:1 on a phone in either theme. Nearer
-   the ink. */
-.enquiry-backdrop ~ * .text-muted-foreground {
-  color: color-mix(in oklab, var(--foreground) 82%, transparent);
-}
-
 /* ── a thumb's worth ──────────────────────────────────────────────
  * Under a finger, 44px each way at the least (Apple's own floor). The
  * scan measured the view toggles at 26, the crumbs at 30, Legal at 28,
@@ -337,7 +202,6 @@ h2:not(.label) {
     button:has(> svg:only-child),
     a[aria-label]:has(> [aria-hidden]:only-child),
     a:has(> .sr-only),
-    [data-dial="crumb"] a,
     nav[aria-label="Legal"] a,
     [role="dialog"] button
   ):not([class*="absolute"], [class*="fixed"]) {
@@ -347,7 +211,6 @@ h2:not(.label) {
     button:has(> svg:only-child),
     a[aria-label]:has(> [aria-hidden]:only-child),
     a:has(> .sr-only),
-    [data-dial="crumb"] a,
     nav[aria-label="Legal"] a,
     [role="dialog"] button
   )::after {
@@ -364,10 +227,6 @@ h2:not(.label) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-  }
-  /* The homepage's pair sit in two zooms (`--m-buttons`, `--mid`); 44 as seen. */
-  .cover-float-ctas .cover-cta {
-    min-height: calc(44px / (var(--m-buttons, 1) * var(--mid, 1)));
   }
 }
 

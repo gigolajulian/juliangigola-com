@@ -21,4 +21,6 @@ export const DEPOSIT_KIND = "deposit";
     Any session's amount passes, not only its own slug's: an intent made at the old $100 just
     before a price change must still book, or it sits paid and unbooked. */
 export const isDeposit = (pi: { amount?: number; currency?: string; metadata?: { [k: string]: string } }) =>
-  pi.metadata?.kind === DEPOSIT_KIND && [...Object.values(DEPOSIT), LEGACY_DEPOSIT].some((d) => d * 100 === pi.amount) && pi.currency === CURRENCY;
+  pi.metadata?.kind === DEPOSIT_KIND &&
+  [...Object.values(DEPOSIT), LEGACY_DEPOSIT].some((d) => d * 100 === pi.amount) &&
+  pi.currency === CURRENCY;

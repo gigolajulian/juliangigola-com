@@ -46,8 +46,16 @@ describe("web push", () => {
     const [, t, k] = /^vapid t=([^,]+), k=(.+)$/.exec(header)!;
     expect(k).toBe(publicKey(jwk));
     const [h, c, s] = t.split(".");
-    expect(JSON.parse(new TextDecoder().decode(unb64url(c)))).toMatchObject({ aud: "https://web.push.apple.com", sub: "mailto:hello@juliangigola.com" });
-    const ok = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-256" }, pair.publicKey, unb64url(s), new TextEncoder().encode(`${h}.${c}`));
+    expect(JSON.parse(new TextDecoder().decode(unb64url(c)))).toMatchObject({
+      aud: "https://web.push.apple.com",
+      sub: "mailto:hello@juliangigola.com",
+    });
+    const ok = await crypto.subtle.verify(
+      { name: "ECDSA", hash: "SHA-256" },
+      pair.publicKey,
+      unb64url(s),
+      new TextEncoder().encode(`${h}.${c}`),
+    );
     expect(ok).toBe(true);
   });
 

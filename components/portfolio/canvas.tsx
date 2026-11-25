@@ -34,7 +34,19 @@ const mod = (a: number, b: number) => ((a % b) + b) % b;
 /** `onLeave`: Open project takes the canvas down. The canvas runs under the page's own title
     and toolbar: it is cut off above `top` px, comes in once its frames are laid out, and fades
     out while `out`. */
-export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: WorkItem[]; onClose: () => void; onLeave: () => void; out?: boolean; top?: number }) {
+export function WorkCanvas({
+  list,
+  onClose,
+  onLeave,
+  out,
+  top = 0,
+}: {
+  list: WorkItem[];
+  onClose: () => void;
+  onLeave: () => void;
+  out?: boolean;
+  top?: number;
+}) {
   const field = React.useRef<HTMLDivElement>(null);
   /* Covers until `/canvas.json` lands, then every frame, projects in the page's order. */
   const [all, setAll] = React.useState<Frames | null>(kept);
@@ -102,7 +114,8 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
       cols = Array.from({ length: COLS }, (_, c) => {
         let y = 0;
         const items = Array.from({ length: per }, (_, k) => {
-          const i = (k * COLS + c) % frames.length, h = Math.round(W * shape(frames[i].r));
+          const i = (k * COLS + c) % frames.length,
+            h = Math.round(W * shape(frames[i].r));
           const it = { i, y, h };
           y += h + GAP + ((c * 7 + k * 3) % 5) * 14;
           return it;
@@ -135,15 +148,23 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
     };
 
     // Camera position, velocity in px per ms, and a wheel notch's target.
-    let x = 0, y = 0, vx = 0, vy = 0;
-    let tx: number | null = null, ty: number | null = null;
+    let x = 0,
+      y = 0,
+      vx = 0,
+      vy = 0;
+    let tx: number | null = null,
+      ty: number | null = null;
     const draw = () => {
       const cw = W + GAP;
-      const c0 = Math.floor(x / cw) - 1, c1 = Math.ceil((x + innerWidth) / cw) + 1;
+      const c0 = Math.floor(x / cw) - 1,
+        c1 = Math.ceil((x + innerWidth) / cw) + 1;
       let n = 0;
       for (let ci = c0; ci <= c1; ci++) {
-        const col = cols[mod(ci, COLS)], sx = ci * cw - x, base = y - col.off;
-        const r0 = Math.floor(base / col.period) - 1, r1 = Math.ceil((base + innerHeight) / col.period);
+        const col = cols[mod(ci, COLS)],
+          sx = ci * cw - x,
+          base = y - col.off;
+        const r0 = Math.floor(base / col.period) - 1,
+          r1 = Math.ceil((base + innerHeight) / col.period);
         for (let r = r0; r <= r1; r++)
           for (const it of col.items) {
             const sy = r * col.period + it.y - base;
@@ -151,7 +172,9 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
             const p = cell(n++);
             if (p.i !== it.i) {
               p.i = it.i;
-              const fr = frames[it.i], w = list[fr.p], ip = props(it.i);
+              const fr = frames[it.i],
+                w = list[fr.p],
+                ip = props(it.i);
               if (ip.srcSet) p.img.srcset = ip.srcSet;
               else p.img.removeAttribute("srcset");
               p.img.src = ip.src;
@@ -180,7 +203,9 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
         }
     };
 
-    let last = 0, raf = 0, held = false;
+    let last = 0,
+      raf = 0,
+      held = false;
     const tick = (t: number) => {
       const dt = Math.min(48, t - (last || t));
       last = t;
@@ -196,7 +221,8 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
         }
       } else if (!held && (vx || vy)) {
         // A flick runs out under iOS's deceleration, as a throw does on the strip.
-        const f = Math.pow(DECEL, dt), s = (1 - f) / (1 - DECEL);
+        const f = Math.pow(DECEL, dt),
+          s = (1 - f) / (1 - DECEL);
         x += vx * s;
         y += vy * s;
         vx *= f;
@@ -213,7 +239,10 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
     const quiet = () => setHint(false);
 
     // Drag: mouse, pen and finger alike. Speed from the last 80ms of the pull.
-    let sx0 = 0, sy0 = 0, moved = false, pid = -1;
+    let sx0 = 0,
+      sy0 = 0,
+      moved = false,
+      pid = -1;
     let trail: [number, number, number][] = [];
     let downAt: HTMLElement | null = null;
     const onDown = (e: PointerEvent) => {
@@ -249,7 +278,9 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
       held = false;
       delete el.dataset.grab;
       if (moved) {
-        const a = trail[0], b = trail[trail.length - 1], dt = b[0] - a[0];
+        const a = trail[0],
+          b = trail[trail.length - 1],
+          dt = b[0] - a[0];
         // A hand that stopped before letting go does not throw.
         if (e.type === "pointerup" && dt > 0 && e.timeStamp - b[0] < 60 && !reduced) {
           vx = -(b[1] - a[1]) / dt;
@@ -267,7 +298,8 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
       if (openedRef.current) return;
       quiet();
       vx = vy = 0;
-      let dx = e.deltaX, dy = e.deltaY;
+      let dx = e.deltaX,
+        dy = e.deltaY;
       if (e.shiftKey && !dx) [dx, dy] = [dy, 0];
       if (e.deltaMode === 1) [dx, dy] = [dx * 40, dy * 40];
       if (isTrackpad(e, devicePixelRatio) || reduced) {
@@ -304,7 +336,9 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
     };
     // A new scale keeps the point at the screen's centre where it is.
     rescale.current = (s: number) => {
-      const k = s / scaleRef.current, cx = innerWidth / 2, cy = innerHeight / 2;
+      const k = s / scaleRef.current,
+        cx = innerWidth / 2,
+        cy = innerHeight / 2;
       scaleRef.current = s;
       vx = vy = 0;
       tx = ty = null;
@@ -322,7 +356,8 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
     el.addEventListener("wheel", onWheel, { passive: false });
     addEventListener("keydown", onKey);
     addEventListener("resize", relayout);
-    const html = document.documentElement, was = html.style.overflow;
+    const html = document.documentElement,
+      was = html.style.overflow;
     html.style.overflow = "hidden";
     return () => {
       cancelAnimationFrame(raf);
@@ -354,13 +389,21 @@ export function WorkCanvas({ list, onClose, onLeave, out, top = 0 }: { list: Wor
     else {
       // Centred in what the toolbar leaves of the window.
       const room = innerHeight - top;
-      const h = Math.min(room * 0.78, innerWidth * 0.86 * fr.r), w = h / fr.r;
+      const h = Math.min(room * 0.78, innerWidth * 0.86 * fr.r),
+        w = h / fr.r;
       box = { left: (innerWidth - w) / 2, top: top + (room - h) / 2, width: w, height: h };
     }
   }
 
   return (
-    <div className={`cv ${shown ? "in" : "wait"}${out ? " out" : ""}`} style={{ "--cv-top": `${top}px` } as React.CSSProperties} data-lenis-prevent role="dialog" aria-modal="true" aria-label="Portfolio canvas">
+    <div
+      className={`cv ${shown ? "in" : "wait"}${out ? " out" : ""}`}
+      style={{ "--cv-top": `${top}px` } as React.CSSProperties}
+      data-lenis-prevent
+      role="dialog"
+      aria-modal="true"
+      aria-label="Portfolio canvas"
+    >
       <div className="cv-field" ref={field} />
       <div className="cv-foot lbl mute">
         <span>{hint || !all ? "Drag to explore" : `${frames.length} frames`}</span>

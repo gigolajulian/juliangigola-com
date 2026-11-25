@@ -2,7 +2,7 @@ import * as React from "react";
 import { takesDeposit } from "@/lib/leads/deposit-terms";
 import type { SlotsAnswer } from "@/lib/booking/slots";
 import { AHEAD } from "@/components/booking/picker/parts";
-import { localDayKey } from "@/components/booking/flow";
+import { localDayKey } from "@/components/booking/picker/dates";
 import { getJson } from "@/lib/http";
 import { DAY_MS } from "@/lib/time-zone";
 
@@ -35,46 +35,53 @@ export function useSlots(username: string, slug: string, tz: string) {
   /* A paid session, its deposit taken here (`?deposit`, deposit-step.tsx). */
   const [paid, setPaid] = React.useState(false);
 
-  const load = React.useCallback(async (fresh = false) => {
-    const key = recentKey(username, slug, tz);
-    try {
-      const from = new Date();
-      const to = new Date(Date.now() + AHEAD * DAY_MS);
-      // No answer at all left "Loading times" up for good: past
-      // 8 seconds the fallback takes over, as for any other failure.
-      const signal = AbortSignal.timeout?.(8000);
-      const kept = fresh ? undefined : peek(key);
-      // The event and its times in one (`app/api/slots`); a failed answer is a failure like no answer.
-      const got = kept ?? getJson<SlotsAnswer>(`/api/slots?slug=${slug}&start=${localDayKey(from)}&end=${localDayKey(to)}&timeZone=${encodeURIComponent(tz)}${fresh ? "&fresh" : ""}`, { signal })
-        .then((r) => {
-          if (!r.ok) throw new Error(r.error ?? "no times");
-          return r.data;
-        });
-      if (got !== kept) recent.set(key, { at: Date.now(), got });
-      const slots = await got;
-      // An answer with no times (or no body) is a failure too.
-      if (!slots?.slots) throw new Error("no times");
-      // A paid event's deposit is taken here (deposit-step.tsx) where the
-      // build has Stripe's key; without it, the fallback.
-      // Paid by the site's list (lib/leads/deposit-terms.ts).
-      const owes = takesDeposit(slug);
-      if (owes && !process.env.NEXT_PUBLIC_STRIPE_PK) {
-        setState("fallback");
-        return;
+  const load = React.useCallback(
+    async (fresh = false) => {
+      const key = recentKey(username, slug, tz);
+      try {
+        const from = new Date();
+        const to = new Date(Date.now() + AHEAD * DAY_MS);
+        // No answer at all left "Loading times" up for good: past
+        // 8 seconds the fallback takes over, as for any other failure.
+        const signal = AbortSignal.timeout?.(8000);
+        const kept = fresh ? undefined : peek(key);
+        // The event and its times in one (`app/api/slots`); a failed answer is a failure like no answer.
+        const got =
+          kept ??
+          getJson<SlotsAnswer>(
+            `/api/slots?slug=${slug}&start=${localDayKey(from)}&end=${localDayKey(to)}&timeZone=${encodeURIComponent(tz)}${fresh ? "&fresh" : ""}`,
+            { signal },
+          ).then((r) => {
+            if (!r.ok) throw new Error(r.error ?? "no times");
+            return r.data;
+          });
+        if (got !== kept) recent.set(key, { at: Date.now(), got });
+        const slots = await got;
+        // An answer with no times (or no body) is a failure too.
+        if (!slots?.slots) throw new Error("no times");
+        // A paid event's deposit is taken here (deposit-step.tsx) where the
+        // build has Stripe's key; without it, the fallback.
+        // Paid by the site's list (lib/leads/deposit-terms.ts).
+        const owes = takesDeposit(slug);
+        if (owes && !process.env.NEXT_PUBLIC_STRIPE_PK) {
+          setState("fallback");
+          return;
+        }
+        setPaid(owes);
+        setLength(slots.length);
+        setSession(slots.title);
+        setNeedsWhere(slots.where);
+        setDays(slots.slots);
+        setState("ready");
+      } catch {
+        recent.delete(key);
+        // Only before the times have come. A reload after a booking failed
+        // keeps the times it had, and the form with what was typed in it.
+        setState((s) => (s === "ready" ? s : "fallback"));
       }
-      setPaid(owes);
-      setLength(slots.length);
-      setSession(slots.title);
-      setNeedsWhere(slots.where);
-      setDays(slots.slots);
-      setState("ready");
-    } catch {
-      recent.delete(key);
-      // Only before the times have come. A reload after a booking failed
-      // keeps the times it had, and the form with what was typed in it.
-      setState((s) => (s === "ready" ? s : "fallback"));
-    }
-  }, [username, slug, tz]);
+    },
+    [username, slug, tz],
+  );
 
   return { length, setLength, needsWhere, setNeedsWhere, session, setSession, days, setDays, state, setState, paid, setPaid, load };
 }

@@ -3,7 +3,10 @@ import { fireEvent, render, within } from "@testing-library/react";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }), usePathname: () => "/" }));
 vi.mock("@/lib/leads/enquiry-action", () => ({ submitEnquiry: vi.fn() }));
-vi.stubGlobal("fetch", vi.fn(() => Promise.reject(new Error("offline"))));
+vi.stubGlobal(
+  "fetch",
+  vi.fn(() => Promise.reject(new Error("offline"))),
+);
 
 import { Home } from "@/components/home/home";
 import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/home/data";
@@ -13,7 +16,17 @@ import { HOME_DATA } from "@/lib/home/server";
    so a rename inside the components cannot hide a change in what the visitor gets. */
 const pointer = (fine: boolean) =>
   vi.spyOn(window, "matchMedia").mockImplementation(
-    (q: string) => ({ matches: fine && q.includes("pointer: fine"), media: q, onchange: null, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {}, dispatchEvent: () => false }) as MediaQueryList,
+    (q: string) =>
+      ({
+        matches: fine && q.includes("pointer: fine"),
+        media: q,
+        onchange: null,
+        addListener() {},
+        removeListener() {},
+        addEventListener() {},
+        removeEventListener() {},
+        dispatchEvent: () => false,
+      }) as MediaQueryList,
   );
 const book = () => document.querySelector<HTMLElement>('[data-mt="book"]')!;
 const quote = () => document.querySelector<HTMLElement>('[data-mt="quote"]')!;

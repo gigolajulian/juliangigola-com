@@ -60,6 +60,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-11-07: split splash on the homepage.
 - 2026-10-28: `?splash=burst` keeps the burst.
 - 2026-10-30: other pages get the name-only splash.
+- 2026-11-24: the name splash goes (unreachable since the homepage intro took "/"); `?splash=split` stays as a test link (Julian: "yes both").
 - 2026-11-09: Any other character falls through to Inter Tight.
 - 2026-11-10: The proof gate's wall (the default; `?proofwall=0` for the plain gate) is always dark.
 - 2026-11-15: `p3` is on for everyone unless the tab chose otherwise.
@@ -339,7 +340,7 @@ states its rule inline. `SPEC-home-scroll.md` citations point at
 - 2026-10-23: on the Commissions stepper), per page, in memory only.
 - 2026-10-23: button toward it, and a drop there is taken.
 
-### components/splash/burst-splash.ts
+### components/splash/burst-splash.ts (removed 2026-11-24)
 - 2026-10-31: the desktop splash went from 4.7s to about 3.2s.
 - 2026-10-31: the wordmark never animates out. The first frame stacks in 3D. No opening out and no pause.
 
@@ -676,17 +677,23 @@ scrolls and while its group is off screen (`patches/liquid-gooey+0.2.2.patch`).
 - 2026-11-24: retired. Its last consumers went in r15, so the package, the
   patch and its test went in r17.
 
-## 2026-11-24: motion stays a devDependency
+## 2026-11-24: one formatter, Prettier at 140 columns
 
-`motion` ships in the browser bundle through one vendored widget,
-`components/vendor/tilted-card.jsx` (the lightbox tilt). It sits in
-`devDependencies` on purpose: the Worker runs only the built bundle, never
-`node_modules`, and the build installs devDependencies, so the split in
-`package.json` says what the deployed Worker needs at runtime (nothing from
-either list). `dialkit` is the same: the dev dial panel.
+The admin files were wrapped at about 80 columns and the rest of the code ran
+long single lines, with nothing to settle it. `.prettierrc.json` sets one
+print width (140) and `npm run format` applies it. It covers code only: CSS,
+Markdown and JSON keep their hand layout (`.prettierignore`), and so do
+`components/splash/` and `app/layout.tsx`, whose inline scripts are left as
+they are. The whole code base was formatted once, in its own commit.
 
-- **Not chosen:** porting the tilt to gsap to drop `motion`. The widget is
-  vendored as it came, and a port is a visible change to its spring.
+## 2026-11-24: motion and dialkit are gone
+
+The lightbox tilt (`components/vendor/tilted-card.tsx`) runs on gsap,
+through `lib/motion/gsap-lazy.ts`. Its spring became a power2.out tween over
+1.2 s, which passes half way and 99% about when the old spring did (Julian
+approved the small change in feel). The old /book picker was the last user
+of dialkit, the dev dial panel, so with it gone dialkit, its production stub
+and `motion` (dialkit's peer) left `package.json`.
 
 ## 2026-10-09: globals.css split by area; device queries listed, not custom media
 

@@ -27,7 +27,13 @@ export const quoteDrivers: Driver[] = [
           const rot = ctx.fine ? !el.hasAttribute("data-opt") : ctx.t - s.tap > REST;
           if (rot !== s.rot) el.toggleAttribute("data-rot", (s.rot = rot));
           const a = document.activeElement;
-          if (!rot || (!ctx.held && (p <= 0 || p >= 1)) || root?.dataset.cards === "open" || (a && el.contains(a) && a.matches(":focus-visible"))) return;
+          if (
+            !rot ||
+            (!ctx.held && (p <= 0 || p >= 1)) ||
+            root?.dataset.cards === "open" ||
+            (a && el.contains(a) && a.matches(":focus-visible"))
+          )
+            return;
           if ((s.t += ctx.dt) < EVERY) return;
           s.t = 0;
           s.k = (s.k + 1) % QUOTE_CLIENTS.length;

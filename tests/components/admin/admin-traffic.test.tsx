@@ -13,7 +13,7 @@ describe("AdminTraffic", () => {
     vi.stubGlobal("fetch", vi.fn());
     render(<AdminTraffic />);
     expect(screen.getByRole("heading", { name: /Traffic/ })).toBeTruthy();
-    expect(await screen.findByText("Sign in with the inbox key or the GitHub token first.")).toBeTruthy();
+    expect(await screen.findByText("Sign in with the admin key or the GitHub token first.")).toBeTruthy();
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -21,10 +21,9 @@ describe("AdminTraffic", () => {
     window.localStorage.setItem(TOKEN_STORE, "tok");
     const fetchMock = vi.fn(
       async () =>
-        new Response(
-          JSON.stringify({ visits: 42, sources: [{ key: "google", n: 10 }], devices: [{ key: "mobile", n: 21 }] }),
-          { status: 200 },
-        ),
+        new Response(JSON.stringify({ visits: 42, sources: [{ key: "google", n: 10 }], devices: [{ key: "mobile", n: 21 }] }), {
+          status: 200,
+        }),
     );
     vi.stubGlobal("fetch", fetchMock);
     render(<AdminTraffic />);

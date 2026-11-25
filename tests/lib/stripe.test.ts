@@ -34,9 +34,15 @@ describe("stripe", () => {
 
   it("throws with the status when Stripe refuses, even with a body that is not JSON", async () => {
     const err = vi.spyOn(console, "error").mockImplementation(() => {});
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ error: { type: "card_error", code: "declined" } }, 402)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ error: { type: "card_error", code: "declined" } }, 402)),
+    );
     await expect(stripe("k", "/payment_intents", {})).rejects.toMatchObject({ status: 402 });
-    vi.stubGlobal("fetch", vi.fn(async () => reply("<html>", 500)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply("<html>", 500)),
+    );
     await expect(stripe("k", "/x")).rejects.toMatchObject({ status: 500, message: "Stripe /x 500" });
     err.mockRestore();
   });

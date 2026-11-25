@@ -34,11 +34,23 @@ export async function generateMetadata({ params }: { params: Promise<{ token: st
   if (!f) return base;
   // The URL carries the frame and crop, so a new pick is a new URL and no app shows a stale preview.
   const crop = p.card?.id === f.id ? `&c=${p.card.x}-${p.card.y}-${p.card.w}` : "";
-  const images = [{ url: `/proof/${token}/card?f=${encodeURIComponent(f.id)}${crop}`, width: CARD.w, height: CARD.h, alt: "Proofs by Julian Gigola" }];
-  return { ...base, openGraph: { title: "Proofs | Julian Gigola", description: "Proofs from Julian Gigola.", url: `/proof/${token}`, images }, twitter: { card: "summary_large_image", images } };
+  const images = [
+    { url: `/proof/${token}/card?f=${encodeURIComponent(f.id)}${crop}`, width: CARD.w, height: CARD.h, alt: "Proofs by Julian Gigola" },
+  ];
+  return {
+    ...base,
+    openGraph: { title: "Proofs | Julian Gigola", description: "Proofs from Julian Gigola.", url: `/proof/${token}`, images },
+    twitter: { card: "summary_large_image", images },
+  };
 }
 
-export default async function ProofPage({ params, searchParams }: { params: Promise<{ token: string }>; searchParams: Promise<{ paid?: string }> }) {
+export default async function ProofPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ token: string }>;
+  searchParams: Promise<{ paid?: string }>;
+}) {
   const { token } = await params;
   const { paid } = await searchParams;
   const { env, seal: s, kv } = await sealedStore();

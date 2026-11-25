@@ -16,7 +16,12 @@ export async function POST(request: Request) {
   const denied = await refuseWorker(request, env.WORKER_KEY);
   if (denied) return denied;
   const b = await bodyOf(request);
-  if (!b || typeof b.email !== "string" || typeof b.subject !== "string" || typeof b.kind !== "string") return json({ error: "Bad mail." }, 400);
-  const lead = await logMail(env, b.email, b.subject.slice(0, 200), { to: "client", kind: b.kind.slice(0, 40), booking: typeof b.booking === "string" ? b.booking.slice(0, 40) : undefined });
+  if (!b || typeof b.email !== "string" || typeof b.subject !== "string" || typeof b.kind !== "string")
+    return json({ error: "Bad mail." }, 400);
+  const lead = await logMail(env, b.email, b.subject.slice(0, 200), {
+    to: "client",
+    kind: b.kind.slice(0, 40),
+    booking: typeof b.booking === "string" ? b.booking.slice(0, 40) : undefined,
+  });
   return json({ logged: !!lead });
 }

@@ -24,7 +24,10 @@ const row = (over: Partial<ProofRow> = {}) =>
   ({
     token: "t1",
     name: "Studio day",
-    frames: [{ id: "a", file: "A.jpg" }, { id: "b", file: "B.jpg" }],
+    frames: [
+      { id: "a", file: "A.jpg" },
+      { id: "b", file: "B.jpg" },
+    ],
     viewers: {},
     url: "/proof/t1",
     ...over,
@@ -79,7 +82,7 @@ describe("ActivityDesk", () => {
     await waitFor(() => expect(changed).toHaveBeenCalled());
     expect(confirm.mock.calls[0][0]).toMatch(/Forget maya@b\.co's visits to "Studio day"/);
     const [url, init] = (fetchMock.mock.calls as unknown as [string, RequestInit][])[0];
-    expect(url).toBe("/api/proof");
+    expect(url).toBe("/api/proof/action");
     expect(JSON.parse(init.body as string)).toEqual({ action: "forget", token: "t1", email: "maya@b.co" });
     expect(await screen.findByText("maya@b.co forgotten.")).toBeTruthy();
   });

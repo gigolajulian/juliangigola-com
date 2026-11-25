@@ -136,7 +136,12 @@ export function paperProperties(p: { contract?: Paper; release?: Paper }) {
  * `page` is the row the lead already knows, else it is looked up by
  * address. Never throws. Returns the page id when the row was updated.
  */
-async function notionRow(token: string | undefined, email: string, properties: Record<string, unknown>, page?: string): Promise<string | undefined> {
+async function notionRow(
+  token: string | undefined,
+  email: string,
+  properties: Record<string, unknown>,
+  page?: string,
+): Promise<string | undefined> {
   if (!token) return;
   try {
     const id = page ?? (await findRow(token, email));

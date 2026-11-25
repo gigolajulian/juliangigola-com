@@ -69,8 +69,7 @@ export function DebugOverlay() {
       count++;
       if (!since) since = now;
       if (now - since >= 500) {
-        if (fpsRef.current)
-          fpsRef.current.textContent = `${Math.round((count * 1000) / (now - since))} fps`;
+        if (fpsRef.current) fpsRef.current.textContent = `${Math.round((count * 1000) / (now - since))} fps`;
         count = 0;
         since = now;
       }
@@ -104,7 +103,9 @@ export function DebugOverlay() {
         add(`down ${Math.round(t.clientX)},${Math.round(t.clientY)} n=${e.touches.length} ${where()}`);
       } else if (e.type === "touchend" || e.type === "touchcancel") {
         const t = e.changedTouches[0];
-        add(`${e.type === "touchend" ? "up" : "cancel"} ${Math.round(t.clientX)},${Math.round(t.clientY)} n=${e.touches.length} ${where()}`);
+        add(
+          `${e.type === "touchend" ? "up" : "cancel"} ${Math.round(t.clientX)},${Math.round(t.clientY)} n=${e.touches.length} ${where()}`,
+        );
       }
     };
     const opts = { capture: true, passive: true } as const;
@@ -190,7 +191,14 @@ export function DebugOverlay() {
           <button
             type="button"
             onClick={copy}
-            style={{ font: "inherit", color: "inherit", background: "rgba(255,255,255,0.15)", border: 0, borderRadius: 4, padding: "2px 6px" }}
+            style={{
+              font: "inherit",
+              color: "inherit",
+              background: "rgba(255,255,255,0.15)",
+              border: 0,
+              borderRadius: 4,
+              padding: "2px 6px",
+            }}
           >
             Copy log
           </button>
@@ -200,7 +208,14 @@ export function DebugOverlay() {
               log.current = [];
               setShown([]);
             }}
-            style={{ font: "inherit", color: "inherit", background: "rgba(255,255,255,0.15)", border: 0, borderRadius: 4, padding: "2px 6px" }}
+            style={{
+              font: "inherit",
+              color: "inherit",
+              background: "rgba(255,255,255,0.15)",
+              border: 0,
+              borderRadius: 4,
+              padding: "2px 6px",
+            }}
           >
             Clear
           </button>

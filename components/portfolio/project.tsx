@@ -35,7 +35,14 @@ const creditLabel = (c: Credit, h: string | null) =>
   ORG.test(c.role.trim()) ? c.name.replace(/^@/, "") : (nameOf(c) ?? (h ? `@${h}` : c.name));
 
 /* The commission form's types (components/contact/inquire.tsx TYPE) by discipline. */
-const KIND: Record<string, string> = { campaigns: "campaign", editorial: "editorial", coverart: "coverart", "artist-presskit": "presskit", "music-video": "video", events: "event" };
+const KIND: Record<string, string> = {
+  campaigns: "campaign",
+  editorial: "editorial",
+  coverart: "coverart",
+  "artist-presskit": "presskit",
+  "music-video": "video",
+  events: "event",
+};
 const kindOf = (p: Project) => p.categories.map((c) => KIND[c.slug]).find(Boolean);
 
 export function ProjectView({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
@@ -52,10 +59,22 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
      so the page opens on the picture that was pressed. */
   const bleed = !!imgs[0] && wide(imgs[0]);
   const big = bleed ? imgs[0] : (imgs.find((f) => !wide(f)) ?? imgs[0]);
-  const lead = bleed ? [] : across ? imgs.filter((f) => f !== big && wide(f)).slice(0, 1) : imgs.filter((f) => f !== big && !wide(f)).slice(0, 2);
+  const lead = bleed
+    ? []
+    : across
+      ? imgs.filter((f) => f !== big && wide(f)).slice(0, 1)
+      : imgs.filter((f) => f !== big && !wide(f)).slice(0, 2);
   const rest = imgs.filter((f) => f !== big && !lead.includes(f));
   const pic = (f: Frame, sizes: string, priority = false) => (
-    <Image src={f.src} alt={alt(f.alt)} width={f.width} height={f.height} sizes={sizes} priority={priority} style={{ background: f.color }} />
+    <Image
+      src={f.src}
+      alt={alt(f.alt)}
+      width={f.width}
+      height={f.height}
+      sizes={sizes}
+      priority={priority}
+      style={{ background: f.color }}
+    />
   );
   /* The credits fill the cells the sheet's last row leaves empty, when they fit there
      (up to six names, one a line); else they keep their own row under it. */
@@ -72,7 +91,10 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
           const label = creditLabel(c, h);
           const av = c.avatar ?? (h === "juliangigola" ? "/people/juliangigola.jpg" : null);
           return (
-            <li key={`${c.role}${c.name}`} style={{ "--r": i < half ? i + 1 : i - half + 1, "--c": i < half ? 1 : 2 } as React.CSSProperties}>
+            <li
+              key={`${c.role}${c.name}`}
+              style={{ "--r": i < half ? i + 1 : i - half + 1, "--c": i < half ? 1 : 2 } as React.CSSProperties}
+            >
               <span className="mute">{c.role}</span>
               <b>
                 {h ? (
@@ -127,8 +149,24 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
               tall) and as wide as its shape makes that, so `sizes` says so: 40vw undersold it on a 2x laptop (656px drawn,
               1280 sent for 1312), and 64px oversold it a ladder step (QA on #1376). */}
           {big ? (
-            <figure className="pj-big" style={{ aspectRatio: `${big.width} / ${big.height}`, "--ar": big.width / big.height } as React.CSSProperties}>
-              <Image src={big.src} alt={alt(big.alt)} fill sizes={bleed ? "100vw" : across ? "(max-width: 900px) 100vw, 60vw" : `(max-width: 900px) 100vw, calc((100vh - 80px) * ${(big.width / big.height).toFixed(3)})`} priority style={{ objectFit: "cover", background: big.color }} />
+            <figure
+              className="pj-big"
+              style={{ aspectRatio: `${big.width} / ${big.height}`, "--ar": big.width / big.height } as React.CSSProperties}
+            >
+              <Image
+                src={big.src}
+                alt={alt(big.alt)}
+                fill
+                sizes={
+                  bleed
+                    ? "100vw"
+                    : across
+                      ? "(max-width: 900px) 100vw, 60vw"
+                      : `(max-width: 900px) 100vw, calc((100vh - 80px) * ${(big.width / big.height).toFixed(3)})`
+                }
+                priority
+                style={{ objectFit: "cover", background: big.color }}
+              />
               {/* The client's logo signs the opening frame, bottom right (Julian). */}
               {mark ? (
                 <span className="pj-mark">
@@ -140,7 +178,9 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
           {lead.length ? (
             <div className="pj-lead">
               {lead.map((f) => (
-                <figure key={f.src} className="pj-r" style={{ "--arn": f.width / f.height } as React.CSSProperties}>{pic(f, "(max-width: 900px) 100vw, 30vw", true)}</figure>
+                <figure key={f.src} className="pj-r" style={{ "--arn": f.width / f.height } as React.CSSProperties}>
+                  {pic(f, "(max-width: 900px) 100vw, 30vw", true)}
+                </figure>
               ))}
             </div>
           ) : null}
@@ -148,7 +188,11 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
         {/* The rest as a contact sheet: even rows of three verticals; a horizontal takes the whole row at its own shape. */}
         <div className="pj-flow">
           {rest.map((f) => (
-            <figure key={f.src} className={wide(f) ? "pj-r w" : "pj-r"} style={wide(f) ? ({ "--ar": `${f.width} / ${f.height}` } as React.CSSProperties) : undefined}>
+            <figure
+              key={f.src}
+              className={wide(f) ? "pj-r w" : "pj-r"}
+              style={wide(f) ? ({ "--ar": `${f.width} / ${f.height}` } as React.CSSProperties) : undefined}
+            >
               {pic(f, wide(f) ? "(max-width: 700px) 100vw, 66vw" : "(max-width: 700px) 100vw, 33vw")}
             </figure>
           ))}
@@ -175,14 +219,19 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
               <BtsPageGrid bts={project.bts} name={name} />
             </section>
           ) : null}
-          {hole ? (project.bts ? <div className="pj-cr2">{credits}</div> : null) : credits}
+          {hole ? project.bts ? <div className="pj-cr2">{credits}</div> : null : credits}
           {/* The page closes on an ask (critique), pre-tagged so the form opens on this kind of job. */}
           <div className="pj-ask">
             <div>
               <h2>Want something like this?</h2>
               <p className="mute">Tell me what you have in mind and I&apos;ll come back with an approach and a quote.</p>
             </div>
-            <Link className="btn fill" href={`/contact/form?${new URLSearchParams({ ...(kindOf(project) ? { type: kindOf(project)! } : {}), ref: name })}`}>Inquire</Link>
+            <Link
+              className="btn fill"
+              href={`/contact/form?${new URLSearchParams({ ...(kindOf(project) ? { type: kindOf(project)! } : {}), ref: name })}`}
+            >
+              Inquire
+            </Link>
           </div>
           {next ? (
             <Link className="pj-next" href={next.href} data-sink>
@@ -200,14 +249,35 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
                 </span>
               ) : null}
               {/* --lw: its longest word, so a phone shrinks the name to keep each word whole (Julian). */}
-              <b style={{ "--lw": Math.max(...next.name.replace(/^Next: /, "").split(" ").map((w) => w.length)) } as React.CSSProperties}>{titleCase(next.name.replace(/^Next: /, ""))}</b>
+              <b
+                style={
+                  {
+                    "--lw": Math.max(
+                      ...next.name
+                        .replace(/^Next: /, "")
+                        .split(" ")
+                        .map((w) => w.length),
+                    ),
+                  } as React.CSSProperties
+                }
+              >
+                {titleCase(next.name.replace(/^Next: /, ""))}
+              </b>
               <span aria-hidden>&rarr;</span>
             </Link>
           ) : null}
         </div>
       </section>
       {/* The page's frames in the order they are laid out, for the viewer (`?v4pages=view`). */}
-      <ProjectViewer frames={[...(big ? [big] : []), ...lead, ...rest].map((f) => ({ s: project.slug, src: f.src, alt: alt(f.alt), wide: wide(f), sq: f.width === f.height }))} />
+      <ProjectViewer
+        frames={[...(big ? [big] : []), ...lead, ...rest].map((f) => ({
+          s: project.slug,
+          src: f.src,
+          alt: alt(f.alt),
+          wide: wide(f),
+          sq: f.width === f.height,
+        }))}
+      />
     </div>
   );
 }

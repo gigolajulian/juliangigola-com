@@ -30,8 +30,22 @@ function state(p: ProofRow): { label: string; variant: "success" | "blue" | "gra
 function facts(p: ProofRow, lead: string): string {
   const n = (k: number, one: string) => `${k} ${one}${k === 1 ? "" : "s"}`;
   const parts = p.deliveredAt
-    ? ["Finals", n(p.finals?.length ?? 0, "photo"), `delivered ${dayLabel(p.deliveredAt)}`, p.firstDownloadAt ? `downloaded ${dayLabel(p.firstDownloadAt)}` : null]
-    : ["Proofs", n(p.frames.length, "frame"), p.sentAt ? `sent ${dayLabel(p.sentAt)}` : "not sent", p.submittedAt ? `${n(p.selects.length, "select")} sent ${dayLabel(p.submittedAt)}` : p.views ? `opened ${n(p.views, "time")}` : null];
+    ? [
+        "Finals",
+        n(p.finals?.length ?? 0, "photo"),
+        `delivered ${dayLabel(p.deliveredAt)}`,
+        p.firstDownloadAt ? `downloaded ${dayLabel(p.firstDownloadAt)}` : null,
+      ]
+    : [
+        "Proofs",
+        n(p.frames.length, "frame"),
+        p.sentAt ? `sent ${dayLabel(p.sentAt)}` : "not sent",
+        p.submittedAt
+          ? `${n(p.selects.length, "select")} sent ${dayLabel(p.submittedAt)}`
+          : p.views
+            ? `opened ${n(p.views, "time")}`
+            : null,
+      ];
   if (pastCloseDate(p)) parts.push("closed");
   if (p.email && canonical(p.email) !== canonical(lead)) parts.push(`to ${p.email}`);
   return parts.filter(Boolean).join(" · ");
@@ -41,7 +55,9 @@ export function Galleries({ galleries, lead, open }: { galleries: ProofRow[]; le
   return (
     <VStack gap={3}>
       <HStack gap={2} vAlign="center">
-        <StackItem size="fill"><Heading level={2}>Galleries</Heading></StackItem>
+        <StackItem size="fill">
+          <Heading level={2}>Galleries</Heading>
+        </StackItem>
         <Button label="All proofs" variant="ghost" size="sm" onClick={() => open()} />
       </HStack>
       {galleries.map((p, i) => {
@@ -53,7 +69,9 @@ export function Galleries({ galleries, lead, open }: { galleries: ProofRow[]; le
               <StackItem size="fill">
                 <VStack gap={0}>
                   <Text type="label">{p.name}</Text>
-                  <Text type="supporting" color="secondary">{facts(p, lead)}</Text>
+                  <Text type="supporting" color="secondary">
+                    {facts(p, lead)}
+                  </Text>
                 </VStack>
               </StackItem>
               <Badge label={s.label} variant={s.variant} />

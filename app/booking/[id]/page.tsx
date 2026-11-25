@@ -17,10 +17,17 @@ const Note = ({ children }: { children: React.ReactNode }) => (
   </section>
 );
 
-export default async function BookingPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ t?: string; do?: string }> }) {
+export default async function BookingPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ t?: string; do?: string }>;
+}) {
   const [{ id }, { t, do: open }] = await Promise.all([params, searchParams]);
   const { env } = await getCloudflareContext({ async: true });
-  if (!(await tokenOpens(env.BOOKING_SECRET, id, t))) return <Note>This link has expired. Reply to your confirmation email and I&apos;ll sort it out.</Note>;
+  if (!(await tokenOpens(env.BOOKING_SECRET, id, t)))
+    return <Note>This link has expired. Reply to your confirmation email and I&apos;ll sort it out.</Note>;
   let record: BookingRecord | null = null;
   try {
     ({ record } = await lockOp(env, "get", id));

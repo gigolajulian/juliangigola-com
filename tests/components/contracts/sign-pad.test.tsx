@@ -7,7 +7,8 @@ import { SignPad } from "@/components/contracts/sign-pad";
 
 beforeEach(() => {
   // A 300 x 100 box on screen, so screen pixels double into the pad's 600 x 200.
-  SVGElement.prototype.getBoundingClientRect = () => ({ left: 0, top: 0, width: 300, height: 100, right: 300, bottom: 100, x: 0, y: 0, toJSON() {} }) as DOMRect;
+  SVGElement.prototype.getBoundingClientRect = () =>
+    ({ left: 0, top: 0, width: 300, height: 100, right: 300, bottom: 100, x: 0, y: 0, toJSON() {} }) as DOMRect;
   Object.assign(SVGElement.prototype, { setPointerCapture() {} });
   // jsdom's list is empty; a browser's holds at least the event itself.
   PointerEvent.prototype.getCoalescedEvents = function (this: PointerEvent) {

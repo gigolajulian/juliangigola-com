@@ -3,7 +3,7 @@
 import * as React from "react";
 import Image from "next/image";
 import { isTextRef, type FrameRef, type TextRef } from "@/lib/work/added";
-import { useSequence, srcOf } from "@/lib/admin/admin-sequence";
+import { useSequence, srcOf } from "@/components/admin/use-sequence";
 import { useEditorStaging } from "@/components/admin/editor/editor-context";
 import { cn, pad } from "@/lib/utils";
 import { backToBack, twinGroups } from "@/lib/work/frame-twins";
@@ -48,22 +48,7 @@ export function AdminFrames({
   /** Photographs staged for this publish, by repo path, and where new ones go. */
   const { uploads, onUpload } = useEditorStaging();
   const seq = useSequence({ slug, original, frames, onChange, onUpload });
-  const {
-    list,
-    busy,
-    error,
-    editing,
-    setEditing,
-    dragging,
-    over,
-    reorder,
-    drop,
-    addText,
-    setText,
-    add,
-    reset,
-    dragProps,
-  } = seq;
+  const { list, busy, error, editing, setEditing, dragging, over, reorder, drop, addText, setText, add, reset, dragProps } = seq;
   const [zoom, setZoom] = React.useState<number | null>(null);
 
   const photos = list.filter((f) => !isTextRef(f));
@@ -105,31 +90,19 @@ export function AdminFrames({
       <div className="flex flex-wrap items-baseline justify-between gap-4">
         <p className="label text-muted-foreground">
           {photos.length} {photos.length === 1 ? "frame" : "frames"}
-          {passages > 0
-            ? ` · ${passages} ${passages === 1 ? "passage" : "passages"}`
-            : ""}
+          {passages > 0 ? ` · ${passages} ${passages === 1 ? "passage" : "passages"}` : ""}
           {staged > 0 ? ` · ${staged} not yet uploaded` : ""}
           {frames ? " · edited" : ""}
-          {twinsLeft > 0
-            ? ` · ${twinsLeft} near-twin${twinsLeft === 1 ? "" : "s"}`
-            : ""}
+          {twinsLeft > 0 ? ` · ${twinsLeft} near-twin${twinsLeft === 1 ? "" : "s"}` : ""}
           {b2b.size > 0 ? ` · ${b2b.size} back-to-back` : ""}
         </p>
         <div className="flex items-center gap-2">
           {frames ? (
-            <button
-              type="button"
-              onClick={reset}
-              className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
-            >
+            <button type="button" onClick={reset} className="label border border-border px-3 py-2 press hoverable:hover:bg-card">
               Undo changes
             </button>
           ) : null}
-          <button
-            type="button"
-            onClick={() => addText()}
-            className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
-          >
+          <button type="button" onClick={() => addText()} className="label border border-border px-3 py-2 press hoverable:hover:bg-card">
             Add text
           </button>
           <label className="label cursor-pointer border border-border px-3 py-2 press hoverable:hover:bg-card">
@@ -148,11 +121,7 @@ export function AdminFrames({
         </div>
       </div>
 
-      {busy || error ? (
-        <p className={cn("label mt-3", error && "text-destructive")}>
-          {error || busy}
-        </p>
-      ) : null}
+      {busy || error ? <p className={cn("label mt-3", error && "text-destructive")}>{error || busy}</p> : null}
 
       <ol className="mt-5 grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-6">
         {list.map((f, i) => {
@@ -161,8 +130,7 @@ export function AdminFrames({
           // The frame's own mat where it is known — the same way the site
           // sits a photograph in a box it does not fill. Narrowed with the
           // guard rather than via `text`, which the checker will not follow.
-          const mat =
-            typeof f === "string" || isTextRef(f) ? undefined : f.color;
+          const mat = typeof f === "string" || isTextRef(f) ? undefined : f.color;
           const pending = uploads[`public${src}`];
           // The last photograph cannot go: `lib/work/added.ts` refuses to build a
           // gallery of pure text, and saying so here beats failing the deploy
@@ -192,10 +160,7 @@ export function AdminFrames({
                 // The slot it would land in, outlined rather than nudged
                 // aside: seventy tiles reflowing on every pointer move is
                 // motion sickness, and the outline says the same thing.
-                over === i &&
-                  dragging !== null &&
-                  dragging !== i &&
-                  "outline outline-2 outline-offset-2 outline-foreground",
+                over === i && dragging !== null && dragging !== i && "outline outline-2 outline-offset-2 outline-foreground",
               )}
             >
               {text ? (
@@ -205,20 +170,12 @@ export function AdminFrames({
                   aria-expanded={editing === i}
                   className={cn(
                     "relative flex aspect-[4/5] w-full flex-col justify-between overflow-hidden border p-2 text-left press",
-                    editing === i
-                      ? "border-foreground bg-card"
-                      : "border-dashed border-border hoverable:hover:bg-card",
+                    editing === i ? "border-foreground bg-card" : "border-dashed border-border hoverable:hover:bg-card",
                   )}
                 >
-                  <span className="label shrink-0 text-muted-foreground">
-                    TEXT
-                  </span>
+                  <span className="label shrink-0 text-muted-foreground">TEXT</span>
                   <span className="min-h-0 flex-1 overflow-hidden py-1">
-                    {text.heading ? (
-                      <span className="label block truncate text-foreground">
-                        {text.heading}
-                      </span>
-                    ) : null}
+                    {text.heading ? <span className="label block truncate text-foreground">{text.heading}</span> : null}
                     <span className="mt-1 line-clamp-4 block text-[0.7rem] leading-snug text-muted-foreground">
                       {text.body || "Empty. Click to write"}
                     </span>
@@ -236,12 +193,7 @@ export function AdminFrames({
                     // Not in the repo yet, so `next/image` has nothing to fetch
                     // and the object URL is the only copy there is.
                     // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={pending.preview}
-                      alt=""
-                      draggable={false}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
+                    <img src={pending.preview} alt="" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
                   ) : (
                     <Image
                       src={src}
@@ -257,23 +209,15 @@ export function AdminFrames({
                     />
                   )}
                   <span className="label absolute left-0 top-0 bg-background/80 px-2 py-1 tabular-nums">
-                    {ordinal[i] === 1
-                      ? "COVER"
-                      : pad(ordinal[i])}
+                    {ordinal[i] === 1 ? "COVER" : pad(ordinal[i])}
                   </span>
                   {letters.has(src) ? (
-                    <span
-                      title="Near-twin group"
-                      className="label absolute right-0 top-0 bg-background/80 px-2 py-1 text-accent"
-                    >
+                    <span title="Near-twin group" className="label absolute right-0 top-0 bg-background/80 px-2 py-1 text-accent">
                       {letters.get(src)}
                     </span>
                   ) : null}
                   {b2b.has(src) ? (
-                    <span
-                      aria-label="Plays straight after its near-twin"
-                      className="absolute inset-y-0 left-0 w-0.5 bg-accent"
-                    />
+                    <span aria-label="Plays straight after its near-twin" className="absolute inset-y-0 left-0 w-0.5 bg-accent" />
                   ) : null}
                 </button>
               )}
@@ -329,32 +273,25 @@ export function AdminFrames({
       ) : null}
 
       <p className="label mt-5 text-muted-foreground">
-        Drag a tile to move it, or use the arrows. The arrows are the way on a
-        touch screen and with a keyboard. The first photograph opens the project
-        and is the card shown on every index. Text sits on the page exactly
-        where it sits in this list. Removing a photograph takes it out of the
-        sequence and keeps the file. Nothing here is live until you press
-        Publish. A letter marks frames that are near-twins of each other; a
-        line on a frame&rsquo;s left edge means it plays straight after its
-        twin. Open a frame to see it full size.
+        Drag a tile to move it, or use the arrows. The arrows are the way on a touch screen and with a keyboard. The first photograph opens
+        the project and is the card shown on every index. Text sits on the page exactly where it sits in this list. Removing a photograph
+        takes it out of the sequence and keeps the file. Nothing here is live until you press Publish. A letter marks frames that are
+        near-twins of each other; a line on a frame&rsquo;s left edge means it plays straight after its twin. Open a frame to see it full
+        size.
       </p>
 
       {zoom !== null && list[zoom] && !isTextRef(list[zoom]) ? (
         <FrameZoom
           // Keyed by frame, so a step or a cut opens the next one unzoomed.
           key={srcOf(list[zoom])}
-          src={
-            uploads[`public${srcOf(list[zoom])}`]?.preview ??
-            srcOf(list[zoom])
-          }
+          src={uploads[`public${srcOf(list[zoom])}`]?.preview ?? srcOf(list[zoom])}
           number={ordinal[zoom]}
           count={photos.length}
           letter={letters.get(srcOf(list[zoom]))}
           after={b2b.has(srcOf(list[zoom]))}
           canCut={photos.length > 1}
           onStep={(d) => {
-            for (let n = zoom + d; n >= 0 && n < list.length; n += d)
-              if (!isTextRef(list[n])) return setZoom(n);
+            for (let n = zoom + d; n >= 0 && n < list.length; n += d) if (!isTextRef(list[n])) return setZoom(n);
           }}
           onCut={() => cut(zoom)}
           onClose={() => setZoom(null)}
@@ -391,9 +328,7 @@ function FrameZoom({
   onCut: () => void;
   onClose: () => void;
 }) {
-  const [origin, setOrigin] = React.useState<{ x: number; y: number } | null>(
-    null,
-  );
+  const [origin, setOrigin] = React.useState<{ x: number; y: number } | null>(null);
   const [pan, setPan] = React.useState({ x: 0, y: 0 });
   const [dragging, setDragging] = React.useState(false);
   const [help, setHelp] = React.useState(false);
@@ -419,22 +354,13 @@ function FrameZoom({
     return () => window.removeEventListener("keydown", key);
   }, [onClose, onStep, onCut, canCut]);
 
-  const ctl =
-    "label border border-border px-3 py-2 press hoverable:hover:bg-card disabled:opacity-30";
+  const ctl = "label border border-border px-3 py-2 press hoverable:hover:bg-card disabled:opacity-30";
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Frame ${number}`}
-      className="fixed inset-0 z-[60] flex flex-col bg-background"
-    >
+    <div role="dialog" aria-modal="true" aria-label={`Frame ${number}`} className="fixed inset-0 z-[60] flex flex-col bg-background">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-5 py-3">
         <p className="label tabular-nums text-muted-foreground">
-          <span className="text-foreground">
-            {number === 1 ? "COVER" : pad(number)}
-          </span>{" "}
-          / {count}
+          <span className="text-foreground">{number === 1 ? "COVER" : pad(number)}</span> / {count}
           {letter ? <span className="text-accent"> · twin {letter}</span> : null}
           {after ? <span className="text-accent"> · back-to-back</span> : null}
         </p>
@@ -445,21 +371,10 @@ function FrameZoom({
           <button type="button" onClick={() => onStep(1)} aria-label="Next frame" className={ctl}>
             →
           </button>
-          <button
-            type="button"
-            onClick={onCut}
-            disabled={!canCut}
-            className={cn(ctl, "hoverable:hover:text-destructive")}
-          >
+          <button type="button" onClick={onCut} disabled={!canCut} className={cn(ctl, "hoverable:hover:text-destructive")}>
             Cut
           </button>
-          <button
-            type="button"
-            onClick={() => setHelp((h) => !h)}
-            aria-expanded={help}
-            aria-label="Help"
-            className={ctl}
-          >
+          <button type="button" onClick={() => setHelp((h) => !h)} aria-expanded={help} aria-label="Help" className={ctl}>
             ?
           </button>
           <button type="button" onClick={onClose} aria-label="Close" className={ctl}>
@@ -468,8 +383,7 @@ function FrameZoom({
         </div>
         {help ? (
           <p className="label w-full text-muted-foreground">
-            Tap to zoom 2x where you tap, tap again to come back. Drag to pan.
-            ← → step. X cuts. Esc closes.
+            Tap to zoom 2x where you tap, tap again to come back. Drag to pan. ← → step. X cuts. Esc closes.
           </p>
         ) : null}
       </div>
@@ -548,17 +462,14 @@ function PassageForm({
   onClose: () => void;
   onRemove: () => void;
 }) {
-  const field =
-    "w-full border border-border bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-foreground";
+  const field = "w-full border border-border bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-foreground";
 
   return (
     <div className="mt-5 border border-foreground p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <p className="label">
           Passage · item {position + 1}
-          {before === 0
-            ? " · opens the project"
-            : ` · after ${before} ${before === 1 ? "frame" : "frames"}`}
+          {before === 0 ? " · opens the project" : ` · after ${before} ${before === 1 ? "frame" : "frames"}`}
         </p>
         <div className="flex items-center gap-2">
           <button
@@ -568,11 +479,7 @@ function PassageForm({
           >
             Remove
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="label border border-border px-3 py-1.5 press hoverable:hover:bg-card"
-          >
+          <button type="button" onClick={onClose} className="label border border-border px-3 py-1.5 press hoverable:hover:bg-card">
             Done
           </button>
         </div>
@@ -594,8 +501,7 @@ function PassageForm({
         className={cn(field, "mt-2 resize-y leading-relaxed")}
       />
       <p className="label mt-2 text-muted-foreground">
-        A blank line starts a new paragraph. A passage left empty is dropped on
-        publish rather than printed as a gap.
+        A blank line starts a new paragraph. A passage left empty is dropped on publish rather than printed as a gap.
       </p>
     </div>
   );

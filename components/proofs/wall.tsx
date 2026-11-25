@@ -53,14 +53,19 @@ function tilesNear(root: HTMLElement): Box[] {
 function gridShape(g: HTMLElement | null) {
   if (!g) return "";
   const cs = getComputedStyle(g);
-  const cols = cs.gridTemplateColumns.split(" ").map(parseFloat).filter((n) => n > 0);
+  const cols = cs.gridTemplateColumns
+    .split(" ")
+    .map(parseFloat)
+    .filter((n) => n > 0);
   if (!cols.length) return "";
   const gap = parseFloat(cs.columnGap) || 0;
   const left = g.getBoundingClientRect().left + (parseFloat(cs.paddingLeft) || 0);
   const width = cols.length * cols[0] + (cols.length - 1) * gap;
   // From the middle of the wall's layer, which stops short of a scrollbar.
   const top = g.getBoundingClientRect().top + (parseFloat(cs.paddingTop) || 0);
-  return [cols.length, cols[0], gap, left + width / 2 - document.documentElement.clientWidth / 2, top].map((n) => Math.round(n * 100) / 100).join(",");
+  return [cols.length, cols[0], gap, left + width / 2 - document.documentElement.clientWidth / 2, top]
+    .map((n) => Math.round(n * 100) / 100)
+    .join(",");
 }
 const onResize = (cb: () => void) => {
   addEventListener("resize", cb);
@@ -109,7 +114,11 @@ export function ProofWall({
   }, []);
 
   // The wall on the grid's columns (the grid is laid out, hidden, under the gate).
-  const shape = React.useSyncExternalStore(onResize, () => gridShape(grid.current), () => "");
+  const shape = React.useSyncExternalStore(
+    onResize,
+    () => gridShape(grid.current),
+    () => "",
+  );
   const wall = React.useMemo(() => {
     if (!shape || !frames.length) return null;
     const [n, w, gap, dx, top] = shape.split(",").map(Number);
@@ -149,7 +158,10 @@ export function ProofWall({
     const done = () => {
       if (gone || lift) return;
       setProgress(1);
-      lift = window.setTimeout(() => !gone && setLoaded(true), Math.max(BAR_DONE_MS, (back ? 0 : SPLASH_MIN_MS) - (performance.now() - t0)));
+      lift = window.setTimeout(
+        () => !gone && setLoaded(true),
+        Math.max(BAR_DONE_MS, (back ? 0 : SPLASH_MIN_MS) - (performance.now() - t0)),
+      );
     };
     const cap = window.setTimeout(done, back ? RETURN_CAP_MS : PRELOAD_CAP_MS);
     const srcs = [...new Set(wall.items.map((i) => i.image))];
@@ -265,7 +277,9 @@ export function ProofWall({
         order.forEach((t, i) => {
           const r = i - k;
           if (r < 0) {
-            t.img.closest(".drift-wall__inner")?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: GLIDE_MS * 0.55, easing: "ease-out", fill: "forwards" });
+            t.img
+              .closest(".drift-wall__inner")
+              ?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: GLIDE_MS * 0.55, easing: "ease-out", fill: "forwards" });
             return;
           }
           const cell = cells[c + r * n];
@@ -276,7 +290,13 @@ export function ProofWall({
       }
       // The curve's start slope set to the column's own speed, so it carries on from where it was, then settles.
       const y1 = Math.max(-0.3, Math.min(1, D ? (0.3 * v * T) / D : 0.9));
-      glides.push(track.animate([{ translate: "0 0" }, { translate: `0 ${D}px` }], { duration: GLIDE_MS, easing: `cubic-bezier(.3,${y1},.25,1)`, fill: "forwards" }));
+      glides.push(
+        track.animate([{ translate: "0 0" }, { translate: `0 ${D}px` }], {
+          duration: GLIDE_MS,
+          easing: `cubic-bezier(.3,${y1},.25,1)`,
+          fill: "forwards",
+        }),
+      );
     });
     await Promise.all(glides.map((x) => x.finished.catch(() => {})));
     await drawn;
@@ -309,10 +329,21 @@ export function ProofWall({
       const cx = to.left + to.width / 2;
       const cy = to.top + to.height / 2;
       let from: Box | null = null;
-      for (const t of tiles) if (t.img.getAttribute("src") === src && (!from || Math.hypot(t.x - cx, t.y - cy) < Math.hypot(from.x - cx, from.y - cy))) from = t;
-      if (from && Math.abs(from.x - cx) < 1.5 && Math.abs(from.y - cy) < 1.5 && Math.abs(from.w - to.width) < 2 && Math.abs(from.h - to.height) < 2) continue;
+      for (const t of tiles)
+        if (t.img.getAttribute("src") === src && (!from || Math.hypot(t.x - cx, t.y - cy) < Math.hypot(from.x - cx, from.y - cy))) from = t;
+      if (
+        from &&
+        Math.abs(from.x - cx) < 1.5 &&
+        Math.abs(from.y - cy) < 1.5 &&
+        Math.abs(from.w - to.width) < 2 &&
+        Math.abs(from.h - to.height) < 2
+      )
+        continue;
       const kf: Keyframe[] = from
-        ? [{ transform: `translate(${from.x - cx}px, ${from.y - cy}px) scale(${from.w / to.width}, ${from.h / to.height})` }, { transform: "none" }]
+        ? [
+            { transform: `translate(${from.x - cx}px, ${from.y - cy}px) scale(${from.w / to.width}, ${from.h / to.height})` },
+            { transform: "none" },
+          ]
         : [{ opacity: 0 }, { opacity: 1 }];
       anims.push(cell.animate(kf, { duration: tune ? GRIDWALL.handOver : 450, easing: "cubic-bezier(.22,1,.36,1)", fill: "backwards" }));
     }
@@ -327,7 +358,9 @@ export function ProofWall({
   async function reveal(still: boolean) {
     setLeaving(true);
     const t0 = performance.now();
-    const imgs = [...(grid.current?.querySelectorAll<HTMLImageElement>(".proof-cell img") ?? [])].filter((i) => i.getBoundingClientRect().top < innerHeight);
+    const imgs = [...(grid.current?.querySelectorAll<HTMLImageElement>(".proof-cell img") ?? [])].filter(
+      (i) => i.getBoundingClientRect().top < innerHeight,
+    );
     for (const i of imgs) i.loading = "eager";
     const wait = (ms: number) => new Promise((r) => window.setTimeout(r, ms));
     await Promise.race([Promise.all(imgs.map((i) => i.decode().catch(() => {}))), wait(DECODE_CAP_MS)]);
@@ -343,10 +376,28 @@ export function ProofWall({
       if (r.top > innerHeight) break;
       const col = Math.round((r.left - (first?.left ?? 0)) / pitch);
       const row = Math.round((r.top - (first?.top ?? 0)) / Math.max(1, first?.height ?? 1));
-      anims.push(cell.animate([{ opacity: 0, transform: "translateY(10px) scale(.985)" }, { opacity: 1, transform: "none" }], { duration: RISE_MS, easing: "cubic-bezier(.22,1,.36,1)", delay: col * 80 + row * 50, fill: "backwards" }));
+      anims.push(
+        cell.animate(
+          [
+            { opacity: 0, transform: "translateY(10px) scale(.985)" },
+            { opacity: 1, transform: "none" },
+          ],
+          { duration: RISE_MS, easing: "cubic-bezier(.22,1,.36,1)", delay: col * 80 + row * 50, fill: "backwards" },
+        ),
+      );
     }
-    if (still) anims.push(...[grid.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 600, easing: "ease", fill: "backwards" })].filter((a) => !!a));
-    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], { duration: still ? 600 : 1000, delay: still ? 0 : 250, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" });
+    if (still)
+      anims.push(
+        ...[grid.current?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 600, easing: "ease", fill: "backwards" })].filter(
+          (a) => !!a,
+        ),
+      );
+    const out = root?.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: still ? 600 : 1000,
+      delay: still ? 0 : 250,
+      easing: "cubic-bezier(.4,0,.2,1)",
+      fill: "forwards",
+    });
     Promise.all([out?.finished, ...anims.map((a) => a.finished)].map((p) => p?.catch(() => {}))).then(onDone);
   }
 
@@ -365,7 +416,14 @@ export function ProofWall({
           <i style={{ transform: `scaleX(${progress})` }} />
         </div>
       </div>
-      <div ref={layer} className="pw-layer" data-gw={tune ? "" : undefined} data-ready={ready || undefined} data-flat={flat || undefined} data-leave={leaving || undefined}>
+      <div
+        ref={layer}
+        className="pw-layer"
+        data-gw={tune ? "" : undefined}
+        data-ready={ready || undefined}
+        data-flat={flat || undefined}
+        data-leave={leaving || undefined}
+      >
         {wall && loaded ? (
           <DriftWall
             items={wall.items}
@@ -404,7 +462,13 @@ export function ProofWall({
         style={
           tune
             ? innerWidth <= 520
-              ? { scale: tune.card, borderRadius: tune.cardRadius, transformOrigin: "50% 100%", width: `calc(100% / ${tune.card})`, left: `calc(50% - 50% / ${tune.card})` }
+              ? {
+                  scale: tune.card,
+                  borderRadius: tune.cardRadius,
+                  transformOrigin: "50% 100%",
+                  width: `calc(100% / ${tune.card})`,
+                  left: `calc(50% - 50% / ${tune.card})`,
+                }
               : { scale: tune.card, borderRadius: tune.cardRadius, transformOrigin: "0 50%" }
             : undefined
         }
@@ -431,7 +495,7 @@ export function ProofWall({
             autoComplete="name"
             required
             value={name}
-           
+
             aria-invalid={bad === "Add your name." || undefined}
             onChange={(e) => {
               setName(e.target.value);
@@ -448,7 +512,7 @@ export function ProofWall({
             autoComplete="email"
             required
             value={email}
-           
+
             aria-invalid={(!!bad && bad !== "Add your name.") || undefined}
             onChange={(e) => {
               setEmail(e.target.value);

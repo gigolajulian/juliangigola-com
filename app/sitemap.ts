@@ -61,9 +61,7 @@ const showing = (frames: Frame[]) => {
     covers. Cover art's rack shows the front of each sleeve. */
 const galleryOf = (slug: string) => projectsIn(slug).find(isDisciplineGallery);
 const galleryFrames = (gallery: NonNullable<ReturnType<typeof galleryOf>>) =>
-  gallery.slug === COVER_ART?.slug
-    ? COVER_RELEASES.map((r) => r.frames[0])
-    : gallery.images;
+  gallery.slug === COVER_ART?.slug ? COVER_RELEASES.map((r) => r.frames[0]) : gallery.images;
 
 /**
  * Every project page is listed, including the ones the nav does not link —
@@ -82,21 +80,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "": [...FEATURED, ...DISCIPLINE_TILES, ...PROJECTS].map((p) => p.cover),
     "/portfolio": WORK_CATEGORY_LINKS.flatMap((c) => {
       const gallery = galleryOf(c.slug);
-      return gallery
-        ? galleryFrames(gallery)
-        : commissionsIn(c.slug).map((p) => p.cover);
+      return gallery ? galleryFrames(gallery) : commissionsIn(c.slug).map((p) => p.cover);
     }),
   };
-  const pages = ["", "/portfolio", "/legal"].map(
-    (path) => ({
-      url: `${SITE}${path}`,
-      ...(path === "/legal"
-        ? { lastModified: new Date(DATES.legal) }
-        : showing(shownOn[path])),
-      changeFrequency: "monthly" as const,
-      priority: path === "" ? 1 : 0.8,
-    }),
-  );
+  const pages = ["", "/portfolio", "/legal"].map((path) => ({
+    url: `${SITE}${path}`,
+    ...(path === "/legal" ? { lastModified: new Date(DATES.legal) } : showing(shownOn[path])),
+    changeFrequency: "monthly" as const,
+    priority: path === "" ? 1 : 0.8,
+  }));
 
   // The discipline pages. They sit above individual projects in priority:
   // they are the pages a search for "bay area editorial photographer" should
@@ -119,11 +111,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       ...(c.slug === "video"
         ? {}
         : showing(
-            gallery
-              ? galleryFrames(gallery)
-              : COMMISSIONS.filter((p) =>
-                  p.categories.some((k) => k.slug === c.slug),
-                ).map((p) => p.cover),
+            gallery ? galleryFrames(gallery) : COMMISSIONS.filter((p) => p.categories.some((k) => k.slug === c.slug)).map((p) => p.cover),
           )),
       changeFrequency: "monthly" as const,
       priority: 0.7,

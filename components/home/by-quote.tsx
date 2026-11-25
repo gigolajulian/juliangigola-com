@@ -16,9 +16,26 @@ import { CardsCtx, useTold } from "./ctx";
 const W = QUOTE_OPTS.findIndex((o) => o.key === "weddings");
 
 /** `on`: client 0 without motion (static CSS). `q`: the rotation's current client (quote.css, only under motion). */
-function ClientPhoto({ c, on, q, stills, wide }: { c: QuoteClient; on: boolean; q: boolean; stills: Record<string, string>; wide?: boolean }) {
+function ClientPhoto({
+  c,
+  on,
+  q,
+  stills,
+  wide,
+}: {
+  c: QuoteClient;
+  on: boolean;
+  q: boolean;
+  stills: Record<string, string>;
+  wide?: boolean;
+}) {
   const srcs = c.photos.map((p) => ({ ...p, src: stills[p.src] ?? p.src })).filter((p) => p.src);
-  if (wide && c.wide) return <span className={on ? "cl on" : "cl"} data-q={q ? "" : undefined}><Image src={c.wide} alt={c.photos[0].alt} fill sizes="100vw" /></span>;
+  if (wide && c.wide)
+    return (
+      <span className={on ? "cl on" : "cl"} data-q={q ? "" : undefined}>
+        <Image src={c.wide} alt={c.photos[0].alt} fill sizes="100vw" />
+      </span>
+    );
   return (
     <span className={`cl${on ? " on" : ""}${srcs.length > 1 ? " two" : ""}`} data-q={q ? "" : undefined}>
       {srcs.map((p) => (
@@ -30,7 +47,15 @@ function ClientPhoto({ c, on, q, stills, wide }: { c: QuoteClient; on: boolean; 
   );
 }
 
-export function ByQuote({ stills, reply, onOptionPick }: { stills: Record<string, string>; reply: string | null; onOptionPick: (k: QuoteOpt["key"]) => void }) {
+export function ByQuote({
+  stills,
+  reply,
+  onOptionPick,
+}: {
+  stills: Record<string, string>;
+  reply: string | null;
+  onOptionPick: (k: QuoteOpt["key"]) => void;
+}) {
   const [sel, setSel] = React.useState(0);
   const [optPhoto, setOptPhoto] = React.useState(false); // the option's photo shows instead of the client's
   // the rotation (motion/quote.ts): `k` is the client shown, `name` the name shown (it follows k after a fade, `sw`)
@@ -51,53 +76,112 @@ export function ByQuote({ stills, reply, onOptionPick }: { stills: Record<string
       <div className="mt-frame mt-stage">
         <figure className="mt-photo">
           {/* the first client stands for the static form (`.on`); the rotation is `q` */}
-          {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={!optPhoto && i === 0} q={i === rot.k} stills={stills} />)}
+          {QUOTE_CLIENTS.map((c, i) => (
+            <ClientPhoto key={c.name} c={c} on={!optPhoto && i === 0} q={i === rot.k} stills={stills} />
+          ))}
           {QUOTE_OPTS.map((x, i) => (
             <span key={x.key} className={optPhoto && i === sel ? "op on" : "op"} data-cur={i === sel || undefined}>
               <Image src={x.photo} alt={`${x.name} sample`} fill sizes="(max-width: 1023px) 100vw, 42vw" />
             </span>
           ))}
-          <figcaption className="lbl mt-clcap" aria-hidden data-sw={sw}>{client.name}</figcaption>
+          <figcaption className="lbl mt-clcap" aria-hidden data-sw={sw}>
+            {client.name}
+          </figcaption>
         </figure>
         {/* Phone and tablet: the client frame at 2:1 (spec 8). */}
         <figure className="mt-photo-w">
-          {QUOTE_CLIENTS.map((c, i) => <ClientPhoto key={c.name} c={c} on={i === 0} q={i === rot.k} stills={stills} wide />)}
+          {QUOTE_CLIENTS.map((c, i) => (
+            <ClientPhoto key={c.name} c={c} on={i === 0} q={i === rot.k} stills={stills} wide />
+          ))}
         </figure>
-        <div className="mt-quote-col" onPointerEnter={() => matches("fine") && setOptPhoto(true)} onPointerLeave={() => matches("fine") && setOptPhoto(false)}>
+        <div
+          className="mt-quote-col"
+          onPointerEnter={() => matches("fine") && setOptPhoto(true)}
+          onPointerLeave={() => matches("fine") && setOptPhoto(false)}
+        >
           <p className="lbl mute mt-label">By quote</p>
           <h2 className="mt-q-h">Have something in mind?</h2>
           <p className="lbl mt-by">
-            <span className="mute">Commissioned by</span> <span className="nm" data-sw={sw}>{client.name}</span>
+            <span className="mute">Commissioned by</span>{" "}
+            <span className="nm" data-sw={sw}>
+              {client.name}
+            </span>
           </p>
           <div className="mt-qos">
-            {QUOTE_OPTS.map((x, i) => i === W ? null : (
-              <div key={x.key} className="mt-qow" data-on={i === sel || undefined}>
-                <button type="button" className="mt-qo" aria-pressed={i === sel} onPointerEnter={() => matches("fine") && pick(i)} onFocus={() => pick(i)} onClick={() => pick(i)}>
-                  <b>{x.name}</b>
-                  <span className="lbl">{x.holds.map((h, k) => <React.Fragment key={h}>{k ? <i> | </i> : null}{h}</React.Fragment>)}</span>
-                </button>
-                <p className="mt-qo-d">{x.detail}</p>
-              </div>
-            ))}
-            <button type="button" className="mt-qw" aria-pressed={sel === W} onPointerEnter={() => matches("fine") && pick(W)} onFocus={() => pick(W)} onClick={() => pick(W)}>
+            {QUOTE_OPTS.map((x, i) =>
+              i === W ? null : (
+                <div key={x.key} className="mt-qow" data-on={i === sel || undefined}>
+                  <button
+                    type="button"
+                    className="mt-qo"
+                    aria-pressed={i === sel}
+                    onPointerEnter={() => matches("fine") && pick(i)}
+                    onFocus={() => pick(i)}
+                    onClick={() => pick(i)}
+                  >
+                    <b>{x.name}</b>
+                    <span className="lbl">
+                      {x.holds.map((h, k) => (
+                        <React.Fragment key={h}>
+                          {k ? <i> | </i> : null}
+                          {h}
+                        </React.Fragment>
+                      ))}
+                    </span>
+                  </button>
+                  <p className="mt-qo-d">{x.detail}</p>
+                </div>
+              ),
+            )}
+            <button
+              type="button"
+              className="mt-qw"
+              aria-pressed={sel === W}
+              onPointerEnter={() => matches("fine") && pick(W)}
+              onFocus={() => pick(W)}
+              onClick={() => pick(W)}
+            >
               <b>{QUOTE_OPTS[W].name}</b>
-              <span><span className="dk">{QUOTE_OPTS[W].holds.join(" | ")}</span><span className="po">Full day | Couples</span></span>
+              <span>
+                <span className="dk">{QUOTE_OPTS[W].holds.join(" | ")}</span>
+                <span className="po">Full day | Couples</span>
+              </span>
             </button>
           </div>
           <p className="mt-q-line">Send a note or book a free call. I come back with an approach and a quote.</p>
           <div className="mt-q-act">
-            <button type="button" className="btn fill mt-big" aria-label={`Inquire about ${o.name.toLowerCase()}`} onClick={() => cards.inquire("quote", o.key)}>Inquire</button>
+            <button
+              type="button"
+              className="btn fill mt-big"
+              aria-label={`Inquire about ${o.name.toLowerCase()}`}
+              onClick={() => cards.inquire("quote", o.key)}
+            >
+              Inquire
+            </button>
             <div className="mt-q-alt">
               {reply ? <p className="lbl mute">Replies {reply}</p> : null}
-              <Link className="mt-link" href={o.call}>Book a free 15 minute call</Link>
+              <Link className="mt-link" href={o.call}>
+                Book a free 15 minute call
+              </Link>
             </div>
           </div>
         </div>
       </div>
       <div className="mt-bar">
-        <Link className="lbl mt-bar-call" href={o.call}><span>Free consultation&nbsp;<span aria-hidden>&rarr;</span></span></Link>
+        <Link className="lbl mt-bar-call" href={o.call}>
+          <span>
+            Free consultation&nbsp;<span aria-hidden>&rarr;</span>
+          </span>
+        </Link>
         {/* the picked row above names the session; the label keeps it for screen readers */}
-        <button type="button" className="btn fill" aria-label={`Inquire about ${o.name.toLowerCase()}`} onClick={() => cards.inquire("quote", o.key)}>Inquire</button>
+        <button
+          type="button"
+          className="btn fill"
+          aria-label={`Inquire about ${o.name.toLowerCase()}`}
+          onClick={() => cards.inquire("quote", o.key)}
+        >
+          Inquire
+        </button>
       </div>
     </section>
   );

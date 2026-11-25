@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { builds, gatherWhenSeen, streams } from '@/lib/motion/gather';
+import { builds, gatherWhenSeen, streams } from "@/lib/motion/gather";
 import {
   useCallback,
   useEffect,
@@ -11,14 +11,13 @@ import {
   useSyncExternalStore,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
-  type ReactNode
-} from 'react';
-import type { DriftWallItem } from '@/lib/work/work-types';
-
+  type ReactNode,
+} from "react";
+import type { DriftWallItem } from "@/lib/work/work-types";
 
 export type DriftWallProps = {
   items: DriftWallItem[];
-  columns?: number | 'fill';
+  columns?: number | "fill";
   tileWidth?: number;
   tileHeight?: number;
   gap?: number;
@@ -51,11 +50,11 @@ export type DriftWallProps = {
 
 // Read through `useSyncExternalStore` rather than set from an effect: the
 // site's lint forbids setState in an effect body.
-const REDUCED = '(prefers-reduced-motion: reduce)';
+const REDUCED = "(prefers-reduced-motion: reduce)";
 const subscribeReduced = (cb: () => void) => {
   const mq = window.matchMedia(REDUCED);
-  mq.addEventListener('change', cb);
-  return () => mq.removeEventListener('change', cb);
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
 };
 const readReduced = () => window.matchMedia(REDUCED).matches;
 
@@ -73,7 +72,7 @@ const columnFactor = (index: number) => {
 export function DriftWall({
   items,
   // The defaults are the site's wall (the 404 and the inquire page).
-  columns = 'fill',
+  columns = "fill",
   tileWidth = 300,
   tileHeight = 400,
   gap = 28,
@@ -85,7 +84,7 @@ export function DriftWall({
   speed = 42,
   fade = 0.6,
   dim = 0.55,
-  overlayColor = '#060010',
+  overlayColor = "#060010",
   // A ceiling on the photographs it loads, however many columns it
   // takes to cover the screen: past it the columns share them.
   limit,
@@ -102,8 +101,8 @@ export function DriftWall({
   offsetY = 0,
   start,
   onShown,
-  className = '',
-  style
+  className = "",
+  style,
 }: DriftWallProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const planeRef = useRef<HTMLDivElement>(null);
@@ -131,7 +130,7 @@ export function DriftWall({
   useLayoutEffect(() => {
     const box = containerRef.current;
     if (!shown || !box) return;
-    return gatherWhenSeen(box, b => b.querySelectorAll<HTMLElement>('.drift-wall__inner'), build ? builds : streams);
+    return gatherWhenSeen(box, (b) => b.querySelectorAll<HTMLElement>(".drift-wall__inner"), build ? builds : streams);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the wall shows
   }, [shown]);
   const [seen, setSeen] = useState(false);
@@ -155,20 +154,15 @@ export function DriftWall({
       if (!root) return show();
       // Photographs that loaded before React was listening (a server
       // render, a cached file) never fire `onLoad`: mark them here.
-      for (const img of root.querySelectorAll('img')) {
-        if (img.complete && img.naturalWidth) img.classList.add('is-loaded');
+      for (const img of root.querySelectorAll("img")) {
+        if (img.complete && img.naturalWidth) img.classList.add("is-loaded");
       }
       const box = root.getBoundingClientRect();
-      const inView = Array.from(root.querySelectorAll('img')).filter(img => {
+      const inView = Array.from(root.querySelectorAll("img")).filter((img) => {
         const r = img.getBoundingClientRect();
         // A tile swung behind the camera projects to a huge box: not in view.
         return (
-          r.width > 0 &&
-          r.width < box.width * 2 &&
-          r.right > box.left &&
-          r.left < box.right &&
-          r.bottom > box.top &&
-          r.top < box.bottom
+          r.width > 0 && r.width < box.width * 2 && r.right > box.left && r.left < box.right && r.bottom > box.top && r.top < box.bottom
         );
       });
       /* Only the ones in view are fetched, ahead of everything else: lazy
@@ -176,20 +170,20 @@ export function DriftWall({
          would compete with the few in it. The rest are handed their
          addresses once it is shown (`shown` below). */
       for (const img of inView) {
-        img.loading = 'eager';
-        img.fetchPriority = 'high';
+        img.loading = "eager";
+        img.fetchPriority = "high";
         if (img.dataset.srcset) img.srcset = img.dataset.srcset;
         if (img.dataset.src) img.src = img.dataset.src;
       }
       Promise.all(
-        inView.map(img =>
+        inView.map((img) =>
           img.complete
             ? null
-            : new Promise<unknown>(r => {
-                img.addEventListener('load', r, { once: true });
-                img.addEventListener('error', r, { once: true });
-              })
-        )
+            : new Promise<unknown>((r) => {
+                img.addEventListener("load", r, { once: true });
+                img.addEventListener("error", r, { once: true });
+              }),
+        ),
       ).then(show);
     });
     return () => {
@@ -206,10 +200,7 @@ export function DriftWall({
      plane's edges in. When there are more columns than a few items each,
      every column runs through the items from its own starting point
      instead, so no column is one picture repeated. */
-  const colCount =
-    columns === 'fill'
-      ? Math.max(5, Math.ceil((containerWidth * 1.5) / (tileWidth + gap)))
-      : columns;
+  const colCount = columns === "fill" ? Math.max(5, Math.ceil((containerWidth * 1.5) / (tileWidth + gap))) : columns;
 
   const columnItems = useMemo(() => {
     /* A phone sees three or four of a column at a time, and every tile
@@ -233,19 +224,15 @@ export function DriftWall({
        length, from its own place in it, so nothing past the ceiling loads
        and no column is longer than it has to be. */
     if (limit) {
-      return Array.from({ length: colCount }, (_, c) =>
-        Array.from({ length: perCol }, (_, k) => pool[(c * 7 + k * 5) % pool.length])
-      );
+      return Array.from({ length: colCount }, (_, c) => Array.from({ length: perCol }, (_, k) => pool[(c * 7 + k * 5) % pool.length]));
     }
     const run = Math.min(items.length, 6);
-    return Array.from({ length: colCount }, (_, c) =>
-      Array.from({ length: run }, (_, k) => items[(c * 7 + k * 5) % items.length])
-    );
+    return Array.from({ length: colCount }, (_, c) => Array.from({ length: run }, (_, k) => items[(c * 7 + k * 5) % items.length]));
   }, [items, colCount, containerWidth, containerHeight, tileHeight, gap, limit]);
 
   const columnMeta = useMemo(() => {
     const unit = tileHeight + gap;
-    return columnItems.map(col => {
+    return columnItems.map((col) => {
       const copyHeight = Math.max(unit, col.length * unit);
       /* The site's fix: a column drifts up to a whole copy out of place,
          so it carries a copy's height beyond the view at either end, or
@@ -298,7 +285,7 @@ export function DriftWall({
         `rotateX(${tilt + py}deg) rotateY(${turn + px}deg) ` +
         `translateZ(${-depth}px)`;
     },
-    [tilt, turn, depth, scale, offsetX, offsetY]
+    [tilt, turn, depth, scale, offsetX, offsetY],
   );
 
   /* The site's rewrite of the drift: each column is one looping animation
@@ -323,12 +310,13 @@ export function DriftWall({
         el.style.transform = `translate3d(0, ${-at}px, 0)`;
         return;
       }
-      el.style.transform = '';
+      el.style.transform = "";
       const duration = (meta.copyHeight / Math.abs(v)) * 1000;
-      const a = el.animate(
-        [{ transform: 'translate3d(0, 0, 0)' }, { transform: `translate3d(0, ${-meta.copyHeight}px, 0)` }],
-        { duration, iterations: Infinity, direction: v > 0 ? 'normal' : 'reverse' }
-      );
+      const a = el.animate([{ transform: "translate3d(0, 0, 0)" }, { transform: `translate3d(0, ${-meta.copyHeight}px, 0)` }], {
+        duration,
+        iterations: Infinity,
+        direction: v > 0 ? "normal" : "reverse",
+      });
       const p = at / meta.copyHeight;
       a.currentTime = duration * (v > 0 ? p : 1 - p);
       a.pause();
@@ -360,15 +348,15 @@ export function DriftWall({
       anims.forEach((a, c) => {
         if (!a) return;
         // Flattening with the columns stopped from outside (`proofs/wall.tsx`): left where they were put.
-        if (flatRef.current !== undefined && a.playState === 'paused') return;
+        if (flatRef.current !== undefined && a.playState === "paused") return;
         const target = paused || hoveredColRef.current === c ? 0 : 1;
         if (rates[c] === target) {
           // Held and stopped: paused outright, so nothing runs at rate 0.
-          if (target === 0 && heldRef.current && a.playState === 'running') a.pause();
+          if (target === 0 && heldRef.current && a.playState === "running") a.pause();
           return;
         }
         // Coming out of a hold: running again before it picks up speed.
-        if (visible && a.playState === 'paused') a.play();
+        if (visible && a.playState === "paused") a.play();
         const ease = 1 - Math.exp(-dt / (target === 0 ? 0.16 : 0.28));
         rates[c] += (target - rates[c]) * ease;
         if (Math.abs(target - rates[c]) < 0.005) rates[c] = target;
@@ -434,7 +422,7 @@ export function DriftWall({
     flatRef.current = flatten;
     const plane = planeRef.current;
     if (flatten === undefined || !plane) return;
-    plane.style.transition = 'transform var(--dw-flat, 1.3s) var(--dw-flat-ease, cubic-bezier(.45,0,.2,1))';
+    plane.style.transition = "transform var(--dw-flat, 1.3s) var(--dw-flat-ease, cubic-bezier(.45,0,.2,1))";
     applyPlaneTransform(0, 0);
   }, [flatten, applyPlaneTransform]);
 
@@ -458,12 +446,12 @@ export function DriftWall({
       if (!reduced) {
         pointerRef.current = {
           x: (e.clientX - rect.left) / rect.width - 0.5,
-          y: (e.clientY - rect.top) / rect.height - 0.5
+          y: (e.clientY - rect.top) / rect.height - 0.5,
         };
         wakeRef.current();
       }
       const hit = document.elementFromPoint(e.clientX, e.clientY);
-      const tile = hit ? hit.closest<HTMLElement>('[data-tile-id]') : null;
+      const tile = hit ? hit.closest<HTMLElement>("[data-tile-id]") : null;
       if (!tile) return;
       const id = tile.dataset.tileId ?? null;
       if (id === activeIdRef.current) return;
@@ -472,7 +460,7 @@ export function DriftWall({
       wakeRef.current();
       setActiveId(id);
     },
-    [reduced]
+    [reduced],
   );
 
   const handlePointerLeaveWall = useCallback(() => {
@@ -482,40 +470,52 @@ export function DriftWall({
   }, [release]);
 
   const cssVars = useMemo(
-    () => ({
-      '--dw-tile-w': `${tileWidth}px`,
-      '--dw-tile-h': `${tileHeight}px`,
-      '--dw-gap': `${gap}px`,
-      '--dw-radius': `${radius}px`,
-      '--dw-perspective': `${perspective}px`,
-      '--dw-lift': `${LIFT}px`,
-      '--dw-dim': dim,
-      '--dw-overlay': overlayColor,
-      '--dw-edge': `${Math.max(0, (1 - fade) * 100)}%`,
-      ...style
-    }) as CSSProperties,
-    [tileWidth, tileHeight, gap, radius, perspective, dim, overlayColor, fade, style]
+    () =>
+      ({
+        "--dw-tile-w": `${tileWidth}px`,
+        "--dw-tile-h": `${tileHeight}px`,
+        "--dw-gap": `${gap}px`,
+        "--dw-radius": `${radius}px`,
+        "--dw-perspective": `${perspective}px`,
+        "--dw-lift": `${LIFT}px`,
+        "--dw-dim": dim,
+        "--dw-overlay": overlayColor,
+        "--dw-edge": `${Math.max(0, (1 - fade) * 100)}%`,
+        ...style,
+      }) as CSSProperties,
+    [tileWidth, tileHeight, gap, radius, perspective, dim, overlayColor, fade, style],
   );
 
   const renderTile = (item: DriftWallItem, id: string, colIndex: number): ReactNode => {
     const inner = (
       <span className="drift-wall__inner">
         {/* eslint-disable-next-line @next/next/no-img-element -- the site passes loader-sized URLs */}
-        <img src={shown ? item.image : undefined} srcSet={shown ? item.srcSet : undefined} data-src={item.image} data-srcset={item.srcSet} sizes={`${Math.round((containerWidth && containerWidth < 640 ? 110 : tileWidth) * density)}px`} alt={item.title ?? ''} loading={seen ? 'eager' : 'lazy'} decoding="async" draggable={false} onLoad={e => e.currentTarget.classList.add('is-loaded')} />
+        <img
+          src={shown ? item.image : undefined}
+          srcSet={shown ? item.srcSet : undefined}
+          data-src={item.image}
+          data-srcset={item.srcSet}
+          sizes={`${Math.round((containerWidth && containerWidth < 640 ? 110 : tileWidth) * density)}px`}
+          alt={item.title ?? ""}
+          loading={seen ? "eager" : "lazy"}
+          decoding="async"
+          draggable={false}
+          onLoad={(e) => e.currentTarget.classList.add("is-loaded")}
+        />
         <span className="drift-wall__overlay" aria-hidden="true" />
       </span>
     );
     const commonProps = {
-      className: `drift-wall__tile${activeId === id ? ' is-active' : ''}`,
-      'data-tile-id': id,
-      'data-col': colIndex,
+      className: `drift-wall__tile${activeId === id ? " is-active" : ""}`,
+      "data-tile-id": id,
+      "data-col": colIndex,
       /* Out of the tab order: every copy of every column was a stop, about
          300 on the 404, most of them off screen with no ring, before the
          page's own buttons. The wall is for the pointer; the keys have
          the buttons. */
       tabIndex: -1,
       onFocus: () => activate(id, colIndex),
-      onBlur: release
+      onBlur: release,
     };
     if (item.href) {
       return (
@@ -524,8 +524,8 @@ export function DriftWall({
           key={id}
           href={item.href}
           // The pointer's ring: one word, always (Julian).
-          data-ring={/^https?:/.test(item.href) ? 'Open' : 'View'}
-          {...(/^https?:/.test(item.href) ? { target: '_blank', rel: 'noreferrer noopener' } : {})}
+          data-ring={/^https?:/.test(item.href) ? "Open" : "View"}
+          {...(/^https?:/.test(item.href) ? { target: "_blank", rel: "noreferrer noopener" } : {})}
           {...commonProps}
         >
           {inner}
@@ -534,15 +534,13 @@ export function DriftWall({
     }
     return (
       // Out of the tab order like the links: `commonProps` sets `tabIndex`.
-      <div key={id} role="button" aria-label={item.title ?? 'tile'} {...commonProps}>
+      <div key={id} role="button" aria-label={item.title ?? "tile"} {...commonProps}>
         {inner}
       </div>
     );
   };
 
-  const rootClass = ['drift-wall', shown ? 'is-shown' : '', reduced ? 'drift-wall--reduced' : '', className]
-    .filter(Boolean)
-    .join(' ');
+  const rootClass = ["drift-wall", shown ? "is-shown" : "", reduced ? "drift-wall--reduced" : "", className].filter(Boolean).join(" ");
 
   return (
     <div
@@ -563,13 +561,11 @@ export function DriftWall({
             <div className="drift-wall__col" key={`col-${c}`}>
               <div
                 className="drift-wall__track"
-                ref={el => {
+                ref={(el) => {
                   trackRefs.current[c] = el;
                 }}
               >
-                {copies.map((_, copyIndex) =>
-                  col.map((item, itemIndex) => renderTile(item, `${c}-${copyIndex}-${itemIndex}`, c))
-                )}
+                {copies.map((_, copyIndex) => col.map((item, itemIndex) => renderTile(item, `${c}-${copyIndex}-${itemIndex}`, c)))}
               </div>
             </div>
           );

@@ -16,7 +16,12 @@ async function withLead() {
   const kv = new FakeKV();
   const s = (await sealer(LEADS_KEY))!;
   const id = await s.id("ana@example.com");
-  await writeLead(kv as never, s, id, applyLeadEvent(null, "ana@example.com", { event: { at, kind: "inquiry", ref: "msg:1" }, name: "Ana" }));
+  await writeLead(
+    kv as never,
+    s,
+    id,
+    applyLeadEvent(null, "ana@example.com", { event: { at, kind: "inquiry", ref: "msg:1" }, name: "Ana" }),
+  );
   return { kv, s, id };
 }
 

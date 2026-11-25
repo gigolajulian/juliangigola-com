@@ -16,7 +16,10 @@ describe("GET /api/traffic", async () => {
 
   it("refuses without a token, or with one that cannot push", async () => {
     expect((await get()).status).toBe(401);
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ permissions: { push: false } })),
+    );
     expect((await get(githubToken())).status).toBe(401);
   });
 
@@ -33,8 +36,14 @@ describe("GET /api/traffic", async () => {
   it("never puts the Cloudflare token in what it answers", async () => {
     const secret = "cf-analytics-secret-value";
     ctx.env = { CF_ANALYTICS_TOKEN: secret };
-    vi.stubGlobal("fetch", vi.fn(async (u: string) =>
-      String(u).startsWith("https://api.github.com/") ? reply({ permissions: { push: true } }, 200, SCOPED) : reply("not json at all", 400)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (u: string) =>
+        String(u).startsWith("https://api.github.com/")
+          ? reply({ permissions: { push: true } }, 200, SCOPED)
+          : reply("not json at all", 400),
+      ),
+    );
     const res = await get(githubToken());
     expect(await res.text()).not.toContain(secret);
   });

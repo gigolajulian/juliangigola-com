@@ -28,9 +28,7 @@ const projectRedirects = LINKABLE.map((p) => ({
  * and both land on the page as it is now. Generated from the manifest so
  * a rename cannot be made without its redirect.
  */
-const renameRedirects = LINKABLE.filter(
-  (p): p is typeof p & { origin: string } => !!p.origin,
-).flatMap((p) => [
+const renameRedirects = LINKABLE.filter((p): p is typeof p & { origin: string } => !!p.origin).flatMap((p) => [
   {
     source: `/work/${p.origin}`,
     destination: `/portfolio/${p.slug}`,
@@ -176,13 +174,10 @@ const LOCAL = process.env.JG_LOCAL === "1";
  * Setting the variable by hand wins, for a local build that wants the same.
  */
 const CI_BRANCH = process.env.WORKERS_CI_BRANCH;
-const IMAGE_CDN_ORIGIN =
-  process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ??
-  (CI_BRANCH && CI_BRANCH !== "main" ? "https://juliangigola.com" : "");
+const IMAGE_CDN_ORIGIN = process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ?? (CI_BRANCH && CI_BRANCH !== "main" ? "https://juliangigola.com" : "");
 
 // Dev-only allowance so impeccable live mode can load. Guarded by NODE_ENV.
-const __impeccableLiveDev =
-  process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
+const __impeccableLiveDev = process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
 
 /**
  * Security headers.
@@ -257,8 +252,8 @@ const csp = [
   // The two players, and only as an embed. `frame-ancestors 'self'` above
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
-  // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/booking/book-picker.tsx`).
+  // calendar.google.com: the old /book picker's appointment schedules. That
+  // picker is gone; the entry stays until Julian drops it.
   // Stripe's Payment Element for the $100 deposit (`lib/booking/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.
@@ -338,16 +333,6 @@ const nextConfig: NextConfig = {
      Next's 1MB default would refuse the second or third. */
   experimental: {
     serverActions: { bodySizeLimit: "24mb" },
-  },
-
-  /**
-   * DialKit on the dev server only (Julian). A production build gets
-   * `lib/dev/dialkit-stub.ts` in its place: the configs' defaults and no panel,
-   * so visitors never download 72KB gzipped of tuning panels.
-   */
-  turbopack: {
-    resolveAlias:
-      process.env.NODE_ENV === "production" ? { dialkit: "./lib/dev/dialkit-stub.ts" } : {},
   },
 
   /**
@@ -471,13 +456,11 @@ const nextConfig: NextConfig = {
       ...categoryPathRedirects,
       ...workRedirects,
       ...disciplineRedirects,
-    ].filter(
-      (r) => {
-        if (seen.has(r.source)) return false;
-        seen.add(r.source);
-        return true;
-      },
-    );
+    ].filter((r) => {
+      if (seen.has(r.source)) return false;
+      seen.add(r.source);
+      return true;
+    });
   },
 };
 

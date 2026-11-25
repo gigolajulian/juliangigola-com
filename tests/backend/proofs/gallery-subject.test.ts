@@ -14,12 +14,36 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 const ID = "11152026-k7m2q9xd";
 let kv: FakeKV;
 let sent: { subject: string }[];
-const req = (method: string, body?: unknown, query = "") => new Request(`https://juliangigola.com/api/proof${query}`, { method, body: body ? JSON.stringify(body) : undefined, headers: { "x-admin-key": "k" } });
+const req = (method: string, body?: unknown, query = "") =>
+  new Request(`https://juliangigola.com/api/proof${query}`, {
+    method,
+    body: body ? JSON.stringify(body) : undefined,
+    headers: { "x-admin-key": "k" },
+  });
 beforeEach(async () => {
   kv = new FakeKV();
   sent = [];
-  ctx.env = { INBOX: kv, INBOX_KEY: "k", LEADS_KEY, PROOFS: { delete: async () => {}, get: async () => null }, CLIENT_EMAIL: { send: async (m: { subject: string }) => void sent.push(m) } };
-  const p = { token: ID, name: "Ana", email: "ana@gmail.com", included: 2, price: 15, days: 14, createdAt: "2026-11-01T00:00:00Z", frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }], finals: [{ id: "a", file: "a.jpg", w: 1, h: 1, bytes: 1, crc: 1 }], selects: [], notes: {}, views: 0 };
+  ctx.env = {
+    INBOX: kv,
+    INBOX_KEY: "k",
+    LEADS_KEY,
+    PROOFS: { delete: async () => {}, get: async () => null },
+    CLIENT_EMAIL: { send: async (m: { subject: string }) => void sent.push(m) },
+  };
+  const p = {
+    token: ID,
+    name: "Ana",
+    email: "ana@gmail.com",
+    included: 2,
+    price: 15,
+    days: 14,
+    createdAt: "2026-11-01T00:00:00Z",
+    frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }],
+    finals: [{ id: "a", file: "a.jpg", w: 1, h: 1, bytes: 1, crc: 1 }],
+    selects: [],
+    notes: {},
+    views: 0,
+  };
   await writeProof(kv as never, (await sealer(LEADS_KEY))!, p as Proof);
 });
 

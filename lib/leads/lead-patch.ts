@@ -1,14 +1,14 @@
 /* ── a lead changed by hand ───────────────────────────────────────
- * The lead desk's PATCH on one lead (`app/api/leads/route.ts` hands `key: "lead:..."`
- * here): every field checked, every 404 decided before anything is written,
+ * The lead desk's PATCH on one lead (`app/api/leads/route.ts` hands its plain `id`
+ * here, and `mergeFrom` is a plain id too): every field checked, every 404 decided before anything is written,
  * then folded onto the record and its log. The route turns the answer into a Response.
  * ─────────────────────────────────────────────────────────────── */
 import type { InboxKV as KV } from "@/lib/kv";
 import type { Sealer } from "@/lib/seal";
-import { applyLeadEvent, isPaper, isStage, LEAD_PREFIX, leadIdOf, REMIND_MAX, type Lead, type LeadPatch } from "@/lib/leads/leads";
-import { buryLead, hasPerson, linkPeople, personKey, readLead, writeLead } from "@/lib/leads/lead-store";
+import { applyLeadEvent, isPaper, isStage, REMIND_MAX, type Lead, type LeadPatch } from "@/lib/leads/leads";
+import { buryLead, hasPerson, linkPeople, openLead, personKey, UNOPENABLE, writeLead } from "@/lib/leads/lead-store";
 import { adoptLog } from "@/lib/leads/activity-log";
-import { notionPaper, notionStage } from "@/lib/leads/sync/notion-lead";
+import { notionPaper, notionStage } from "@/lib/leads/notion-lead";
 import { cleanPeople, cleanPlan, cleanTasks, merge } from "@/lib/leads/lead-crm";
 import { balance, cleanInvoice, invoiceCountKey, invoiceNo, invoicesTaken, usd } from "@/lib/leads/invoice";
 import { logged } from "@/lib/utils";
@@ -23,18 +23,41 @@ const refuse = (error: string, status: number): PatchResult => ({ error, status 
  * on the timeline like everything else.
  */
 export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, unknown>, notion?: string): Promise<PatchResult> {
-  const { key, stage, snoozeUntil, seen, archive, trash, notes, remind, details, quote, lostReason, mergeFrom, invoice, licence, contract, release, invoicePaid, people, plan, tasks } = given as LeadPatch & { key: string };
+  const {
+    id,
+    stage,
+    snoozeUntil,
+    seen,
+    archive,
+    trash,
+    notes,
+    remind,
+    details,
+    quote,
+    lostReason,
+    mergeFrom,
+    invoice,
+    licence,
+    contract,
+    release,
+    invoicePaid,
+    people,
+    plan,
+    tasks,
+  } = given as LeadPatch & { id: string };
   if ((contract !== undefined && !isPaper(contract)) || (release !== undefined && !isPaper(release))) return refuse("Unknown status.", 400);
   const bill = invoice === undefined ? undefined : cleanInvoice(invoice);
   if (bill && "error" in bill) return refuse(bill.error, 400);
   if (remind && (typeof remind.at !== "string" || isNaN(Date.parse(remind.at)))) return refuse("Bad time.", 400);
   if (quote !== undefined && quote !== null && !(typeof quote === "number" && quote >= 0 && quote < 1e7)) return refuse("Bad amount.", 400);
-  if (licence && !(typeof licence.end === "string" && /^\d{4}-\d{2}-\d{2}$/.test(licence.end) && !isNaN(Date.parse(licence.end)))) return refuse("Bad date.", 400);
+  if (licence && !(typeof licence.end === "string" && /^\d{4}-\d{2}-\d{2}$/.test(licence.end) && !isNaN(Date.parse(licence.end))))
+    return refuse("Bad date.", 400);
   if (stage !== undefined && !isStage(stage)) return refuse("Unknown stage.", 400);
   if (snoozeUntil !== undefined && snoozeUntil !== "" && isNaN(Date.parse(snoozeUntil))) return refuse("Bad time.", 400);
-  const id = leadIdOf(key);
-  let lead = await readLead(inbox, seal, id);
-  if (!lead) return refuse("Gone.", 404);
+  const opened = await openLead(inbox, seal, id);
+  if (opened === undefined) return refuse(UNOPENABLE, 500);
+  if (!opened) return refuse("Gone.", 404);
+  let lead = opened;
   const wasPeople = lead.people;
   if (people !== undefined) {
     const list = cleanPeople(people, lead.email);
@@ -42,12 +65,19 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
     // An address with a lead of its own, or on another lead, would split their mail: Merge is the way to join them.
     for (const p of list) {
       const own = await seal.id(p.email);
-      if (own !== id && (await readLead(inbox, seal, own))) return refuse(`${p.email} has a lead of their own. Merge it into this one instead.`, 409);
+      const theirs = own !== id ? await openLead(inbox, seal, own) : null;
+      if (theirs === undefined) return refuse(UNOPENABLE, 500);
+      if (theirs) return refuse(`${p.email} has a lead of their own. Merge it into this one instead.`, 409);
       const to = await inbox.get(personKey(own));
-      const there = to && to !== id ? await readLead(inbox, seal, to) : null;
+      const there = to && to !== id ? await openLead(inbox, seal, to) : null;
+      if (there === undefined) return refuse(UNOPENABLE, 500);
       if (there && hasPerson(there, p.email)) return refuse(`${p.email} is already on another lead.`, 409);
     }
-    lead = { ...lead, people: list.length ? list : undefined, events: [...lead.events, { at: new Date().toISOString(), kind: "edit" as const, note: "people" }].slice(-50) };
+    lead = {
+      ...lead,
+      people: list.length ? list : undefined,
+      events: [...lead.events, { at: new Date().toISOString(), kind: "edit" as const, note: "people" }].slice(-50),
+    };
   }
   // The shoot plan and tasks (`cleanPlan`, `cleanTasks`): whole replacements, checked against the people as they now stand.
   if (plan !== undefined) {
@@ -61,8 +91,9 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
     lead = { ...lead, tasks: t.tasks.length ? t.tasks : undefined, events: [...lead.events, ...t.events].slice(-50) };
   }
   // Every 404 is decided before anything is written: a patch that fails must not move the Notion board or use up an invoice number.
-  const mergeId = typeof mergeFrom === "string" && mergeFrom.startsWith(LEAD_PREFIX) && mergeFrom !== key ? mergeFrom : undefined;
-  const other = mergeId ? await readLead(inbox, seal, leadIdOf(mergeId)) : null;
+  const mergeId = typeof mergeFrom === "string" && mergeFrom && mergeFrom !== id ? mergeFrom : undefined;
+  const other = mergeId ? await openLead(inbox, seal, mergeId) : null;
+  if (other === undefined) return refuse(UNOPENABLE, 500);
   if (mergeId && !other) return refuse("Gone.", 404);
   const paidNo = invoicePaid && typeof invoicePaid.no === "string" ? invoicePaid.no : undefined;
   const billN = bill ? await invoicesTaken(inbox, bill.date) : 0;
@@ -83,9 +114,12 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
     const page = await notionPaper(notion, lead.email, paper, lead.notion);
     if (page) lead.notion = page;
   }
-  if (snoozeUntil !== undefined) lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
-  if (typeof archive === "boolean") lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
-  if (typeof trash === "boolean") lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
+  if (snoozeUntil !== undefined)
+    lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "snooze", note: snoozeUntil || "woken" }, snoozeUntil });
+  if (typeof archive === "boolean")
+    lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "archive", note: archive ? "in" : "out" }, on: archive });
+  if (typeof trash === "boolean")
+    lead = applyLeadEvent(lead, lead.email, { event: { at, kind: "trash", note: trash ? "in" : "out" }, on: trash });
   // Opened (true), or marked unread again by hand (false).
   if (typeof seen === "boolean") lead = { ...lead, unread: !seen };
   // His own words and numbers (`lib/leads/lead-crm.ts`).
@@ -106,7 +140,12 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
     };
     lead = { ...lead, ...d, events: [...lead.events, { at, kind: "edit" as const }].slice(-50) };
   }
-  if (quote !== undefined) lead = { ...lead, quote: quote ?? undefined, events: [...lead.events, { at, kind: "quote" as const, note: quote === null ? "" : String(quote) }].slice(-50) };
+  if (quote !== undefined)
+    lead = {
+      ...lead,
+      quote: quote ?? undefined,
+      events: [...lead.events, { at, kind: "quote" as const, note: quote === null ? "" : String(quote) }].slice(-50),
+    };
   if (typeof lostReason === "string") lead = { ...lead, lostReason: cut(lostReason, 80) };
   if (licence !== undefined) lead = { ...lead, licence: licence ? { use: cut(licence.use, 80) ?? "", end: licence.end! } : undefined };
   // Another record of the same person folded into this one; the other goes for good, once this one is written.
@@ -121,7 +160,11 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
   if (bill) {
     const n = billN;
     const made = { ...bill, no: invoiceNo(bill.date, n), at };
-    lead = { ...lead, invoices: [...(lead.invoices ?? []), made], events: [...lead.events, { at, kind: "invoice" as const, note: `${made.no}, ${usd(balance(made))} due` }].slice(-50) };
+    lead = {
+      ...lead,
+      invoices: [...(lead.invoices ?? []), made],
+      events: [...lead.events, { at, kind: "invoice" as const, note: `${made.no}, ${usd(balance(made))} due` }].slice(-50),
+    };
     await inbox.put(invoiceCountKey(bill.date), String(n + 1));
   }
   // Settled by hand (cash, Zelle), or opened again.
@@ -135,10 +178,20 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
       const lastAdded = handPaid !== undefined && handPaid > 0 ? handPaid : undefined;
       lead = {
         ...lead,
-        invoices: lead.invoices!.map((v) => (v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined, unpaid: invoicePaid.paid ? undefined : true } : v)),
+        invoices: lead.invoices!.map((v) =>
+          v === inv ? { ...v, paidAt: invoicePaid.paid ? at : undefined, unpaid: invoicePaid.paid ? undefined : true } : v,
+        ),
         // Cash or Zelle is money too: the amount counts in paid total. An unmark takes off only what a hand mark added
         // (an old invoice counted as paid, or one a Stripe payment settled, was never added here).
-        events: [...lead.events, { at, kind: "invoice-paid" as const, note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}`, amount: invoicePaid.paid ? balance(inv) : lastAdded !== undefined ? -lastAdded : undefined }].slice(-50),
+        events: [
+          ...lead.events,
+          {
+            at,
+            kind: "invoice-paid" as const,
+            note: `${inv.no} ${invoicePaid.paid ? `paid, ${usd(balance(inv))}` : "unpaid again"}`,
+            amount: invoicePaid.paid ? balance(inv) : lastAdded !== undefined ? -lastAdded : undefined,
+          },
+        ].slice(-50),
       };
     }
   }
@@ -147,9 +200,9 @@ export async function patchLead(inbox: KV, seal: Sealer, given: Record<string, u
   // Their mail finds this lead from now on; a merged record's people now point here too.
   if (people !== undefined || merged) await linkPeople(inbox, seal, id, lead.people, merged ? undefined : wasPeople);
   if (merged) {
-    await adoptLog(inbox, seal, id, leadIdOf(merged), lead).catch(logged("activity log merge"));
+    await adoptLog(inbox, seal, id, merged, lead).catch(logged("activity log merge"));
     // No seal: adoptLog above already moved the old log here.
-    await buryLead(inbox, undefined, leadIdOf(merged));
+    await buryLead(inbox, undefined, merged);
   }
   return { lead };
 }

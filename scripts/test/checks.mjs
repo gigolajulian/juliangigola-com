@@ -5,7 +5,9 @@
 import { spawnSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 
-for (const f of readdirSync("scripts").filter((f) => /^check-.*\.mjs$/.test(f)).sort()) {
+for (const f of readdirSync("scripts")
+  .filter((f) => /^check-.*\.mjs$/.test(f))
+  .sort()) {
   const r = spawnSync(process.execPath, ["--experimental-strip-types", "--no-warnings", `scripts/${f}`], { stdio: "inherit" });
   if (r.status !== 0) {
     console.error(`checks: scripts/${f} failed`);

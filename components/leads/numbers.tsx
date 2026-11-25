@@ -20,16 +20,21 @@ import { Page } from "@/components/leads/lists";
 
 const AdminTraffic = React.lazy(() => import("@/components/admin/admin-traffic").then((m) => ({ default: m.AdminTraffic })));
 const AdminSeo = React.lazy(() => import("@/components/admin/admin-seo").then((m) => ({ default: m.AdminSeo })));
-const hours = (h: number | null) => (h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`);
+const hours = (h: number | null) =>
+  h === null ? "None yet" : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${Math.round(h)} h` : `${Math.round(h / 24)} d`;
 
 /** One figure on the Stats and Money pages: a label, the value, a hint under it. */
 export function StatTile({ k, v, hint }: { k: string; v: string; hint: string }) {
   return (
     <Card padding={4}>
       <VStack gap={1}>
-        <Text type="code" size="xsm" color="secondary" weight="medium">{k.toUpperCase()}</Text>
+        <Text type="code" size="xsm" color="secondary" weight="medium">
+          {k.toUpperCase()}
+        </Text>
         <Heading level={2}>{v}</Heading>
-        <Text type="code" size="sm" color="secondary">{hint}</Text>
+        <Text type="code" size="sm" color="secondary">
+          {hint}
+        </Text>
       </VStack>
     </Card>
   );
@@ -39,20 +44,36 @@ export function StatsDesk() {
   const [s, setS] = React.useState<Stats | null>(null);
   const [err, setErr] = React.useState<string | null>(null);
   React.useEffect(() => {
-    deskCall<{ stats: Stats }>({ path: "/stats" }).then((o) => setS(o.stats)).catch((e: unknown) => setErr(errorText(e)));
+    deskCall<{ stats: Stats }>({ path: "/stats" })
+      .then((o) => setS(o.stats))
+      .catch((e: unknown) => setErr(errorText(e)));
   }, []);
   const top = s ? Math.max(1, ...s.weeks.map((w) => w.inquiries)) : 1;
   return (
     <Page bare eyebrow={s ? `${s.total} LEADS` : "THE NUMBERS"} title="Stats">
-      {err ? <Text color="secondary">{err}</Text> : !s ? <Text type="code" size="sm" color="secondary">Counting</Text> : (
+      {err ? (
+        <Text color="secondary">{err}</Text>
+      ) : !s ? (
+        <Text type="code" size="sm" color="secondary">
+          Counting
+        </Text>
+      ) : (
         <VStack gap={6} maxWidth={760}>
           <Grid columns={{ minWidth: 160 }} gap={3}>
-            <StatTile k="Booked" v={s.bookedRate === null ? "None yet" : `${Math.round(s.bookedRate * 100)}%`} hint="of leads over a week old" />
+            <StatTile
+              k="Booked"
+              v={s.bookedRate === null ? "None yet" : `${Math.round(s.bookedRate * 100)}%`}
+              hint="of leads over a week old"
+            />
             <StatTile k="First reply" v={hours(s.replyHours)} hint="median, inquiry to answer" />
             <StatTile k="Quoted, open" v={dollarsLabel(s.pipeline)} hint="waiting on an answer" />
             <StatTile k="Booked value" v={dollarsLabel(s.won)} hint="from the quotes you entered" />
             <StatTile k="Repeat clients" v={String(s.repeat)} hint="two or more sessions or calls" />
-            <StatTile k="Lifetime value" v={s.lifetime === null ? "None yet" : dollarsLabel(Math.round(s.lifetime))} hint="average paid, less refunds" />
+            <StatTile
+              k="Lifetime value"
+              v={s.lifetime === null ? "None yet" : dollarsLabel(Math.round(s.lifetime))}
+              hint="average paid, less refunds"
+            />
           </Grid>
           <VStack gap={2}>
             <Heading level={2}>Top clients by paid</Heading>
@@ -64,34 +85,98 @@ export function StatsDesk() {
                 columns={[
                   { key: "name", header: "Client", renderCell: (c) => c.name },
                   { key: "sessions", header: "Sessions", align: "end", renderCell: (c) => String(c.sessions) },
-                  { key: "paid", header: "Paid", align: "end", renderCell: (c) => <Text type="code" weight="medium">{dollarsLabel(c.paid)}</Text> },
+                  {
+                    key: "paid",
+                    header: "Paid",
+                    align: "end",
+                    renderCell: (c) => (
+                      <Text type="code" weight="medium">
+                        {dollarsLabel(c.paid)}
+                      </Text>
+                    ),
+                  },
                 ]}
               />
-            ) : <Text color="secondary">No payments logged yet.</Text>}
+            ) : (
+              <Text color="secondary">No payments logged yet.</Text>
+            )}
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Last 12 weeks</Heading>
-            <div role="img" aria-label={s.weeks.map((w) => `Week of ${w.start}: ${w.inquiries} inquiries, ${w.booked} booked`).join(". ")} style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 128 }}>
+            <div
+              role="img"
+              aria-label={s.weeks.map((w) => `Week of ${w.start}: ${w.inquiries} inquiries, ${w.booked} booked`).join(". ")}
+              style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 128 }}
+            >
               {s.weeks.map((w) => (
-                <div key={w.start} title={`Week of ${w.start}: ${w.inquiries} in, ${w.booked} booked`} style={{ position: "relative", flex: 1, height: "100%", display: "flex", alignItems: "flex-end" }}>
-                  <div style={{ width: "100%", height: `${(w.inquiries / top) * 100}%`, borderRadius: "3px 3px 0 0", background: "var(--color-border, currentColor)", opacity: 0.5 }} />
-                  <div style={{ position: "absolute", bottom: 0, width: "100%", height: `${(Math.min(w.booked, w.inquiries || w.booked) / top) * 100}%`, borderRadius: "3px 3px 0 0", background: "var(--color-accent)" }} />
+                <div
+                  key={w.start}
+                  title={`Week of ${w.start}: ${w.inquiries} in, ${w.booked} booked`}
+                  style={{ position: "relative", flex: 1, height: "100%", display: "flex", alignItems: "flex-end" }}
+                >
+                  <div
+                    style={{
+                      width: "100%",
+                      height: `${(w.inquiries / top) * 100}%`,
+                      borderRadius: "3px 3px 0 0",
+                      background: "var(--color-border, currentColor)",
+                      opacity: 0.5,
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      bottom: 0,
+                      width: "100%",
+                      height: `${(Math.min(w.booked, w.inquiries || w.booked) / top) * 100}%`,
+                      borderRadius: "3px 3px 0 0",
+                      background: "var(--color-accent)",
+                    }}
+                  />
                 </div>
               ))}
             </div>
-            <Text type="code" size="sm" color="secondary">Grey: inquiries. Teal: booked.</Text>
+            <Text type="code" size="sm" color="secondary">
+              Grey: inquiries. Teal: booked.
+            </Text>
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Where they came from</Heading>
-            {s.sources.length ? <MetadataList>{s.sources.map((r) => <MetadataListItem key={r.source} label={r.source}>{r.leads} in · {r.booked} booked</MetadataListItem>)}</MetadataList> : <Text color="secondary">Nothing yet.</Text>}
+            {s.sources.length ? (
+              <MetadataList>
+                {s.sources.map((r) => (
+                  <MetadataListItem key={r.source} label={r.source}>
+                    {r.leads} in · {r.booked} booked
+                  </MetadataListItem>
+                ))}
+              </MetadataList>
+            ) : (
+              <Text color="secondary">Nothing yet.</Text>
+            )}
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>Why they were lost</Heading>
-            {s.lost.length ? <MetadataList>{s.lost.map((r) => <MetadataListItem key={r.reason} label={r.reason}>{r.n}</MetadataListItem>)}</MetadataList> : <Text color="secondary">None lost.</Text>}
+            {s.lost.length ? (
+              <MetadataList>
+                {s.lost.map((r) => (
+                  <MetadataListItem key={r.reason} label={r.reason}>
+                    {r.n}
+                  </MetadataListItem>
+                ))}
+              </MetadataList>
+            ) : (
+              <Text color="secondary">None lost.</Text>
+            )}
           </VStack>
           <VStack gap={2}>
             <Heading level={2}>By stage</Heading>
-            <MetadataList>{STAGES.map((st) => <MetadataListItem key={st} label={st}>{s.stages[st] ?? 0}</MetadataListItem>)}</MetadataList>
+            <MetadataList>
+              {STAGES.map((st) => (
+                <MetadataListItem key={st} label={st}>
+                  {s.stages[st] ?? 0}
+                </MetadataListItem>
+              ))}
+            </MetadataList>
           </VStack>
         </VStack>
       )}
@@ -103,7 +188,15 @@ export function StatsDesk() {
 export function PanelDesk({ which }: { which: "traffic" | "seo" }) {
   return (
     <Page bare eyebrow={which === "traffic" ? "CLOUDFLARE" : "SEARCH"} title={which === "traffic" ? "Traffic" : "SEO"}>
-      <React.Suspense fallback={<Text type="code" size="sm" color="secondary">Loading</Text>}>{which === "traffic" ? <AdminTraffic /> : <AdminSeo />}</React.Suspense>
+      <React.Suspense
+        fallback={
+          <Text type="code" size="sm" color="secondary">
+            Loading
+          </Text>
+        }
+      >
+        {which === "traffic" ? <AdminTraffic /> : <AdminSeo />}
+      </React.Suspense>
     </Page>
   );
 }

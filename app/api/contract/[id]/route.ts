@@ -33,14 +33,44 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (slow) return slow;
   const b = (await bodyOf(request)) ?? {};
   const at = new Date().toISOString();
-  const contract = await sign(draft, { name: b.name, email: b.email, agree: b.agree, seen: b.hash, mark: b.mark, typed: b.typed, ip: request.headers.get("cf-connecting-ip") ?? "", ua: request.headers.get("user-agent") ?? "" }, at);
+  const contract = await sign(
+    draft,
+    {
+      name: b.name,
+      email: b.email,
+      agree: b.agree,
+      seen: b.hash,
+      mark: b.mark,
+      typed: b.typed,
+      ip: request.headers.get("cf-connecting-ip") ?? "",
+      ua: request.headers.get("user-agent") ?? "",
+    },
+    at,
+  );
   if ("error" in contract) return json({ error: contract.error }, contract.status);
   await writeContract(kv, s, contract);
   const sig = contract.signed;
-  await contractStep(kv, s, contract.lead, "Signed", { at, kind: "contract", ref: `signed:${contract.id}`, note: sig.name }, env.NOTION_TOKEN);
+  await contractStep(
+    kv,
+    s,
+    contract.lead,
+    "Signed",
+    { at, kind: "contract", ref: `signed:${contract.id}`, note: sig.name },
+    env.NOTION_TOKEN,
+  );
   const [mailed] = await Promise.all([
     sendClient(env.CLIENT_EMAIL, sig.email, signedMail(contract, { html: signedCopy(contract), filename: copyName(contract) })),
-    alertHello(env.EMAIL, `Signed: ${contract.to.name}`, [`${sig.name} (${sig.email}) signed the contract for ${contract.to.name}.`, `SHA-256 ${sig.hash}`, "", "Leads: https://juliangigola.com/admin/leads"], { who: { name: sig.name, email: sig.email } }),
+    alertHello(
+      env.EMAIL,
+      `Signed: ${contract.to.name}`,
+      [
+        `${sig.name} (${sig.email}) signed the contract for ${contract.to.name}.`,
+        `SHA-256 ${sig.hash}`,
+        "",
+        "Leads: https://juliangigola.com/admin/leads",
+      ],
+      { who: { name: sig.name, email: sig.email } },
+    ),
   ]);
   return json({ signed: { name: sig.name, at: sig.at, hash: sig.hash, mark: sig.mark ?? null }, mailed });
 }

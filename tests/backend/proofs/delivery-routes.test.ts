@@ -24,7 +24,8 @@ const { GET: dl } = await import("@/app/delivery/[id]/dl/[fid]/route");
 const { GET: preview } = await import("@/app/delivery/[id]/f/[fid]/route");
 
 const ID = "11082026-k7m2q9xd";
-const req = (path: string, cookie?: string) => new Request(`https://juliangigola.com/delivery/${ID}${path}`, { headers: cookie ? { cookie } : {} });
+const req = (path: string, cookie?: string) =>
+  new Request(`https://juliangigola.com/delivery/${ID}${path}`, { headers: cookie ? { cookie } : {} });
 const g = { env: ENV, p: { token: "tok", finals: [{ id: "f1" }] } };
 
 beforeEach(() => {
@@ -45,7 +46,8 @@ describe("/delivery/[id] downloads", () => {
 });
 
 describe("/delivery/[id]/f/[fid]", () => {
-  const get = (fid: string, query = "", cookie?: string) => preview(req(`/f/${fid}${query}`, cookie), { params: Promise.resolve({ id: ID, fid }) });
+  const get = (fid: string, query = "", cookie?: string) =>
+    preview(req(`/f/${fid}${query}`, cookie), { params: Promise.resolve({ id: ID, fid }) });
 
   it("serves the 2000px copy, or 800px for ?w=800, with the gate's cookie passed on", async () => {
     const res = await get("f1", "", "pass=1");

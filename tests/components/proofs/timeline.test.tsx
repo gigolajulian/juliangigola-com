@@ -57,7 +57,9 @@ describe("Timeline", () => {
   });
 
   it("a far close date shows no count, and no window once selects are in", () => {
-    render(<Timeline p={{ ...base, sentAt: "2026-11-18T20:00:00Z", submittedAt: "2026-11-19T20:00:00Z", closesAt: "2026-12-20T20:00:00Z" }} />);
+    render(
+      <Timeline p={{ ...base, sentAt: "2026-11-18T20:00:00Z", submittedAt: "2026-11-19T20:00:00Z", closesAt: "2026-12-20T20:00:00Z" }} />,
+    );
     const close = items()[6];
     expect(close.className).not.toMatch(/soon/);
     expect(close.textContent).toBe("Closes Dec 20");

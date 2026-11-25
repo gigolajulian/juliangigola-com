@@ -11,8 +11,8 @@
 import type { Sealer } from "@/lib/seal";
 import { gcalToken } from "@/lib/google";
 import { HttpError } from "@/lib/http";
-import { eventsCsv, paidTotal, readMaster, SHEET_DIRTY, type MasterEntry } from "../activity-log";
-import { leadsCsv } from "../lead-crm";
+import { paidTotal, readMaster, SHEET_DIRTY, type MasterEntry } from "../activity-log";
+import { eventsCsv, leadsCsv } from "../lead-crm";
 import { everyLead } from "../lead-store";
 import type { Lead } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
@@ -49,7 +49,10 @@ export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, no
       const made = await fetch(SHEETS, {
         method: "POST",
         headers,
-        body: JSON.stringify({ properties: { title: "JG Leads (juliangigola.com, read only)" }, sheets: TABS.map((properties) => ({ properties })) }),
+        body: JSON.stringify({
+          properties: { title: "JG Leads (juliangigola.com, read only)" },
+          sheets: TABS.map((properties) => ({ properties })),
+        }),
       });
       id = ((await made.json().catch(() => ({}))) as { spreadsheetId?: string }).spreadsheetId ?? null;
       if (!made.ok || !id) throw new HttpError(`Sheets create ${made.status}`, made.status);

@@ -18,8 +18,7 @@
 
 import assert from "node:assert/strict";
 
-const isTextRef = (f) =>
-  typeof f !== "string" && "kind" in f && f.kind === "text";
+const isTextRef = (f) => typeof f !== "string" && "kind" in f && f.kind === "text";
 
 /** The body of `reframe`, kept in step by hand. */
 function split(stored, archive) {
@@ -36,8 +35,7 @@ function split(stored, archive) {
       });
       continue;
     }
-    const frame =
-      typeof ref === "string" ? (found.get(ref) ?? null) : (found.get(ref.src) ?? ref);
+    const frame = typeof ref === "string" ? (found.get(ref) ?? null) : (found.get(ref.src) ?? ref);
     if (frame) images.push(frame);
   }
 
@@ -50,10 +48,7 @@ const text = (body) => ({ kind: "text", heading: null, body });
 
 // A passage at the front opens the sequence and counts nothing before it.
 {
-  const { images, blocks } = split(
-    [text("opening"), "/work/x/a.jpg", "/work/x/b.jpg"],
-    archive,
-  );
+  const { images, blocks } = split([text("opening"), "/work/x/a.jpg", "/work/x/b.jpg"], archive);
   assert.equal(images.length, 2, "photographs survive alongside a passage");
   assert.deepEqual(
     blocks.map((b) => b.after),
@@ -64,10 +59,7 @@ const text = (body) => ({ kind: "text", heading: null, body });
 
 // In the middle, it counts the frames actually laid before it.
 {
-  const { blocks } = split(
-    ["/work/x/a.jpg", "/work/x/b.jpg", text("middle"), "/work/x/c.jpg"],
-    archive,
-  );
+  const { blocks } = split(["/work/x/a.jpg", "/work/x/b.jpg", text("middle"), "/work/x/c.jpg"], archive);
   assert.deepEqual(
     blocks.map((b) => b.after),
     [2],
@@ -87,10 +79,7 @@ const text = (body) => ({ kind: "text", heading: null, body });
 
 // Consecutive passages share a position and keep their written order.
 {
-  const { blocks } = split(
-    ["/work/x/a.jpg", text("first"), text("second")],
-    archive,
-  );
+  const { blocks } = split(["/work/x/a.jpg", text("first"), text("second")], archive);
   assert.deepEqual(
     blocks.map((b) => [b.after, b.body]),
     [
@@ -107,20 +96,10 @@ const text = (body) => ({ kind: "text", heading: null, body });
    rather than stay pinned to an index that no longer has that many frames
    ahead of it — otherwise the passage lands past the end and never renders. */
 {
-  const { images, blocks } = split(
-    ["/work/x/a.jpg", "/work/x/GONE.jpg", text("after the hole")],
-    archive,
-  );
+  const { images, blocks } = split(["/work/x/a.jpg", "/work/x/GONE.jpg", text("after the hole")], archive);
   assert.equal(images.length, 1, "the missing frame is dropped, not faked");
-  assert.equal(
-    blocks[0].after,
-    1,
-    "the passage follows the frame that survived, not the one that went",
-  );
-  assert.ok(
-    blocks[0].after <= images.length,
-    "a passage never sits past the end of the gallery",
-  );
+  assert.equal(blocks[0].after, 1, "the passage follows the frame that survived, not the one that went");
+  assert.ok(blocks[0].after <= images.length, "a passage never sits past the end of the gallery");
 }
 
 // A photograph added through the editor carries its own numbers.
@@ -164,32 +143,15 @@ const instagramHandle = (raw) => {
     "https://www.instagram.com/rice666s/?hl=en",
     "RICE666S",
   ]) {
-    assert.equal(
-      instagramHandle(typed),
-      "rice666s",
-      `"${typed}" is the same account as the bare handle`,
-    );
+    assert.equal(instagramHandle(typed), "rice666s", `"${typed}" is the same account as the bare handle`);
   }
 
   // Instagram's own alphabet, and nothing else.
   assert.equal(instagramHandle("a.b_c9"), "a.b_c9", "dots and underscores");
 
   // Anything that would put something other than a handle in the href.
-  for (const bad of [
-    "",
-    "   ",
-    "@",
-    "javascript:alert(1)",
-    "../../etc",
-    "two words",
-    "hand<le>",
-    "a".repeat(31),
-  ]) {
-    assert.equal(
-      instagramHandle(bad),
-      null,
-      `"${bad}" never reaches an href`,
-    );
+  for (const bad of ["", "   ", "@", "javascript:alert(1)", "../../etc", "two words", "hand<le>", "a".repeat(31)]) {
+    assert.equal(instagramHandle(bad), null, `"${bad}" never reaches an href`);
   }
 }
 
@@ -202,19 +164,13 @@ const instagramHandle = (raw) => {
  * ─────────────────────────────────────────────────────────────── */
 function inRunningOrder(slugs, order) {
   const rank = new Map(order.map((slug, i) => [slug, i]));
-  return [...slugs].sort(
-    (a, b) => (rank.get(a) ?? Infinity) - (rank.get(b) ?? Infinity),
-  );
+  return [...slugs].sort((a, b) => (rank.get(a) ?? Infinity) - (rank.get(b) ?? Infinity));
 }
 
 {
   const manifest = ["a", "b", "c", "d", "e"];
 
-  assert.deepEqual(
-    inRunningOrder(manifest, []),
-    manifest,
-    "no order named leaves the site exactly as harvested",
-  );
+  assert.deepEqual(inRunningOrder(manifest, []), manifest, "no order named leaves the site exactly as harvested");
 
   assert.deepEqual(
     inRunningOrder(manifest, ["d"]),
@@ -228,11 +184,7 @@ function inRunningOrder(slugs, order) {
     "the named lead in the order given, the rest follow in manifest order",
   );
 
-  assert.deepEqual(
-    inRunningOrder(manifest, manifest.toReversed()),
-    manifest.toReversed(),
-    "a full order is honoured exactly",
-  );
+  assert.deepEqual(inRunningOrder(manifest, manifest.toReversed()), manifest.toReversed(), "a full order is honoured exactly");
 
   // The stability guarantee the partial case rests on. Sort has been stable
   // since ES2019; this is here so a change of approach cannot quietly lose it.

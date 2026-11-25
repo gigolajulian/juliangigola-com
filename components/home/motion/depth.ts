@@ -11,7 +11,12 @@ export const depthDrivers: Driver[] = [
       const hero = [el.querySelector<HTMLElement>(".mt-wall"), el.querySelector<HTMLElement>(".mt-name")];
       const sheet = el.closest(".mt")?.querySelector<HTMLElement>(".mt-sheet") ?? null;
       let heroH = el.offsetHeight;
-      let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0, k = 0.1;
+      let tx = 0,
+        ty = 0,
+        cx = 0,
+        cy = 0,
+        raf = 0,
+        k = 0.1;
       const draw = () => {
         cx += (tx - cx) * k;
         cy += (ty - cy) * k;

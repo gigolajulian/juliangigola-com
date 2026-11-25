@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import * as React from "react";
 import { createPortal } from "react-dom";
 import { noSubscribe } from "@/lib/utils";
 
@@ -12,9 +12,13 @@ import { noSubscribe } from "@/lib/utils";
    Mounted on <body>: <main> carries a transform, which would pin a fixed bar
    to the page's bottom instead of the screen's. Nothing renders on the server, where there is no <body>. */
 export function ServiceBar({ name, rate, label, href }: { name: string; rate: string; label: string; href: string }) {
-  const on = useSyncExternalStore(noSubscribe, () => true, () => false);
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
+  const on = React.useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
     const el = ref.current;
     if (!on || !el) return;
     const hero = document.querySelector("#p-service .sv-top .ctas");
@@ -24,7 +28,11 @@ export function ServiceBar({ name, rate, label, href }: { name: string; rate: st
     const update = () => {
       const vh = innerHeight;
       const b = book?.getBoundingClientRect();
-      const show = !!hero && hero.getBoundingClientRect().bottom < 0 && !(b && b.top < vh && b.bottom > 0) && !(end && end.getBoundingClientRect().top < vh);
+      const show =
+        !!hero &&
+        hero.getBoundingClientRect().bottom < 0 &&
+        !(b && b.top < vh && b.bottom > 0) &&
+        !(end && end.getBoundingClientRect().top < vh);
       el.toggleAttribute("data-on", show);
     };
     const io = new IntersectionObserver(update);
@@ -39,7 +47,9 @@ export function ServiceBar({ name, rate, label, href }: { name: string; rate: st
           {name}
           <span className="mute">{rate}</span>
         </p>
-        <Link className="btn fill" href={href}>{label}</Link>
+        <Link className="btn fill" href={href}>
+          {label}
+        </Link>
       </div>
     </div>,
     document.body,

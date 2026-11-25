@@ -17,6 +17,8 @@ describe("leads startup screens", () => {
   });
   it("matches each image to its device in portrait", () => {
     expect(startupImages).toHaveLength(STARTUP_SCREENS.length);
-    expect(startupImages[0].media).toBe("(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)");
+    expect(startupImages[0].media).toBe(
+      "(device-width: 440px) and (device-height: 956px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)",
+    );
   });
 });

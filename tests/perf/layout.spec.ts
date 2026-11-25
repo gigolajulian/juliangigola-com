@@ -20,8 +20,7 @@ function cutOff(): string[] {
   const H = innerHeight;
   const root = document.scrollingElement ?? document.documentElement;
   const docScrollsY = root.scrollHeight > H + 1;
-  const content =
-    "a, button, input, select, textarea, label, img, video, svg, h1, h2, h3, h4, h5, h6, p, li";
+  const content = "a, button, input, select, textarea, label, img, video, svg, h1, h2, h3, h4, h5, h6, p, li";
   const out: string[] = [];
   for (const el of Array.from(document.body.querySelectorAll<HTMLElement>("*"))) {
     if (out.length >= 12) break;
@@ -71,8 +70,7 @@ function cutOff(): string[] {
       else if (clips(s.overflowY) || paint) y = { lo: Math.max(y.lo, box.top), hi: Math.min(y.hi, box.bottom), reach: y.reach };
     }
     if (hidden || x.hi - x.lo < 2 || y.hi - y.lo < 2) continue;
-    const straddles = (a: { lo: number; hi: number }, max: number) =>
-      (a.lo < -1 && a.hi > 1) || (a.hi > max + 1 && a.lo < max - 1);
+    const straddles = (a: { lo: number; hi: number }, max: number) => (a.lo < -1 && a.hi > 1) || (a.hi > max + 1 && a.lo < max - 1);
     const bad = (!x.reach && straddles(x, W)) || (!y.reach && straddles(y, H));
     if (!bad) continue;
     const name =

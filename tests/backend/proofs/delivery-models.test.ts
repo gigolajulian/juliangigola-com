@@ -17,11 +17,25 @@ const bytes: Record<string, string> = { a: "aaa", b: "bbbb", c: "cc" };
 let kv: FakeKV;
 let env: Record<string, unknown>;
 beforeEach(async () => {
-  vi.stubGlobal("FixedLengthStream", class { constructor() { return new TransformStream(); } });
+  vi.stubGlobal(
+    "FixedLengthStream",
+    class {
+      constructor() {
+        return new TransformStream();
+      }
+    },
+  );
   kv = new FakeKV();
   env = {
-    INBOX: kv, INBOX_KEY: KEY, LEADS_KEY,
-    PROOFS: { get: async (k: string) => { const b = bytes[k.split("/").pop()!.replace(".jpg", "")]; return b ? { body: new Response(b).body, size: b.length } : null; } },
+    INBOX: kv,
+    INBOX_KEY: KEY,
+    LEADS_KEY,
+    PROOFS: {
+      get: async (k: string) => {
+        const b = bytes[k.split("/").pop()!.replace(".jpg", "")];
+        return b ? { body: new Response(b).body, size: b.length } : null;
+      },
+    },
     DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
   };
   const finals = [
@@ -29,14 +43,28 @@ beforeEach(async () => {
     { id: "b", file: "B.jpg", w: 1, h: 1, bytes: 4, crc: 0, model: "Marcus K" },
     { id: "c", file: "C.jpg", w: 1, h: 1, bytes: 2, crc: 0, model: "M04" },
   ];
-  await writeProof(kv as never, (await sealer(LEADS_KEY))!, { token: ID, name: "Paradox", frames: [], selects: [], notes: {}, finals } as unknown as Proof);
+  await writeProof(kv as never, (await sealer(LEADS_KEY))!, {
+    token: ID,
+    name: "Paradox",
+    frames: [],
+    selects: [],
+    notes: {},
+    finals,
+  } as unknown as Proof);
 });
 
 describe("a model's zip", () => {
   it("holds only that model's finals, with the exact length and the model in its name", async () => {
     const res = (await deliveryDownload(new Request(`https://x/delivery/${ID}/zip?m=M04`), env as never))!;
     expect(res.status).toBe(200);
-    expect(res.headers.get("content-length")).toBe(String(zipLayout([{ name: "A.jpg", size: 3, crc: 0 }, { name: "C.jpg", size: 2, crc: 0 }]).total));
+    expect(res.headers.get("content-length")).toBe(
+      String(
+        zipLayout([
+          { name: "A.jpg", size: 3, crc: 0 },
+          { name: "C.jpg", size: 2, crc: 0 },
+        ]).total,
+      ),
+    );
     expect(res.headers.get("content-disposition")).toContain("M04.zip");
     const body = await res.text();
     expect(body).toContain("A.jpg");
@@ -56,10 +84,29 @@ describe("a model's zip", () => {
 
 describe("publishing a final with its model", () => {
   const put = (q: string) =>
-    PUT(new Request(`https://juliangigola.com/api/proof?token=${ID}&file=x.jpg&w=2&h=3&final=1&${q}`, { method: "PUT", body: "xy", headers: { "x-admin-key": KEY, "content-type": "image/jpeg", "content-length": "2" }, duplex: "half" } as RequestInit));
+    PUT(
+      new Request(`https://juliangigola.com/api/proof?token=${ID}&file=x.jpg&w=2&h=3&final=1&${q}`, {
+        method: "PUT",
+        body: "xy",
+        headers: { "x-admin-key": KEY, "content-type": "image/jpeg", "content-length": "2" },
+        duplex: "half",
+      } as RequestInit),
+    );
 
   it("keeps the collection name as the label and five stars, and drops a label past 40 characters", async () => {
-    ctx.env = { ...env, PROOFS: { put: async (_k: string, b: ReadableStream) => void (await new Response(b).arrayBuffer()), get: async () => null, delete: async () => {} }, IMAGES: { input: () => { throw new Error("off"); } } };
+    ctx.env = {
+      ...env,
+      PROOFS: {
+        put: async (_k: string, b: ReadableStream) => void (await new Response(b).arrayBuffer()),
+        get: async () => null,
+        delete: async () => {},
+      },
+      IMAGES: {
+        input: () => {
+          throw new Error("off");
+        },
+      },
+    };
     expect((await put("id=d&model=Marcus%20%20K&top=1"))!.status).toBe(200);
     expect((await put(`id=e&model=${"x".repeat(41)}`))!.status).toBe(200);
     const p = (await readProof(kv as never, (await sealer(LEADS_KEY))!, ID))!;

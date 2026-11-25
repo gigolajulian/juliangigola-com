@@ -1,0 +1,17 @@
+# Code only: CSS, Markdown and JSON keep their hand layout.
+*.css
+*.md
+*.json
+*.jsonc
+*.html
+node_modules/
+.next/
+.open-next/
+.wrangler/
+graphify-out/
+.desloppify*/
+public/
+lightroom/
+cloudflare-env.d.ts
+components/splash/
+app/layout.tsx

@@ -17,7 +17,13 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const slug = (await params).slug;
-  if (slug === "consultation") return { title: "Book a consultation", description: "15 minutes, phone or video. Pick a time on my calendar.", alternates: { canonical: "/book/consultation" }, ...shareOg("Book a consultation", "15 minutes, phone or video, with Julian Gigola. Pick a time on my calendar.") };
+  if (slug === "consultation")
+    return {
+      title: "Book a consultation",
+      description: "15 minutes, phone or video. Pick a time on my calendar.",
+      alternates: { canonical: "/book/consultation" },
+      ...shareOg("Book a consultation", "15 minutes, phone or video, with Julian Gigola. Pick a time on my calendar."),
+    };
   const m = item(slug);
   const name = item(slug)?.name ?? (isSession(slug) ? SESSIONS[slug].name : undefined);
   // The session in lowercase in the title, as in "Book studio digitals".

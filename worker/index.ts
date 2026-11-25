@@ -52,7 +52,8 @@ async function askSite(env: Env, path: string, label: string, body?: unknown) {
 }
 
 /** Whether it is the 9 o'clock hour in Pacific time: the cron fires at both UTC hours DST can put it on. */
-export const isNineAmPacific = (now: Date) => Number(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", hourCycle: "h23" }).format(now)) === 9;
+export const isNineAmPacific = (now: Date) =>
+  Number(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", hourCycle: "h23" }).format(now)) === 9;
 
 /** Tells the site's lead desk a reminder went out (the lead key lives there). Never throws. */
 const logSent = (env: Env, email: string, subject: string, booking: string, kind: string) =>
@@ -80,7 +81,13 @@ export const WEEKLY = "0 16,17 * * 1";
 const worker = {
   fetch: () => new Response("Not found.", { status: 404 }),
   scheduled: (event: { cron: string }, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) =>
-    ctx.waitUntil(event.cron === HOURLY ? Promise.all([remind(env), daily(env)]) : event.cron === WEEKLY ? weekly(env) : syncMail(env).then(() => copySheet(env))),
+    ctx.waitUntil(
+      event.cron === HOURLY
+        ? Promise.all([remind(env), daily(env)])
+        : event.cron === WEEKLY
+          ? weekly(env)
+          : syncMail(env).then(() => copySheet(env)),
+    ),
 };
 
 export default worker;

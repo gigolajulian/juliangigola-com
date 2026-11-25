@@ -28,8 +28,23 @@ export function Duo({
 }) {
   return (
     <>
-      <Image src={dark} alt={alt} fill sizes={sizes} priority={priority} fetchPriority={fetchPriority} className={className ? `v3d ${className}` : "v3d"} />
-      <Image src={light} alt={altL ?? alt} fill sizes={sizes} fetchPriority={fetchPriority} className={className ? `v3l ${className}` : "v3l"} />
+      <Image
+        src={dark}
+        alt={alt}
+        fill
+        sizes={sizes}
+        priority={priority}
+        fetchPriority={fetchPriority}
+        className={className ? `v3d ${className}` : "v3d"}
+      />
+      <Image
+        src={light}
+        alt={altL ?? alt}
+        fill
+        sizes={sizes}
+        fetchPriority={fetchPriority}
+        className={className ? `v3l ${className}` : "v3l"}
+      />
     </>
   );
 }
@@ -62,10 +77,25 @@ const MARKS: [slug: string, name: string, w: number, h: number][] = [
 ];
 
 /* Where a strip mark goes when it is not its project's page (PRESS in lib/work/press.ts). */
-const MARK_HREF: Record<string, string> = { empire: "https://www.empi.re/", "pear-vc": "/portfolio/video#pear-vc", "ladera-granola": "/portfolio/video#ladera-granola" };
+const MARK_HREF: Record<string, string> = {
+  empire: "https://www.empi.re/",
+  "pear-vc": "/portfolio/video#pear-vc",
+  "ladera-granola": "/portfolio/video#ladera-granola",
+};
 
 /* The About grid's own order (Julian's Arrange); the homepage strip keeps MARKS order. */
-const ABOUT_ORDER = ["empire", "goodcult", "jubo", "wired-magazine", "paradox", "sols", "ladera-granola", "pear-vc", "sago", "ukiyosunknown"];
+const ABOUT_ORDER = [
+  "empire",
+  "goodcult",
+  "jubo",
+  "wired-magazine",
+  "paradox",
+  "sols",
+  "ladera-granola",
+  "pear-vc",
+  "sago",
+  "ukiyosunknown",
+];
 
 /** `cell`: each mark in its own box, in ABOUT_ORDER (the About grid). */
 export function Marks({ hidden, cell }: { hidden?: boolean; cell?: boolean }) {
@@ -77,7 +107,17 @@ export function Marks({ hidden, cell }: { hidden?: boolean; cell?: boolean }) {
     const mask = `url(${m.kind === "mask" ? m.src : ""}) center/contain no-repeat`;
     const mark =
       m.kind === "svg" ? (
-        <svg key={slug} className="mk" viewBox={m.viewBox} width={w} height={h} fill="currentColor" data-mk={slug} {...label} dangerouslySetInnerHTML={{ __html: m.body }} />
+        <svg
+          key={slug}
+          className="mk"
+          viewBox={m.viewBox}
+          width={w}
+          height={h}
+          fill="currentColor"
+          data-mk={slug}
+          {...label}
+          dangerouslySetInnerHTML={{ __html: m.body }}
+        />
       ) : (
         <span key={slug} className="mk" data-mk={slug} {...label} style={{ width: w, height: h, WebkitMask: mask, mask }} />
       );
@@ -99,8 +139,26 @@ export function Mark({ slug, name, h: base, even = false }: { slug: string; name
   const h = even ? Math.round(base * m.scale) : base;
   if (m.kind === "svg") {
     const [, , vw, vh] = m.viewBox.split(/\s+/).map(Number);
-    return <svg className="mk" viewBox={m.viewBox} height={h} width={(h * vw) / vh} fill="currentColor" role="img" aria-label={name} dangerouslySetInnerHTML={{ __html: m.body }} />;
+    return (
+      <svg
+        className="mk"
+        viewBox={m.viewBox}
+        height={h}
+        width={(h * vw) / vh}
+        fill="currentColor"
+        role="img"
+        aria-label={name}
+        dangerouslySetInnerHTML={{ __html: m.body }}
+      />
+    );
   }
   const mask = `url(${m.src}) center/contain no-repeat`;
-  return <span className="mk" role="img" aria-label={name} style={{ display: "inline-block", height: h, width: (h * m.width) / m.height, WebkitMask: mask, mask, background: "currentColor" }} />;
+  return (
+    <span
+      className="mk"
+      role="img"
+      aria-label={name}
+      style={{ display: "inline-block", height: h, width: (h * m.width) / m.height, WebkitMask: mask, mask, background: "currentColor" }}
+    />
+  );
 }

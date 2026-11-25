@@ -25,7 +25,12 @@ afterEach(() => vi.unstubAllGlobals());
 
 const TOKEN = "11152026-k7m2q9xd";
 const bytesOf = (...chunks: number[][]) =>
-  new ReadableStream<Uint8Array>({ start(c) { for (const ch of chunks) c.enqueue(new Uint8Array(ch)); c.close(); } });
+  new ReadableStream<Uint8Array>({
+    start(c) {
+      for (const ch of chunks) c.enqueue(new Uint8Array(ch));
+      c.close();
+    },
+  });
 
 /** An R2 bucket that reads every streamed body to the end, as R2 would. */
 function bucket() {
@@ -76,7 +81,12 @@ describe("storeFinal", () => {
   });
 
   it("still answers when the cleanup delete fails too", async () => {
-    const PROOFS = { ...bucket(), delete: async () => { throw new Error("R2 is down"); } };
+    const PROOFS = {
+      ...bucket(),
+      delete: async () => {
+        throw new Error("R2 is down");
+      },
+    };
     await expect(storeFinal({ PROOFS, IMAGES: images(true) } as never, TOKEN, "a", bytesOf([7]), 1)).resolves.toMatchObject({ bytes: 1 });
   });
 });
@@ -85,7 +95,19 @@ describe("openDelivery", () => {
   beforeEach(async () => {
     const kv = new FakeKV();
     ctx.env = { INBOX: kv, LEADS_KEY, PROOFS: bucket() };
-    const p = { token: TOKEN, name: "Ana", included: 2, price: 15, days: 14, createdAt: "2026-11-01T00:00:00Z", frames: [], finals: [{ id: "a", file: "DSC0001.jpg", w: 1, h: 1, bytes: 9, crc: 0 }], selects: [], notes: {}, views: 0 };
+    const p = {
+      token: TOKEN,
+      name: "Ana",
+      included: 2,
+      price: 15,
+      days: 14,
+      createdAt: "2026-11-01T00:00:00Z",
+      frames: [],
+      finals: [{ id: "a", file: "DSC0001.jpg", w: 1, h: 1, bytes: 9, crc: 0 }],
+      selects: [],
+      notes: {},
+      views: 0,
+    };
     await writeProof(kv as never, (await sealer(LEADS_KEY))!, p as Proof);
   });
 

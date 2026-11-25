@@ -25,7 +25,16 @@ const PI = "pi_TEST1234567890";
 const wed = new Date(Date.now() + 7 * 864e5);
 wed.setUTCDate(wed.getUTCDate() + ((3 - wed.getUTCDay() + 7) % 7));
 const START = new Date(Date.UTC(wed.getUTCFullYear(), wed.getUTCMonth(), wed.getUTCDate(), 18)).toISOString();
-const BODY = { slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", phone: "+14085550100", where: "Studio", amount: 1 };
+const BODY = {
+  slug: "portraits",
+  start: START,
+  timeZone: "America/Los_Angeles",
+  name: "QA Test",
+  email: "qa@example.com",
+  phone: "+14085550100",
+  where: "Studio",
+  amount: 1,
+};
 
 type Call = { url: string; init?: RequestInit };
 let calls: Call[];
@@ -35,7 +44,14 @@ let refundOk: boolean;
 let allowed: boolean;
 type Mail = { subject: string; text: string; replyTo?: { email: string } };
 let mails: Mail[];
-type ClientMail = { to: { email: string; name: string }; from: { email: string }; replyTo: string; subject: string; html: string; text: string };
+type ClientMail = {
+  to: { email: string; name: string };
+  from: { email: string };
+  replyTo: string;
+  subject: string;
+  html: string;
+  text: string;
+};
 let sent: ClientMail[];
 /** The intent as Stripe holds it: the webhook writes its outcome here. */
 let intent: { status?: string; amount: number; currency: string; metadata: Record<string, string> };
@@ -50,14 +66,28 @@ beforeEach(() => {
   mails = [];
   sent = [];
   allowed = true;
-  ctx.env = { INBOX: new FakeKV(), PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", STRIPE_WEBHOOK_SECRET: WHSEC, EMAIL: { send: async (m: Mail) => void mails.push(m) }, CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) }, GCAL_OAUTH: OAUTH, BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })), BOOKING_SECRET: "test-secret" };
+  ctx.env = {
+    INBOX: new FakeKV(),
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) },
+    STRIPE_SECRET_KEY: "sk_test_x",
+    STRIPE_WEBHOOK_SECRET: WHSEC,
+    EMAIL: { send: async (m: Mail) => void mails.push(m) },
+    CLIENT_EMAIL: { send: async (m: ClientMail) => void sent.push(m) },
+    GCAL_OAUTH: OAUTH,
+    BOOKING_LOCK: fakeLock(new BookingLock({ storage: new FakeStore() }, { GCAL_OAUTH: OAUTH })),
+    BOOKING_SECRET: "test-secret",
+  };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     calls.push({ url, init });
     if (url.includes("oauth2")) return reply({ access_token: "t", expires_in: 3600 });
     if (url.includes("/events?q=")) return reply({ items: [] });
-    if (url.includes("/freeBusy")) return reply({ calendars: { primary: { busy: open ? [] : [{ start: START, end: new Date(Date.parse(START) + 36e5).toISOString() }] } } });
+    if (url.includes("/freeBusy"))
+      return reply({
+        calendars: { primary: { busy: open ? [] : [{ start: START, end: new Date(Date.parse(START) + 36e5).toISOString() }] } },
+      });
     if (url.includes("/events")) return insertOk ? reply({ id: "ev1" }) : reply({ error: {} }, 500);
-    if (url.endsWith(`/payment_intents/${PI}?expand[]=latest_charge`)) return reply({ id: PI, ...intent, latest_charge: { payment_method_details: { card: { brand: "visa", last4: "4242" } } } });
+    if (url.endsWith(`/payment_intents/${PI}?expand[]=latest_charge`))
+      return reply({ id: PI, ...intent, latest_charge: { payment_method_details: { card: { brand: "visa", last4: "4242" } } } });
     if (url.endsWith("/payment_intents")) return reply({ id: PI, client_secret: `${PI}_secret_x` });
     if (url.endsWith(`/payment_intents/${PI}`)) {
       if (init?.method === "POST") for (const [k, v] of new URLSearchParams(String(init.body))) intent.metadata[k.slice(9, -1)] = v;
@@ -79,10 +109,26 @@ async function signed(body: string, at = Math.floor(Date.now() / 1000), secret =
   const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${at}.${body}`));
   return `t=${at},v1=${[...new Uint8Array(sig)].map((b) => b.toString(16).padStart(2, "0")).join("")}`;
 }
-const paid = (metadata: Record<string, string> = { kind: "deposit", slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", where: "Studio" }, amount = 10000) =>
-  JSON.stringify({ type: "payment_intent.succeeded", data: { object: { id: PI, amount, currency: "usd", metadata } } });
+const paid = (
+  metadata: Record<string, string> = {
+    kind: "deposit",
+    slug: "portraits",
+    start: START,
+    timeZone: "America/Los_Angeles",
+    name: "QA Test",
+    email: "qa@example.com",
+    where: "Studio",
+  },
+  amount = 10000,
+) => JSON.stringify({ type: "payment_intent.succeeded", data: { object: { id: PI, amount, currency: "usd", metadata } } });
 const deliver = async (body: string, sig?: string) =>
-  hook(new Request("https://juliangigola.com/api/stripe", { method: "POST", body, headers: { "stripe-signature": sig ?? (await signed(body)) } }));
+  hook(
+    new Request("https://juliangigola.com/api/stripe", {
+      method: "POST",
+      body,
+      headers: { "stripe-signature": sig ?? (await signed(body)) },
+    }),
+  );
 
 describe("POST /api/deposit", () => {
   it("is off while the Stripe key is unset", async () => {
@@ -229,7 +275,12 @@ describe("the client's confirmation", () => {
 
   it("sends the client's mail with linked logos when the inline ones are refused", async () => {
     const tries: { html: string; attachments?: unknown[] }[] = [];
-    ctx.env.CLIENT_EMAIL = { send: async (m: { html: string; attachments?: unknown[] }) => { tries.push(m); if (m.attachments) throw new Error("bad shape"); } };
+    ctx.env.CLIENT_EMAIL = {
+      send: async (m: { html: string; attachments?: unknown[] }) => {
+        tries.push(m);
+        if (m.attachments) throw new Error("bad shape");
+      },
+    };
     expect((await deliver(paid())).status).toBe(200);
     expect(tries).toHaveLength(2);
     expect(tries[1].html).toContain('src="https://juliangigola.com/email-name-w.png"');
@@ -238,20 +289,38 @@ describe("the client's confirmation", () => {
   });
 
   it("keeps the booking when the client's mail fails, and escapes what they typed", async () => {
-    ctx.env.CLIENT_EMAIL = { send: async () => { throw new Error("quota"); } };
+    ctx.env.CLIENT_EMAIL = {
+      send: async () => {
+        throw new Error("quota");
+      },
+    };
     expect((await deliver(paid())).status).toBe(200);
     expect(kv().json(`deposit:${PI}`).status).toBe("booked");
     const { confirmMail } = await import("@/lib/booking/confirm");
-    const { html, attachments } = confirmMail({ name: "<b>x</b>", email: "x@example.com", session: "Portraits", start: START, where: "<script>", uid: "u", manage: null });
+    const { html, attachments } = confirmMail({
+      name: "<b>x</b>",
+      email: "x@example.com",
+      session: "Portraits",
+      start: START,
+      where: "<script>",
+      uid: "u",
+      manage: null,
+    });
     // The name rides inline: a remote logo showed broken in Gmail.
     for (const { contentId } of attachments) expect(html).toContain(`src="cid:${contentId}"`);
     expect(html).not.toContain("<script>");
     expect(html).not.toContain("<b>x</b>");
-    expect(confirmMail({ name: "A", email: "a@example.com", session: "Graduation photos", start: START, uid: "u", manage: null }).text).toContain("Your graduation session is booked.");
+    expect(
+      confirmMail({ name: "A", email: "a@example.com", session: "Graduation photos", start: START, uid: "u", manage: null }).text,
+    ).toContain("Your graduation session is booked.");
     // The length, in the card's words.
     const end = (m: number) => new Date(+new Date(START) + m * 60000).toISOString();
-    expect(confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(60), uid: "u", manage: null }).text).toMatch(/^When: .+, 60 minutes$/m);
-    expect(confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(120), uid: "u", manage: null }).text).toMatch(/, 2 hours$/m);
+    expect(
+      confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(60), uid: "u", manage: null }).text,
+    ).toMatch(/^When: .+, 60 minutes$/m);
+    expect(
+      confirmMail({ name: "A", email: "a@example.com", session: "Portraits", start: START, end: end(120), uid: "u", manage: null }).text,
+    ).toMatch(/, 2 hours$/m);
   });
 
   it("reads the time in Pacific with no city", async () => {
@@ -289,7 +358,9 @@ describe("telling Julian", () => {
     const at = new Date(Date.now() - 3 * 60 * 1000).toISOString();
     await kv().put(`deposit:${PI}`, JSON.stringify({ status: "booking", at }));
     expect((await deliver(paid())).status).toBe(200);
-    expect(mails.map((m) => m.subject)).toEqual([expect.stringMatching(/^Deposit stuck: check Stripe and the calendar: Portraits, .+, QA Test, \$100$/)]);
+    expect(mails.map((m) => m.subject)).toEqual([
+      expect.stringMatching(/^Deposit stuck: check Stripe and the calendar: Portraits, .+, QA Test, \$100$/),
+    ]);
     expect(mails[0].text).toContain(LINK);
     expect(kv().json(`deposit:${PI}`)).toMatchObject({ status: "booking", warned: true });
     expect(calls.some(inserted)).toBe(false);
@@ -304,11 +375,14 @@ describe("telling Julian", () => {
   });
 
   it("keeps the booking when the mail fails", async () => {
-    ctx.env.EMAIL = { send: async () => { throw new Error("quota"); } };
+    ctx.env.EMAIL = {
+      send: async () => {
+        throw new Error("quota");
+      },
+    };
     expect((await deliver(paid())).status).toBe(200);
     expect(kv().json(`deposit:${PI}`).status).toBe("booked");
   });
-
 });
 
 describe("GET /api/deposit/<id>", () => {
@@ -338,7 +412,8 @@ describe("GET /api/deposit/<id>", () => {
   it("keeps the booking when the copy to Stripe fails", async () => {
     const real = globalThis.fetch;
     vi.stubGlobal("fetch", async (url: string, init?: RequestInit) =>
-      url.endsWith(`/payment_intents/${PI}`) ? reply({ error: {} }, 500) : real(url, init));
+      url.endsWith(`/payment_intents/${PI}`) ? reply({ error: {} }, 500) : real(url, init),
+    );
     await deliver(paid());
     expect(kv().json(`deposit:${PI}`).status).toBe("booked");
     expect(calls.some((c) => c.url.endsWith("/refunds"))).toBe(false);
@@ -375,7 +450,12 @@ describe("references with a deposit", () => {
 
   it("sends the mail again without the images when the send with them fails", async () => {
     await send(refs());
-    ctx.env.EMAIL = { send: async (m: Mail & { attachments?: unknown[] }) => { if (m.attachments) throw new Error("too big"); mails.push(m); } };
+    ctx.env.EMAIL = {
+      send: async (m: Mail & { attachments?: unknown[] }) => {
+        if (m.attachments) throw new Error("too big");
+        mails.push(m);
+      },
+    };
     await deliver(paid());
     expect(mails).toHaveLength(1);
     expect(mails[0].subject).toMatch(/^Deposit paid: /);

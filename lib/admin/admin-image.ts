@@ -54,11 +54,7 @@ const toBase64 = (buffer: ArrayBuffer): string => {
   return btoa(binary);
 };
 
-const draw = (
-  source: ImageBitmap,
-  width: number,
-  height: number,
-): HTMLCanvasElement => {
+const draw = (source: ImageBitmap, width: number, height: number): HTMLCanvasElement => {
   const canvas = document.createElement("canvas");
   canvas.width = width;
   canvas.height = height;
@@ -74,14 +70,7 @@ const draw = (
 
 const encode = (canvas: HTMLCanvasElement): Promise<Blob> =>
   new Promise((resolve, reject) =>
-    canvas.toBlob(
-      (blob) =>
-        blob
-          ? resolve(blob)
-          : reject(new Error("The browser could not encode a JPEG.")),
-      "image/jpeg",
-      QUALITY,
-    ),
+    canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("The browser could not encode a JPEG."))), "image/jpeg", QUALITY),
   );
 
 /**
@@ -102,9 +91,7 @@ const encode = (canvas: HTMLCanvasElement): Promise<Blob> =>
 const GRID = 32;
 
 const meanColour = (source: ImageBitmap): string => {
-  const pixels = draw(source, GRID, GRID)
-    .getContext("2d")!
-    .getImageData(0, 0, GRID, GRID).data;
+  const pixels = draw(source, GRID, GRID).getContext("2d")!.getImageData(0, 0, GRID, GRID).data;
 
   let r = 0;
   let g = 0;
@@ -120,14 +107,9 @@ const meanColour = (source: ImageBitmap): string => {
 };
 
 /** Resizes to at most `maxWidth`, never up: upscaling adds bytes, not detail. */
-export async function prepareImage(
-  file: File,
-  maxWidth: number,
-): Promise<PreparedAsset> {
+export async function prepareImage(file: File, maxWidth: number): Promise<PreparedAsset> {
   if (!/^image\/(jpeg|png|webp|avif)$/.test(file.type)) {
-    throw new Error(
-      `${file.name} is a ${file.type || "unknown type"}, not a photograph.`,
-    );
+    throw new Error(`${file.name} is a ${file.type || "unknown type"}, not a photograph.`);
   }
 
   const source = await createImageBitmap(file);

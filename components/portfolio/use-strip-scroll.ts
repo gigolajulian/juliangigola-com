@@ -3,12 +3,7 @@
 import * as React from "react";
 
 /** Strip view: from 768px up, wheel and finger move the row, with iOS-style momentum on lift. */
-export function useStripScroll(
-  view: string,
-  cells: unknown,
-  stripRef: React.RefObject<HTMLDivElement | null>,
-  stripBar: () => void,
-) {
+export function useStripScroll(view: string, cells: unknown, stripRef: React.RefObject<HTMLDivElement | null>, stripBar: () => void) {
   React.useEffect(() => {
     if (view !== "strip") return;
     const s = stripRef.current!;
@@ -20,8 +15,7 @@ export function useStripScroll(
     const wheel = (e: WheelEvent) => {
       if (!wide.matches || e.ctrlKey) return; // Ctrl+wheel and pinch are zoom (WCAG 1.4.4)
       e.preventDefault();
-      s.scrollLeft +=
-        Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      s.scrollLeft += Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
     };
     /* A finger from 768px up moves the row one to one, so on lift it has
        to carry on the way iOS's own scroll does: the speed of the last

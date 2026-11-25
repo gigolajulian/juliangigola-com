@@ -27,7 +27,10 @@ export async function POST(request: Request) {
     const m = k.metadata;
     const email = m?.email?.trim().toLowerCase();
     if (!m || !email?.includes("@")) continue;
-    people.set(email, [...(people.get(email) ?? []), { key: k.name, at: m.at, type: m.type, name: m.name, email, read: m.read, detail: m.detail }]);
+    people.set(email, [
+      ...(people.get(email) ?? []),
+      { key: k.name, at: m.at, type: m.type, name: m.name, email, read: m.read, detail: m.detail },
+    ]);
   }
 
   const stages: Partial<Record<Stage, number>> = {};

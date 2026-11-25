@@ -1,14 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  MAX_FRAME,
-  OMEGA,
-  RESPONSE,
-  type SpringState,
-  frameDt,
-  launchSpeed,
-  springSettled,
-  stepSpring,
-} from "@/lib/motion/spring";
+import { MAX_FRAME, OMEGA, RESPONSE, type SpringState, frameDt, launchSpeed, springSettled, stepSpring } from "@/lib/motion/spring";
 
 /** Runs the spring at 60Hz until it settles and reports how far it went
     past the target and how long it took. */

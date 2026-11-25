@@ -11,7 +11,13 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 const SECRET = "worker-key-for-tests";
 const MAIL = { email: "client@example.com", subject: "See you tomorrow", kind: "reminder", booking: "bk_1" };
 const call = (body: unknown, auth?: string) =>
-  POST(new Request("https://juliangigola.com/api/leads/mail", { method: "POST", body: JSON.stringify(body), headers: auth ? { authorization: auth } : {} }));
+  POST(
+    new Request("https://juliangigola.com/api/leads/mail", {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: auth ? { authorization: auth } : {},
+    }),
+  );
 
 let kv: FakeKV;
 beforeEach(() => {

@@ -233,19 +233,6 @@
      when the snapshot goes. */
   background: var(--ground);
 }
-/* No cover flies on a deal. The homepage's selected work and the work
-   index share the covers' names (`cover-${slug}`, the morph into a
-   project), so dealing one into the other would fly the band's covers out
-   over both pages as a flashing grid. The morph is for a press on a cover, not a page dealt. */
-/* By `data-morph` (each thing that carries a cover's name), never by the
-   style it is named in: a root attribute over `[style*=…]` sent every
-   element with a style attribute through a restyle each time
-   `data-nav-side` came or went, 400 to 600 on the portfolio, twice a
-   crossing. */
-:root[data-nav-side] [data-morph],
-:root[data-nav="deal"] [data-morph] {
-  view-transition-name: none !important;
-}
 :root[data-nav-side="right"]::view-transition-new(.page) {
   animation-name: jg-bar-in-right;
 }

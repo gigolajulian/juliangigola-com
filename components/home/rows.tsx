@@ -30,9 +30,11 @@ function keepFlip(e: React.MouseEvent<HTMLElement>) {
 /** The spot that holds the clicked cover in the middle (Julian: "Back lands on the cover you clicked"): held (desktop), the place in
     the block's scroll that brings that cover up (the covers driver's own map, motion/rows.ts); a phone's row, that cover's snap. */
 function coverSpot(it: HTMLElement) {
-  const sec = it.closest<HTMLElement>(".mt-covers")!, row = it.closest<HTMLElement>(".mt-row");
+  const sec = it.closest<HTMLElement>(".mt-covers")!,
+    row = it.closest<HTMLElement>(".mt-row");
   const items = row ? [...row.querySelectorAll<HTMLElement>(".mt-item")] : [];
-  const i = items.indexOf(it), n = items.length;
+  const i = items.indexOf(it),
+    n = items.length;
   const here = { b: "covers", off: scrollY - layoutTop(sec), x: row?.scrollLeft ?? 0 };
   if (!row || i < 0 || n < 2) return here;
   if (media("held").matches) return { ...here, off: holdUnease(i / (n - 1)) * (sec.offsetHeight - innerHeight), x: 0 };
@@ -84,34 +86,70 @@ export function HomeCovers() {
   // the same scroll a cover as the five had in 1.5 screens
   const hold = (COVERS.length - 1) * 0.375;
   return (
-    <section className="mt-held mt-covers" data-mt="covers" data-hold={hold} data-cur={cur} style={{ "--n": COVERS.length } as React.CSSProperties}>
+    <section
+      className="mt-held mt-covers"
+      data-mt="covers"
+      data-hold={hold}
+      data-cur={cur}
+      style={{ "--n": COVERS.length } as React.CSSProperties}
+    >
       <div className="mt-stage">
         <div className="mt-rowhead">
           <h2>Cover art</h2>
           <p className="lbl mute mt-cvsub">Design</p>
           {/* phones name the current cover here; desktop names each one under its sleeve */}
-          <p className="lbl mt-ttl mt-artist"><span className="ln"><span>{COVERS[cur].title} <span className="mute">{COVERS[cur].artist}</span></span></span></p>
-          <Link className="btn mt-sm" href="/portfolio?d=coverart">See all covers</Link>
+          <p className="lbl mt-ttl mt-artist">
+            <span className="ln">
+              <span>
+                {COVERS[cur].title} <span className="mute">{COVERS[cur].artist}</span>
+              </span>
+            </span>
+          </p>
+          <Link className="btn mt-sm" href="/portfolio?d=coverart">
+            See all covers
+          </Link>
         </div>
         <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Cover art">
           <div className="mt-track">
             {COVERS.map((c, i) => {
               const back = c.frames[1];
               return (
-                <Link key={c.slug} href={coverHref(c.slug)} onClick={keepFlip} className="mt-item mt-sleeve" data-i={i} data-flip={back ? "" : undefined} style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
+                <Link
+                  key={c.slug}
+                  href={coverHref(c.slug)}
+                  onClick={keepFlip}
+                  className="mt-item mt-sleeve"
+                  data-i={i}
+                  data-flip={back ? "" : undefined}
+                  style={{ "--o": 0.5, "--press": COVER_PRESS[c.slug] } as React.CSSProperties}
+                >
                   <span className="disc" aria-hidden />
                   <div className="face">
                     {/* the sleeves a first look at the row shows (one or two on a phone, three on desktop) load with the page: lazy, they painted grey */}
-                    <Image data-frame={c.frames[0].src} src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(max-width: 599px) 92vw, 34vw" loading={i < 3 ? "eager" : "lazy"} fetchPriority={i < 3 ? "high" : undefined} />
+                    <Image
+                      data-frame={c.frames[0].src}
+                      src={c.frames[0].src}
+                      alt={`${c.title} by ${c.artist}`}
+                      fill
+                      sizes="(max-width: 599px) 92vw, 34vw"
+                      loading={i < 3 ? "eager" : "lazy"}
+                      fetchPriority={i < 3 ? "high" : undefined}
+                    />
                     {back ? <Image className="back" src={back.src} alt={`${c.title}, back of the sleeve`} fill sizes="34vw" /> : null}
                   </div>
-                  <p className="lbl mt-cvcap" aria-hidden><span>{c.title}</span><span className="mute">{c.artist}</span></p>
+                  <p className="lbl mt-cvcap" aria-hidden>
+                    <span>{c.title}</span>
+                    <span className="mute">{c.artist}</span>
+                  </p>
                 </Link>
               );
             })}
           </div>
         </div>
-        <p className="mt-cvn" aria-hidden>{pad(cur + 1)}<span>/{pad(COVERS.length)}</span></p>
+        <p className="mt-cvn" aria-hidden>
+          {pad(cur + 1)}
+          <span>/{pad(COVERS.length)}</span>
+        </p>
       </div>
     </section>
   );
@@ -148,7 +186,8 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
         // the hold eases in and out like Cover art's, so the first and last film take more of the scroll
         return setCur(Math.floor(holdEase(p) * items.length));
       }
-      const a = items[0].getBoundingClientRect(), b = items[1].getBoundingClientRect();
+      const a = items[0].getBoundingClientRect(),
+        b = items[1].getBoundingClientRect();
       const at = mq.matches ? (innerHeight / 2 - a.top - a.height / 2) / (b.top - a.top) : el.scrollLeft / (b.left - a.left);
       setCur(clamp(Math.round(at), 0, items.length - 1));
     };
@@ -174,20 +213,29 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
     items.forEach((it, i) => (it.toggleAttribute("data-on", i === cur), it.toggleAttribute("data-was", i === was.current && i !== cur)));
     // keyboard: the film that held focus is hidden once the next one is current, and focus fell to the page. It follows the film.
     const a = document.activeElement;
-    if (a instanceof HTMLElement && a.classList.contains("mt-film") && a !== items[cur] && row.current!.contains(a)) items[cur]?.focus({ preventScroll: true });
+    if (a instanceof HTMLElement && a.classList.contains("mt-film") && a !== items[cur] && row.current!.contains(a))
+      items[cur]?.focus({ preventScroll: true });
     was.current = cur;
   }, [cur]);
   const dress = FILM_DRESS[films[cur].title];
   return (
-    <section className="mt-held mt-motion" data-mt="motion" data-hold={films.length * 0.25 /* a quarter screen a film */} data-cur={cur} style={{ "--n": films.length } as React.CSSProperties}>
+    <section
+      className="mt-held mt-motion"
+      data-mt="motion"
+      data-hold={films.length * 0.25 /* a quarter screen a film */}
+      data-cur={cur}
+      style={{ "--n": films.length } as React.CSSProperties}
+    >
       <div
         className="mt-stage"
         onFocus={(e) => {
           // a film taking keyboard focus before the block is held: bring the stage up, so the film and its focus mark are whole on screen
           const top = e.currentTarget.getBoundingClientRect().top;
           // straight to the first film's resting place in the hold, so the snap (motion/rows.ts) has nothing left to move
-          const sec = e.currentTarget.parentElement!, rest = !media("fine").matches ? 0 : holdUnease(0.5 / films.length) * (sec.offsetHeight - innerHeight);
-          if (top > 0 && document.documentElement.hasAttribute("data-mt-held") && (e.target as Element).matches(".mt-film:focus-visible")) scrollBy({ top: top + rest });
+          const sec = e.currentTarget.parentElement!,
+            rest = !media("fine").matches ? 0 : holdUnease(0.5 / films.length) * (sec.offsetHeight - innerHeight);
+          if (top > 0 && document.documentElement.hasAttribute("data-mt-held") && (e.target as Element).matches(".mt-film:focus-visible"))
+            scrollBy({ top: top + rest });
         }}
       >
         <div className="mt-mohead">
@@ -197,7 +245,18 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
         <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
           <div className="mt-track">
             {films.map((f, i) => (
-              <Link key={f.id} href={f.href} className="mt-item mt-film" tabIndex={i === cur ? 0 : -1 /* only the film on screen is in the Tab order: the others lie under it */} data-i={i} data-film={f.id} data-preview={f.preview} data-file={f.file} aria-label={`${f.title}, ${f.kind}`} style={FILM_DRESS[f.title]?.zoom ? ({ "--z": FILM_DRESS[f.title]?.zoom } as React.CSSProperties) : undefined}>
+              <Link
+                key={f.id}
+                href={f.href}
+                className="mt-item mt-film"
+                tabIndex={i === cur ? 0 : -1 /* only the film on screen is in the Tab order: the others lie under it */}
+                data-i={i}
+                data-film={f.id}
+                data-preview={f.preview}
+                data-file={f.file}
+                aria-label={`${f.title}, ${f.kind}`}
+                style={FILM_DRESS[f.title]?.zoom ? ({ "--z": FILM_DRESS[f.title]?.zoom } as React.CSSProperties) : undefined}
+              >
                 {f.poster ? <Image src={f.poster} alt="" fill sizes="(max-width: 599px) 92vw, 100vw" /> : null}
               </Link>
             ))}
@@ -205,15 +264,37 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
         </div>
         {/* One screen (desktop with motion): which film of the four, the client mark top right, how far through the hold. */}
         <ol className="mt-mopg lbl" aria-hidden>
-          {films.map((f, i) => <li key={f.id} data-on={i === cur ? "" : undefined}>{pad(i + 1)}</li>)}
+          {films.map((f, i) => (
+            <li key={f.id} data-on={i === cur ? "" : undefined}>
+              {pad(i + 1)}
+            </li>
+          ))}
         </ol>
-        {dress?.mark ? <span key={dress.mark.src} className="mt-molg" role="img" aria-label={dress.mark.name} style={{ "--m": `url(${dress.mark.src})`, "--ar": dress.mark.w / dress.mark.h } as React.CSSProperties} /> : null}
+        {dress?.mark ? (
+          <span
+            key={dress.mark.src}
+            className="mt-molg"
+            role="img"
+            aria-label={dress.mark.name}
+            style={{ "--m": `url(${dress.mark.src})`, "--ar": dress.mark.w / dress.mark.h } as React.CSSProperties}
+          />
+        ) : null}
         <span className="mt-mobar" aria-hidden />
         <div className="mt-mofoot">
-          <p className="lbl">{pad(cur + 1)}/{pad(films.length)}</p>
-          <h3 className="mt-ttl"><span className="ln"><span>{films[cur].title}</span></span></h3>
-          <p className="lbl mute">{films[cur].kind} <i aria-hidden>|</i> {films[cur].client}</p>
-          <Link className="btn mt-sm" href={films[cur].href}>View more</Link>
+          <p className="lbl">
+            {pad(cur + 1)}/{pad(films.length)}
+          </p>
+          <h3 className="mt-ttl">
+            <span className="ln">
+              <span>{films[cur].title}</span>
+            </span>
+          </h3>
+          <p className="lbl mute">
+            {films[cur].kind} <i aria-hidden>|</i> {films[cur].client}
+          </p>
+          <Link className="btn mt-sm" href={films[cur].href}>
+            View more
+          </Link>
         </div>
       </div>
     </section>

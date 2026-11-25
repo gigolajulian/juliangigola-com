@@ -47,20 +47,14 @@ try {
     for (const w of WIDTHS) {
       const target = join(DIR, `${name}-w${w}.jpg`);
       if (fresh(source, target)) continue;
-      await sharp(source)
-        .resize({ width: w, withoutEnlargement: true })
-        .jpeg({ quality: 82, mozjpeg: true })
-        .toFile(target);
+      await sharp(source).resize({ width: w, withoutEnlargement: true }).jpeg({ quality: 82, mozjpeg: true }).toFile(target);
       made += 1;
     }
 
     // The blur-up: a 16px JPEG, which the browser scales up and softens.
     // Under a kilobyte each, inlined as a data URL so it paints with the
     // HTML rather than after a request.
-    const tiny = await sharp(source)
-      .resize({ width: BLUR_WIDTH })
-      .jpeg({ quality: 50 })
-      .toBuffer();
+    const tiny = await sharp(source).resize({ width: BLUR_WIDTH }).jpeg({ quality: 50 }).toBuffer();
     blur[`/hero/${file}`] = `data:image/jpeg;base64,${tiny.toString("base64")}`;
   }
 

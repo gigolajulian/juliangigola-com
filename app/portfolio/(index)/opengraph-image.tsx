@@ -7,5 +7,13 @@ export const alt = "Julian Gigola";
 
 export default function Image() {
   const pool = FEATURED.map((p) => p.images[0]);
-  return renderCard({ kicker: "Portfolio", title: "Julian Gigola", byline: "Selected work", oneLine: true, panel: 620, exact: true, frames: [pool[3]] });
+  return renderCard({
+    kicker: "Portfolio",
+    title: "Julian Gigola",
+    byline: "Selected work",
+    oneLine: true,
+    panel: 620,
+    exact: true,
+    frames: [pool[3]],
+  });
 }

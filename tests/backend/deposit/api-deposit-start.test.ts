@@ -14,7 +14,16 @@ const PI = "pi_TEST1234567890";
 const wed = new Date(Date.now() + 7 * 864e5);
 wed.setUTCDate(wed.getUTCDate() + ((3 - wed.getUTCDay() + 7) % 7));
 const START = new Date(Date.UTC(wed.getUTCFullYear(), wed.getUTCMonth(), wed.getUTCDate(), 18)).toISOString();
-const BODY = { slug: "portraits", start: START, timeZone: "America/Los_Angeles", name: "QA Test", email: "qa@example.com", phone: "+14085550100", where: "Studio", amount: 1 };
+const BODY = {
+  slug: "portraits",
+  start: START,
+  timeZone: "America/Los_Angeles",
+  name: "QA Test",
+  email: "qa@example.com",
+  phone: "+14085550100",
+  where: "Studio",
+  amount: 1,
+};
 const post = (body: unknown) => POST(new Request("https://juliangigola.com/api/deposit", { method: "POST", body: JSON.stringify(body) }));
 
 let allowed: boolean;
@@ -24,7 +33,12 @@ beforeEach(() => {
   allowed = true;
   intents = [];
   // Since #767 an open time is read from hello@'s Google Calendar.
-  ctx.env = { INBOX: new FakeKV(), PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) }, STRIPE_SECRET_KEY: "sk_test_x", GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
+  ctx.env = {
+    INBOX: new FakeKV(),
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: allowed }) },
+    STRIPE_SECRET_KEY: "sk_test_x",
+    GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }),
+  };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return reply({ access_token: "t", expires_in: 3600 });
     if (url.includes("/freeBusy")) return reply({ calendars: { primary: { busy: [] } } });

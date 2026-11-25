@@ -27,19 +27,10 @@
   .contact-inquire {
     align-items: start;
   }
-  .contact-inquire > [data-scroll],
-  .contact-inquire > [data-beam],
-  .contact-inquire > [data-beam] > [data-scroll] {
+  .contact-inquire > [data-scroll] {
     max-height: none;
     min-height: auto;
     overflow: visible;
-  }
-}
-/* A pointer only: a tap left :hover stuck on a phone and the marks
-   stopped for good. */
-@keyframes about-marquee {
-  to {
-    transform: translateX(-50%);
   }
 }
 /* Julian: the loop only where the room is short. A tall screen holds
@@ -165,25 +156,6 @@
     box-shadow var(--dur-xl) var(--ease-out-strong),
     translate 900ms cubic-bezier(0.25, 1, 0.5, 1);
 }
-/* Room for it: the lifted card grows a few pixels past the 6px gutter,
-   so its neighbours ease aside by half that, the ones before it back,
-   the ones after it on, the rows above up and the rows below down, and
-   settle again when it does. */
-:where(:root[data-hover]) .light-sheet:has(.light-cell:hover) {
-  --push: 3px;
-}
-:where(:root[data-hover]) .light-cell:has(~ .light-cell:hover) {
-  translate: calc(var(--push) * -1) 0;
-}
-:where(:root[data-hover]) .light-cell:hover ~ .light-cell {
-  translate: var(--push) 0;
-}
-:where(:root[data-hover]) .light-sheet:has(~ .light-sheet .light-cell:hover) .light-cell {
-  translate: 0 -3px;
-}
-:where(:root[data-hover]) .light-sheet:has(.light-cell:hover) ~ .light-sheet .light-cell {
-  translate: 0 3px;
-}
 @media (prefers-reduced-motion: reduce) {
   .light-cell {
     translate: none !important;
@@ -201,13 +173,6 @@
   transition:
     filter var(--dur-md) var(--ease-out-strong),
     scale var(--dur-md) var(--ease-out-strong);
-}
-@media (hover: hover) and (pointer: fine) {
-  /* The others' softening is the focus field now (`focus-field.tsx`). */
-  :where(:root[data-hover]) .light-cell:hover .light-name {
-    opacity: 1;
-    translate: 0 0;
-  }
 }
 @media (prefers-reduced-motion: no-preference) {
   .light-cell {
@@ -231,61 +196,12 @@
     animation: jg-fade-in var(--dur-sm) ease-out backwards;
   }
 }
-/* How a commission runs, one step after another as About arrives, and
-   the sessions as Sessions does. Hidden
-   only while the strip says it is somewhere else, so a page without the
-   strip, or before it has said, shows them as they are. Gone at once on
-   the way out, so the next arrival plays it again. */
-@media (prefers-reduced-motion: no-preference) {
-  /* In from the right, the way the strip travels (`jg-fade-up`). It
-     cannot rise from below: the last step rising past the list's foot
-     gives the list a scrollbar while it moves. The list clips sideways, so this one cannot. About's label is
-     "Biography" since the menu names changed; the old "About" here left
-     its steps hidden for good. */
-  .strip-scroll[data-at]:not([data-at="Biography"]) .about-step,
-  .strip-scroll[data-at]:not([data-at="Sessions"]) .session-step,
-  .strip-scroll[data-at]:not([data-at="Commissions"]) .services-step {
-    opacity: 0;
-    translate: 2rem 0;
-    transition-duration: 0s;
-    transition-delay: 0s;
-  }
-}
 /* Upright, the screen is tall and its columns narrow: the words need the
    height the centring gave away (an iPad, 165px above the title). */
 @media (min-width: 40rem) and (orientation: portrait) {
   [data-hash="about"] {
     --screen-title-y: 6rem;
   }
-}
-/* "Copy all" (components/dev/dial-copy-all.tsx), in the panel's header,
-   left of the close button; hidden while the panel is folded. The open
-   header is DialKit's sticky one, which it sits against; making the header
-   relative instead pulled the folded button's icon off centre. */
-.dial-copy-all {
-  position: absolute;
-  top: 10px;
-  right: 32px;
-  height: 24px;
-  padding: 0 8px;
-  border: 0;
-  border-radius: 6px;
-  background: var(--dial-surface);
-  color: var(--dial-text-label);
-  font: 500 11px/24px system-ui, sans-serif;
-  cursor: pointer;
-}
-.dial-copy-all:hover {
-  background: var(--dial-surface-hover);
-  color: var(--dial-text-primary);
-}
-
-/* Julian: the line under each card on a phone, in two even lines. The
-   label's wide tracking left one word alone on a third line in a half
-   column ("BRANDS"); a little tighter, and balanced. */
-.services-cap {
-  letter-spacing: 0.06em;
-  text-wrap: balance;
 }
 
 /* `?scroll=1` (`slide.ts`): only the strip moves. Each screen is drawn

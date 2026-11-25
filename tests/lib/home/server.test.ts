@@ -28,6 +28,10 @@ describe("v4 home picks", () => {
   });
 
   it("every By quote film still resolves", () => {
-    expect(Object.entries(HOME_DATA.stills).filter(([, src]) => !src).map(([k]) => k)).toEqual([]);
+    expect(
+      Object.entries(HOME_DATA.stills)
+        .filter(([, src]) => !src)
+        .map(([k]) => k),
+    ).toEqual([]);
   });
 });

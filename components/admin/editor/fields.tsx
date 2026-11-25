@@ -86,7 +86,17 @@ export function CoverArtFields(p: FieldsProps & { releases: PickerItem[] }) {
   );
 }
 
-export function HomeFields(p: FieldsProps & { releases: PickerItem[]; releaseLimit: number; slugs: string[]; unknownSlugs: string[]; projects: AdminProject[]; hidden: Set<string>; heroChoices: PickerItem[] }) {
+export function HomeFields(
+  p: FieldsProps & {
+    releases: PickerItem[];
+    releaseLimit: number;
+    slugs: string[];
+    unknownSlugs: string[];
+    projects: AdminProject[];
+    hidden: Set<string>;
+    heroChoices: PickerItem[];
+  },
+) {
   const { draft, set, releases, releaseLimit, slugs, unknownSlugs, projects, hidden, heroChoices } = p;
   return (
     <Area title="Homepage">
@@ -151,20 +161,14 @@ export function HomeFields(p: FieldsProps & { releases: PickerItem[]; releaseLim
 
       {unknownSlugs.length ? (
         <p className="text-sm text-accent">
-          No project with{" "}
-          {unknownSlugs.length === 1 ? "this slug" : "these slugs"}:{" "}
-          {unknownSlugs.join(", ")}. Anything unmatched is skipped on the
-          page.
+          No project with {unknownSlugs.length === 1 ? "this slug" : "these slugs"}: {unknownSlugs.join(", ")}. Anything unmatched is
+          skipped on the page.
         </p>
       ) : null}
 
       <details className="text-sm text-muted-foreground">
-        <summary className="label cursor-pointer">
-          Every project slug ({slugs.length})
-        </summary>
-        <p className="mt-3 font-mono text-xs leading-relaxed">
-          {slugs.join(" · ")}
-        </p>
+        <summary className="label cursor-pointer">Every project slug ({slugs.length})</summary>
+        <p className="mt-3 font-mono text-xs leading-relaxed">{slugs.join(" · ")}</p>
       </details>
     </Area>
   );
@@ -172,10 +176,7 @@ export function HomeFields(p: FieldsProps & { releases: PickerItem[]; releaseLim
 
 export function SessionFields(p: FieldsProps) {
   const { draft, set } = p;
-  function updateSession(
-    i: number,
-    patch: Partial<SiteContent["sessions"][number]>,
-  ) {
+  function updateSession(i: number, patch: Partial<SiteContent["sessions"][number]>) {
     set(
       "sessions",
       draft.sessions.map((s, j) => (j === i ? { ...s, ...patch } : s)),
@@ -185,25 +186,16 @@ export function SessionFields(p: FieldsProps) {
   return (
     <Area title="Sessions" anchor="sessions">
       <p className="max-w-prose text-sm text-muted-foreground">
-        A price left empty reads as &ldquo;On request&rdquo;, which is honest,
-        but a visible number is the single biggest thing that stops a session
-        client leaving without inquiring.
+        A price left empty reads as &ldquo;On request&rdquo;, which is honest, but a visible number is the single biggest thing that stops a
+        session client leaving without inquiring.
       </p>
 
       {draft.sessions.map((session, i) => (
-        <div
-          key={session.slug}
-          className="flex flex-col gap-4 border-t border-border pt-6"
-        >
-          <h3 className="font-display text-xl uppercase tracking-[0]">
-            {session.name}
-          </h3>
+        <div key={session.slug} className="flex flex-col gap-4 border-t border-border pt-6">
+          <h3 className="font-display text-xl uppercase tracking-[0]">{session.name}</h3>
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <Field
-              label="Starting price (USD)"
-              hint="Empty means “On request”."
-            >
+            <Field label="Starting price (USD)" hint="Empty means “On request”.">
               <input
                 type="number"
                 min={0}
@@ -211,8 +203,7 @@ export function SessionFields(p: FieldsProps) {
                 value={session.from ?? ""}
                 onChange={(e) =>
                   updateSession(i, {
-                    from:
-                      e.target.value === "" ? null : Number(e.target.value),
+                    from: e.target.value === "" ? null : Number(e.target.value),
                   })
                 }
                 placeholder="On request"
@@ -223,30 +214,21 @@ export function SessionFields(p: FieldsProps) {
               <input
                 type="text"
                 value={session.turnaround}
-                onChange={(e) =>
-                  updateSession(i, { turnaround: e.target.value })
-                }
+                onChange={(e) => updateSession(i, { turnaround: e.target.value })}
                 className={inputClass}
               />
             </Field>
           </div>
 
           <Field label="Blurb">
-            <textarea
-              rows={2}
-              value={session.blurb}
-              onChange={(e) => updateSession(i, { blurb: e.target.value })}
-              className={inputClass}
-            />
+            <textarea rows={2} value={session.blurb} onChange={(e) => updateSession(i, { blurb: e.target.value })} className={inputClass} />
           </Field>
 
           <Field label="What's included" hint="One per line.">
             <textarea
               rows={4}
               value={session.includes.join("\n")}
-              onChange={(e) =>
-                updateSession(i, { includes: splitLines(e.target.value) })
-              }
+              onChange={(e) => updateSession(i, { includes: splitLines(e.target.value) })}
               className={inputClass}
             />
           </Field>
@@ -268,22 +250,15 @@ export function QuoteFields(p: FieldsProps) {
   return (
     <Area title="Quotes" anchor="testimonials">
       <p className="max-w-prose text-sm text-muted-foreground">
-        The section does not render at all while this is empty, so there is
-        never invented praise on the site. A specific detail beats an
-        adjective: &ldquo;turned a two-hour window into eighteen usable
-        frames&rdquo; earns trust, &ldquo;great to work with&rdquo; does not.
-        Three to five is the useful range.
+        The section does not render at all while this is empty, so there is never invented praise on the site. A specific detail beats an
+        adjective: &ldquo;turned a two-hour window into eighteen usable frames&rdquo; earns trust, &ldquo;great to work with&rdquo; does
+        not. Three to five is the useful range.
       </p>
 
       {draft.testimonials.map((t, i) => (
-        <div
-          key={i}
-          className="flex flex-col gap-4 border-t border-border pt-6"
-        >
+        <div key={i} className="flex flex-col gap-4 border-t border-border pt-6">
           <div className="flex items-baseline justify-between gap-4">
-            <span className="label text-muted-foreground">
-              {pad(i + 1)}
-            </span>
+            <span className="label text-muted-foreground">{pad(i + 1)}</span>
             <button
               type="button"
               onClick={() =>
@@ -316,9 +291,7 @@ export function QuoteFields(p: FieldsProps) {
             <input
               type="text"
               value={t.role ?? ""}
-              onChange={(e) =>
-                updateTestimonial(i, { role: e.target.value || undefined })
-              }
+              onChange={(e) => updateTestimonial(i, { role: e.target.value || undefined })}
               placeholder="Art Director, WIRED"
               className={inputClass}
             />
@@ -340,12 +313,7 @@ export function QuoteFields(p: FieldsProps) {
 
       <button
         type="button"
-        onClick={() =>
-          set("testimonials", [
-            ...draft.testimonials,
-            { quote: "", name: "" },
-          ])
-        }
+        onClick={() => set("testimonials", [...draft.testimonials, { quote: "", name: "" }])}
         className="label self-start border border-border px-5 py-3 press hoverable:hover:bg-card active:scale-[0.98]"
       >
         Add a quote
@@ -427,13 +395,8 @@ export function Area({
   anchor?: string;
 }) {
   return (
-    <section
-      id={anchor ? `field-${anchor}` : undefined}
-      className="mt-8 flex scroll-mt-28 flex-col gap-6"
-    >
-      <h2 className="font-display border-b border-border pb-3 text-xl uppercase tracking-[0]">
-        {title}
-      </h2>
+    <section id={anchor ? `field-${anchor}` : undefined} className="mt-8 flex scroll-mt-28 flex-col gap-6">
+      <h2 className="font-display border-b border-border pb-3 text-xl uppercase tracking-[0]">{title}</h2>
       {children}
     </section>
   );
@@ -452,16 +415,9 @@ export function Field({
   anchor?: string;
 }) {
   return (
-    <label
-      id={anchor ? `field-${anchor}` : undefined}
-      className="flex scroll-mt-28 flex-col gap-2"
-    >
+    <label id={anchor ? `field-${anchor}` : undefined} className="flex scroll-mt-28 flex-col gap-2">
       <span className="label text-muted-foreground">{label}</span>
-      {hint ? (
-        <span className="max-w-prose text-sm text-muted-foreground">
-          {hint}
-        </span>
-      ) : null}
+      {hint ? <span className="max-w-prose text-sm text-muted-foreground">{hint}</span> : null}
       {children}
     </label>
   );

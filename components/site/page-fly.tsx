@@ -15,7 +15,8 @@ const HERO = ".v3 .pj-big, .v3 .f-photo .ph";
 /* Motion plan item 3 (docs/decisions.md): the photo travels on
    `move` in 600, the covers left behind recede, the project's other frames
    rise in as it lands, and back flies the hero home to its tile. */
-const MOVE = "cubic-bezier(.77,0,.175,1)", OUT = "cubic-bezier(.23,1,.32,1)";
+const MOVE = "cubic-bezier(.77,0,.175,1)",
+  OUT = "cubic-bezier(.23,1,.32,1)";
 const onScreen = (r: DOMRect) => r.width > 0 && r.bottom > 0 && r.top < innerHeight;
 /** Sets a root flag for one trip; the transition's CSS reads it as it starts. */
 const flag = (k: "mpFly") => {
@@ -29,7 +30,9 @@ type Zoom = { scale: string; translate: string; transform: string };
 const FLAT: Zoom = { scale: "1", translate: "0px 0px", transform: "none" };
 const zoomOf = (img: Element | null | undefined): Zoom | undefined => {
   const s = img && getComputedStyle(img);
-  return s && s.scale !== "none" ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform } : undefined;
+  return s && s.scale !== "none"
+    ? { scale: s.scale, translate: s.translate === "none" ? FLAT.translate : s.translate, transform: s.transform }
+    : undefined;
 };
 
 /* The page opening (Julian's call).
@@ -64,7 +67,8 @@ const named = (e: HTMLElement) => {
 };
 let unnameSource = () => {};
 /** Which photograph a file is, whatever size or loader served it: "iris/03". */
-const photo = (i: HTMLImageElement | null | undefined) => (i ? decodeURIComponent(i.currentSrc || i.src).match(/\/work\/([^/?]+\/\d+)/)?.[1] : undefined);
+const photo = (i: HTMLImageElement | null | undefined) =>
+  i ? decodeURIComponent(i.currentSrc || i.src).match(/\/work\/([^/?]+\/\d+)/)?.[1] : undefined;
 
 /** On trial: a frame's picture slides up from its own foot, behind the frame's edge, at full strength (Julian: no fade, slide from the bottom). */
 const slideUp = (e: HTMLElement, i: number) => {
@@ -77,7 +81,12 @@ const slideUp = (e: HTMLElement, i: number) => {
   Promise.race([pic.decode().catch(() => {}), new Promise((r) => window.setTimeout(r, 1500))]).then(() => {
     pic.style.removeProperty("transform");
     const delay = Math.max(0, 140 + i * 70 - (performance.now() - t0));
-    pic.animate({ transform: ["translateY(101%)", "none"] }, { duration: 700, delay, easing: "cubic-bezier(.32,.72,0,1)", fill: "backwards" }).finished.finally(() => e.style.removeProperty("overflow"));
+    pic
+      .animate(
+        { transform: ["translateY(101%)", "none"] },
+        { duration: 700, delay, easing: "cubic-bezier(.32,.72,0,1)", fill: "backwards" },
+      )
+      .finished.finally(() => e.style.removeProperty("overflow"));
   });
 };
 
@@ -107,7 +116,10 @@ export function PageFly() {
       const img = scope && [...scope.querySelectorAll("img")].find(shown);
       // An oversized grid photo flies from its frame, not from its own larger box.
       const z = zoomOf(img);
-      fly.current = to && img ? { to, t: Date.now(), r: ((z && img.closest(".ph")) || img).getBoundingClientRect(), src: img.currentSrc || img.src, z } : null;
+      fly.current =
+        to && img
+          ? { to, t: Date.now(), r: ((z && img.closest(".ph")) || img).getBoundingClientRect(), src: img.currentSrc || img.src, z }
+          : null;
       if (fly.current && img) {
         flag("mpFly");
         const mode = carried();
@@ -139,7 +151,10 @@ export function PageFly() {
           e.style.setProperty("view-transition-name", `mp-o${i}`);
           e.style.setProperty("view-transition-class", "mp-out");
         });
-        window.setTimeout(() => others.forEach((e) => (e.style.removeProperty("view-transition-name"), e.style.removeProperty("view-transition-class"))), 1500);
+        window.setTimeout(
+          () => others.forEach((e) => (e.style.removeProperty("view-transition-name"), e.style.removeProperty("view-transition-class"))),
+          1500,
+        );
       }
     };
     /* Back from a project, read while its page is still up: the browser's
@@ -154,7 +169,10 @@ export function PageFly() {
       const r = hero?.getBoundingClientRect();
       // The page being left, by the path it was rendered for (location has already moved on).
       const slug = here.current.match(/^\/portfolio\/([^/]+)$/)?.[1];
-      back.current = { t: Date.now(), hero: hero && img && r && onScreen(r) && slug ? { slug, r, src: img.currentSrc || img.src } : undefined };
+      back.current = {
+        t: Date.now(),
+        hero: hero && img && r && onScreen(r) && slug ? { slug, r, src: img.currentSrc || img.src } : undefined,
+      };
     };
     /* On trial: building the next page holds the screen for 150 to 250ms after the click, and nothing started in
        the click can show until then. So the photo answers the press itself: it dips, then lifts, on the
@@ -167,11 +185,20 @@ export function PageFly() {
     const down = (e: PointerEvent) => {
       if (e.button || !carried() || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       // the next-project link at the foot of a project page holds its cover in .pj-nx or the full stage, whichever is showing
-      const ph = [...((e.target as Element).closest('.v3 a[href^="/portfolio/"]')?.querySelectorAll<HTMLElement>(".ph, .pj-nx, .pj-stage") ?? [])].find((n) => n.offsetWidth);
+      const ph = [
+        ...((e.target as Element).closest('.v3 a[href^="/portfolio/"]')?.querySelectorAll<HTMLElement>(".ph, .pj-nx, .pj-stage") ?? []),
+      ].find((n) => n.offsetWidth);
       press?.cancel();
       press = null;
       window.clearTimeout(wait);
-      const start = () => ((begin = null), (press = ph?.animate({ scale: ["1", "0.975", "1.035"], offset: [0, 0.22, 1], easing: "cubic-bezier(.23,1,.32,1)" }, { duration: 560, fill: "forwards" }) ?? null));
+      const start = () => (
+        (begin = null),
+        (press =
+          ph?.animate(
+            { scale: ["1", "0.975", "1.035"], offset: [0, 0.22, 1], easing: "cubic-bezier(.23,1,.32,1)" },
+            { duration: 560, fill: "forwards" },
+          ) ?? null)
+      );
       if (e.pointerType !== "touch") return void start();
       begin = start;
       wait = window.setTimeout(start, 90);
@@ -220,7 +247,17 @@ export function PageFly() {
       const h = to.getBoundingClientRect();
       const c = document.createElement("div");
       c.setAttribute("aria-hidden", "");
-      Object.assign(c.style, { position: "fixed", zIndex: "60", overflow: "hidden", borderRadius: "4px", pointerEvents: "none", left: `${h.left}px`, top: `${h.top}px`, width: `${h.width}px`, height: `${h.height}px` });
+      Object.assign(c.style, {
+        position: "fixed",
+        zIndex: "60",
+        overflow: "hidden",
+        borderRadius: "4px",
+        pointerEvents: "none",
+        left: `${h.left}px`,
+        top: `${h.top}px`,
+        width: `${h.width}px`,
+        height: `${h.height}px`,
+      });
       const img = c.appendChild(document.createElement("img"));
       img.alt = "";
       img.src = src;
@@ -233,7 +270,8 @@ export function PageFly() {
         c.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 150 }).finished.then(() => c.remove());
       });
     };
-    let n = 0, raf = 0;
+    let n = 0,
+      raf = 0;
     /* Item 3, back. A pop runs no view transition today (it cut), so the
        page returned to comes down 2.5vh and fades in on its own; and the
        hero shrinks home to its tile when that tile is on screen once the
@@ -252,7 +290,10 @@ export function PageFly() {
       const home = () => {
         const tile = document.querySelector<HTMLElement>(`[data-flip-id="${CSS.escape(go.slug)}"]`);
         const r = tile?.getBoundingClientRect();
-        if (!tile || !r?.width) return void (++n < 30 && (raf = requestAnimationFrame(home)));
+        if (!tile || !r?.width) {
+          if (++n < 30) raf = requestAnimationFrame(home);
+          return;
+        }
         if (onScreen(r)) flyCopy(go.r, go.src, tile, 600, MOVE, undefined, zoomOf(tile.querySelector("img")));
       };
       raf = requestAnimationFrame(home);
@@ -264,7 +305,10 @@ export function PageFly() {
     const land = () => {
       const hero = document.querySelector<HTMLElement>(HERO);
       const h = hero?.getBoundingClientRect();
-      if (!hero || !h?.width) return void (++n < 60 && (raf = requestAnimationFrame(land)));
+      if (!hero || !h?.width) {
+        if (++n < 60) raf = requestAnimationFrame(land);
+        return;
+      }
       if (h.bottom < 0 || h.top > innerHeight) return;
       // Found in the layout phase, the hero is named before the new page is captured; found later, the copy flies as before.
       if (f.vt && !n) {
@@ -296,7 +340,14 @@ export function PageFly() {
       [...document.querySelectorAll<HTMLElement>(".v3 .pj-r")]
         .filter((e) => !e.contains(hero) && !hero.contains(e) && onScreen(e.getBoundingClientRect()))
         .slice(0, 6)
-        .forEach((e, i) => f.vt ? slideUp(e, i + 1) : e.animate({ opacity: [0, 1], transform: ["translateY(16px)", "none"] }, { duration: 600, delay: 300 + i * 40, easing: OUT, fill: "backwards" }));
+        .forEach((e, i) =>
+          f.vt
+            ? slideUp(e, i + 1)
+            : e.animate(
+                { opacity: [0, 1], transform: ["translateY(16px)", "none"] },
+                { duration: 600, delay: 300 + i * 40, easing: OUT, fill: "backwards" },
+              ),
+        );
     };
     land();
     return () => cancelAnimationFrame(raf);

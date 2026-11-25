@@ -1,7 +1,14 @@
 // Serves the booking page's images. Every page now redirects to the site:
 // the sessions and the two calls book on a page of their own (/book/<slug>),
 // and the old booking page is never served.
-const picker = { portraits: "portraits", graduation: "graduation", headshots: "headshots", digitals: "studio-digitals", editorial: "editorial", campaign: "brand-photography" };
+const picker = {
+  portraits: "portraits",
+  graduation: "graduation",
+  headshots: "headshots",
+  digitals: "studio-digitals",
+  editorial: "editorial",
+  campaign: "brand-photography",
+};
 
 export default {
   async fetch(request, env) {

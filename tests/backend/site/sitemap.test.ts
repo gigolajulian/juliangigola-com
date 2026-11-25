@@ -21,7 +21,8 @@ describe("sitemap", () => {
   });
 
   it("lists every other project and every booking page above the projects", () => {
-    for (const p of PROJECTS.filter((p) => !["headshots", "graduation"].includes(p.slug))) expect(urls).toContain(`${SITE}/portfolio/${p.slug}`);
+    for (const p of PROJECTS.filter((p) => !["headshots", "graduation"].includes(p.slug)))
+      expect(urls).toContain(`${SITE}/portfolio/${p.slug}`);
     for (const b of BOOKING_PAGES) expect(entries.find((e) => e.url === `${SITE}${bookingHref(b)}`)?.priority).toBe(0.9);
     expect(entries.find((e) => e.url === SITE)?.priority).toBe(1);
   });

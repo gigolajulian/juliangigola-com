@@ -45,7 +45,10 @@ test("keyboard: a row takes focus and Enter opens its session", async ({ browser
   const sec = page.locator("#sessions");
   await sec.locator(".mt-br").first().waitFor();
   // Tab from the page, so the focus is a keyboard's (:focus-visible)
-  const row = sec.locator(".mt-br").filter({ hasText: /Headshots/i }).first();
+  const row = sec
+    .locator(".mt-br")
+    .filter({ hasText: /Headshots/i })
+    .first();
   await sec.locator(".mt-br").first().focus();
   await page.keyboard.press("Tab");
   await expect(row).toBeFocused();
@@ -84,10 +87,19 @@ test("on the home, a link to /#contact glides to the footer, then opens the card
   // the motion engine starts in the same effect pass that adds the home's click listener;
   // then the page height holds over two frames, so the glide aims at where the footer stays
   await page.waitForFunction(() => document.documentElement.hasAttribute("data-mt-motion"), null, { timeout: 15000 });
-  await expect.poll(() => page.evaluate(() => new Promise<boolean>((done) => {
-    const h = document.documentElement.scrollHeight;
-    requestAnimationFrame(() => requestAnimationFrame(() => done(document.documentElement.scrollHeight === h)));
-  })), { message: "page height holds" }).toBe(true);
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            new Promise<boolean>((done) => {
+              const h = document.documentElement.scrollHeight;
+              requestAnimationFrame(() => requestAnimationFrame(() => done(document.documentElement.scrollHeight === h)));
+            }),
+        ),
+      { message: "page height holds" },
+    )
+    .toBe(true);
   // no link on the home points there today: a stand-in, as any page link to /#contact would be
   await page.evaluate(() => {
     const a = Object.assign(document.createElement("a"), { href: "/#contact", id: "t-contact", textContent: "contact" });

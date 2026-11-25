@@ -82,24 +82,27 @@ export async function searchConsole(secret: string) {
     body: new URLSearchParams({ client_id, client_secret, refresh_token, grant_type: "refresh_token" }),
   });
   // An HTML error page from Google is a refusal too, not a JSON parse crash.
-  const tok = (await tokRes.json().catch(() => ({ error: `HTTP ${tokRes.status}` }))) as { access_token?: string; error_description?: string; error?: string };
+  const tok = (await tokRes.json().catch(() => ({ error: `HTTP ${tokRes.status}` }))) as {
+    access_token?: string;
+    error_description?: string;
+    error?: string;
+  };
   if (!tok.access_token) throw new Error(`Google sign-in failed: ${tok.error_description ?? tok.error}`);
 
   return async (body: Record<string, unknown>): Promise<SearchRow[]> => {
-    const res = await fetch(
-      "https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Ajuliangigola.com/searchAnalytics/query",
-      {
-        method: "POST",
-        headers: { authorization: `Bearer ${tok.access_token}`, "content-type": "application/json" },
-        body: JSON.stringify(body),
-      },
-    );
-    const r = (await res.json().catch(() => ({ error: { message: `Search Console said ${res.status}` } }))) as { rows?: SearchRow[]; error?: { message: string } };
+    const res = await fetch("https://searchconsole.googleapis.com/webmasters/v3/sites/sc-domain%3Ajuliangigola.com/searchAnalytics/query", {
+      method: "POST",
+      headers: { authorization: `Bearer ${tok.access_token}`, "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const r = (await res.json().catch(() => ({ error: { message: `Search Console said ${res.status}` } }))) as {
+      rows?: SearchRow[];
+      error?: { message: string };
+    };
     if (r.error) throw new Error(r.error.message);
     return r.rows ?? [];
   };
 }
 
 /** Search Console's page URL as a site path: `https://juliangigola.com/x` -> `/x`. */
-export const sitePath = (url: string) =>
-  url.replace(/^https?:\/\//, "").replace(/^(www\.)?juliangigola\.com(?=\/|$)/, "") || "/";
+export const sitePath = (url: string) => url.replace(/^https?:\/\//, "").replace(/^(www\.)?juliangigola\.com(?=\/|$)/, "") || "/";

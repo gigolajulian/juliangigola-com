@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { localDayKey } from "@/components/booking/flow";
-import { monthCells, weekFrom } from "@/components/booking/picker/dates";
+import { localDayKey, monthCells, weekFrom } from "@/components/booking/picker/dates";
 
 /* The picker's pure date helpers (`components/booking/picker/dates.ts`). */
 
@@ -19,13 +18,13 @@ describe("weekFrom", () => {
 });
 
 describe("monthCells", () => {
-  it("pads the first row to the 1st's weekday, Sunday first", () => {
-    const cells = monthCells(new Date(2026, 1, 14)); // Feb 2026 starts on a Sunday
-    expect(cells).toHaveLength(28);
-    expect(localDayKey(cells[0]!)).toBe("2026-02-01");
+  it("pads the first row to the 1st's weekday, Monday first", () => {
+    const feb = monthCells(new Date(2026, 1, 14)); // Feb 2026 starts on a Sunday: the last column
+    expect(keys(feb.slice(0, 7))).toEqual([null, null, null, null, null, null, "2026-02-01"]);
+    expect(feb).toHaveLength(34);
     const april = monthCells(new Date(2026, 3, 30)); // Apr 2026 starts on a Wednesday
-    expect(keys(april.slice(0, 4))).toEqual([null, null, null, "2026-04-01"]);
-    expect(april).toHaveLength(33);
+    expect(keys(april.slice(0, 3))).toEqual([null, null, "2026-04-01"]);
+    expect(april).toHaveLength(32);
     expect(localDayKey(april.at(-1)!)).toBe("2026-04-30");
   });
 });

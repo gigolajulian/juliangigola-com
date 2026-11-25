@@ -10,15 +10,7 @@ import type { Enquiry } from "@/lib/leads/enquiry";
    own frames they picked, which are public. Each opens full size in a
    new tab. Only what actually loads is shown: a broken tile, or a
    heading over none, says nothing. */
-export function References({
-  msgKey,
-  enquiry,
-  auth,
-}: {
-  msgKey: string;
-  enquiry: Enquiry;
-  auth: Record<string, string>;
-}) {
+export function References({ msgKey, enquiry, auth }: { msgKey: string; enquiry: Enquiry; auth: Record<string, string> }) {
   const [urls, setUrls] = React.useState<(string | null)[]>([]);
   const [broken, setBroken] = React.useState<string[]>([]);
   const count = enquiry.files?.length ?? 0;
@@ -30,7 +22,11 @@ export function References({
     void Promise.all(
       Array.from({ length: count }, async (_, n) => {
         // a refused file is left out; a fetch that fails offline fails them all, as before
-        const blob = await adminBlob(`/api/inbox?key=${encodeURIComponent(`ref:${msgKey}:${n}`)}`, "Reference failed", JSON.parse(header)).catch((e: unknown) => {
+        const blob = await adminBlob(
+          `/api/inbox?key=${encodeURIComponent(`ref:${msgKey}:${n}`)}`,
+          "Reference failed",
+          JSON.parse(header),
+        ).catch((e: unknown) => {
           if (e instanceof TypeError) throw e;
           return null;
         });
@@ -50,8 +46,7 @@ export function References({
     };
   }, [msgKey, count, header]);
 
-  const tile =
-    "block size-28 overflow-hidden rounded-[6px] border border-border hoverable:hover:border-foreground/40";
+  const tile = "block size-28 overflow-hidden rounded-[6px] border border-border hoverable:hover:border-foreground/40";
   const uploads = (enquiry.files ?? [])
     .map((name, n) => ({ name, url: urls[n] }))
     .filter((u): u is { name: string; url: string } => !!u.url);
@@ -81,7 +76,15 @@ export function References({
             {picks.map((src) => (
               <li key={src}>
                 <a href={src} target="_blank" rel="noreferrer" className={tile}>
-                  <Image src={src} alt="" width={224} height={224} sizes="112px" className="size-full object-cover" onError={() => setBroken((b) => [...b, src])} />
+                  <Image
+                    src={src}
+                    alt=""
+                    width={224}
+                    height={224}
+                    sizes="112px"
+                    className="size-full object-cover"
+                    onError={() => setBroken((b) => [...b, src])}
+                  />
                 </a>
               </li>
             ))}

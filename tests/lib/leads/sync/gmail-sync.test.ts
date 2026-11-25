@@ -11,7 +11,13 @@ const msg = (id: string, labels: string[], from: string, to: string, subject = "
   id,
   labelIds: labels,
   internalDate: String(Date.parse(at(5))),
-  payload: { headers: [{ name: "From", value: from }, { name: "To", value: to }, { name: "Subject", value: subject }] },
+  payload: {
+    headers: [
+      { name: "From", value: from },
+      { name: "To", value: to },
+      { name: "Subject", value: subject },
+    ],
+  },
 });
 
 describe("applyLeadEvent, Gmail kinds", () => {
@@ -65,7 +71,10 @@ describe("mailChanges", () => {
 describe("invoice sent", () => {
   const billed = (): Lead => ({
     ...applyLeadEvent(null, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Maya" }),
-    invoices: [{ no: "1126", date: "2026-11-12", lines: [{ desc: "Portraits", qty: 1, rate: 450 }], paid: 100, at: "2026-11-12T20:00:00Z" }, { no: "1126-2", date: "2026-11-12", lines: [{ desc: "Prints", qty: 1, rate: 90 }], paid: 0, at: "2026-11-12T21:00:00Z" }],
+    invoices: [
+      { no: "1126", date: "2026-11-12", lines: [{ desc: "Portraits", qty: 1, rate: 450 }], paid: 100, at: "2026-11-12T20:00:00Z" },
+      { no: "1126-2", date: "2026-11-12", lines: [{ desc: "Prints", qty: 1, rate: 90 }], paid: 0, at: "2026-11-12T21:00:00Z" },
+    ],
   });
   const sent = (subject: string, filename?: string): Msg => {
     const m = msg("g9", ["SENT"], "hello@juliangigola.com", email, subject);
@@ -101,7 +110,10 @@ describe("syncGmail", () => {
   const kv = () => ({
     get: async (k: string) => data.get(k) ?? null,
     put: async (k: string, v: string) => void data.set(k, v),
-    list: async ({ prefix }: { prefix: string }) => ({ keys: [...data.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })), list_complete: true }),
+    list: async ({ prefix }: { prefix: string }) => ({
+      keys: [...data.keys()].filter((k) => k.startsWith(prefix)).map((name) => ({ name })),
+      list_complete: true,
+    }),
     delete: async (k: string) => void data.delete(k),
   });
   const env = () => ({ INBOX: kv() as never, LEADS_KEY, GCAL_OAUTH });
@@ -148,7 +160,11 @@ describe("syncGmail", () => {
     expect(await syncGmail(e)).toBe(2);
     const s = await sealer(LEADS_KEY)!;
     const lead = await s.open<Lead>(data.get(leadStoreKey(await s.id(email)))!);
-    expect(lead.events.map((x) => [x.kind, x.ref])).toEqual([["inquiry", "msg:1"], ["replied", "a"], ["wrote", "b"]]);
+    expect(lead.events.map((x) => [x.kind, x.ref])).toEqual([
+      ["inquiry", "msg:1"],
+      ["replied", "a"],
+      ["wrote", "b"],
+    ]);
     expect(lead).toMatchObject({ stage: "Replied", unread: true });
     // news@shop.com is no lead and never becomes one; the draft is never fetched.
     expect(data.has(leadStoreKey(await s.id("news@shop.com")))).toBe(false);
@@ -169,7 +185,13 @@ describe("syncGmail", () => {
     const e = env();
     await recordLead(e, email, { event: { at: at(1), kind: "inquiry", ref: "msg:1" } });
     data.set(CURSOR, "100");
-    const down = { ...kv(), put: async (k: string, v: string) => { if (k.startsWith("lead:")) throw new Error("down"); data.set(k, v); } };
+    const down = {
+      ...kv(),
+      put: async (k: string, v: string) => {
+        if (k.startsWith("lead:")) throw new Error("down");
+        data.set(k, v);
+      },
+    };
     vi.spyOn(console, "error").mockImplementation(() => {});
     expect(await syncGmail({ ...e, INBOX: down as never })).toBe(0);
     expect(data.get(CURSOR)).toBe("120");
@@ -188,7 +210,12 @@ describe("syncGmail", () => {
     const e = env();
     const s = (await sealer(LEADS_KEY))!;
     // A lead from the form, stored under an id from before dots were ignored.
-    await writeLead(kv() as never, s, "old", applyLeadEvent(null, "gigola.julian@gmail.com", { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Test" }));
+    await writeLead(
+      kv() as never,
+      s,
+      "old",
+      applyLeadEvent(null, "gigola.julian@gmail.com", { event: { at: at(1), kind: "inquiry", ref: "msg:1" }, name: "Test" }),
+    );
     const [a, b] = [MAIL.a, MAIL.b];
     MAIL.a = msg("a", ["SENT"], "hello@juliangigola.com", "gigolajulian@gmail.com");
     MAIL.b = msg("b", ["INBOX"], "Test <GigolaJulian+x@googlemail.com>", "hello@juliangigola.com");

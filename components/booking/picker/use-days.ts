@@ -50,7 +50,26 @@ export function usePickerDays(days: Record<string, string[]> | null, startView?:
     setView(v);
   };
   /* Nothing to go back to before today. */
-  const atStart = view === "week" ? +week[0] <= +today : anchor.getFullYear() * 12 + anchor.getMonth() <= today.getFullYear() * 12 + today.getMonth();
+  const atStart =
+    view === "week" ? +week[0] <= +today : anchor.getFullYear() * 12 + anchor.getMonth() <= today.getFullYear() * 12 + today.getMonth();
 
-  return { view, setView, anchor, setAnchor, pick, setPick, chosen, setChosen, choose, today, week, month, shift, mstep, setMstep, switchView, atStart };
+  return {
+    view,
+    setView,
+    anchor,
+    setAnchor,
+    pick,
+    setPick,
+    chosen,
+    setChosen,
+    choose,
+    today,
+    week,
+    month,
+    shift,
+    mstep,
+    setMstep,
+    switchView,
+    atStart,
+  };
 }

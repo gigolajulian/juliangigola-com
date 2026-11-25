@@ -65,7 +65,11 @@ let skipped = 0;
 let failed = 0;
 
 /** The object key mirrors the public path, so `/work/x/01.jpg` maps 1:1. */
-const keyOf = (file) => file.split(path.sep).join("/").replace(/^public\//, "");
+const keyOf = (file) =>
+  file
+    .split(path.sep)
+    .join("/")
+    .replace(/^public\//, "");
 
 const queue = [...files];
 const worker = async () => {
