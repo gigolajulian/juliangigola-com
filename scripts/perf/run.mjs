@@ -73,7 +73,8 @@ try {
   if (!base) {
     if (REBUILD || !localBuild()) {
       console.log("perf: building a local production build (JG_LOCAL=1)");
-      code = await run("npx", ["next", "build"], { JG_LOCAL: "1" });
+      // the placeholder CI builds with (.github/workflows/ci.yml): without a key the paid sessions show the fallback, no days
+      code = await run("npx", ["next", "build"], { JG_LOCAL: "1", NEXT_PUBLIC_STRIPE_PK: process.env.NEXT_PUBLIC_STRIPE_PK || "pk_test_ci_placeholder" });
       if (code) throw new Error("build failed");
     } else {
       console.log("perf: reusing the local build in .next (--rebuild to make a new one)");
