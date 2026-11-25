@@ -4,7 +4,7 @@
     "command": "npx vitest run --project backend tests/backend/deposit/api-stripe.test.ts",
     "break": ".bedrock/breaks/WEB-10.patch",
     "patch_sha256": "9ab0c2cc420fb34acb2be397d8f7924daa36f26d0d2f5db9316ad8980d31d80b",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/booking/deposit.ts": "9b2e7441dc4f8b7705d8185edcd8b748a78c436a1e57bc351f35ba550305458d",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -320,7 +320,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -328,7 +328,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.3,
+    "seconds": 18.9,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -337,7 +337,7 @@
     "command": "node scripts/bedrock/lockfile-check.mjs",
     "break": ".bedrock/breaks/SEC-3.patch",
     "patch_sha256": "b301504b49e37d07906733dafe0895491ff15c364e1372b5f00fbf143642e7c9",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       ".github/workflows/ci.yml": "5b46375b9bc76c08e6e32f78aad824a2856292ce8caae3490bbce5689e0d34ec",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -654,7 +654,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -662,7 +662,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 7.6,
+    "seconds": 7.0,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -671,7 +671,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/api-inbox.test.ts",
     "break": ".bedrock/breaks/SEC-5.patch",
     "patch_sha256": "6e353321e7d2bc388ae9c83d24c305299cf39f56a339377ada8668272376c2e4",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/admin/vouch.ts": "11ccc109dc3fb65253bef86dd1f2d3476ee5c1e7d276b3d54754652b2a2dcfdf",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -987,7 +987,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -995,7 +995,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.8,
+    "seconds": 21.8,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -1004,7 +1004,7 @@
     "command": "node scripts/test/gate.mjs --backend",
     "break": ".bedrock/breaks/REL-1.patch",
     "patch_sha256": "448e987e190790a797851093ab199d348153eb1fabf9beb3a8c3a914c7c197cd",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/booking/deposit.ts": "9b2e7441dc4f8b7705d8185edcd8b748a78c436a1e57bc351f35ba550305458d",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -1320,7 +1320,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -1328,7 +1328,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 62.3,
+    "seconds": 67.1,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -1337,7 +1337,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/actions.test.ts",
     "break": ".bedrock/breaks/ABU-13.patch",
     "patch_sha256": "6136d5d81409344fed74b46dbaa085a6fdace2e6a813c4a9d19599f33cda4884",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/leads/enquiry-action.ts": "057dbb6b314be1356a4ba49ee77bffbaf9c4510179bf9d949b8609346affa157",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -1653,7 +1653,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -1661,7 +1661,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.3,
+    "seconds": 16.9,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -1670,7 +1670,7 @@
     "command": "npx vitest run --project backend tests/backend/site/security-headers.test.ts",
     "break": ".bedrock/breaks/WEB-1.patch",
     "patch_sha256": "2a7ce697af8d4325caa89cf3e4f976c092ad7f42f3354ae1c4d1d59aeefb95ee",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
       "lightroom/Shoot.test.lua": "6248d7be4f93b23f1ecfab1143caba9336c2f863d0412c088907f85dadfb83ac",
@@ -1986,7 +1986,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -1994,7 +1994,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 17.7,
+    "seconds": 18.6,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -2003,7 +2003,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/api-leads.test.ts",
     "break": ".bedrock/breaks/PRIV-4.patch",
     "patch_sha256": "727226e9ad7bd911369457658040cf366bb91dedf3936c569958a2989a001e8f",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/seal.ts": "421188c7696f879ff0e2e0dc79ef82a161b3ef35b17f5422c50a4a2218a6de7a",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2319,7 +2319,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -2327,7 +2327,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 19.6,
+    "seconds": 20.0,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -2336,7 +2336,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"picks of the site\"",
     "break": ".bedrock/breaks/WEB-4.patch",
     "patch_sha256": "45110cffd96c374d57cb97b1e498e9a1e909ac2420f4a06b0767c63584125f4a",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2652,7 +2652,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -2660,7 +2660,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 17.0,
+    "seconds": 16.0,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -2669,7 +2669,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"first bytes\"",
     "break": ".bedrock/breaks/WEB-5.patch",
     "patch_sha256": "99f3802e3d73e5830542209bc2ff3686e267ace9a4a8cbd08fa1a00ab341d81e",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -2985,7 +2985,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -2993,7 +2993,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.8,
+    "seconds": 15.2,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -3002,7 +3002,7 @@
     "command": "npx vitest run --project backend tests/lib/admin/vouch.test.ts",
     "break": ".bedrock/breaks/AUTHZ-2.patch",
     "patch_sha256": "05a64b8e5f1af31a1cc62c219f5d08af35fa909fffd9838ff0ea758ede09d91a",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/admin/vouch.ts": "11ccc109dc3fb65253bef86dd1f2d3476ee5c1e7d276b3d54754652b2a2dcfdf",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3318,7 +3318,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -3326,7 +3326,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.8,
+    "seconds": 15.3,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -3335,7 +3335,7 @@
     "command": "npx vitest run --project backend tests/lib/leads/inbox.test.ts -t \"escaped HTML body\"",
     "break": ".bedrock/breaks/WEB-7.patch",
     "patch_sha256": "e5c8e0e369d57f36c0d54197cd937f850633e9572e17cf08584fb907da405956",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/leads/enquiry.ts": "c02c7b8dcae7158036cfa4a37b35e126e8656996fb2475686c84deec74cde7b9",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3651,7 +3651,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -3659,7 +3659,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.5,
+    "seconds": 14.8,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -3668,7 +3668,7 @@
     "command": "npx vitest run --project backend tests/backend/site/route-walk.test.ts",
     "break": ".bedrock/breaks/AUTHZ-3.patch",
     "patch_sha256": "3ef5fb11fdef63d84cd75302322a4edd8ba166315ffee20078add9f52c449878",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/admin/vouch.ts": "11ccc109dc3fb65253bef86dd1f2d3476ee5c1e7d276b3d54754652b2a2dcfdf",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -3984,7 +3984,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -3992,7 +3992,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 20.9,
+    "seconds": 21.1,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -4001,7 +4001,7 @@
     "command": "npx vitest run --project backend tests/lib/http-limited.test.ts",
     "break": ".bedrock/breaks/ABU-3.patch",
     "patch_sha256": "9c3da7a42331d889c55054afe229e92fa4e43b74badfcdb9bb7e362261061711",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/http.ts": "7728ec988036f1884818bc58791c9cbc2c6876b80e7e8063a3fc106b6685ca75",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -4317,7 +4317,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -4325,7 +4325,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.5,
+    "seconds": 17.1,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -4334,7 +4334,7 @@
     "command": "node scripts/bedrock/ci-check.mjs",
     "break": ".bedrock/breaks/REL-7.patch",
     "patch_sha256": "3e6a6e3d1274ead59d83124c89b4ae584cdaf6e6e6cd2d29e6d632d5161108cf",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       ".github/workflows/ci.yml": "5b46375b9bc76c08e6e32f78aad824a2856292ce8caae3490bbce5689e0d34ec",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -4651,7 +4651,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -4659,7 +4659,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 4.5,
+    "seconds": 5.7,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -4668,7 +4668,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/lead-write-retry.test.ts",
     "break": ".bedrock/breaks/INP-2.patch",
     "patch_sha256": "4a4fe75ee3742b1e90866007de080b39ad6531357b9e1041addfc0dd4a36ffef",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/leads/lead-store.ts": "fcfefb6a88e6137e25e9e421e64723d27e6f7fff46cf83d5a31740c76b5d4908",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -4984,7 +4984,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -4992,7 +4992,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 21.3,
+    "seconds": 23.8,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -5001,7 +5001,7 @@
     "command": "npx vitest run --project backend tests/backend/proofs/gallery-notify.test.ts -t \"at most 100 addresses\"",
     "break": ".bedrock/breaks/MEM-3.patch",
     "patch_sha256": "05937a33b47f29590c8d6ce2f2d45e517d98f8f34807575074c98f5c6d8a623d",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/proofs/gallery-api.ts": "97a786a46889c87c19e34480c736b6be842af48719aba8f3a9672c9b3c68b978",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -5317,7 +5317,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -5325,7 +5325,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.8,
+    "seconds": 21.0,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -5334,7 +5334,7 @@
     "command": "npx vitest run --project backend tests/lib/http.test.ts -t \"streamed body\"",
     "break": ".bedrock/breaks/MEM-4.patch",
     "patch_sha256": "5e749605c9dcd7e0353e2cfe70f69ff83adfbe6d5c4790b90a0ce4c3c53f810c",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/http.ts": "7728ec988036f1884818bc58791c9cbc2c6876b80e7e8063a3fc106b6685ca75",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -5650,7 +5650,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -5658,7 +5658,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.6,
+    "seconds": 15.8,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -5667,7 +5667,7 @@
     "command": "npx vitest run --project backend tests/backend/booking/own-booking.test.ts -t \"two calls a day\"",
     "break": ".bedrock/breaks/ABU-9.patch",
     "patch_sha256": "1a404709babfbb56922cdf2991b2c7adff10c9b1225ee7dba4ac20f015376261",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "app/api/book/route.ts": "effac41e1660bbf2c815b106e3f94d7c6f60ed04834ed2e41731af6c200fc92a",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -5983,7 +5983,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -5991,7 +5991,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.7,
+    "seconds": 19.0,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -6000,7 +6000,7 @@
     "command": "npx vitest run --project backend tests/lib/http.test.ts -t \"before parsing\"",
     "break": ".bedrock/breaks/ABU-11.patch",
     "patch_sha256": "9ab83bca5f999a1737732ab1c78a5f348bb68dbb5ca24381cc7de8b190b3cc54",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/http.ts": "7728ec988036f1884818bc58791c9cbc2c6876b80e7e8063a3fc106b6685ca75",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -6316,7 +6316,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -6324,7 +6324,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.5,
+    "seconds": 19.7,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -6333,7 +6333,7 @@
     "command": "npx vitest run --project backend tests/lib/proofs/submit.test.ts -t \"refunded\"",
     "break": ".bedrock/breaks/MONEY-1.patch",
     "patch_sha256": "86e80c886b9b6d42d19437b6441244574e4c4d1226557fc5feb221826166b69a",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/proofs/submit.ts": "cac8dcd2dd37a1e11d2134cf4e139d31d281413ade08579e8c9ddd95b5d6bf6f",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -6649,7 +6649,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -6657,7 +6657,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.0,
+    "seconds": 18.6,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -6666,7 +6666,7 @@
     "command": "npx vitest run --project backend tests/backend/site/error-alert.test.ts -t \"route throws\"",
     "break": ".bedrock/breaks/DATA-2.patch",
     "patch_sha256": "cadc8bd4b76559e92d605c420a8451210595197979ce8cec912e8c01bcfc5db8",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "instrumentation.ts": "786461e767f495a0f37fa423239f55367cb1d1746964a38e9178203d9fab15d3",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -6982,7 +6982,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -6990,7 +6990,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.9,
+    "seconds": 15.4,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -6999,7 +6999,7 @@
     "command": "npx vitest run --project backend -t \"per target\"",
     "break": ".bedrock/breaks/ABU-1.patch",
     "patch_sha256": "667629c2dfa224c64e643036b641819928e49392d05e08db50ad6c5639a549d1",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/http.ts": "7728ec988036f1884818bc58791c9cbc2c6876b80e7e8063a3fc106b6685ca75",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -7315,7 +7315,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -7323,7 +7323,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 47.2,
+    "seconds": 50.7,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -7332,7 +7332,7 @@
     "command": "npx vitest run --project backend tests/backend/booking/api-booking-id.test.ts tests/backend/proofs/gallery-online.test.ts -t \"another\"",
     "break": ".bedrock/breaks/AUTHZ-1.patch",
     "patch_sha256": "7afd3cd3af81f9185e7e51f7b05cf4008a330f625ea56a0351b477bb120dc494",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/booking/manage-link.ts": "8dffada9541b4d856a1e00955551c41d31486a38362cb6d9787c4b8c755f2ebe",
       "lib/proofs/proof-store.ts": "97b96ddca7667aa1164178a3afd47c7a9a7bbae0f62b98ad503964fbf7ccb6e2",
@@ -7649,7 +7649,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -7657,7 +7657,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 19.4,
+    "seconds": 18.0,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -7666,7 +7666,7 @@
     "command": "npx vitest run --project backend tests/backend/site/error-alert.test.ts -t \"upstream error\"",
     "break": ".bedrock/breaks/OBS-1.patch",
     "patch_sha256": "47f2d707b8c03a1cfab6557a024b70d614e3b8bfd49ef377a7c721e9abd7988a",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/email/error-alert.ts": "7dc16ac6eed7233034fa95a7f47f7205d0d5a72698d0bbd386af4c83e7e259b4",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -7982,7 +7982,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -7990,7 +7990,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 17.6,
+    "seconds": 17.8,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -8335,7 +8335,7 @@
     "command": "npx vitest run --project backend tests/lib/net.test.ts",
     "break": ".bedrock/breaks/NET-1.patch",
     "patch_sha256": "7cf6f08654ad70db876aa868e5d26dd8e62ecf47596fb235c720337790f303d0",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/net.ts": "8c53911763643d8e1cf51a9c4975391d099e0c6f11dca738ee49466a5532acaa",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -8651,7 +8651,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -8659,7 +8659,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.9,
+    "seconds": 17.9,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -8668,7 +8668,7 @@
     "command": "npx vitest run --project backend tests/backend/leads/lead-versions.test.ts",
     "break": ".bedrock/breaks/DATA-3.patch",
     "patch_sha256": "3cb9abaf64aba473d59a6e807c9507c07297f5c9d029dc510537ff9185ab67f0",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/leads/lead-store.ts": "fcfefb6a88e6137e25e9e421e64723d27e6f7fff46cf83d5a31740c76b5d4908",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -8984,7 +8984,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -8992,7 +8992,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.0,
+    "seconds": 18.4,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -9001,7 +9001,7 @@
     "command": "npx vitest run --project backend tests/backend/booking/slots.test.ts -t \"daylight|clocks going back\"",
     "break": ".bedrock/breaks/TIME-1.patch",
     "patch_sha256": "26ce4f1c15ed856c1ad8d299a61574161f528d604f3e74189298123e6a2e7a1b",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/booking/slots.ts": "76a1c395d917eaeccf093b649f13b2456d2f4f6ebdf11af1714949cee66cb409",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -9317,7 +9317,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -9325,7 +9325,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 18.0,
+    "seconds": 20.9,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -9334,7 +9334,7 @@
     "command": "npx vitest run --project backend tests/lib/admin/vouch.test.ts -t \"revoked\"",
     "break": ".bedrock/breaks/AUTH-2.patch",
     "patch_sha256": "2bc1aeab712f952d6abc6ca506cf50f6b6d444b8e98dad1010d14b268dd13dc4",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/admin/vouch.ts": "11ccc109dc3fb65253bef86dd1f2d3476ee5c1e7d276b3d54754652b2a2dcfdf",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -9650,7 +9650,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -9658,7 +9658,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 17.2,
+    "seconds": 18.3,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -9667,7 +9667,7 @@
     "command": "npx vitest run --project backend tests/lib/scrub.test.ts",
     "break": ".bedrock/breaks/PRIV-2.patch",
     "patch_sha256": "13888d5ad37f1500470440b629448ff9da26c79a2e7efd7e78c26a2dcd2614b6",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/scrub.ts": "102d53cd3cd5bc76628c3bd47a7f4350308f1ec37b77d55d4d97aed4a949da40",
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
@@ -9983,7 +9983,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -9991,7 +9991,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 17.2,
+    "seconds": 17.9,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -10336,7 +10336,7 @@
     "command": "npx vitest run --project backend tests/backend/deposit/api-deposit.test.ts tests/lib/leads/actions.test.ts -t \"once, however often|last place\"",
     "break": ".bedrock/breaks/JOB-1.patch",
     "patch_sha256": "9f8b8d724e66497f986824cb8c8fca9ac6c7ae49a1a9674988a7e80ab04475a2",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lib/booking/engine.ts": "e79d2e30d48a328235cade04937930179b06878323f55b49fbff1bddc85e8b2c",
       "lib/leads/enquiry-action.ts": "057dbb6b314be1356a4ba49ee77bffbaf9c4510179bf9d949b8609346affa157",
@@ -10653,7 +10653,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -10661,7 +10661,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 19.2,
+    "seconds": 16.5,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -10670,7 +10670,7 @@
     "command": "node scripts/check-version.mjs",
     "break": ".bedrock/breaks/REL-9.patch",
     "patch_sha256": "2a4c747670eb4e58b2a3c2ccdf8301894d90d95f76124a4decccf3dac27f0d8c",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
       "lightroom/Shoot.test.lua": "6248d7be4f93b23f1ecfab1143caba9336c2f863d0412c088907f85dadfb83ac",
@@ -10987,7 +10987,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -10995,7 +10995,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 4.7,
+    "seconds": 4.1,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   },
@@ -11341,7 +11341,7 @@
     "command": "npx vitest run --project backend tests/backend/site/security-txt.test.ts",
     "break": ".bedrock/breaks/SEC-12.patch",
     "patch_sha256": "04f62320d1b1e8811e6571f1788b3b74fbecbce6c20b7f170315b6ec4ef27bbf",
-    "sha": "8fff9db9d322e7e40a9277685594537373493c9b",
+    "sha": "93311235a29b476846f0cf37e01030a86addac60",
     "files": {
       "lightroom/GallerySettings.test.lua": "a7401a1f41beec78bc1f02734e142e2aedc83e0bad83d123cce570198611832f",
       "lightroom/Shoot.test.lua": "6248d7be4f93b23f1ecfab1143caba9336c2f863d0412c088907f85dadfb83ac",
@@ -11657,7 +11657,7 @@
       "tests/perf/matrix.ts": "20d44b33aea0b4f500eec73da12dc19b2e57b46953300dcc04f87ec87bc74a9b",
       "tests/perf/reporter.ts": "762bc7c85f98a2572edb446c210d34f8d4f69d0d92c0f362299064992a76a85c",
       "tests/perf/swipe.spec.ts": "3d1c0863f94fed0cf708ca31a7b2f2e0b0f5f5120f320add039e611dcfb6cd6a",
-      "tests/ui/a11y.spec.ts": "c81ac78205af9389076de7905705562f4d2c93c443b1bd0a593595ef05dcbdbc",
+      "tests/ui/a11y.spec.ts": "53e979f72cb819bc704957997b3001ec243671bba74284275faff2f08397355a",
       "tests/ui/book.spec.ts": "91594d067b30ad0b3f22cf8feed4a11a6a3ffb4c098cb5bf6af496ed0d5b4f05",
       "tests/ui/booking-menu.spec.ts": "8704912fb5695310203ca77d997b0498d2f9aed0db8e3dac4e1600fb82bd074d",
       "tests/ui/booking-pages.spec.ts": "da0157ff0a555388b35243cacf1b780d8dae012742fc0ce70d3b267d1b0dede5",
@@ -11665,7 +11665,7 @@
       "tests/ui/pages.spec.ts": "06890e21e8c47266c85f7372a03db22b489add2e676b0a3d091a2ffd65bfaa5f",
       "tests/ui/ratios.ts": "88525fcfc3686c1ed3439409c99f0e68088a8760f5ab1f711eaea75ca933f4c5"
     },
-    "seconds": 16.2,
+    "seconds": 14.8,
     "date": "2026-11-25",
     "bedrock": "2.9.5"
   }
