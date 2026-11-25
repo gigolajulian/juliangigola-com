@@ -13,10 +13,10 @@ import { json, taken, upstreamError } from "@/lib/http";
 
 const SAY = {
   missing: [404, "No such booking."],
-  cancelled: [409, "This booking is already cancelled."],
+  cancelled: [409, "This booking is already canceled."],
   past: [409, "This session has started."],
-  moves: [403, "This booking has been moved twice already. It can still be cancelled."],
-  late: [403, "It's under 24 hours before your session, so it can no longer be moved."],
+  moves: [403, "This booking has been moved twice already. It can still be canceled."],
+  late: [403, "Your session is less than 24 hours away, so it can no longer be moved."],
 } as const;
 
 /** The answer to a change the lock refused. */
@@ -55,7 +55,7 @@ async function noShow(env: BookingEnv, id: string) {
     () => null,
   );
   if (!r) return json({ error: "No such booking." }, 404);
-  if (r.cancelled) return json({ error: "This booking is already cancelled." }, 409);
+  if (r.cancelled) return json({ error: "This booking is already canceled." }, 409);
   if (Date.parse(r.start) > Date.now()) return json({ error: "This session has not started." }, 409);
   const what = [r.session, whenPT(r.start), r.name].join(", ");
   const paid = depositPaid(r);

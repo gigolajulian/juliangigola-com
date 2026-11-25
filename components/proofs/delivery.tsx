@@ -139,10 +139,10 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
 
   const track = React.useCallback(
     (b: Record<string, unknown>) =>
-      fetch(`/api/proof/${id}`, {
+      fetch(`/api/proof/${id}/track`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: "track", ...b }),
+        body: JSON.stringify(b),
         keepalive: true,
       }).catch(() => {}),
     [id],
@@ -256,8 +256,8 @@ export function DeliveryGallery({ id, initial }: { id: string; initial: PublicDe
             {initial.subhead ? <p className="proof-sub">{initial.subhead}</p> : null}
             <p className="proof-mu" style={{ marginTop: 18 }}>
               {models.length
-                ? "Full size JPEGs, grouped by model. Open a model to see its photos, take one model as a zip, or take everything at once."
-                : "Full size JPEGs. Save the ones you want, or all of them at once."}
+                ? "Full-size JPEGs, grouped by model. Open a model to see its photos, take one model as a zip, or take everything at once."
+                : "Full-size JPEGs. Save the ones you want, or all of them at once."}
             </p>
             <div className="dlv-dl">
               <button

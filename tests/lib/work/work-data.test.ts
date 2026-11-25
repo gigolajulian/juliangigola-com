@@ -5,7 +5,7 @@ import { SPLASH_RUN } from "@/lib/work/splash-run";
 import { CALL_CARD, DOORS, HERO } from "@/lib/photos";
 import { INDEX_ORDER, isSession, LENGTH, priceLabel, SESSIONS, TAB_ORDER, type Session } from "@/lib/booking/catalog";
 import { CATEGORIES, PROJECTS } from "@/lib/work/work-data";
-import { PROJECTS as SITE_PROJECTS } from "@/lib/work/work";
+import { PROJECTS as SITE_PROJECTS, titleCase } from "@/lib/work/work";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The archive and the lists built from it: invariants that, broken, show
@@ -73,5 +73,12 @@ describe("credits", () => {
         p.slug,
       ).toBe(true);
     }
+  });
+
+  it("title-cases a name: lowercase collab x, a capital after a colon, apostrophes left alone", () => {
+    expect(titleCase("KALA X SHARKS")).toBe("Kala x Sharks");
+    expect(titleCase("ÆRA:WRAITH")).toBe("Æra:Wraith");
+    expect(titleCase("TONIGHT'S THE NIGHT")).toBe("Tonight's The Night");
+    expect(titleCase("BBYXSHEY")).toBe("Bbyxshey");
   });
 });

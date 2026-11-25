@@ -37,14 +37,47 @@ export async function limited(limiter: { limit(o: { key: string }): Promise<{ su
   return res;
 }
 
+/** Past this a body is refused unread: the admin's largest JSON is a 4 MB invoice photo. Public routes pass less. */
+export const BODY_MAX = 5_000_000;
+/** A public route's JSON: a booking, a move, a deposit start. */
+export const SMALL_BODY = 64 * 1024;
+
+/** The body as text, read no further than `max` bytes: null past it, so a huge body never fills the isolate. */
+export async function textOf(request: Request, max: number): Promise<string | null> {
+  if (Number(request.headers.get("content-length")) > max) return null;
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      await reader.cancel().catch(() => {});
+      return null;
+    }
+    parts.push(value);
+  }
+  const all = new Uint8Array(size);
+  let at = 0;
+  for (const p of parts) {
+    all.set(p, at);
+    at += p.byteLength;
+  }
+  return new TextDecoder().decode(all);
+}
+
 /**
- * The request body as an object, or null when it is not one. `request.json()`
+ * The request body as an object, or null when it is not one or is over `max` bytes. `request.json()`
  * throws on a malformed body, and a throw out of a handler is the Worker's
  * generic 500 for a request that was simply wrong.
  */
-export async function bodyOf(request: Request): Promise<Record<string, unknown> | null> {
+export async function bodyOf(request: Request, max = BODY_MAX): Promise<Record<string, unknown> | null> {
   try {
-    const b: unknown = await request.json();
+    const text = await textOf(request, max);
+    if (text === null) return null;
+    const b: unknown = JSON.parse(text);
     return isRecord(b) ? b : null;
   } catch {
     return null;

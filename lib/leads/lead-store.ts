@@ -104,21 +104,19 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
   return moved;
 }
 
-/** Every lead's summary from the list's metadata, newest first, each with its id.
-    Trash empties itself: 30 days after it went in, a lead goes for good.
-    The list is the only reader, so it is the one place that checks. A summary that will not open is logged and left out. */
-export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<LeadSummary[]> {
+/** Every lead's summary from the list's metadata, newest first, each with its id, read only. A lead 30 days in
+    the trash is left out and its id given in `expired`, for the caller to bury (`buryLead`). A summary that will
+    not open is logged and left out. */
+export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<{ leads: LeadSummary[]; expired: string[] }> {
   const leads: LeadSummary[] = [];
+  const expired: string[] = [];
   for await (const k of everyKey<{ s?: string }>(kv, LEAD_PREFIX)) {
     const one = k.metadata?.s ? await openSummary(seal, k.name, k.metadata.s) : null;
     if (!one) continue;
-    if (one.trashedAt && trashDaysLeft(one.trashedAt, now) <= 0) {
-      await buryLead(kv, seal, leadIdOf(k.name));
-      continue;
-    }
-    leads.push({ ...one, id: leadIdOf(k.name) });
+    if (one.trashedAt && trashDaysLeft(one.trashedAt, now) <= 0) expired.push(leadIdOf(k.name));
+    else leads.push({ ...one, id: leadIdOf(k.name) });
   }
-  return leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+  return { leads: leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt)), expired };
 }
 
 /** The ids of every lead in the trash, from the list's metadata. */
@@ -187,28 +185,48 @@ export const logMail = (env: LeadStore, email: string | undefined, subject: stri
  * or no address), or failed (no key, or the read or write threw; logged).
  */
 export type Recorded = { status: "written"; lead: Lead } | { status: "same" | "skipped" | "failed" };
-export async function recordLead(env: LeadStore, email: string, c: Change): Promise<Recorded> {
+/** Past a failed lead write, the wait before reading and writing again: KV takes one write a second to a key. */
+export const LEAD_RETRY_MS = 1100;
+
+export async function recordLead(env: LeadStore, email: string, change: Change | Change[]): Promise<Recorded> {
   const seal = sealer(env.LEADS_KEY);
   if (!env.INBOX || !email.includes("@")) return { status: "skipped" };
   if (!seal) {
     console.error("lead", "LEADS_KEY unset or malformed, not recorded");
     return { status: "failed" };
   }
-  try {
+  const changes = Array.isArray(change) ? change : [change];
+  const once = async () => {
     const s = await seal;
     // Mail from the art director lands on the client's lead (`findLead`).
-    const { id, lead: before } = await findLead(env.INBOX, s, email);
-    const after = applyLeadEvent(before, email, c);
-    if (after === before) return { status: "same" };
-    await writeLead(env.INBOX, s, id, after, before);
-    // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
-    const push = pushFor(after, c.event);
-    if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));
-    return { status: "written", lead: after };
+    const { id, lead: before } = await findLead(env.INBOX!, s, email);
+    const after = changes.reduce<Lead | null>((l, c) => applyLeadEvent(l, email, c), before);
+    if (!after || after === before) return { status: "same" } as const;
+    await writeLead(env.INBOX!, s, id, after, before);
+    return { status: "written", lead: after } as const;
+  };
+  let out: Awaited<ReturnType<typeof once>>;
+  try {
+    out = await once();
   } catch (e) {
-    console.error("lead", String(e));
-    return { status: "failed" };
+    // A second write to the key within a second is refused: read again and write once more.
+    console.error("lead, retrying", String(e));
+    await new Promise((go) => setTimeout(go, LEAD_RETRY_MS));
+    try {
+      out = await once();
+    } catch (e2) {
+      console.error("lead, not recorded", String(e2));
+      return { status: "failed" };
+    }
   }
+  if (out.status === "written") {
+    // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
+    for (const c of changes) {
+      const push = pushFor(out.lead, c.event);
+      if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));
+    }
+  }
+  return out;
 }
 
 /** A gallery's "proofs" opens taken off a person's lead (a visit he forgot, his own test). A lead made only of

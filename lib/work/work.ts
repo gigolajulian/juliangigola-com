@@ -363,7 +363,8 @@ export const titleCase = (s: string) =>
   s
     .trim()
     .toLowerCase()
-    .replace(/(^|[\s(/-])\S/g, (c) => c.toUpperCase());
+    .replace(/(^|[\s(/:-])\S/g, (c) => c.toUpperCase())
+    .replace(/ X /g, " x "); // a collab reads "Kala x Sharks"
 
 /**
  * What the project page says about a photograph, as a sentence for its

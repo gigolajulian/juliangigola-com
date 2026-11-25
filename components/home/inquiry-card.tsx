@@ -117,7 +117,7 @@ function Form({ from, opt, reply, onClose }: { from: InquiryMode; opt?: QuoteOpt
         </div>
       ) : null}
       {call ? (
-        <p className="mt-card-note">Music videos start with a free 15 minute call. Pick a time on the next step.</p>
+        <p className="mt-card-note">Music videos start with a free 15-minute call. Pick a time on the next step.</p>
       ) : (
         <>
           <div className="mt-two">

@@ -84,7 +84,8 @@ export type Proof = {
   /** Open Checkout session for the extras, while one is pending. */
   checkout?: string;
   /** `pending`: a bank (ACH) payment Stripe has accepted but not settled, about 4 business days; `failed`: it bounced, so `amount` no longer counts it. */
-  paid?: { session: string; amount: number; at: string; pending?: boolean; failed?: boolean };
+  /** `sessions`: every Checkout session counted so far, so none counts twice across reopens. */
+  paid?: { session: string; amount: number; at: string; pending?: boolean; failed?: boolean; sessions?: string[] };
   /** When the client hit Send: selects are locked from here. */
   submittedAt?: string;
   /** When the client's receipt mail went out; unset if it failed. */

@@ -54,10 +54,12 @@ export function JgLoad({ done, onDone, className }: { done: boolean; onDone: () 
         doneAt.current = now;
         from = shown;
       }
-      if (doneAt.current === null) shown = 90 * (1 - Math.exp(-(now - start) / CREEP));
+      // a frame stamped before `start` (jsdom, or an early frame) would run the count negative
+      if (doneAt.current === null) shown = 90 * (1 - Math.exp(-Math.max(0, now - start) / CREEP));
       else {
         const k = still ? 1 : Math.min(1, (now - doneAt.current) / FINISH);
-        shown = from + (100 - from) * (1 - (1 - k) ** 3);
+        // exactly 100 at the end: `from + (100 - from)` can round to 99.99999999999999 and never finish
+        shown = k >= 1 ? 100 : from + (100 - from) * (1 - (1 - k) ** 3);
       }
       if (fill.current) fill.current.style.clipPath = `inset(0 ${100 - shown}% 0 0)`;
       if (num.current) num.current.textContent = String(Math.round(shown)).padStart(3, "0");

@@ -13,7 +13,7 @@ import { HomeAbout } from "./about";
 import { HomeFoot } from "./foot";
 import { HomeIntro } from "./intro";
 import { MotionLayer } from "./motion";
-import { glideTo } from "@/components/site/smooth-scroll";
+import { glideTo, jumpTo } from "@/components/site/smooth-scroll";
 import { useBackHome } from "./back";
 
 /* The inquiry card (its dialog and form) is not in the home page's first load (audit): fetched once By quote
@@ -52,9 +52,11 @@ export function Home({ data }: { data: HomeData }) {
   const [inqUsed, setInqUsed] = React.useState(false);
   if (inq && !inqUsed) setInqUsed(true);
   const [, inqIn] = React.useReducer((n: number) => n + 1, 0);
+  // what this render drew, not the module now: the import can land between this commit and the effect, and nothing would draw the card
+  const drewCard = !!InquiryCard;
   React.useEffect(() => {
-    if (inq && !InquiryCard) void warmInq().then(inqIn);
-  }, [inq]);
+    if (inq && !drewCard) void warmInq().then(inqIn);
+  }, [inq, drewCard]);
   React.useEffect(() => {
     const io = window.IntersectionObserver
       ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmInq(), io?.disconnect()), { rootMargin: "100% 0px" })
@@ -74,7 +76,8 @@ export function Home({ data }: { data: HomeData }) {
     const target = () => (location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null);
     const land = () => {
       const el = target();
-      if (el) scrollTo({ top: scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
+      // jumpTo, not scrollTo: the browser's own jump can land in a held row, whose snap glide (Lenis) would carry on over a plain scrollTo
+      if (el) jumpTo(scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0));
       return el;
     };
     const card = (el: HTMLElement | null) => {

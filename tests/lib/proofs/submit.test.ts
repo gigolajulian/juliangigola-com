@@ -58,6 +58,22 @@ describe("paidFor", () => {
     stripeSays(() => ({ body: { payment_status: "paid", metadata: { proof: "tok1" } } }));
     expect(await paidFor("k", proof(), "cs_test_A")).toBeNull();
   });
+  it("refuses a paid session whose charge was refunded, whole or in part", async () => {
+    const refunded = (charge: Record<string, unknown>) =>
+      stripeSays(() => ({ body: { payment_status: "paid", amount_total: 5000, metadata: { proof: "tok1" }, payment_intent: { latest_charge: charge } } }));
+    refunded({ refunded: true, amount_refunded: 5000 });
+    expect(await paidFor("k", proof(), "cs_test_A")).toBeNull();
+    refunded({ refunded: false, amount_refunded: 1000 });
+    expect(await paidFor("k", proof(), "cs_test_A")).toBeNull();
+    refunded({ refunded: false, amount_refunded: 0 });
+    expect(await paidFor("k", proof(), "cs_test_A")).toMatchObject({ amount: 5000, sessions: ["cs_test_A"] });
+  });
+  it("never counts an older session again after a reopen", async () => {
+    stripeSays(() => ({ body: {} }));
+    const paid = { session: "cs_test_B", amount: 5000, at: "", sessions: ["cs_test_A", "cs_test_B"] };
+    expect(await paidFor("k", proof({ paid }), "cs_test_A")).toBeNull();
+    expect(calls).toHaveLength(0);
+  });
   it("takes a complete but unpaid bank session as pending", async () => {
     stripeSays(() => ({ body: { status: "complete", payment_status: "unpaid", amount_total: 5000, metadata: { proof: "tok1" } } }));
     expect(await paidFor("k", proof(), "cs_live_B")).toMatchObject({ pending: true, amount: 5000 });
