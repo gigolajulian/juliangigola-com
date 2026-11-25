@@ -65,16 +65,18 @@ for (const r of [RATIOS[0], RATIOS[4]]) {
     const { ctx, page } = await open(browser, browserName, r);
     await page.goto("/#about", { waitUntil: "load" });
     await expect.poll(() => page.locator("#about").evaluate((e) => Math.abs(Math.round(e.getBoundingClientRect().top)))).toBeLessThan(80);
-    // a full load: a hash-only move this soon after the first load races the router
-    await page.goto("/#contact");
-    await page.reload({ waitUntil: "load" });
-    const card = page.locator(".mt-inq");
+    // a fresh page: a hash-only goto here can land before the router's first replaceState, which puts /#about back,
+    // so a reload after it loaded /#about again (Firefox, #1512)
+    const contact = await ctx.newPage();
+    await page.close();
+    await contact.goto("/#contact", { waitUntil: "load" });
+    const card = contact.locator(".mt-inq");
     await expect(card).toBeVisible();
     expect(await card.evaluate((e) => e.contains(document.activeElement)), "focus is in the card").toBe(true);
-    await expect(page.locator("footer#contact")).toBeInViewport();
-    await page.keyboard.press("Escape");
+    await expect(contact.locator("footer#contact")).toBeInViewport();
+    await contact.keyboard.press("Escape");
     await expect(card).toHaveCount(0);
-    await expect(page.locator("#contact .mt-ph-btn")).toBeFocused();
+    await expect(contact.locator("#contact .mt-ph-btn")).toBeFocused();
     await ctx.close();
   });
 }
