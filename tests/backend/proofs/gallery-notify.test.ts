@@ -41,6 +41,7 @@ beforeEach(() => {
     LEADS_KEY,
     WORKER_KEY: "s",
     PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
+    DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
     EMAIL: { send: async (m: { subject: string; text: string }) => void sent.push(m) },
   };
 });
@@ -55,6 +56,24 @@ describe("notify setting", () => {
     expect(cleanSettings({ notify: "daily" })).toEqual({ notify: "daily" });
     expect(cleanSettings({ notify: "selects" })).toEqual({ notify: undefined });
     expect("notify" in cleanSettings({ notify: "loud" })).toBe(false);
+  });
+});
+
+describe("track limits", () => {
+  it("keeps at most 100 addresses on one gallery, and a new one past that makes no lead or mail", async () => {
+    const viewers = Object.fromEntries(Array.from({ length: 100 }, (_, i) => [`v${i}`, { events: [] }]));
+    await writeProof(kv as never, await seal(), base({ notify: "each", viewers } as Partial<Proof>));
+    expect((await open("new@gmail.com")).status).toBe(200);
+    const after = (await readProof(kv as never, await seal(), TOKEN))!;
+    expect(Object.keys(after.viewers ?? {})).toHaveLength(100);
+    expect(sent).toHaveLength(0);
+    expect([...kv.data.keys()].some((k) => k.startsWith("lead:"))).toBe(false);
+  });
+
+  it("answers 429 past the download limiter", async () => {
+    await writeProof(kv as never, await seal(), base());
+    ctx.env.DOWNLOAD_LIMIT = { limit: async () => ({ success: false }) };
+    expect((await open()).status).toBe(429);
   });
 });
 

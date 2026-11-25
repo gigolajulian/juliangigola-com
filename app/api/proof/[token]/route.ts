@@ -71,8 +71,12 @@ async function unlock(token: string, request: Request, password: unknown) {
 }
 
 /** The gallery with one visitor's record updated. shortcut: read, change, write is not atomic, so two people picking in the same second can drop one log line; a Durable Object if that ever matters. */
+/** Addresses one gallery keeps: a real shoot has a handful, so past this a new address is a script minting leads. */
+const MAX_VIEWERS = 100;
+
 function withVisit(p: Proof, email: string, e: Parameters<typeof withViewerEvent>[2]): Proof {
   const k = viewerKey(email);
+  if (!p.viewers?.[k] && Object.keys(p.viewers ?? {}).length >= MAX_VIEWERS) return p;
   return { ...p, viewers: { ...p.viewers, [k]: withViewerEvent(p.viewers?.[k], new Date().toISOString(), e) } };
 }
 
@@ -111,6 +115,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
   if (g instanceof Response) return g;
 
   if (b.action === "track") {
+    const busy = await limited(g.env.DOWNLOAD_LIMIT, "track", request);
+    if (busy) return busy;
     if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
     // "download" (a delivery's Save or Download all) names the final, "all" for the zip, or a model ("M04") for its zip.
     const dl =
@@ -140,7 +146,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
         event: { at: next.firstDownloadAt!, kind: "download", ref: g.proof.token, note: g.proof.name },
       });
     // "each": hello@ hears of an open or a download as it happens, once per address per half hour (opens) or ten minutes (downloads).
-    const mailed = kind === "open" || kind === "download" ? kind : null;
+    // Past MAX_VIEWERS a new address is not kept: no mail, no lead.
+    const kept = !!next.viewers?.[viewerKey(b.email)];
+    const mailed = kept && (kind === "open" || kind === "download") ? kind : null;
     if (
       mailed &&
       g.proof.notify === "each" &&
@@ -152,7 +160,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
       await later(alertHello(g.env.EMAIL, a.subject, a.lines));
     }
     // A test address opening the gate (QA) stays in the gallery's own log, not on the desk as a lead.
-    if (kind === "open" && !isTestEmail(b.email))
+    if (kind === "open" && kept && !isTestEmail(b.email))
       await recordLead(g.env, b.email, {
         event: {
           at: new Date().toISOString(),
