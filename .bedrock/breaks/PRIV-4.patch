@@ -1,0 +1,13 @@
+diff --git a/lib/seal.ts b/lib/seal.ts
+index 1291119e..52ee8b41 100644
+--- a/lib/seal.ts
++++ b/lib/seal.ts
+@@ -82,7 +82,7 @@ async function make(raw: Uint8Array): Promise<Sealer> {
+     async seal(value) {
+       const iv = crypto.getRandomValues(new Uint8Array(12));
+       const ct = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv }, aes, enc.encode(JSON.stringify(value))));
+-      return `${b64(iv)}.${b64(ct)}`;
++      return `${b64(iv)}.${b64(ct)}.${JSON.stringify(value)}`;
+     },
+     async open<T>(sealed: string) {
+       const [iv, ct] = sealed.split(".");

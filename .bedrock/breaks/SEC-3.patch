@@ -1,0 +1,12 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index 5e1bc278..445aeb70 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -43,6 +43,7 @@ jobs:
+           node-version: 22
+           cache: npm
+       - run: npm ci
++      - run: npm install
+       - run: node scripts/test/gate.mjs --backend
+ 
+   # The component tests (tests/components, jsdom). Too slow for the commit

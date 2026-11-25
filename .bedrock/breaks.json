@@ -1,0 +1,121 @@
+{
+ "WEB-10": {
+  "file": "lib/booking/deposit.ts",
+  "find": "Math.abs(now / 1000 - +t) > TOLERANCE_S) return false;",
+  "replace": "Math.abs(now / 1000 - +t) > TOLERANCE_S * 1e9) return false;"
+ },
+ "SEC-5": {
+  "file": "lib/admin/vouch.ts",
+  "find": "if (!expected || !given) return false;",
+  "replace": "if (!expected) return true;\n  if (!given) return false;"
+ },
+ "AUTHZ-3": {
+  "file": "lib/admin/vouch.ts",
+  "find": "if (await authorised(request, key)) return true;",
+  "replace": "if ((await authorised(request, key)) || !bearer(request)) return true;"
+ },
+ "AUTHZ-1": {
+  "edits": [
+   {
+    "file": "lib/booking/manage-link.ts",
+    "find": "enc.encode(`${id}.${e}`)",
+    "replace": "enc.encode(`${e}`)"
+   },
+   {
+    "file": "lib/booking/manage-link.ts",
+    "find": "enc.encode(`${id}.${m[1]}`)",
+    "replace": "enc.encode(`${m[1]}`)"
+   }
+  ]
+ },
+ "AUTHZ-2": {
+  "file": "lib/admin/vouch.ts",
+  "find": "ok = scopes.includes(\"repo\") || scopes.includes(\"public_repo\");",
+  "replace": "ok = scopes.length > 0;"
+ },
+ "WEB-1": {
+  "file": "next.config.ts",
+  "find": "\"object-src 'none'\",",
+  "replace": "\"object-src *\","
+ },
+ "WEB-4": {
+  "file": "lib/leads/enquiry.ts",
+  "find": ".filter((src) => /^\\/(work\\/[\\w-]+|hero|covers)\\/[\\w.-]+\\.(jpe?g|png|webp)$/i.test(src))",
+  "replace": ".filter((src) => /\\.(jpe?g|png|webp)$/i.test(src))"
+ },
+ "WEB-5": {
+  "file": "lib/leads/enquiry.ts",
+  "find": "? head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff",
+  "replace": "? head.length > 0"
+ },
+ "WEB-7": {
+  "file": "lib/leads/enquiry.ts",
+  "find": "s.replace(/[&<>\"]/g,",
+  "replace": "s.replace(/[&\"]/g,"
+ },
+ "ABU-3": {
+  "file": "lib/http.ts",
+  "find": "res.headers.set(\"retry-after\", \"60\");",
+  "replace": ""
+ },
+ "ABU-13": {
+  "file": "lib/leads/enquiry-action.ts",
+  "find": "if (today >= DAILY_CAP) {",
+  "replace": "if (today >= DAILY_CAP * 1e6) {"
+ },
+ "PRIV-4": {
+  "file": "lib/seal.ts",
+  "find": "return `${b64(iv)}.${b64(ct)}`;",
+  "replace": "return `${b64(iv)}.${b64(ct)}.${JSON.stringify(value)}`;"
+ },
+ "SEC-3": {
+  "file": ".github/workflows/ci.yml",
+  "find": "      - run: node scripts/test/gate.mjs --backend",
+  "replace": "      - run: npm install\n      - run: node scripts/test/gate.mjs --backend"
+ },
+ "REL-1": {
+  "file": "lib/booking/deposit.ts",
+  "find": "const sigs = parts.filter(([k]) => k === \"v1\").map(([, v]) => v);",
+  "replace": "const sigs = parts.filter(([k]) => k === \"v1\").map(() => \"\");"
+ },
+ "JOB-1": {
+  "file": "lib/booking/engine.ts",
+  "find": "const had = await store.get<string>(intentKey(b.intent));",
+  "replace": "const had = null as string | null;"
+ },
+ "REL-7": {
+  "file": ".github/workflows/ci.yml",
+  "find": "  contents: read",
+  "replace": "  contents: write"
+ },
+ "ABU-11": {
+  "file": "lib/http.ts",
+  "find": "    if (size > max) {",
+  "replace": "    if (size > max * 1e9) {"
+ },
+ "MEM-4": {
+  "file": "lib/http.ts",
+  "find": "    if (size > max) {",
+  "replace": "    if (size < 0) {"
+ },
+ "MEM-3": {
+  "file": "lib/proofs/gallery-api.ts",
+  "find": ">= MAX_VIEWERS) return p;",
+  "replace": ">= MAX_VIEWERS * 1e9) return p;"
+ },
+ "ABU-9": {
+  "file": "app/api/book/route.ts",
+  "find": "if (byEmail >= CALLS_PER_EMAIL ||",
+  "replace": "if (byEmail >= CALLS_PER_EMAIL * 1e9 ||"
+ },
+ "INP-2": {
+  "file": "lib/leads/lead-store.ts",
+  "find": "    console.error(\"lead, retrying\", String(e));",
+  "replace": "    console.error(\"lead, retrying\", String(e));\n    if (e) return { status: \"failed\" };"
+ },
+ "MONEY-1": {
+  "file": "lib/proofs/submit.ts",
+  "find": "if (charge && (charge.refunded || (charge.amount_refunded ?? 0) > 0)) return null;",
+  "replace": "if (charge && charge.refunded && false) return null;"
+ }
+}

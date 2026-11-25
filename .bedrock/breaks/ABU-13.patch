@@ -1,0 +1,13 @@
+diff --git a/lib/leads/enquiry-action.ts b/lib/leads/enquiry-action.ts
+index 0ed8f7fc..8d37ad32 100644
+--- a/lib/leads/enquiry-action.ts
++++ b/lib/leads/enquiry-action.ts
+@@ -202,7 +202,7 @@ async function rateLimit(
+    * because KV cannot be asked how many keys it holds without listing them
+    * all, which is the expensive thing being avoided. */
+   const today = Number((await inbox.get(dayKey(now))) ?? 0);
+-  if (today >= DAILY_CAP) {
++  if (today >= DAILY_CAP * 1e6) {
+     return {
+       refused: {
+         status: "unconfigured",
