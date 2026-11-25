@@ -1,0 +1,3 @@
+{
+  "WEB-10": {"file": "lib/booking/deposit.ts", "find": "Math.abs(now / 1000 - +t) > TOLERANCE_S) return false;", "replace": "Math.abs(now / 1000 - +t) > TOLERANCE_S * 1e9) return false;"}
+}
