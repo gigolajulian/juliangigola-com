@@ -128,7 +128,7 @@ export function confirmMail(c: Confirm) {
         ? `Until ${timeRange(judged)} you can cancel for ${top}. After that a cancel returns 70%, and nothing in the last 24 hours.`
         : c.firstStart && c.firstStart !== c.start
           ? `The balance is due after the shoot. The deposit moved with the new date. ${(() => {
-              const share = refundShare({ intent: "x", start: c.start, firstStart: c.firstStart, fee: c.deposit?.fee });
+              const share = refundShare({ start: c.start, firstStart: c.firstStart, fee: c.deposit?.fee });
               return share >= EARLY_SHARE
                 ? `A cancel is judged by the time you first booked, ${timeRange(c.firstStart)}: ${top} 48 hours or more before it, 70% back 24 hours or more before, nothing after.`
                 : share === PART_SHARE
