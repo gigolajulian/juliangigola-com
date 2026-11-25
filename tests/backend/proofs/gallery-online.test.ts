@@ -5,7 +5,7 @@ import { finalResponse } from "@/lib/proofs/delivery-serve";
 import { sealer } from "@/lib/seal";
 import { coverFrame, type Proof } from "@/lib/proofs/proof-model";
 import { checkPass, hashPass, passOk, passValue, readProof, writeProof } from "@/lib/proofs/proof-store";
-import { FakeKV, LEADS_KEY } from "../fakes";
+import { FakeKV, LEADS_KEY, refusesTargets } from "../fakes";
 
 /* Online/offline and the gate's password (Julian 2026-11-15): offline closes the gallery, its frames and downloads at
    once; a password is stored hashed, checked on the gate with a rate limit, and every later call needs its cookie. */
@@ -127,5 +127,62 @@ describe("the gate's password", () => {
     expect(JSON.stringify(list)).not.toContain(stored.pass!.hash);
     await patch({ password: "" });
     expect((await readProof(kv as never, await seal(), ID))!.pass).toBeUndefined();
+  });
+});
+
+describe("per target", () => {
+  it("counts wrong passwords per gallery from any address, and shuts the gate a minute past the limit", async () => {
+    await put(gallery({ pass: await hashPass("blue moon") }));
+    const lim = refusesTargets();
+    ctx.env.PUBLIC_WRITE_LIMIT = lim;
+    expect((await post({ action: "unlock", password: "blue moon" })).status).toBe(200);
+    expect(lim.keys.some((k) => k.includes(":t:"))).toBe(false);
+    expect((await post({ action: "unlock", password: "nope" })).status).toBe(403);
+    expect(lim.keys).toContain(`pass-miss:t:${ID}`);
+    expect((await post({ action: "unlock", password: "blue moon" })).status).toBe(429);
+  });
+
+  it("limits the delivery's downloads per delivery from every address together", async () => {
+    await put(gallery({ deliveredAt: "2026-11-02T00:00:00Z" }));
+    const lim = refusesTargets();
+    ctx.env.DOWNLOAD_LIMIT = lim;
+    expect((await save()).status).toBe(429);
+    expect(lim.keys).toContain(`dl:t:${ID}`);
+  });
+});
+
+describe("one gallery's link or cookie never opens another", () => {
+  const OTHER = "11152026-p4n8w3zr";
+  const on = (token: string, body: unknown, cookie?: string) =>
+    POST(
+      new Request("https://juliangigola.com/api/proof/x", { method: "POST", body: JSON.stringify(body), headers: cookie ? { cookie } : {} }),
+      { params: Promise.resolve({ token }) },
+    );
+  const download = (token: string, cookie?: string) =>
+    finalResponse(new Request(`https://x/delivery/${token}/dl/a`, { headers: cookie ? { cookie } : {} }), ctx.env as never, token, "a");
+
+  it("refuses gallery A's cookie on gallery B, under either name, for picks, looks and downloads", async () => {
+    const pass = await hashPass("blue moon");
+    await put(gallery({ pass, deliveredAt: "2026-11-02T00:00:00Z" }));
+    await put(gallery({ token: OTHER, name: "Ben", pass, deliveredAt: "2026-11-02T00:00:00Z" }));
+    const ok = await on(ID, { action: "unlock", password: "blue moon" });
+    const cookie = ok.headers.get("set-cookie")!.split(";")[0];
+    const value = cookie.split("=").slice(1).join("=");
+    expect((await on(ID, { action: "track", email: "ana@gmail.com", kind: "open" }, cookie)).status).toBe(200);
+    for (const c of [cookie, `gp_${OTHER}=${value}`]) {
+      expect((await on(OTHER, { action: "track", email: "ana@gmail.com", kind: "open" }, c)).status).toBe(404);
+      expect((await on(OTHER, { email: "ana@gmail.com", selects: ["a"] }, c)).status).toBe(404);
+      expect((await download(OTHER, c)).status).toBe(404);
+    }
+    expect((await readProof(kv as never, await seal(), OTHER))!.viewers).toBeUndefined();
+  });
+
+  it("a token names one gallery: A's token never reads B's frames or picks", async () => {
+    await put(gallery({ frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }] }));
+    await put(gallery({ token: OTHER, name: "Ben", frames: [{ id: "b", file: "b.jpg", w: 1, h: 1 }] }));
+    const res = await on(ID, { action: "track", email: "ana@gmail.com", kind: "open" });
+    expect(res.status).toBe(200);
+    expect((await readProof(kv as never, await seal(), ID))!.viewers).toBeTruthy();
+    expect((await readProof(kv as never, await seal(), OTHER))!.viewers).toBeUndefined();
   });
 });

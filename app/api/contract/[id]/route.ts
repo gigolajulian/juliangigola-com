@@ -29,7 +29,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   const draft = await openOr("contract sign open", readContract(kv, s, (await params).id));
   if (draft instanceof Response) return draft;
   if (!draft || !draft.sentAt) return json({ error: UNAVAILABLE }, 404);
-  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "sign", request);
+  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "sign", request, (await params).id);
   if (slow) return slow;
   const b = (await bodyOf(request, 1_000_000)) ?? {};
   const at = new Date().toISOString();

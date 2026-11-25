@@ -6,7 +6,7 @@ import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { fillContract, readContract, signedCopy, type Contract } from "@/lib/contracts/contract";
 import { sha256Hex } from "@/lib/token";
 import type { Lead } from "@/lib/leads/leads";
-import { FakeEmail, FakeKV, LEADS_KEY, INBOX_KEY as KEY } from "../fakes";
+import { FakeEmail, FakeKV, LEADS_KEY, INBOX_KEY as KEY, refusesTargets } from "../fakes";
 
 /* /api/contract (the desk) and /api/contract/[id] (the client): a contract
    made from a lead's template, sent, signed once with a hash of the exact
@@ -74,6 +74,17 @@ const signReq = (id: string, body: Record<string, unknown>) =>
   );
 
 describe("/api/contract", () => {
+  it("limits signing per target: many addresses aimed at one contract meet one limit", async () => {
+    const { contract: c } = await make();
+    await send(c);
+    const lim = refusesTargets();
+    ctx.env.PUBLIC_WRITE_LIMIT = lim;
+    const res = await signReq(c.id, { name: "Sam Rivera", email: "sam@example.com", agree: true, hash: await sha256Hex(c.text) });
+    expect(res.status).toBe(429);
+    expect(lim.keys).toContain(`sign:t:${c.id}`);
+    expect((await readContract(kv as never, await seal(), c.id))!.signed).toBeUndefined();
+  });
+
   it("refuses without the admin key", async () => {
     const res = await GET(new Request("https://juliangigola.com/api/contract?templates"));
     expect(res.status).toBe(401);

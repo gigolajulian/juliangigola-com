@@ -5,7 +5,7 @@ import { afterBooked, confirmOf } from "@/lib/booking/confirm";
 import { alertHello } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/time-zone";
 import { sha256Hex } from "@/lib/token";
-import { SMALL_BODY, bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
+import { SMALL_BODY, bodyOf, json, limited, limitedFor, taken, upstreamError } from "@/lib/http";
 
 // A booked call answers { id, start, end, where }; errors answer { error: string }, as every other booking route does.
 
@@ -48,8 +48,9 @@ export async function POST(request: Request) {
 const CALLS_PER_EMAIL = 2;
 const CALLS_PER_IP = 5;
 const day = () => new Date().toISOString().slice(0, 10);
+const emailKey = async (email: string) => (await sha256Hex(email.trim().toLowerCase())).slice(0, 32);
 const callKeys = async (email: string, ip: string) => [
-  `callcap:e:${(await sha256Hex(email.trim().toLowerCase())).slice(0, 32)}:${day()}`,
+  `callcap:e:${await emailKey(email)}:${day()}`,
   `callcap:i:${(await sha256Hex(ip)).slice(0, 32)}:${day()}`,
 ];
 
@@ -59,6 +60,8 @@ async function bookCall(env: CloudflareEnv, raw: unknown, ip: string): Promise<B
   if (!parsed.ok) return json({ error: parsed.reason }, 400);
   const kv = env.INBOX;
   if (!kv) return json({ error: "Booking is off." }, 503);
+  const busy = await limitedFor(env.PUBLIC_WRITE_LIMIT, "book", await emailKey(parsed.booking.email));
+  if (busy) return busy;
   const keys = await callKeys(parsed.booking.email, ip);
   const [byEmail, byIp] = await Promise.all(keys.map(async (k) => Number((await kv.get(k)) ?? 0)));
   if (byEmail >= CALLS_PER_EMAIL || byIp >= CALLS_PER_IP)
