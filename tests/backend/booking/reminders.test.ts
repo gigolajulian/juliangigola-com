@@ -70,7 +70,7 @@ describe("reminders", () => {
     const m = client.sent[0];
     expect(m.subject).toMatch(/^Tomorrow: Portraits, /);
     expect(String(m.text)).toContain("See you tomorrow.");
-    expect(String(m.text)).toContain("a cancel keeps the deposit");
+    expect(String(m.text)).toContain("a cancellation keeps the deposit");
     expect(String(m.text)).toContain("https://juliangigola.com/booking/due?t=");
 
     // The next hour does not send it again.

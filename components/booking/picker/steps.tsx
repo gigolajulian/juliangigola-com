@@ -349,7 +349,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
               {/* The deposit terms before the commit, in deposit-step's wording. */}
               {paid ? (
                 <p className="lbl mute">
-                  90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. The balance is due after
+                  90% refund up to 48 hours before the shoot, 70% up to 24 hours. Reschedule up to 24 hours before. The balance is due after
                   the shoot.
                 </p>
               ) : null}

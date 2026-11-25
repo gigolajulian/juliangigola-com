@@ -9,7 +9,7 @@ import { pad } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Behind the scenes",
-  description: "Behind the scenes on my shoots in San Francisco and the Bay Area, shoot by shoot.",
+  description: "Behind the scenes of my shoots across San Francisco and the Bay Area.",
   alternates: { canonical: "/bts" },
 };
 

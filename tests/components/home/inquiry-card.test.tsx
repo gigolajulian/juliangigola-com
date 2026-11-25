@@ -29,10 +29,10 @@ describe("v4 inquiry card", () => {
     open({ from: "quote", opt: "music" });
     expect(hidden("type")).toBe("coverart"); // the first chip is picked
     expect(hidden("detail")).toBe("Music: Cover art");
-    fireEvent.click(screen.getByRole("button", { name: "Artist presskit" }));
+    fireEvent.click(screen.getByRole("button", { name: "Artist press kit" }));
     expect(hidden("type")).toBe("presskit");
     fireEvent.change(document.getElementById("mq-when")!, { target: { value: " June " } });
-    expect(hidden("detail")).toBe("Music: Artist presskit · When: June");
+    expect(hidden("detail")).toBe("Music: Artist press kit · When: June");
   });
 
   it("files fashion, which has no chips, as editorial", () => {

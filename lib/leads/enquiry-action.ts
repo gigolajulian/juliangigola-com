@@ -191,7 +191,7 @@ async function rateLimit(
       refused: {
         status: "error",
         values,
-        message: `That has been sent. If you have something to add, you can write again in ${waitPhrase(gate.waitSeconds)}, or reply to the email link below any time.`,
+        message: `That has been sent. If you have something to add, you can write again in ${waitPhrase(gate.waitSeconds)}, or use the email link below any time.`,
         mailto,
       },
     };

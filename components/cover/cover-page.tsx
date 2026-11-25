@@ -25,7 +25,7 @@ export function CoverPage({ releases, onwards }: { releases: CoverRelease[]; onw
           <div className="pj-ask">
             <div>
               <h2>Want something like this?</h2>
-              <p className="mute">Tell me what you have in mind and I&apos;ll come back with an approach and a quote.</p>
+              <p className="mute">Tell me what you have in mind and I&apos;ll reply with an approach and a quote.</p>
             </div>
             <div className="cv4b">
               <Link className="btn fill" href={`/contact/form?${new URLSearchParams({ type: "coverart", ref: "Cover art" })}`}>

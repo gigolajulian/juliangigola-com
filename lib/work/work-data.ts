@@ -3779,8 +3779,7 @@ export const PROJECTS: Project[] = [
     slug: "info-overload",
     name: "INFO OVERLOAD",
     headline: "INFO OVERLOAD",
-    intent:
-      "model: Caroline Thuyle @carolinethuyle\nphotographer: Julian Gigola @juliangigola\ndesigner: @by_vicious x @vile.honey\nhair: Cassie Sanidad @cassieofalltrades \nmakeup: Lilia Mercedes @lilia.mercedes\nassist/second photographer: @euphotic_photography",
+    intent: null,
     credits: [],
     categories: [
       {
@@ -4517,7 +4516,7 @@ export const PROJECTS: Project[] = [
     slug: "luxe-meets-future",
     name: "LUXE MEETS FUTURE",
     headline: "LUXE MEETS FUTURE",
-    intent: "​Creative Director & HMUA: @lilia.mercedes",
+    intent: null,
     credits: [
       {
         role: "Stylist",
@@ -4536,6 +4535,14 @@ export const PROJECTS: Project[] = [
       {
         role: "BTS",
         name: "@lightbender_mark",
+      },
+      {
+        role: "Creative direction",
+        name: "@lilia.mercedes",
+      },
+      {
+        role: "Hair & makeup",
+        name: "@lilia.mercedes",
       },
       {
         role: "Photographer",
@@ -6471,7 +6478,7 @@ export const PROJECTS: Project[] = [
     credits: [
       {
         role: "Model",
-        name: "​Ryan Ohaya (@carti.kun)",
+        name: "Ryan Ohaya (@carti.kun)",
       },
     ],
     categories: [
@@ -6909,7 +6916,7 @@ export const PROJECTS: Project[] = [
     slug: "transmutate",
     name: "TRANSMUTATE",
     headline: "TRANSMUTATE",
-    intent: "@rice666s",
+    intent: null,
     credits: [],
     categories: [
       {
