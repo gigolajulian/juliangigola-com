@@ -1,5 +1,6 @@
 import * as React from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { INITIAL, submitOrKeep } from "@/components/enquiry/submit";
 import { trailContext } from "@/components/analytics/visit-trail";
 import type { ContactState } from "@/lib/leads/enquiry";
@@ -43,6 +44,7 @@ export function FlowShell({
   get,
   foot,
   h1,
+  lead,
 }: {
   /** Step names; `at` is 1-based. An empty list draws no rail. */
   steps: string[];
@@ -64,6 +66,8 @@ export function FlowShell({
   foot?: React.ReactNode;
   /** The page's own heading (the booking page has no other). */
   h1?: boolean;
+  /** A step done before this flow, first in the rail and a link back to it (/book's package cards). The rail only: `at` and `steps` stay the flow's own. */
+  lead?: { name: string; href: string };
 }) {
   const last = at === steps.length && steps.length > 0;
   /* A shorter step keeps the scroll of a taller one, which left the rail
@@ -79,13 +83,20 @@ export function FlowShell({
       <div className="f-main">
         {steps.length ? (
           <ol ref={rail} className="rail lbl" aria-label="Steps">
+            {lead ? (
+              <li className="done">
+                <Link href={lead.href} data-back data-step>
+                  {pad(1)} <span className="nm">{lead.name}</span>
+                </Link>
+              </li>
+            ) : null}
             {steps.map((n, i) => (
               <li
                 key={n}
                 className={i + 1 === at ? "cur" : i + 1 < at || last ? "done" : undefined}
                 aria-current={i + 1 === at ? "step" : undefined}
               >
-                {pad(i + 1)} <span className="nm">{n}</span>
+                {pad(i + (lead ? 2 : 1))} <span className="nm">{n}</span>
               </li>
             ))}
           </ol>

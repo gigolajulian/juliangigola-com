@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
 import { SessionBook } from "@/components/booking/book";
+import { Packages } from "@/components/booking/packages";
 import { isSession } from "@/lib/booking/catalog";
 
 export const metadata: Metadata = {
@@ -14,8 +15,8 @@ export const metadata: Metadata = {
   ),
 };
 
-/* The stepper, on portraits unless `?session=` names another. */
+/* The package cards; `?session=` (the old links) opens that session's stepper. */
 export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string }> }) {
   const { session } = await searchParams;
-  return <SessionBook slug={isSession(session) ? session : "portraits"} />;
+  return isSession(session) ? <SessionBook slug={session} /> : <Packages />;
 }

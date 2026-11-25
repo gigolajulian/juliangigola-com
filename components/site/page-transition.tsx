@@ -23,6 +23,7 @@ const clearNav = () => {
   delete root.dataset.nav;
   delete root.dataset.navBar;
   delete root.dataset.navSide;
+  delete root.dataset.navStep;
 };
 
 /* The bar's order, left to right, the wordmark first. A press in the bar
@@ -139,6 +140,9 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       const out = a.dataset.back !== undefined || a.textContent?.trimStart().startsWith("←") || a.pathname === "/";
       const from = a.closest("header") ? "bar" : "page";
       set(out ? "out" : "in", from);
+      /* A booking step (`data-step`, components/booking/packages.tsx) travels sideways where `?slide` is on. */
+      if (a.dataset.step !== undefined && "slide" in root.dataset) root.dataset.navStep = "";
+      else delete root.dataset.navStep;
       const here = sectionOf(location.pathname);
       /* Portfolio leads the bar, so the homepage's own screens
          (Sessions, About, Contact) sit to its right; only the

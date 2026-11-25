@@ -88,7 +88,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     name: "Studio digitals",
     blurb: "Agency-standard digitals: clean light, no retouching, true to how you look. Studio located in San Jose.",
     from: 300,
-    includes: ["Full length, three-quarter and close", "Front and profile", "Unretouched, as agencies require"],
+    includes: ["Full-length, three-quarter and close-up", "Front and profile views", "Unretouched, to agency standard"],
     turnaround: "2 business days",
     cal: "juliangigola/digitals",
     photo: { d: w("abril", "03"), l: w("abril", "03"), at: { d: "50% 10%", l: "50% 10%" } },

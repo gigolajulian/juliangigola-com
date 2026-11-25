@@ -26,6 +26,7 @@ import { SmoothScroll } from "@/components/site/smooth-scroll";
 import { ScrollReveal } from "@/components/site/scroll-reveal";
 import { V4PAGES_HEAD } from "@/lib/flags/v4pages";
 import { SKY_HEAD } from "@/lib/flags/sky-flag";
+import { SLIDE_HEAD } from "@/lib/flags/slide-flag";
 
 /* JG V3 (DESIGN.md): Inter Tight for the display type and the wordmark,
    IBM Plex Mono for everything else, and Archivo Expanded for the booking
@@ -201,6 +202,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
         {/* `data-sky`: the time picker in the hour's light, on trial (lib/flags/sky-flag.ts). */}
         <script dangerouslySetInnerHTML={{ __html: SKY_HEAD }} />
+        {/* `data-slide`: the booking steps move right to left, on trial (lib/flags/slide-flag.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: SLIDE_HEAD }} />
       </head>
       <body className="min-h-full flex flex-col">
         {/* The JG cover for a first arrival on an inner page (`data-cover-intro`, set in the head), up before the

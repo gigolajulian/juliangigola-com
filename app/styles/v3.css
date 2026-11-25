@@ -1812,3 +1812,47 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .sky-meta dd{margin:0;text-transform:none;letter-spacing:.02em}
 @media (min-width:1700px){:root[data-sky] .v3 .f-body:has(>.f-in>.cal){grid-template-columns:minmax(0,1fr);grid-template-areas:"tabs" "top" "cal" "times" "fig";grid-template-rows:none}
 :root[data-sky] .v3 .f-in>:is(.sky-rows,.sky-ruler){grid-area:times}}
+/* /book's package cards (components/booking/packages.tsx): the rail and title as the stepper's, four photo cards, the other ways in as ruled rows. */
+.v3 .pk{display:flex;flex-direction:column;gap:30px;padding:28px var(--gr) 72px var(--g)}
+.v3 .rail a{display:block;color:inherit}
+.v3 .pk-row{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
+.v3 .pk-c{display:flex;flex-direction:column;min-width:0}
+.v3 .pk-ph{position:relative;display:block;aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--line)}
+.v3 .pk-ph img{object-fit:cover}
+.v3 .pk-c h2{margin:22px 0 0;font:900 clamp(1.5rem,2.4vw,2.125rem)/.95 var(--display);letter-spacing:-.05em;white-space:nowrap}
+.v3 .pk-c h2 span{display:block;margin-top:8px;font-size:.5em;font-weight:800;letter-spacing:-.02em;color:var(--mute)}
+.v3 .pk-in{list-style:none;flex:1;margin:16px 0 20px;padding:14px 0 0;border-top:1px solid var(--line);font-size:13px;line-height:1.5}
+.v3 .pk-in li{position:relative;padding-left:16px}
+.v3 .pk-in li::before{content:"";position:absolute;left:0;top:.6em;width:5px;height:5px;background:var(--mute)}
+.v3 .pk-in li+li{margin-top:8px}
+.v3 .pk-dl{margin:0 0 18px}
+.v3 .pk-dl div{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--line)}
+.v3 .pk-dl dt{color:var(--mute)}
+.v3 .pk-dl dd{margin:0;text-align:right}
+.v3 .pk-c .btn{width:100%;justify-content:center}
+.v3 .pk-more{display:grid;grid-template-columns:1fr 1fr;column-gap:24px;margin:34px 0 0}
+.v3 .pk-more a{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:48px;border-top:1px solid var(--line);color:var(--mute)}
+.v3 .pk-more a:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
+.v3 .pk-more b{font-weight:400;color:var(--ink);white-space:nowrap}
+.v3 .pk-more i{font-style:normal}
+.v3 .pk-more a:focus-visible,.v3 .rail a:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+@media (hover:hover){.v3 .pk-more a:hover b{color:var(--accent)}}
+@media (max-width:1023px){
+.v3 .pk{gap:20px;padding-top:18px}
+.v3 .pk-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;margin:6px calc(-1*var(--gr)) 0 calc(-1*var(--g));padding:0 var(--gr) 0 var(--g);scroll-padding-left:var(--g)}
+.v3 .pk-row::-webkit-scrollbar{display:none}
+.v3 .pk-c{flex:0 0 min(84%,340px);scroll-snap-align:start}
+.v3 .pk-c h2{font-size:1.875rem;margin-top:16px}
+.v3 .pk-more{grid-template-columns:1fr;margin-top:22px}
+.v3 .pk-more a:nth-last-child(2){border-bottom:0}}
+/* `?slide` (lib/flags/slide-flag.ts), on trial: a booking step travels right to left, and back the other way.
+   Cards to calendar is a page trip (`data-nav-step`, page-transition.tsx): the page leaving is the snapshot here, the
+   calendar arriving is moved by script (components/booking/book.tsx). The steps after it mount in place. */
+@media (prefers-reduced-motion:no-preference){
+:root:root:root[data-nav-step]::view-transition-old(root){animation:pk-off-l var(--dur-small) var(--ease-out-strong) both!important}
+:root:root:root[data-nav-step][data-nav="out"]::view-transition-old(root){animation-name:pk-off-r!important}
+:root[data-slide] .v3 #p-flow .f-body{animation:pk-step var(--dur-page) var(--ease-drawer) both}
+:root[data-slide] .v3 #p-flow .f-in>*{animation:none}}
+@keyframes pk-off-l{to{opacity:0;transform:translateX(-7vw)}}
+@keyframes pk-off-r{to{opacity:0;transform:translateX(7vw)}}
+@keyframes pk-step{from{opacity:0;translate:32px 0}}
