@@ -102,7 +102,7 @@ export function frameStats(frames: number[]): FrameStats {
 
 /** One row of the summary table (`reporter.ts`). */
 export type Metric = {
-  kind: "swipe" | "splash" | "images";
+  kind: "swipe" | "images";
   page: string;
   viewport: string;
   [key: string]: string | number | boolean;

@@ -22,13 +22,6 @@ const COLUMNS: Record<Metric["kind"], [string, (r: Row) => string][]> = {
     ["slow %", (r) => num(r.slow)],
     ["worst ms", (r) => num(r.worst, 0)],
   ],
-  splash: [
-    ["lifted ms", (r) => num(r.lifted, 0)],
-    ["frames", (r) => num(r.frames, 0)],
-    ["median ms", (r) => num(r.median)],
-    ["slow %", (r) => num(r.slow)],
-    ["worst ms", (r) => num(r.worst, 0)],
-  ],
   images: [
     ["images", (r) => num(r.count, 0)],
     ["KB", (r) => num(r.kb, 0)],
