@@ -1859,7 +1859,10 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (prefers-reduced-motion:no-preference){
 :root:root:root[data-nav-step]::view-transition-old(root){animation:pk-off-l var(--dur-small) var(--ease-out-strong) both!important}
 :root:root:root[data-nav-step][data-nav="out"]::view-transition-old(root){animation-name:pk-off-r!important}
-.v3 #p-flow .f-body{animation:pk-step var(--dur-page) var(--ease-drawer) both}
+/* Back to the cards: only the page leaving moves. The cards arrive in place: no drop or fade on their snapshot (Safari takes one, Chromium does not). */
+:root:root:root[data-nav-step][data-nav="out"]::view-transition-new(root){animation:none!important}
+/* `backwards`, not `both`: a finished step-in is over, so it is not held (or counted again) for the rest of the step. */
+.v3 #p-flow .f-body{animation:pk-step var(--dur-page) var(--ease-drawer) backwards}
 .v3 #p-flow .f-in>*{animation:none}}
 @keyframes pk-off-l{to{opacity:0;transform:translateX(-7vw)}}
 @keyframes pk-off-r{to{opacity:0;transform:translateX(7vw)}}
