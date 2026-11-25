@@ -62,9 +62,12 @@ describe("bodyOf's size cap", () => {
     expect(await bodyOf(post(JSON.stringify({ a: 1 })), SMALL_BODY)).toEqual({ a: 1 });
   });
 
-  it("refuses a body past the cap, by its length or while it streams", async () => {
+  it("refuses a body past the cap before parsing it", async () => {
     const big = JSON.stringify({ a: "x".repeat(SMALL_BODY) });
     expect(await bodyOf(post(big), SMALL_BODY)).toBeNull();
+  });
+
+  it("stops reading a streamed body once it passes the cap", async () => {
     expect(await bodyOf(streamed(SMALL_BODY + 1), SMALL_BODY)).toBeNull();
     expect(await textOf(streamed(10), 100)).toBe(" ".repeat(10));
   });
