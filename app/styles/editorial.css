@@ -24,8 +24,6 @@
 .ed-steps button:disabled { opacity: 1; cursor: default; }
 .ed-steps b { font-weight: 500; color: var(--foreground); margin-right: 0.5rem; }
 .ed-steps [aria-current] { color: var(--foreground); border-color: var(--accent); }
-.ed-steps [data-done] { color: var(--foreground); }
-@media (hover: hover) { .ed-steps [data-done]:not(:disabled):hover { opacity: 0.6; } }
 .ed-body { flex: 1; min-height: 0; overflow: hidden; padding: 1.5rem var(--ed-x) 0; display: flex; flex-direction: column; }
 .ed-l, .ed-r { display: flex; flex-direction: column; min-width: 0; }
 .ed-floor { flex-shrink: 0; padding: 1rem var(--ed-x) 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
@@ -88,9 +86,6 @@
 .ed-none { padding: 1rem 0; color: var(--muted-foreground); border-top: 0.5px solid var(--ed-line); border-bottom: 0.5px solid var(--ed-line); }
 .ed-back { position: relative; display: none; align-items: center; gap: 0.75rem; align-self: flex-start; margin-bottom: 1rem; }
 
-/* Booked and declined keep the card dark (Julian's mock): the red is
-   the card field's line and the words, not the whole card. */
-
 /* fitted to a short card, a step at a time */
 .ed[data-fit="1"] { --ed-time: 4rem; --ed-cell: 2.625rem; }
 .ed[data-fit="1"] .ed-body { padding-top: 1.125rem; }
@@ -131,7 +126,7 @@
   .ed:not([data-fit="3"]) > .ed-body > .ed-times { grid-column: 2; grid-row: 3; margin-top: 1.75rem; }
   .ed:not([data-fit="3"]) .ed-times > .ed-on { display: none; }
   .ed:not([data-fit="3"]) .ed-slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-l > div:not(.ed-head, .ed-big) { grid-column: 1; grid-row: 2; }
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-l > div:not(.ed-head) { grid-column: 1; grid-row: 2; }
   .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-times { grid-row: 2 / span 2; margin-top: 1rem; }
   /* A bigger calendar on a desktop: the month takes
      more of the width, the times scroll in their own column instead of
@@ -175,17 +170,14 @@
 /* The step bar, the month arrows and the small links keep their drawn
    size; an unseen box gives a mouse 24px (WCAG 2.2, audit)
    and a thumb 2.75rem. */
-:is(.ed-steps button, .ed-ctl button, .ed-opts label, .ed-quiet, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 1.5rem); height: max(100%, 1.5rem); translate: -50% -50%; }
+:is(.ed-steps button, .ed-ctl button, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 1.5rem); height: max(100%, 1.5rem); translate: -50% -50%; }
 @media (pointer: coarse) {
   .ed-ctl { gap: 1.75rem; }
   .ed-steps { gap: 1.25rem; }
-  :is(.ed-steps button, .ed-ctl button, .ed-opts label, .ed-quiet, .ed-back)::before { width: max(100%, 2.75rem); height: 2.75rem; }
+  :is(.ed-steps button, .ed-ctl button, .ed-back)::before { width: max(100%, 2.75rem); height: 2.75rem; }
 }
 
-/* the form and the ends may run longer than a short card: they alone scroll */
-.ed .ed-body[role="status"] { overflow-y: auto; overscroll-behavior: contain; }
-
-/* a call: a handset or a camera, its length as a timer, the number big */
+/* a call: a handset, its length as a timer */
 .ed-handset { width: 1em; height: 1em; flex-shrink: 0; }
 .ed-call { order: 9; margin-left: auto; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; color: var(--muted-foreground); white-space: nowrap; }
 .ed-call .ed-handset { width: 0.875rem; height: 0.875rem; color: var(--foreground); }
@@ -222,7 +214,7 @@
   font-family: var(--ed-f);
 }
 /* Not inside the reference picker: its labels stay the site's Plex Mono. */
-.ed :is(.label, .ed-v, .ed-n, .ed-slot, .ed-btn, .ed-box, .ed-why, .ed-said, .ed-copy, .ed-err, .ed-opts label, .ed-row input, .ed-row textarea.tp-notes, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-quiet, .ed-on, .ed-none):not(.reference-panel *) {
+.ed :is(.label, .ed-n, .ed-slot, .ed-btn, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-on, .ed-none):not(.reference-panel *) {
   font-family: var(--ed-f) !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
@@ -235,7 +227,6 @@
    own colours, or the lit chip is a white pill with a white label. */
 .ed .label:not(.reference-panel *) { color: var(--ed-mu); }
 /* Typed into on a touch screen: 16px, or iOS zooms in on focus. */
-@media (pointer: coarse) { .ed :is(.ed-row input, .ed-row textarea.tp-notes) { font-size: 1rem !important; } }
 
 /* the steps: dots between, two squares at the end */
 .ed-steps { gap: 0.625rem; padding-bottom: 0.875rem; border-bottom: 1px solid var(--ed-line); align-items: center; }
@@ -243,7 +234,7 @@
 /* ::after, so the 44px touch target (::before, below) keeps its own. */
 .ed-steps button + button::after { content: ""; order: -1; width: 3px; height: 3px; background: var(--ed-mu); }
 .ed-steps b { margin-right: 0.3em; color: inherit; }
-.ed-steps :is([aria-current], [data-done]) { color: var(--foreground); }
+.ed-steps [aria-current] { color: var(--foreground); }
 .ed-steps::after { content: ""; margin-left: auto; width: 5px; height: 5px; background: var(--foreground); box-shadow: -9px 0 0 var(--foreground); }
 
 /* the heading: one huge line, its context small at the right */
@@ -288,22 +279,6 @@
 /* the floor: the same button on every step */
 .ed-btn, .ed-btn[data-accent] { background: var(--foreground); color: var(--background) !important; border-radius: 0; padding: 0.95rem 1.5rem; }
 
-/* details: two fields to a row, labels over values */
-
-/* deposit, and its ends */
-
-/* booked: the check, what was sent, then the rows */
-/* Booked: the check sits on the Booked line in
-   the square's place, and the message is a sentence in the body face,
-   the page's ink, two lines wide, straight over the rows. */
-
-/* One long line over the rows, not one per column (Julian). */
-
-@container ed (min-width: 40rem) {
-  .ed .ed-body:has(> .ed-l + .ed-r):not(:has(> .ed-times)) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: stretch; }
-  /* Booked: the summary rows two across under the message. */
-
-}
 @container card (max-width: 36rem) {
   .ed-hero { padding-top: 1.5rem; }
   .ed-hero h2 { font-size: 3rem; flex-direction: column; align-items: flex-start; }
