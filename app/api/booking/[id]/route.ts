@@ -5,7 +5,7 @@ import { tokenOpens } from "@/lib/booking/manage-link";
 import { afterRescheduled } from "@/lib/booking/confirm";
 import { cancelBooking } from "@/lib/booking/deposit";
 import { deskAction, isDeskAction, refuseChange } from "@/lib/booking/changes";
-import { bodyOf, json, limited, upstreamError } from "@/lib/http";
+import { SMALL_BODY, bodyOf, json, limited, upstreamError } from "@/lib/http";
 
 /* ── a client reschedules or cancels (`/booking/<id>`) ────────────
  * POST {t, action: "cancel"} or {t, action: "reschedule", start}. The
@@ -21,7 +21,7 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { env } = await getCloudflareContext({ async: true });
   const { id } = await params;
-  const body = (await bodyOf(request)) ?? {};
+  const body = (await bodyOf(request, SMALL_BODY)) ?? {};
   // A desk tab loaded before the desk route existed still posts its two here: the admin gate, never the token.
   if (isDeskAction(body.action)) return (await refuseAdmin(request, env.INBOX_KEY)) ?? deskAction(env, id, body.action);
   if (!(await tokenOpens(env.BOOKING_SECRET, id, typeof body.t === "string" ? body.t : undefined)))

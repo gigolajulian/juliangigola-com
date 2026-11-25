@@ -4,7 +4,7 @@ import { amountOf, intentForm } from "@/lib/booking/deposit";
 import { CURRENCY } from "@/lib/leads/deposit-terms";
 import { openNow } from "@/lib/booking/slots";
 import { PAYMENTS_DOWN, stripe } from "@/lib/stripe";
-import { bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
+import { SMALL_BODY, bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
 
 /* ── a deposit starts ──────────────────────────────────────────────
  * The card posts the booking it wants; this checks the time is still
@@ -22,7 +22,7 @@ export async function POST(request: Request) {
   const slow = await limited(env.PUBLIC_WRITE_LIMIT, "deposit", request);
   if (slow) return slow;
 
-  const parsed = parseBooking(await bodyOf(request));
+  const parsed = parseBooking(await bodyOf(request, SMALL_BODY));
   if (!parsed.ok) return json({ error: parsed.reason }, 400);
   const b = parsed.booking;
 

@@ -4,7 +4,7 @@ import { manageLinks } from "@/lib/booking/manage-link";
 import { afterBooked, confirmOf } from "@/lib/booking/confirm";
 import { alertHello } from "@/lib/email/hello-mail";
 import { whenPT } from "@/lib/time-zone";
-import { bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
+import { SMALL_BODY, bodyOf, json, limited, taken, upstreamError } from "@/lib/http";
 
 // A booked call answers { id, start, end, where }; errors answer { error: string }, as every other booking route does.
 
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
   const slow = await limited(env.PUBLIC_WRITE_LIMIT, "book", request);
   if (slow) return slow;
 
-  const booked = await bookCall(env, await bodyOf(request));
+  const booked = await bookCall(env, await bodyOf(request, SMALL_BODY));
   if (booked instanceof Response) return booked;
   // The visitor waits on the booking only: the filing, their mail and hello@'s alert follow the answer.
   ctx.waitUntil(afterCall(env, booked));

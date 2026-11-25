@@ -90,7 +90,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
   const slow = await limited(g.env.DOWNLOAD_LIMIT, "selects", request);
   if (slow) return slow;
   if (g.proof.submittedAt) return json({ error: "Selects are already in." }, 409);
-  const b = (await bodyOf(request)) ?? {};
+  const b = (await bodyOf(request, 256 * 1024)) ?? {};
   if (typeof b.email !== "string" || !isEmail(b.email)) return json({ error: "Add your email first." }, 400);
   const selects = cleanSelects(b.selects, g.proof.frames);
   const next = {
@@ -104,7 +104,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ to
 
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
-  const b = (await bodyOf(request)) ?? {};
+  const b = (await bodyOf(request, 256 * 1024)) ?? {};
   if (b.action === "unlock") return unlock(token, request, b.password);
   const g = await load(token, request);
   if (!g) return json({ error: "This gallery closed." }, 404);
