@@ -67,9 +67,8 @@ describe("ProofGallery", () => {
     fireEvent.change(screen.getByLabelText("Your name"), { target: { value: " Maya  Ross " } });
     fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open proofs" }).closest("form")!);
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/proof/t1", expect.objectContaining({ method: "POST" })));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/proof/t1/track", expect.objectContaining({ method: "POST" })));
     expect(JSON.parse((fetchMock.mock.calls as unknown as [string, RequestInit][])[0][1].body as string)).toMatchObject({
-      action: "track",
       kind: "open",
       email: "a@b.co",
       name: "Maya Ross",

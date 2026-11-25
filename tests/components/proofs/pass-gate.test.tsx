@@ -28,8 +28,8 @@ describe("PassGate", () => {
     fireEvent.click(open);
     await waitFor(() => expect(fetch).toHaveBeenCalledTimes(1));
     const [url, init] = fetch.mock.calls[0] as unknown as [string, RequestInit];
-    expect(url).toBe("/api/proof/g1");
-    expect(JSON.parse(String(init.body))).toEqual({ action: "unlock", password: "hunter 2" });
+    expect(url).toBe("/api/proof/g1/unlock");
+    expect(JSON.parse(String(init.body))).toEqual({ password: "hunter 2" });
     await waitFor(() => expect(screen.getByRole("button", { name: "Checking" })).toHaveProperty("disabled", true));
     expect(screen.queryByRole("alert")).toBeNull();
   });
