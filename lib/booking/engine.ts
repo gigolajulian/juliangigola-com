@@ -109,7 +109,7 @@ export function parseBooking(raw: unknown, call = false): Parsed {
   const name = cap(b.name, 120);
   const email = cap(b.email, 200);
   if (!name) return { ok: false, reason: "Add your name." };
-  if (!looksLikeEmail(email)) return { ok: false, reason: "Check your email." };
+  if (!looksLikeEmail(email)) return { ok: false, reason: "That email does not look right." };
   const booking: Booking = {
     slug,
     start: new Date(t).toISOString(),

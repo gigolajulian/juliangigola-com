@@ -11,7 +11,7 @@ import { LogoBand } from "@/components/about/logo-band";
 /* Locked copy (DESIGN.md, Bio). No soft hyphens: words stay whole, and the place names carry
    no-break spaces so they never split. */
 const BIO =
-  "I photograph people, mostly for fashion, music and brands. I shoot editorials and campaigns, and help labels and musicians shape how they’re seen. I also cover the moments people want to keep: headshots, portraits, graduations and weddings across San Francisco, San Jose and the Bay Area. Growing up Assyrian American, between cultures, taught me to watch from slightly outside the frame.";
+  "I photograph people, mostly for fashion, music and brands. For twelve years I have shot and directed editorials and campaigns, and helped labels and musicians shape how they’re seen. The look is dark: one hard light and real shadow. I also photograph what people want to keep: headshots, portraits, graduations and weddings in San Francisco, San Jose and across the Bay Area. Growing up Assyrian American, between cultures, taught me to watch from slightly outside the frame.";
 
 export function About() {
   return (
