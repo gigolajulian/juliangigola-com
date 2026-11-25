@@ -27,11 +27,7 @@ describe("v4 home picks", () => {
     expect(COVER_KEYS.filter((k) => !COVER_PRESS[k])).toEqual([]);
   });
 
-  it("every By quote film still resolves", () => {
-    expect(
-      Object.entries(HOME_DATA.stills)
-        .filter(([, src]) => !src)
-        .map(([k]) => k),
-    ).toEqual([]);
+  it("every session on the home has two more frames after its main photo", () => {
+    expect(Object.entries(HOME_DATA.samples).filter(([, v]) => v.length !== 2).map(([k]) => k)).toEqual([]);
   });
 });

@@ -1,8 +1,10 @@
-import { COMM_HOME, COMM_KEYS, DISCIPLINES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/home/data";
+import { BOOK_ROWS, COMM_HOME, COMM_KEYS, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/home/data";
 import { PROJECTS, categoryLabel, getProject } from "@/lib/work/work";
 import { CONTENT } from "@/lib/content";
 import { REEL, posterFor, previewUrl } from "@/lib/work/videos";
 import { RESPONSE_TIME } from "@/lib/site";
+import { SESSIONS } from "@/lib/booking/catalog";
+import { pageForSession } from "@/lib/booking/service-pages";
 
 /* The v4 home: the frames resolved on the server so lib/work stays out of the client. */
 // the home's own start second for a film's preview, where one was picked (FILM_DRESS.startSec)
@@ -66,17 +68,13 @@ export const HOME_DATA: HomeData = {
       href: v?.client ? `/portfolio/video#${markOf(v.client)}` : "/portfolio/video",
     };
   }),
-  disciplines: DISCIPLINES,
   reply: RESPONSE_TIME,
-  stills: Object.fromEntries(
-    (
-      [
-        ["film:pear-vc", "Pear VC Campaign"],
-        ["film:ladera", "Ladera Granola"],
-      ] as const
-    ).map(([k, t]) => {
-      const v = vid(t);
-      return [k, (v && posterFor(v)) ?? ""];
+  // two more frames a session, from its own page's tiles, never its main photo again
+  samples: Object.fromEntries(
+    BOOK_ROWS.map((r) => {
+      const main = Object.values(SESSIONS[r.slug].photo);
+      const tiles = pageForSession(r.slug)?.tiles ?? [];
+      return [r.slug, tiles.map((t) => t.frame.src).filter((src) => !main.includes(src)).slice(0, 2)];
     }),
   ),
 };

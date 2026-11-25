@@ -27,9 +27,9 @@ export type HomeData = {
   extras: HomeFrame[];
   commissions: HomeFrame[];
   films: HomeFilm[];
-  disciplines: string[];
   reply: string | null;
-  stills: Record<string, string>;
+  /** Per session slug: more frames after its main photo, for the Sessions photo on the home. */
+  samples: Record<string, string[]>;
 };
 
 /* Julian's arranger save (save.json), in order. Key `<slug>/<NN>`. */
@@ -224,22 +224,6 @@ export const CHIP_TYPE: Record<string, (typeof SHOOT_TYPES)[number]> = {
   Engagement: "session",
 };
 /* SZV: the client proof, in order. `wide` is the 2:1 frame for the phone. */
-export type QuoteClient = { name: string; photos: { src: string; alt: string }[]; wide?: string };
-export const QUOTE_CLIENTS: QuoteClient[] = [
-  { name: "WIRED", photos: [{ src: "/work/wired-magazine/cover.jpg", alt: "WIRED" }], wide: "/v3/wired-18-wide.jpg" },
-  { name: "Sago", photos: [{ src: "/work/sago/02.jpg", alt: "Sago" }] },
-  { name: "Jubo", photos: [{ src: "/work/jubo/cover.jpg", alt: "Jubo" }] },
-  { name: "Ukiyosunknown", photos: [{ src: "/work/ukiyosunknown/02.jpg", alt: "Ukiyo" }] },
-  { name: "Goodcult", photos: [{ src: "/work/goodcult/cover.jpg", alt: "Goodcult" }] },
-  { name: "Paradox", photos: [{ src: "/work/paradox/cover.jpg", alt: "Paradox" }] },
-  {
-    name: "Pear VC | Ladera Granola",
-    photos: [
-      { src: "film:pear-vc", alt: "Pear VC" },
-      { src: "film:ladera", alt: "Ladera Granola" },
-    ],
-  },
-];
 
 /* ── About (spec 3.9) ── */
 /** What I do, as listed on /about and the home's About. */

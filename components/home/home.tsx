@@ -123,8 +123,7 @@ export function Home({ data }: { data: HomeData }) {
           open={book}
           opener={bookOpener}
           onClose={() => setBook(null)}
-          quotePhoto={null}
-          onRowPick={() => {}}
+          samples={data.samples}
         />
         <HomeCovers />
         <HomeFoot />

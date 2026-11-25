@@ -46,13 +46,13 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
   await home(page);
   await expect(page.locator("html[data-mt-held]")).toBeAttached();
 
-  const covers = page.locator('[data-mt="covers"]');
-  await expect(covers).toHaveAttribute("data-hold");
-  const { top, h, vh } = await boxOf(page, '[data-mt="covers"]');
+  const held = page.locator('[data-mt="motion"]');
+  await expect(held).toHaveAttribute("data-hold");
+  const { top, h, vh } = await boxOf(page, '[data-mt="motion"]');
   expect(h, "the hold makes the section taller than the screen").toBeGreaterThan(vh);
   /** --p, and the hold's progress at the scroll as it is now. */
   const read = () =>
-    covers.evaluate(
+    held.evaluate(
       (el, [t, run]) => ({ p: parseFloat(el.style.getPropertyValue("--p")), at: Math.min(1, Math.max(0, (scrollY - t) / run)) }),
       [top, h - vh] as const,
     );
@@ -75,17 +75,13 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
     if (want !== null) expect((await read()).p, `--p at ${want}`).toBeCloseTo(want, 1);
   }
 
-  for (const name of ["book", "quote"]) {
-    await topAt(page, `[data-mt="${name}"]`, 0.2);
-    const [book, quote] = await Promise.all([noBar(page, "book"), noBar(page, "quote")]);
-    expect(book, `book has no bar with ${name} up`).toBe(true);
-    expect(quote, `quote has no bar with ${name} up`).toBe(true);
-  }
+  await topAt(page, '[data-mt="book"]', 0.2);
+  expect(await noBar(page, "book"), "book has no bar on a laptop").toBe(true);
   expect(errors).toEqual([]);
   await ctx.close();
 });
 
-test("phone: no holds, and Book online and By quote take the bar once their top is above 0.45 of the screen", async ({
+test("phone: no holds, and Book online takes the bar once its top is above 0.45 of the screen", async ({
   browser,
   browserName,
 }) => {
@@ -99,13 +95,10 @@ test("phone: no holds, and Book online and By quote take the bar once their top 
 
   await topAt(page, '[data-mt="book"]', 0.2);
   await expect.poll(() => bar(page, "book"), { message: "book up" }).toBe(true);
-  expect(await bar(page, "quote"), "quote still below").toBe(false);
 
   await topAt(page, '[data-mt="book"]', 0.8);
   await expect.poll(() => bar(page, "book"), { message: "book back down" }).toBe(false);
 
-  await topAt(page, '[data-mt="quote"]', 0.2);
-  await expect.poll(() => bar(page, "quote"), { message: "quote up" }).toBe(true);
   expect(errors).toEqual([]);
   await ctx.close();
 });
