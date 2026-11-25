@@ -49,7 +49,7 @@ const freePort = async () => {
       const s = createServer()
         .once("error", () => resolve(false))
         .once("listening", () => s.close(() => resolve(true)))
-        .listen(port, "127.0.0.1");
+        .listen(port); // every interface: next start listens on ::, which a 127.0.0.1 probe misses
     });
     if (ok) return port;
   }
