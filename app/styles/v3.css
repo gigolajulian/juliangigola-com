@@ -1814,7 +1814,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 :root[data-sky] .v3 .f-in>:is(.sky-rows,.sky-ruler){grid-area:times}}
 /* /book's package cards (components/booking/packages.tsx): the rail and title as the stepper's, four photo cards, the other ways in as ruled rows. */
 .v3 .pk{display:flex;flex-direction:column;gap:30px;padding:28px var(--gr) 72px var(--g)}
-.v3 .rail a{display:block;color:inherit}
+/* The rail's link back (FlowShell `lead`): the whole cell is the target, 24px and up; its ring sits inside the cell, which clips. */
+.v3 .rail a{display:block;color:inherit;margin-top:-10px;padding:10px 0 8px}
 .v3 .pk-row{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px}
 .v3 .pk-c{display:flex;flex-direction:column;min-width:0}
 .v3 .pk-ph{position:relative;display:block;aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--line)}
@@ -1835,16 +1836,23 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pk-more a:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
 .v3 .pk-more b{font-weight:400;color:var(--ink);white-space:nowrap}
 .v3 .pk-more i{font-style:normal}
-.v3 .pk-more a:focus-visible,.v3 .rail a:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .pk-more a:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .rail a:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
 @media (hover:hover){.v3 .pk-more a:hover b{color:var(--accent)}}
 @media (max-width:1023px){
 .v3 .pk{gap:20px;padding-top:18px}
-.v3 .pk-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;margin:6px calc(-1*var(--gr)) 0 calc(-1*var(--g));padding:0 var(--gr) 0 var(--g);scroll-padding-left:var(--g)}
+.v3 .pk-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;margin:6px calc(-1*var(--gr)) 0 calc(-1*var(--g));padding:0 var(--gr) 5px var(--g);scroll-padding-left:var(--g)}
 .v3 .pk-row::-webkit-scrollbar{display:none}
 .v3 .pk-c{flex:0 0 min(84%,340px);scroll-snap-align:start}
 .v3 .pk-c h2{font-size:1.875rem;margin-top:16px}
 .v3 .pk-more{grid-template-columns:1fr;margin-top:22px}
 .v3 .pk-more a:nth-last-child(2){border-bottom:0}}
+/* A phone at 200% zoom (DESIGN.md): the cards stack, nothing is held on one line or left off screen. */
+@media (max-width:299.98px){
+.v3 .pk-row{flex-direction:column;overflow:visible;gap:32px}
+.v3 .pk-c{flex:none}
+.v3 .pk-c h2,.v3 .pk-more b{white-space:normal}
+.v3 .pk-more a{flex-wrap:wrap;padding:8px 0}}
 /* `?slide` (lib/flags/slide-flag.ts), on trial: a booking step travels right to left, and back the other way.
    Cards to calendar is a page trip (`data-nav-step`, page-transition.tsx): the page leaving is the snapshot here, the
    calendar arriving is moved by script (components/booking/book.tsx). The steps after it mount in place. */

@@ -52,7 +52,7 @@ export function Packages() {
                       src={PHOTO[s.slug] ?? s.photo.d}
                       alt=""
                       fill
-                      sizes="(max-width: 1023px) 84vw, 25vw"
+                      sizes="(max-width: 1023px) min(84vw, 340px), 25vw"
                       loading={k < 2 ? "eager" : "lazy"}
                     />
                   </Link>
