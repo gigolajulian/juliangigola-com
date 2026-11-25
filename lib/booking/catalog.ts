@@ -52,7 +52,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   portraits: {
     slug: "portraits",
     name: "Portraits",
-    blurb: "One hour with direction, lighting and edited selects. Studio located in San Jose, available to travel across the SF Bay Area.",
+    blurb: "One hour with direction, lighting and edited selects. My studio is in San Jose, and I travel across the Bay Area.",
     from: null,
     includes: ["One hour, studio or location", "Two looks", "Retouched selects", "Crops for web and print"],
     turnaround: "1 week",
@@ -65,7 +65,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     slug: "graduation",
     name: "Graduation",
     blurb:
-      "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. Studio located in San Jose, available to travel across the SF Bay Area. On campus at SJSU or SCU; a travel fee applies further out.",
+      "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. My studio is in San Jose, and I travel across the Bay Area. SJSU and SCU are included. A travel fee applies farther out.",
     from: 400,
     includes: ["90 minutes on location", "Two outfit changes", "Edited gallery", "Print release"],
     turnaround: "1 week",
@@ -76,7 +76,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
     slug: "headshots",
     name: "Headshots",
     blurb:
-      "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio located in San Jose, available to travel across the SF Bay Area.",
+      "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. My studio is in San Jose, and I travel across the Bay Area.",
     from: 400,
     includes: ["Studio lighting", "Multiple backgrounds", "Retouched selects", "Crops for web and print"],
     turnaround: "3 business days",
@@ -86,7 +86,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   "studio-digitals": {
     slug: "studio-digitals",
     name: "Studio digitals",
-    blurb: "Agency-standard digitals: clean light, no retouching, accurate to how you actually look. Studio located in San Jose.",
+    blurb: "Agency-standard digitals: clean light, no retouching, true to how you look. Studio located in San Jose.",
     from: 300,
     includes: ["Full length, three-quarter and close", "Front and profile", "Unretouched, as agencies require"],
     turnaround: "2 business days",
@@ -107,7 +107,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   weddings: {
     slug: "weddings",
     name: "Weddings",
-    blurb: "Coverage that reads as editorial rather than as a wedding album. Limited dates each year.",
+    blurb: "Editorial coverage of the full day. Limited dates each year.",
     from: null,
     includes: ["Full-day coverage", "Second shooter available", "Edited gallery", "Print release"],
     turnaround: "4 weeks",
@@ -145,7 +145,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   "brand-photography": {
     slug: "brand-photography",
     name: "Brand campaigns",
-    blurb: "Campaign imagery from the concept and the art direction to the shoot and the retouch.",
+    blurb: "Campaign imagery, from concept and art direction to shoot and retouch.",
     from: null,
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/campaign",

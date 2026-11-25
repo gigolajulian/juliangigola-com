@@ -74,7 +74,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
   return (
     <section className="v3 mx-auto flex min-h-svh max-w-2xl flex-col justify-center gap-8 px-4 py-24">
       <div className="flex flex-col gap-3">
-        <span className="lbl mute">{state === "cancelled" ? "Cancelled" : state === "moved" ? "Moved" : "Your booking"}</span>
+        <span className="lbl mute">{state === "cancelled" ? "Canceled" : state === "moved" ? "Moved" : "Your booking"}</span>
         <h1 className="text-2xl">{b.session}</h1>
         <p className="mute">
           {stampIn(b.start, TZ)}
@@ -91,11 +91,11 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
         <p>
           {refunded === true
             ? back && back < usd
-              ? `It's cancelled, and $${back} of your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
-              : `It's cancelled, and your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
+              ? `It's canceled, and $${back} of your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
+              : `It's canceled, and your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
             : refunded === false && b.paid && share
-              ? "It's cancelled. The refund did not go through on its own; I'll send it by hand and email you."
-              : "It's cancelled. A note is on its way to your inbox."}{" "}
+              ? "It's canceled. The refund did not go through on its own; I'll send it by hand and email you."
+              : "It's canceled. A note is on its way to your inbox."}{" "}
           <Link href="/book" className="underline">
             Book another time
           </Link>
@@ -117,7 +117,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           </p>
           <div className="flex gap-3">
             <button type="button" className="btn fill" disabled={state === "busy"} onClick={() => act({ action: "cancel" })}>
-              {state === "busy" ? "Cancelling" : "Cancel booking"}
+              {state === "busy" ? "Canceling" : "Cancel booking"}
             </button>
             <button type="button" className="btn" onClick={() => setMode("")}>
               Keep it
@@ -135,9 +135,9 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           {b.paid ? (
             <p className="mute">
               {share >= EARLY_SHARE
-                ? `Your $${usd} deposit moves with it. A cancel is judged by the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}: ${top} ${REFUND_HOURS} hours or more before it, 70% back ${PART_HOURS} hours or more before, nothing after.`
+                ? `Your $${usd} deposit moves with it. A cancellation is judged by the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}: ${top} ${REFUND_HOURS} hours or more before it, 70% back ${PART_HOURS} hours or more before, nothing after.`
                 : share
-                  ? `Your $${usd} deposit moves with it. A cancel now refunds 70% of it: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${REFUND_HOURS} hours away.`
+                  ? `Your $${usd} deposit moves with it. A cancellation now refunds 70% of it: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${REFUND_HOURS} hours away.`
                   : `Your $${usd} deposit moves with it. It is no longer refundable: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${PART_HOURS} hours away.`}
             </p>
           ) : null}
@@ -161,7 +161,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
             {(b.moves ?? 0) >= MAX_MOVES
               ? "This booking has been moved twice, so it can no longer be moved."
               : !movable
-                ? `It's under ${MOVE_HOURS} hours before your session, so it can no longer be moved.`
+                ? `Your session is less than ${MOVE_HOURS} hours away, so it can no longer be moved.`
                 : (b.moves ?? 0) === 1
                   ? `You can move this booking one more time, until ${MOVE_HOURS} hours before it.`
                   : `A booking can be moved twice, until ${MOVE_HOURS} hours before it.`}

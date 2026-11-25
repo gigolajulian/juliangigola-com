@@ -93,7 +93,7 @@ export const MAX_INVOICE_ROWS = 4;
 export const THANKS_NOTES: [string, string, string] = [
   "Thanks for having me back.",
   "Always a blast with you guys.",
-  "Can't wait for the next one!",
+  "Can't wait for the next one.",
 ];
 /** The KV key of his sealed invoice details (name, address, EIN): the repo is public, so they live there and nowhere in the code.
     Written by `app/api/leads/invoice-from`, read by the contract (`app/api/contract`). */

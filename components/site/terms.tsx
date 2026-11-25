@@ -347,7 +347,7 @@ export function TermsColumn() {
         </p>
         <p>
           Unauthorized use of the Content is also copyright infringement, for which the law provides remedies including statutory damages of
-          up to US$150,000 per work for wilful infringement. Removing or altering rights-management information is separately actionable
+          up to US$150,000 per work for willful infringement. Removing or altering rights-management information is separately actionable
           under 17 U.S.C. &sect;1202. I register my work with the United States Copyright Office.
         </p>
         <p>
@@ -386,7 +386,7 @@ export function TermsColumn() {
 
       <Clause title="Accessibility">
         <p>
-          I want the Site to be usable by everybody, and I work towards the Web Content Accessibility Guidelines 2.2 at level AA. Parts of
+          I want the Site to be usable by everybody, and I work toward the Web Content Accessibility Guidelines 2.2 at level AA. Parts of
           it are photographic and visual by nature, and I cannot promise that every element meets every criterion at every moment. If
           something is in your way, write to {EMAIL} and describe it; I will fix what I can and offer another way to get the same
           information in the meantime.

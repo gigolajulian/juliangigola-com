@@ -79,7 +79,7 @@ export default function NotFound() {
             <div>
               <h1 className="nf-h">This frame never made the edit.</h1>
               <p className="nf-p">
-                The page you were looking for has been moved, renamed, or cut from the selects.{" "}
+                The page you were looking for has been moved, renamed or cut from the selects.{" "}
                 <span className="hoverable:hidden">Head back to the work.</span>
                 <span className="hidden hoverable:inline">
                   Drag your cursor across the numerals to pull them into focus, or head back to the work.

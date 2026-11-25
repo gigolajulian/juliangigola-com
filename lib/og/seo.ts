@@ -166,7 +166,7 @@ export const SESSION_SEO: Record<string, { title: string; description: string }>
     // The price before the details, so a results page that cuts the
     // description short cuts the details rather than the price.
     description: sentence(
-      "Graduation photos across the SF Bay Area: on campus at SJSU and Santa Clara University, or further out.",
+      "Graduation photos across the SF Bay Area: on campus at SJSU and Santa Clara University, or farther out.",
       from("graduation") ? `${from("graduation")}.` : null,
       "90 minutes, two outfit changes.",
     ),
