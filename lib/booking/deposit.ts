@@ -173,14 +173,13 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   const subject = `${SAID[status]}: ${what}`;
   await alertAndLog(env, subject, lines, { who, log: { kind: `deposit-${status}`, booking: intent }, attachments: refs.files });
   // The money itself, on the activity log: what was paid in, and out again on a refund.
+  // One write for both lines: KV takes one write a second to a key.
+  const at = new Date().toISOString();
   if (who)
-    await recordLead(env, who.email, {
-      event: { at: new Date().toISOString(), kind: "payment", ref: intent, note: "Deposit", amount: usd },
-    });
-  if (who && status === "refunded")
-    await recordLead(env, who.email, {
-      event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: usd },
-    });
+    await recordLead(env, who.email, [
+      { event: { at, kind: "payment" as const, ref: intent, note: "Deposit", amount: usd } },
+      ...(status === "refunded" ? [{ event: { at, kind: "refund" as const, ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: usd } }] : []),
+    ]);
 }
 
 /**
