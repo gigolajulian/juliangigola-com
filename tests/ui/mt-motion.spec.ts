@@ -58,8 +58,9 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
     );
   // the middle last: the snap glides from there to an item, and a jump made mid-glide is taken back by the glide
   for (const [y, want] of [
-    [top, 0],
-    [top + h - vh, 1],
+    // Motion rests each film at the middle of its share, so the snap glides off both ends: only --p following the scroll is checked there
+    [top, null],
+    [top + h - vh, null],
     [top + (h - vh) / 2, null],
   ] as const) {
     await to(page, y);
