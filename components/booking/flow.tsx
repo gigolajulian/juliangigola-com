@@ -56,7 +56,8 @@ export function Calendar({
   return (
     <>
       <div className="cal-top lbl">
-        <span>
+        {/* Announced when Earlier or Later moves the calendar to another month or week. */}
+        <span aria-live="polite">
           {own && own.at(-1)!.getMonth() !== head.getMonth()
             ? `${head.toLocaleDateString("en-US", { month: "long" })} – ${own.at(-1)!.toLocaleDateString("en-US", { month: "long", year: "numeric" })}`
             : head.toLocaleDateString("en-US", { month: "long", year: "numeric" })}

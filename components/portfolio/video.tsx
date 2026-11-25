@@ -10,6 +10,8 @@ import {
   embedUrl,
   previewUrl,
   captionsOff,
+  captionsOn,
+  vimeoCaptionsOff,
   vimeoListen,
   vimeoPlays,
   posterFor,
@@ -126,6 +128,9 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
   const [shown, setShown] = React.useState(true);
   const [paused, setPaused] = React.useState(false);
   const [muted, setMuted] = React.useState(false);
+  // Captions start off; the CC button turns them on and the choice holds for the visit.
+  const [cc, setCc] = React.useState(false);
+  const ccRef = React.useRef(false);
   const [time, setTime] = React.useState({ at: 0, dur: 0 });
   const t = React.useRef<ReturnType<typeof setTimeout>>(undefined);
   const poke = React.useCallback(() => {
@@ -183,12 +188,27 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
     if (!w || !v) return;
     if (v.provider === "youtube") {
       w.postMessage(JSON.stringify({ event: "listening", id: 1 }), "*");
-      // Captions off by default, whatever the viewer's YouTube setting.
-      captionsOff(w);
-    } else
+      // Captions off by default, whatever the viewer's YouTube setting, unless the CC button turned them on.
+      if (ccRef.current) captionsOn(w, "youtube");
+      else captionsOff(w);
+    } else {
       for (const value of ["pause", "play", "timeupdate", "playProgress"])
         w.postMessage(JSON.stringify({ method: "addEventListener", value }), "*");
+      if (ccRef.current) captionsOn(w, "vimeo");
+    }
   }
+  const captions = () => {
+    const on = !ccRef.current;
+    ccRef.current = on;
+    setCc(on);
+    const w = frame.current?.contentWindow;
+    if (w && v) {
+      if (on) captionsOn(w, v.provider);
+      else if (v.provider === "youtube") captionsOff(w);
+      else vimeoCaptionsOff(w);
+    }
+    poke();
+  };
   const toggle = () => {
     post(paused ? "playVideo" : "pauseVideo", [], paused ? "play" : "pause");
     setPaused(!paused);
@@ -209,13 +229,14 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
   const back = () => history.back();
   const keys = (e: React.KeyboardEvent) => {
     poke();
-    if ((e.target as HTMLElement).closest("button, input")) return;
+    if ((e.target as HTMLElement).closest("button, input") || e.metaKey || e.ctrlKey || e.altKey) return;
     if (e.key === " " || e.key === "k") {
       e.preventDefault();
       toggle();
     } else if (e.key === "ArrowRight") seek(time.at + 5);
     else if (e.key === "ArrowLeft") seek(time.at - 5);
     else if (e.key === "m") sound();
+    else if (e.key === "c") captions();
     else if (e.key === "f") full();
   };
   const up = shown || paused;
@@ -295,6 +316,9 @@ function Player({ v, list, onGo, onClose }: { v: Video | null; list: Video[]; on
               />
               <button type="button" onClick={sound}>
                 {muted ? "Sound off" : "Sound on"}
+              </button>
+              <button type="button" onClick={captions} aria-pressed={cc}>
+                {cc ? "CC on" : "CC off"}
               </button>
               <button type="button" onClick={full}>
                 Full
