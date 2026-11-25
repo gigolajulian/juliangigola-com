@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Duo } from "@/components/site/duo";
 import { SESSIONS } from "@/lib/booking/catalog";
 import { matches } from "@/lib/device";
-import { BOOK_ROWS, QUOTE_OPTS, type BookRow, type QuoteOpt } from "@/lib/home/data";
+import { BOOK_ROWS, type BookRow } from "@/lib/home/data";
 import { warmGsap } from "@/lib/motion/gsap-lazy";
 import { useNextOpen } from "./next-open";
 import { CardsCtx } from "./ctx";
@@ -42,20 +42,16 @@ export function BookOnline({
   open,
   opener,
   onClose,
-  quotePhoto,
-  onRowPick,
+  samples,
 }: {
   open: BookRow["slug"] | null;
   opener?: React.RefObject<HTMLElement | null>;
   onClose: () => void;
-  quotePhoto: QuoteOpt["key"] | null;
-  onRowPick: () => void;
+  /** More frames per session, after its main photo (lib/home/server.ts). */
+  samples: Record<string, string[]>;
 }) {
   const cards = React.useContext(CardsCtx);
-  const [sel, setSelRaw] = React.useState(0);
-  const setSel = (i: number) => (setSelRaw(i), onRowPick());
-  // desktop: the photo shows a By quote option while that list was the last one touched; never during a booking
-  const q = open ? null : quotePhoto;
+  const [sel, setSel] = React.useState(0);
   const shownIdx = open
     ? Math.max(
         0,
@@ -63,6 +59,27 @@ export function BookOnline({
       )
     : sel;
   const r = BOOK_ROWS[shownIdx];
+  // One frame, the picked session's photos through it: the main one, then its samples, as the photo crosses the screen.
+  // Not during a booking, and not for visitors who asked for less motion: then it stays on the main photo.
+  const more = samples[r.slug] ?? [];
+  const fig = React.useRef<HTMLElement>(null);
+  const [step, setStep] = React.useState(0);
+  React.useEffect(() => {
+    if (matches("calm")) return;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const el = fig.current;
+      if (!el) return;
+      const t = (innerHeight * 0.8 - el.getBoundingClientRect().top) / (innerHeight * 0.75);
+      setStep(Math.min(2, Math.max(0, Math.floor(t * 3))));
+    };
+    const on = () => (raf ||= requestAnimationFrame(read));
+    addEventListener("scroll", on, { passive: true });
+    read();
+    return () => (removeEventListener("scroll", on), cancelAnimationFrame(raf));
+  }, []);
+  const shot = open ? 0 : Math.min(step, more.length);
   const sec = React.useRef<HTMLElement>(null);
   const head = React.useRef<HTMLHeadingElement>(null);
   const rows = React.useRef<(HTMLButtonElement | null)[]>([]);
@@ -194,13 +211,28 @@ export function BookOnline({
             </>
           )}
         </div>
-        <figure className="mt-photo">
+        <figure className="mt-photo" ref={fig}>
           {BOOK_ROWS.map((x, i) => (
-            <RowPhoto key={x.slug} r={x} on={q === null && i === shownIdx} sizes="(max-width: 1023px) 100vw, 42vw" />
+            <RowPhoto key={x.slug} r={x} on={i === shownIdx && shot === 0} sizes="(max-width: 1023px) 100vw, 42vw" />
           ))}
-          {QUOTE_OPTS.map((x) => (
-            <Image key={x.key} src={x.photo} alt={`${x.name} sample`} fill sizes="42vw" className={q === x.key ? "qp on" : "qp"} />
-          ))}
+          {/* every session's frames are mounted, so picking another row never shows an empty frame while its photo loads */}
+          {BOOK_ROWS.flatMap((x, i) =>
+            (samples[x.slug] ?? []).map((src, k) => (
+              <Image
+                key={src}
+                src={src}
+                alt={`${x.name} sample ${k + 2}`}
+                fill
+                sizes="(max-width: 1023px) 100vw, 42vw"
+                className={i === shownIdx && shot === k + 1 ? "qp on" : "qp"}
+              />
+            )),
+          )}
+          {more.length && !open ? (
+            <figcaption className="lbl mt-photo-n" aria-hidden>
+              {shot + 1} / {more.length + 1}
+            </figcaption>
+          ) : null}
         </figure>
       </div>
       {/* Phone, tablet and on its side: the held bar while the screen is up. */}

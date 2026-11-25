@@ -35,8 +35,6 @@ export function Home({ data }: { data: HomeData }) {
   useBackHome();
   const [book, setBook] = React.useState<BookRow["slug"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryMode; opt?: QuoteOpt["key"] } | null>(null);
-  // the booking photo follows the last row touched in either list: a quote option's key, or null for the sessions
-  const [quotePhoto, setQuotePhoto] = React.useState<QuoteOpt["key"] | null>(null);
   // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   const opener = React.useRef<HTMLElement | null>(null);
   // a booking opened from the footer hands focus back to its footer link; from Sessions itself, to its row (book-online.tsx)
@@ -116,19 +114,18 @@ export function Home({ data }: { data: HomeData }) {
       <HomeIntro extras={data.extras} />
       <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
         <HomeHero frames={data.hero} extras={data.extras} />
-        {/* order: Motion, Cover art, About, Sessions, By quote, then Commissions */}
+        {/* order: About, Commissions, By quote, Motion, Sessions, then Cover art */}
+        <HomeAbout />
+        <HomeCommissions frames={data.commissions} />
+        <ByQuote />
         <HomeFilms films={data.films} />
-        <HomeCovers />
-        <HomeAbout disciplines={data.disciplines} />
         <BookOnline
           open={book}
           opener={bookOpener}
           onClose={() => setBook(null)}
-          quotePhoto={quotePhoto}
-          onRowPick={() => setQuotePhoto(null)}
+          samples={data.samples}
         />
-        <ByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
-        <HomeCommissions frames={data.commissions} />
+        <HomeCovers />
         <HomeFoot />
       </section>
       <MotionLayer />

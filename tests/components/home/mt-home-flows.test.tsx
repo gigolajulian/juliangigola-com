@@ -12,7 +12,7 @@ import { Home } from "@/components/home/home";
 import { BOOK_ROWS, QUOTE_OPTS } from "@/lib/home/data";
 import { HOME_DATA } from "@/lib/home/server";
 
-/* The two lists on the v4 home that talk to each other: Book online and By quote. Read through the DOM only,
+/* Book online and By quote on the v4 home. Read through the DOM only,
    so a rename inside the components cannot hide a change in what the visitor gets. */
 const pointer = (fine: boolean) =>
   vi.spyOn(window, "matchMedia").mockImplementation(
@@ -32,8 +32,6 @@ const book = () => document.querySelector<HTMLElement>('[data-mt="book"]')!;
 const quote = () => document.querySelector<HTMLElement>('[data-mt="quote"]')!;
 // only the four row buttons in Book online carry aria-pressed; the big button under them does not
 const row = (i: number) => book().querySelectorAll<HTMLElement>("button[aria-pressed]")[i];
-// the "on" class is the only state marker on the By quote photos, so it stays the one class this test reads
-const quotePhoto = () => QUOTE_OPTS.findIndex((o) => within(book()).getByAltText(`${o.name} sample`).classList.contains("on"));
 
 describe("v4 home: Book online and By quote", () => {
   afterEach(() => vi.restoreAllMocks());
@@ -57,14 +55,9 @@ describe("v4 home: Book online and By quote", () => {
     expect(book().dataset.on).toBe(BOOK_ROWS[2].slug);
   });
 
-  it("picking a By quote option shows its photo in Book online; touching a Book online row takes it back", () => {
-    pointer(false);
+  it("By quote: every kind of work is a button that asks about it", () => {
     render(<Home data={HOME_DATA} />);
-    expect(quotePhoto()).toBe(-1);
-    // pressed: false leaves out the Inquire buttons, which have no aria-pressed
-    fireEvent.click(within(quote()).getByRole("button", { name: new RegExp(QUOTE_OPTS[1].name), pressed: false }));
-    expect(quotePhoto()).toBe(1);
-    fireEvent.click(row(2));
-    expect(quotePhoto()).toBe(-1);
+    const names = within(quote()).getAllByRole("button", { name: /^Inquire about/ }).map((b) => b.getAttribute("aria-label"));
+    expect(names).toEqual(QUOTE_OPTS.map((o) => `Inquire about ${o.name.toLowerCase()}`));
   });
 });

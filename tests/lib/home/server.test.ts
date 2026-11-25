@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { COMM_KEYS, COVER_KEYS, COVER_PRESS, FILM_DRESS, FILM_PICKS, HERO_KEYS } from "@/lib/home/data";
 import { getProject } from "@/lib/work/work";
+import { existsSync } from "node:fs";
 import { HOME_DATA } from "@/lib/home/server";
 
 /* The v4 home picks its photos, covers and films by hand-kept keys. A renamed project or film
@@ -27,11 +28,8 @@ describe("v4 home picks", () => {
     expect(COVER_KEYS.filter((k) => !COVER_PRESS[k])).toEqual([]);
   });
 
-  it("every By quote film still resolves", () => {
-    expect(
-      Object.entries(HOME_DATA.stills)
-        .filter(([, src]) => !src)
-        .map(([k]) => k),
-    ).toEqual([]);
+  it("every session on the home has two more frames after its main photo", () => {
+    expect(Object.entries(HOME_DATA.samples).filter(([, v]) => v.length !== 2).map(([k]) => k)).toEqual([]);
+    expect(Object.values(HOME_DATA.samples).flat().filter((src) => !existsSync(`public${src}`))).toEqual([]);
   });
 });
