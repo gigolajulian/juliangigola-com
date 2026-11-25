@@ -1,8 +1,8 @@
 diff --git a/lib/booking/engine.ts b/lib/booking/engine.ts
-index e49e96d6..6dac5faa 100644
+index 55995cc0..4a75a3b0 100644
 --- a/lib/booking/engine.ts
 +++ b/lib/booking/engine.ts
-@@ -177,7 +177,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
+@@ -178,7 +178,7 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
    if (!rule) return { ok: false, reason: "unknown" };
    // A deposit books once, however often Stripe delivers it.
    if (b.intent) {

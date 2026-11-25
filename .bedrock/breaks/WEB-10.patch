@@ -1,8 +1,8 @@
 diff --git a/lib/booking/deposit.ts b/lib/booking/deposit.ts
-index 41d8fe9f..f7c40520 100644
+index a33223eb..e76649c3 100644
 --- a/lib/booking/deposit.ts
 +++ b/lib/booking/deposit.ts
-@@ -103,7 +103,7 @@ export async function verifyStripe(body: string, header: string, secret: string,
+@@ -105,7 +105,7 @@ export async function verifyStripe(body: string, header: string, secret: string,
    const parts = header.split(",").map((p) => p.split("="));
    const t = parts.find(([k]) => k === "t")?.[1] ?? "";
    const sigs = parts.filter(([k]) => k === "v1").map(([, v]) => v);

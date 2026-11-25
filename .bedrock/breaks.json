@@ -87,5 +87,35 @@
   "file": ".github/workflows/ci.yml",
   "find": "  contents: read",
   "replace": "  contents: write"
+ },
+ "ABU-11": {
+  "file": "lib/http.ts",
+  "find": "    if (size > max) {",
+  "replace": "    if (size > max * 1e9) {"
+ },
+ "MEM-4": {
+  "file": "lib/http.ts",
+  "find": "    if (size > max) {",
+  "replace": "    if (size < 0) {"
+ },
+ "MEM-3": {
+  "file": "lib/proofs/gallery-api.ts",
+  "find": ">= MAX_VIEWERS) return p;",
+  "replace": ">= MAX_VIEWERS * 1e9) return p;"
+ },
+ "ABU-9": {
+  "file": "app/api/book/route.ts",
+  "find": "if (byEmail >= CALLS_PER_EMAIL ||",
+  "replace": "if (byEmail >= CALLS_PER_EMAIL * 1e9 ||"
+ },
+ "INP-2": {
+  "file": "lib/leads/lead-store.ts",
+  "find": "    console.error(\"lead, retrying\", String(e));",
+  "replace": "    console.error(\"lead, retrying\", String(e));\n    if (e) return { status: \"failed\" };"
+ },
+ "MONEY-1": {
+  "file": "lib/proofs/submit.ts",
+  "find": "if (charge && (charge.refunded || (charge.amount_refunded ?? 0) > 0)) return null;",
+  "replace": "if (charge && charge.refunded && false) return null;"
  }
 }

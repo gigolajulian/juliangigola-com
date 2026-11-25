@@ -13,7 +13,7 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 /** Open to anyone: rate-limited, Stripe-signed, or read-only public data. */
 const PUBLIC = new Set(["beacon", "book", "build", "deposit", "deposit/[id]", "slots", "stripe", "weather"]);
 /** Opened by a signed link or a gallery or contract token, tested in their own files. */
-const BY_LINK = new Set(["booking/[id]", "contract/[id]", "proof/[token]"]);
+const BY_LINK = new Set(["booking/[id]", "contract/[id]", "proof/[token]", "proof/[token]/send", "proof/[token]/track", "proof/[token]/unlock"]);
 
 const API = join(process.cwd(), "app", "api");
 const walk = (dir: string): string[] =>

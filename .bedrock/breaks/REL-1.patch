@@ -1,8 +1,8 @@
 diff --git a/lib/booking/deposit.ts b/lib/booking/deposit.ts
-index 41d8fe9f..03ebc621 100644
+index a33223eb..c8fff353 100644
 --- a/lib/booking/deposit.ts
 +++ b/lib/booking/deposit.ts
-@@ -102,7 +102,7 @@ const hex = (buf: ArrayBuffer) => [...new Uint8Array(buf)].map((b) => b.toString
+@@ -104,7 +104,7 @@ const hex = (buf: ArrayBuffer) => [...new Uint8Array(buf)].map((b) => b.toString
  export async function verifyStripe(body: string, header: string, secret: string, now = Date.now()): Promise<boolean> {
    const parts = header.split(",").map((p) => p.split("="));
    const t = parts.find(([k]) => k === "t")?.[1] ?? "";
