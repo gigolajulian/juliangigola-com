@@ -52,7 +52,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   portraits: {
     slug: "portraits",
     name: "Portraits",
-    blurb: "One hour with direction, lighting and edited selects. My studio is in San Jose, and I travel across the Bay Area.",
+    blurb: "One hour with direction, lighting and retouched selects. My studio is in San Jose, and I travel across the Bay Area.",
     from: null,
     includes: ["One hour, studio or location", "Two looks", "Retouched selects", "Crops for web and print"],
     turnaround: "1 week",
@@ -87,7 +87,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   "studio-digitals": {
     slug: "studio-digitals",
     name: "Studio digitals",
-    blurb: "Agency-standard digitals: clean light, no retouching, true to how you look. Studio located in San Jose.",
+    blurb: "Agency-standard digitals: clean light, no retouching, true to how you look. My studio is in San Jose.",
     from: 300,
     includes: ["Full-length, three-quarter and close-up", "Front and profile views", "Unretouched, to agency standard"],
     turnaround: "2 business days",
@@ -128,7 +128,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   "music-photography": {
     slug: "music-photography",
     name: "Music & artists",
-    blurb: "Press photos, cover art and music videos for a release, planned together so it reads as one thing.",
+    blurb: "Press photos, cover art and music videos for a release, planned together so the whole release shares one look.",
     from: null,
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/music-call",

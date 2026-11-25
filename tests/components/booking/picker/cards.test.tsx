@@ -199,7 +199,7 @@ describe("BookSteps", () => {
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("About you");
 
     fireEvent.click(day("Book the call"));
-    expect(screen.getAllByRole("alert").map((a) => a.textContent)).toEqual(["Add your name", "Email looks incomplete"]);
+    expect(screen.getAllByRole("alert").map((a) => a.textContent)).toEqual(["Add your name", "That email does not look right"]);
     expect(calls().some(([u]) => u === "/api/book")).toBe(false);
 
     fireEvent.change(screen.getByLabelText(/^Name/), { target: { value: "Ana Lee" } });

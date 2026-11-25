@@ -299,7 +299,7 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
           const data = new FormData(form);
           const no: Record<string, string> = {};
           if (!String(data.get("name") || "").trim()) no.name = "Add your name";
-          if (!looksLikeEmail(String(data.get("email") || "").trim())) no.email = "Email looks incomplete";
+          if (!looksLikeEmail(String(data.get("email") || "").trim())) no.email = "That email does not look right";
           setBad(no);
           setBlank({ name: !String(data.get("name") || "").trim(), email: !String(data.get("email") || "").trim() });
           if (Object.keys(no).length) return form.querySelector<HTMLElement>(`#f-${Object.keys(no)[0]}`)?.focus();

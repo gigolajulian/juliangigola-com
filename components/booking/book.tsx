@@ -447,7 +447,7 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
         e.preventDefault();
         const no: Record<string, string> = {};
         if (!v.name.trim()) no.name = "Add your name";
-        if (!looksLikeEmail(v.email.trim())) no.email = "Email looks incomplete";
+        if (!looksLikeEmail(v.email.trim())) no.email = "That email does not look right";
         setErr(no);
         if (Object.keys(no).length) return e.currentTarget.querySelector<HTMLElement>(`#f-${Object.keys(no)[0]}`)?.focus();
         send(e.currentTarget);

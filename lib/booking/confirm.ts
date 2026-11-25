@@ -88,6 +88,13 @@ export function timeRange(start: string, end?: string) {
 
 const first = (name: string) => name.trim().split(/\s+/)[0] || "there";
 
+// "Portraits" reads "your portrait session", not "your portraits session".
+const SINGULAR: Record<string, string> = { portraits: "portrait", headshots: "headshot", weddings: "wedding" };
+function sessionWord(name: string): string {
+  const s = name.toLowerCase().replace(/ photos$/, "");
+  return SINGULAR[s] ?? s;
+}
+
 export function confirmMail(c: Confirm) {
   const at = timeRange(c.start, c.end);
   const remind = c.kind === "reminder";
@@ -98,14 +105,14 @@ export function confirmMail(c: Confirm) {
   const hour = pacificFormat({ hour: "numeric", minute: "2-digit" }).format(new Date(c.start));
   const head = remind ? (c.call ? "Talk tomorrow." : "See you tomorrow.") : soon ? "Coming up." : "You're in.";
   const lead = soon
-    ? `${first(c.name)}, your ${c.session.toLowerCase().replace(/ photos$/, "")} session is on ${at}.`
+    ? `${first(c.name)}, your ${sessionWord(c.session)} session is on ${at}.`
     : remind
       ? c.call
         ? `${first(c.name)}, your ${c.session.toLowerCase()} is tomorrow at ${hour}.${c.where?.startsWith("http") ? " The Meet link is below." : ""}`
-        : `${first(c.name)}, your ${c.session.toLowerCase().replace(/ photos$/, "")} session is tomorrow at ${hour}. Give yourself time to get there.`
+        : `${first(c.name)}, your ${sessionWord(c.session)} session is tomorrow at ${hour}. Give yourself time to get there.`
       : c.call
         ? `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase()} is booked. ${c.where?.startsWith("http") ? "Join with the Meet link below at that time." : "I'll call you then."}`
-        : `Thanks, ${first(c.name)}. Your ${c.session.toLowerCase().replace(/ photos$/, "")} session is booked. I'll call you before the day to go over the concept, rate and schedule.`;
+        : `Thanks, ${first(c.name)}. Your ${sessionWord(c.session)} session is booked. I'll call you before the day to go over the concept, rate and schedule.`;
   // The length as the booking card says it: "Sat, Nov 8, 10:00 to 11:00 AM PST, 60 minutes".
   const mins = c.end ? Math.round((+new Date(c.end) - +new Date(c.start)) / 60000) : 0;
   const rows: [string, string][] = [
