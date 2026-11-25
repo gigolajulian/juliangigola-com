@@ -7,7 +7,7 @@ describe("SignIn", () => {
   it("hands up the trimmed key, never an empty one", () => {
     const onKey = vi.fn();
     render(<SignIn onKey={onKey} wrong={false} />);
-    const box = screen.getByLabelText("Inbox key or GitHub token");
+    const box = screen.getByLabelText("Admin key or GitHub token");
     fireEvent.change(box, { target: { value: "   " } });
     fireEvent.click(screen.getByRole("button", { name: "Open leads" }));
     expect(onKey).not.toHaveBeenCalled();

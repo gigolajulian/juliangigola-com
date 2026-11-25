@@ -67,14 +67,28 @@ describe("ProofGallery", () => {
     fireEvent.change(screen.getByLabelText("Your name"), { target: { value: " Maya  Ross " } });
     fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open proofs" }).closest("form")!);
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/proof/t1", expect.objectContaining({ method: "POST" })));
-    expect(JSON.parse((fetchMock.mock.calls as unknown as [string, RequestInit][])[0][1].body as string)).toMatchObject({ action: "track", kind: "open", email: "a@b.co", name: "Maya Ross" });
-    expect(await screen.findByRole("heading", { name: "Hey Maya, pick your proofs below." })).toBeTruthy();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledWith("/api/proof/t1/track", expect.objectContaining({ method: "POST" })));
+    expect(JSON.parse((fetchMock.mock.calls as unknown as [string, RequestInit][])[0][1].body as string)).toMatchObject({
+      kind: "open",
+      email: "a@b.co",
+      name: "Maya Ross",
+    });
+    expect(await screen.findByRole("heading", { name: "Hi Maya, pick your proofs below." })).toBeTruthy();
     expect(localStorage.getItem("proof-email")).toBeNull();
   });
 
   it("a tap on the photo opens it, the ring picks it, and frames run in shot order", async () => {
-    render(<ProofGallery token="t1" initial={proof({ frames: [{ id: "a", w: 1, h: 1, t: 200 }, { id: "b", w: 1, h: 1, t: 100 }] })} />);
+    render(
+      <ProofGallery
+        token="t1"
+        initial={proof({
+          frames: [
+            { id: "a", w: 1, h: 1, t: 200 },
+            { id: "b", w: 1, h: 1, t: 100 },
+          ],
+        })}
+      />,
+    );
     fireEvent.change(screen.getByLabelText("Your name"), { target: { value: "Maya" } });
     fireEvent.change(screen.getByLabelText("Your email"), { target: { value: "a@b.co" } });
     fireEvent.submit(screen.getByRole("button", { name: "Open proofs" }).closest("form")!);
@@ -118,11 +132,15 @@ describe("ProofGallery", () => {
   });
 
   it("dates the send from the record and claims the inbox copy only when it went out", () => {
-    const { unmount } = render(<ProofGallery token="t1" initial={proof({ submitted: true, selects: ["a"], submittedAt: "2026-11-03T20:00:00Z", mailed: false })} />);
+    const { unmount } = render(
+      <ProofGallery token="t1" initial={proof({ submitted: true, selects: ["a"], submittedAt: "2026-11-03T20:00:00Z", mailed: false })} />,
+    );
     expect(screen.getByText(/Sent · Nov 3/)).toBeTruthy();
     expect(screen.queryByText(/in your inbox/)).toBeNull();
     unmount();
-    render(<ProofGallery token="t1" initial={proof({ submitted: true, selects: ["a"], submittedAt: "2026-11-03T20:00:00Z", mailed: true })} />);
+    render(
+      <ProofGallery token="t1" initial={proof({ submitted: true, selects: ["a"], submittedAt: "2026-11-03T20:00:00Z", mailed: true })} />,
+    );
     expect(screen.getByText(/A copy is in your inbox/)).toBeTruthy();
   });
 });

@@ -16,6 +16,7 @@ import { isRecord } from "@/lib/json";
 import { HttpError } from "@/lib/http";
 import { localGet, localRemove, localSet } from "@/lib/storage";
 import { GITHUB_API, isGithubToken, REPO } from "@/lib/admin/github-repo";
+import { outbound } from "@/lib/net";
 
 /**
  * Where the editor keeps the GitHub token in the browser. Named here, not
@@ -64,22 +65,15 @@ export type CommitFile = {
 };
 
 /** Lists file paths under a directory at the branch head. Empty if absent. */
-export async function listDirectory(
-  token: string,
-  path: string,
-): Promise<string[]> {
-  const res = await fetch(
-    `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
-    { headers: headers(token), cache: "no-store" },
-  );
+export async function listDirectory(token: string, path: string): Promise<string[]> {
+  const res = await outbound(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`, {
+    headers: headers(token),
+    cache: "no-store",
+  });
   if (res.status === 404) return [];
   if (!res.ok) throw new HttpError(`GitHub said ${res.status}: ${await failureMessage(res)}`, res.status);
   const body = (await res.json()) as { type: string; path: string }[];
-  return Array.isArray(body)
-    ? body
-        .filter((e) => e.type === "file")
-        .map((e) => e.path)
-    : [];
+  return Array.isArray(body) ? body.filter((e) => e.type === "file").map((e) => e.path) : [];
 }
 
 /** GitHub's message on a failed response, or "unknown error" when it sent none. */
@@ -95,18 +89,14 @@ const headers = (token: string) => ({
 });
 
 /**
- * One request, with GitHub's error message surfaced rather than a status code.
+ * One request, with GitHub's error message surfaced and its status on the `HttpError`.
  *
  * A 409 here is not a conflict to retry blindly: it means someone — or another
  * tab — moved the branch since this page loaded, and the safe move is to start
  * again from the new head.
  */
-async function gh<T>(
-  token: string,
-  path: string,
-  init?: { method?: string; body?: unknown },
-): Promise<T> {
-  const res = await fetch(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}${path}`, {
+async function gh<T>(token: string, path: string, init?: { method?: string; body?: unknown }): Promise<T> {
+  const res = await outbound(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}${path}`, {
     method: init?.method ?? "GET",
     headers: { ...headers(token), "Content-Type": "application/json" },
     body: init?.body ? JSON.stringify(init.body) : undefined,
@@ -115,12 +105,13 @@ async function gh<T>(
 
   if (!res.ok) {
     const detail = await failureMessage(res);
-    throw new Error(
+    throw new HttpError(
       res.status === 401
         ? "GitHub rejected the token. It has probably expired."
         : res.status === 403
           ? `GitHub refused: ${detail}. The token needs Contents: read and write on this repo.`
           : `GitHub said ${res.status}: ${detail}`,
+      res.status,
     );
   }
   return (await res.json().catch(() => null)) as T;
@@ -147,15 +138,9 @@ export async function commitFiles({
   if (!files.length) throw new Error("Nothing to commit.");
 
   // Where the branch is *now*, not where it was when the page loaded.
-  const ref = await gh<{ object: { sha: string } }>(
-    token,
-    `/git/ref/heads/${REPO.branch}`,
-  );
+  const ref = await gh<{ object: { sha: string } }>(token, `/git/ref/heads/${REPO.branch}`);
   const parent = ref.object.sha;
-  const base = await gh<{ tree: { sha: string } }>(
-    token,
-    `/git/commits/${parent}`,
-  );
+  const base = await gh<{ tree: { sha: string } }>(token, `/git/commits/${parent}`);
 
   // Sequential, not parallel. A dozen simultaneous multi-megabyte uploads
   // compete for the same upstream bandwidth and make the progress meaningless;
@@ -208,20 +193,15 @@ export async function commitFiles({
 }
 
 /** Reads a text file at the branch head. `null` when it does not exist yet. */
-export async function readFile(
-  token: string,
-  path: string,
-): Promise<string | null> {
-  const res = await fetch(
-    `${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`,
-    { headers: headers(token), cache: "no-store" },
-  );
+export async function readFile(token: string, path: string): Promise<string | null> {
+  const res = await outbound(`${GITHUB_API}/repos/${REPO.owner}/${REPO.repo}/contents/${path}?ref=${REPO.branch}`, {
+    headers: headers(token),
+    cache: "no-store",
+  });
   if (res.status === 404) return null;
   if (!res.ok) throw new HttpError(`GitHub said ${res.status}: ${await failureMessage(res)}`, res.status);
   const body = (await res.json()) as { content?: string };
 
   const binary = atob(String(body.content).replace(/\s/g, ""));
-  return new TextDecoder().decode(
-    Uint8Array.from(binary, (c) => c.charCodeAt(0)),
-  );
+  return new TextDecoder().decode(Uint8Array.from(binary, (c) => c.charCodeAt(0)));
 }

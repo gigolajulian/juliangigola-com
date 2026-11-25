@@ -1,13 +1,25 @@
-import { BOOKING_FEE, DEFAULT_HOURS, EVENTS, HEADS_UP_HOURS, MAX_MOVES, MOVE_HOURS, REFUND_HOURS, type Booking, type Hours } from "@/lib/booking/rules";
+import {
+  BOOKING_FEE,
+  DEFAULT_HOURS,
+  EVENTS,
+  HEADS_UP_HOURS,
+  MAX_MOVES,
+  MOVE_HOURS,
+  REFUND_HOURS,
+  type Booking,
+  type Hours,
+} from "@/lib/booking/rules";
 import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { bookingEnquiry, enquiryKey, summary } from "@/lib/leads/enquiry";
 import { looksLikeEmail } from "@/lib/utils";
 import { takesDeposit, LEGACY_DEPOSIT } from "@/lib/leads/deposit-terms";
 import { recordLead, type LeadStore } from "@/lib/leads/lead-store";
-import { toNotion } from "@/lib/leads/sync/notion-lead";
+import { toNotion } from "@/lib/leads/notion-lead";
 import { openNow, type HoursKV } from "@/lib/booking/slots";
-import { statusOf } from "@/lib/http";
+import { HttpError, statusOf } from "@/lib/http";
+import { asRecord } from "@/lib/json";
+import { outbound } from "@/lib/net";
 
 const MINUTE_MS = 6e4;
 const HOUR_MS = 36e5;
@@ -60,6 +72,16 @@ export type BookingRecord = {
 };
 
 /** What the DO keeps its records in: its own storage, or a Map in tests. */
+/** `take`: the day's count for `key`, one more if under `cap`. Called inside the lock's queue, so two never race. */
+export async function takeQuota(store: Store, key: string, day: string, cap: number) {
+  const k = `quota:${key}`;
+  const held = await store.get<{ day: string; count: number }>(k);
+  const count = held?.day === day ? held.count : 0;
+  if (count >= cap) return { ok: false, count };
+  await store.put(k, { day, count: count + 1 });
+  return { ok: true, count };
+}
+
 export type Store = {
   get<T>(key: string): Promise<T | undefined>;
   put(key: string, value: unknown): Promise<void>;
@@ -72,7 +94,7 @@ const cap = (s: unknown, n = 500) => (typeof s === "string" ? s.trim().slice(0, 
 /** The visitor's booking, checked, or the reason it is not one. `call`: a free call (`app/api/book`), not a paid session. */
 export type Parsed = { ok: true; booking: Booking & { via?: CallVia } } | { ok: false; reason: string };
 export function parseBooking(raw: unknown, call = false): Parsed {
-  const b = (raw ?? {}) as { [k: string]: unknown };
+  const b = asRecord(raw);
   const slug = cap(b.slug);
   if (call ? !EVENTS[slug]?.call : !takesDeposit(slug)) return { ok: false, reason: call ? "Not a call." : "Not a paid session." };
   const start = cap(b.start);
@@ -98,8 +120,9 @@ export function parseBooking(raw: unknown, call = false): Parsed {
     where: cap(b.where) || undefined,
     notes: cap(b.notes) || undefined,
   };
-  // A free call also says how it is held; anything else there is no choice.
-  if (call) return { ok: true, booking: { ...booking, via: b.via === "Phone" || b.via === "Video" ? b.via : undefined } };
+  // A free call also says how it is held; anything else there is no choice. It has no place (the picker never asks,
+  // `slots` answers where: false), so none is kept: a stranger's text never reaches the client's mail as "Where".
+  if (call) return { ok: true, booking: { ...booking, where: undefined, via: b.via === "Phone" || b.via === "Video" ? b.via : undefined } };
   return { ok: true, booking };
 }
 
@@ -115,13 +138,33 @@ const intentKey = (intent: string) => `i:${intent}`;
 const newId = () => crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
 /** What the client's page may show: no email, no phone, no deposit id. */
-export const clientView = (r: BookingRecord) => ({ id: r.id, slug: r.slug, session: r.session, start: r.start, end: r.end, firstStart: r.firstStart, where: r.where, moves: r.moves ?? 0, fee: r.fee, paid: !!r.intent, deposit: depositPaid(r), cancelled: !!r.cancelled });
+export const clientView = (r: BookingRecord) => ({
+  id: r.id,
+  slug: r.slug,
+  session: r.session,
+  start: r.start,
+  end: r.end,
+  firstStart: r.firstStart,
+  where: r.where,
+  moves: r.moves ?? 0,
+  fee: r.fee,
+  paid: !!r.intent,
+  deposit: depositPaid(r),
+  cancelled: !!r.cancelled,
+});
 
 /** The record by its id. */
 export const findBooking = (store: Store, id: string) => store.get<BookingRecord>(recKey(id));
 export const saveBooking = (store: Store, r: BookingRecord) => store.put(recKey(r.id), r);
-/** Julian's hours as set from the lead desk, or the defaults. */
-export const readHours = async (store: Store) => (await store.get<Hours>("hours")) ?? DEFAULT_HOURS;
+/** Today's date in Julian's zone, "2026-11-24": the hours drop the dates before it. */
+export const todayPT = (now = Date.now()) => new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(now);
+/** Julian's hours as set from the lead desk, or the defaults. Dates before today are dropped: they can never be booked again. */
+export const readHours = async (store: Store, now = Date.now()): Promise<Hours> => {
+  const h = (await store.get<Hours>("hours")) ?? DEFAULT_HOURS;
+  if (!h.days) return h;
+  const today = todayPT(now);
+  return { ...h, days: Object.fromEntries(Object.entries(h.days).filter(([d]) => d >= today)) };
+};
 export const writeHours = (store: Store, h: Hours) => store.put("hours", h);
 export const allBookings = async (store: Store) => [...(await store.list<BookingRecord>({ prefix: "b:" })).values()];
 
@@ -192,8 +235,17 @@ export async function bookOwn(store: Store, secret: string | undefined, b: BookI
     ...(b.intent ? { fee: BOOKING_FEE } : {}),
     at: new Date().toISOString(),
   };
-  await saveBooking(store, record);
-  if (b.intent) await store.put(intentKey(b.intent), id);
+  try {
+    // The intent first: a record without it would be booked again by the deposit's retry.
+    if (b.intent) await store.put(intentKey(b.intent), id);
+    await saveBooking(store, record);
+  } catch (e) {
+    // Unsaved, the event would hold the time against the retry and stay after the refund: take it off again.
+    await gcal(secret, `/calendars/primary/events/${encodeURIComponent(ev.id)}?sendUpdates=none`, { method: "DELETE" }).catch(
+      (d: unknown) => console.error("booking event left after a failed save", ev.id, String(d)),
+    );
+    throw e;
+  }
   return { ok: true, record };
 }
 
@@ -213,7 +265,9 @@ export async function recordBooking(env: BookingEnv, r: BookingRecord, deposit?:
       startTime: r.start,
       endTime: r.end,
       location: r.where,
-      additionalNotes: [r.phone && `Phone: ${r.phone}`, r.via && `Call: ${r.via}`, r.notes, `Booked on the site (${r.id}).`].filter(Boolean).join("\n"),
+      additionalNotes: [r.phone && `Phone: ${r.phone}`, r.via && `Call: ${r.via}`, r.notes, `Booked on the site (${r.id}).`]
+        .filter(Boolean)
+        .join("\n"),
       attendees: [{ name: r.name, email: r.email }],
     },
     now,
@@ -226,11 +280,24 @@ export async function recordBooking(env: BookingEnv, r: BookingRecord, deposit?:
     console.error("booking inbox", String(e));
   }
   // The lead desk: the person's row moves to Call booked or Confirmed.
-  await recordLead(env, r.email, { event: { at: r.at, kind: r.call ? "call" : "booking", ref: r.id, note: r.session }, name: r.name, kind: r.slug, when: r.start });
-  await toNotion(env.NOTION_TOKEN, { stored, status: r.call ? "Call booked" : "Confirmed", kind: r.slug, calUid: r.id, shootDate: r.call ? undefined : r.start });
+  await recordLead(env, r.email, {
+    event: { at: r.at, kind: r.call ? "call" : "booking", ref: r.id, note: r.session },
+    name: r.name,
+    kind: r.slug,
+    when: r.start,
+  });
+  await toNotion(env.NOTION_TOKEN, {
+    stored,
+    status: r.call ? "Call booked" : "Confirmed",
+    kind: r.slug,
+    calUid: r.id,
+    shootDate: r.call ? undefined : r.start,
+  });
 }
 
-export type ChangeResult = { ok: true; record: BookingRecord; was: BookingRecord } | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" | "moves" | "late" };
+export type ChangeResult =
+  | { ok: true; record: BookingRecord; was: BookingRecord }
+  | { ok: false; reason: "missing" | "past" | "cancelled" | "taken" | "moves" | "late" };
 
 /** Cancels booking `id`: the event leaves hello@'s calendar, the record is marked. Call it only through the lock. */
 export async function cancelOwn(store: Store, secret: string | undefined, id: string): Promise<ChangeResult> {
@@ -251,7 +318,13 @@ export async function cancelOwn(store: Store, secret: string | undefined, id: st
 }
 
 /** Moves booking `id` to `start` if that time is open. Call it only through the lock. */
-export async function rescheduleOwn(store: Store, secret: string | undefined, id: string, start: string, kv?: HoursKV): Promise<ChangeResult> {
+export async function rescheduleOwn(
+  store: Store,
+  secret: string | undefined,
+  id: string,
+  start: string,
+  kv?: HoursKV,
+): Promise<ChangeResult> {
   const was = await findBooking(store, id);
   if (!was) return { ok: false, reason: "missing" };
   if (was.cancelled) return { ok: false, reason: "cancelled" };
@@ -261,7 +334,8 @@ export async function rescheduleOwn(store: Store, secret: string | undefined, id
   if (Date.parse(was.start) - Date.now() < MOVE_HOURS * HOUR_MS) return { ok: false, reason: "late" };
   const rule = EVENTS[was.slug];
   const t = Date.parse(start);
-  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) }))) return { ok: false, reason: "taken" };
+  if (!rule || isNaN(t) || !(await openNow(secret, was.slug, start, { mine: was, kv, hours: await readHours(store) })))
+    return { ok: false, reason: "taken" };
   const end = new Date(t + rule.length * MINUTE_MS).toISOString();
   await gcal(secret, `/calendars/primary/events/${encodeURIComponent(was.eventId)}?sendUpdates=none`, {
     method: "PATCH",
@@ -318,7 +392,9 @@ export async function markReminded(store: Store, id: string, now = Date.now()) {
 
 /* ── reaching the lock from a route ───────────────────────────── */
 
-type LockEnv = { BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } } };
+export type LockEnv = {
+  BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } };
+};
 
 /** What the booking flow reads off the Worker's env: the lock, the lead store, the mailers, Stripe and the link secret. */
 export type BookingEnv = LeadStore &
@@ -332,7 +408,11 @@ export type BookingEnv = LeadStore &
   };
 
 /** Julian's hours from the lock, or the defaults when it cannot answer (the lock rechecks every booking anyway). */
-export const liveHours = (env: LockEnv) => lockOp(env, "hours", null).then((x) => x.hours, () => DEFAULT_HOURS);
+export const liveHours = (env: LockEnv) =>
+  lockOp(env, "hours", null).then(
+    (x) => x.hours,
+    () => DEFAULT_HOURS,
+  );
 
 /** Each op the lock answers (`worker/booking-lock.ts`): [argument, answer]. */
 export type LockOps = {
@@ -345,18 +425,27 @@ export type LockOps = {
   headed: [string, { ok: boolean }];
   hours: [null, { hours: Hours }];
   setHours: [Hours, { hours: Hours }];
+  /** One more against a daily quota (`key`, `day`), if it is under `cap`: race-safe, the lock runs one op at a time. */
+  take: [{ key: string; day: string; cap: number }, { ok: boolean; count: number }];
   get: [string, { record: BookingRecord | null }];
 };
+
+/** The longest a lock call may take: a booking inserts a Calendar event inside it. */
+const LOCK_MS = 25_000;
 
 /** One call to the one lock (`worker/booking-lock.ts`). Throws when it is missing or fails. */
 export async function lockOp<K extends keyof LockOps>(env: LockEnv, op: K, arg: LockOps[K][0]): Promise<LockOps[K][1]> {
   const ns = env.BOOKING_LOCK;
   if (!ns) throw new Error("BOOKING_LOCK is not bound");
-  const res = await ns.get(ns.idFromName("hello@")).fetch("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }) });
+  const stub = ns.get(ns.idFromName("hello@"));
+  // A timeout throws like any lock error: deposit's ask-again path (#1512) handles a lost answer, so no retry here.
+  const res = await outbound("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }), timeoutMs: LOCK_MS }, (u, i) =>
+    stub.fetch(String(u), i),
+  );
   if (!res.ok) {
     // A failing lock may answer plain text: keep the status when the body is not JSON.
     const out = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(`booking lock ${op}: ${out.error ?? res.status}`);
+    throw new HttpError(`booking lock ${op}: ${out.error ?? res.status}`, res.status);
   }
   return (await res.json()) as LockOps[K][1];
 }

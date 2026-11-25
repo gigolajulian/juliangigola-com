@@ -65,7 +65,8 @@ export function sealer(secret: string | undefined): Promise<Sealer> | null {
 }
 
 async function make(raw: Uint8Array): Promise<Sealer> {
-  const derive = async (label: string) => new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array([...enc.encode(label), ...raw])));
+  const derive = async (label: string) =>
+    new Uint8Array(await crypto.subtle.digest("SHA-256", new Uint8Array([...enc.encode(label), ...raw])));
   const aes = await crypto.subtle.importKey("raw", await derive("jg-leads:seal"), "AES-GCM", false, ["encrypt", "decrypt"]);
   const mac = await crypto.subtle.importKey("raw", await derive("jg-leads:id"), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const hmac = async (text: string) => {

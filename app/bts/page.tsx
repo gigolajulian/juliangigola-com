@@ -9,11 +9,9 @@ import { pad } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Behind the scenes",
-  description:
-    "Behind the scenes on my shoots in San Francisco and the Bay Area, shoot by shoot.",
+  description: "Behind the scenes of my shoots across San Francisco and the Bay Area.",
   alternates: { canonical: "/bts" },
 };
-
 
 /* Every shoot that has BTS, in the running order, one row each: the name
    and who shot it on the left, the frames in a grid on the right. Linked
@@ -37,7 +35,9 @@ export default function BtsPage() {
               <span className="lbl mute">{pad(i + 1)}</span>
               <h2>{titleCase(p.headline ?? p.name)}</h2>
               <BtsCredit bts={p.bts!} />
-              <Link className="btn fill" href={`/portfolio/${p.slug}`}>See the shoot</Link>
+              <Link className="btn fill" href={`/portfolio/${p.slug}`}>
+                See the shoot
+              </Link>
             </div>
             <div className="bts-main">
               <BtsPageGrid bts={p.bts!} name={p.name} />
@@ -46,8 +46,20 @@ export default function BtsPage() {
                 <p className="lbl mute">The shoot · {pad(p.images.length)} frames</p>
                 <div className="bts-frames">
                   {p.images.slice(0, 4).map((f, k) => (
-                    <Link key={f.src} href={`/portfolio/${p.slug}`} className="bts-f" aria-label={k === 3 ? `See all ${p.images.length} frames of ${p.name}` : undefined} tabIndex={k === 3 ? 0 : -1}>
-                      <Image src={f.src} alt={f.alt || `${p.name} by Julian Gigola`} fill sizes="(max-width: 800px) 50vw, 18vw" style={{ objectFit: "cover", background: f.color }} />
+                    <Link
+                      key={f.src}
+                      href={`/portfolio/${p.slug}`}
+                      className="bts-f"
+                      aria-label={k === 3 ? `See all ${p.images.length} frames of ${p.name}` : undefined}
+                      tabIndex={k === 3 ? 0 : -1}
+                    >
+                      <Image
+                        src={f.src}
+                        alt={f.alt || `${p.name} by Julian Gigola`}
+                        fill
+                        sizes="(max-width: 800px) 50vw, 18vw"
+                        style={{ objectFit: "cover", background: f.color }}
+                      />
                       {k === 3 && p.images.length > 4 ? <span className="bts-more lbl">+{p.images.length - 4} · See the shoot</span> : null}
                     </Link>
                   ))}

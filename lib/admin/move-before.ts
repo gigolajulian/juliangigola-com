@@ -4,12 +4,7 @@
  * before it, so a drop always puts the dragged item on the spot it was
  * dropped on. Null when nothing moves: the same key, or a key not in the list.
  */
-export function moveBefore<T>(
-  items: readonly T[],
-  from: string,
-  to: string,
-  keyOf: (item: T) => string,
-): T[] | null {
+export function moveBefore<T>(items: readonly T[], from: string, to: string, keyOf: (item: T) => string): T[] | null {
   if (from === to) return null;
   const next = [...items];
   const at = next.findIndex((x) => keyOf(x) === from);

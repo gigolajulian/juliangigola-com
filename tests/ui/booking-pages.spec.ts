@@ -18,7 +18,11 @@ for (const r of RATIOS.filter((x) => !x.touch)) {
     const on = await page.evaluate(() => {
       const hit = document.elementFromPoint(innerWidth / 2, innerHeight / 2);
       const secs = [...document.querySelectorAll<HTMLElement>("section[data-label]")];
-      return { path: location.pathname, on: hit?.closest<HTMLElement>("section[data-label]")?.dataset.label, last: secs.at(-1)?.dataset.label };
+      return {
+        path: location.pathname,
+        on: hit?.closest<HTMLElement>("section[data-label]")?.dataset.label,
+        last: secs.at(-1)?.dataset.label,
+      };
     });
     expect(on.path).toBe("/portraits");
     expect(on.on).toBe(on.last);

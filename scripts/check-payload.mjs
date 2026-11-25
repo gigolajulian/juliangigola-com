@@ -17,13 +17,7 @@
  */
 
 import assert from "node:assert/strict";
-import {
-  projectsFile,
-  tidySequence,
-  sameJson,
-  adoptable,
-  withOverride,
-} from "../lib/admin/admin-payload.ts";
+import { projectsFile, tidySequence, sameJson, adoptable, withOverride } from "../lib/admin/admin-payload.ts";
 
 const edit = {
   hidden: [],
@@ -73,27 +67,15 @@ const edit = {
     ...edit,
     avatars: { anisajadee: "/people/anisajadee.jpg" },
   });
-  assert.deepEqual(
-    out.avatars,
-    { anisajadee: "/people/anisajadee.jpg" },
-    "a collaborator's face is committed",
-  );
+  assert.deepEqual(out.avatars, { anisajadee: "/people/anisajadee.jpg" }, "a collaborator's face is committed");
 }
 
 // And adopted back off the repository, like every other map.
 {
-  const back = adoptable(
-    { projects: [], avatars: { anisajadee: "/people/anisajadee.jpg" } },
-    edit,
-  );
+  const back = adoptable({ projects: [], avatars: { anisajadee: "/people/anisajadee.jpg" } }, edit);
+  assert.deepEqual(back.avatars, { anisajadee: "/people/anisajadee.jpg" }, "faces come back off the file");
   assert.deepEqual(
-    back.avatars,
-    { anisajadee: "/people/anisajadee.jpg" },
-    "faces come back off the file",
-  );
-  assert.deepEqual(
-    adoptable({ projects: [] }, { ...edit, avatars: { x: "/people/x.jpg" } })
-      .avatars,
+    adoptable({ projects: [] }, { ...edit, avatars: { x: "/people/x.jpg" } }).avatars,
     {},
     "a file with no faces means none, not the ones the build had",
   );
@@ -123,11 +105,7 @@ const edit = {
     covers: { "artist-presskit": "/work/l3na/02.jpg" },
   });
   assert.deepEqual(out.order, ["valgur", "cyber1a"], "order is committed");
-  assert.deepEqual(
-    out.covers,
-    { "artist-presskit": "/work/l3na/02.jpg" },
-    "picked covers are committed",
-  );
+  assert.deepEqual(out.covers, { "artist-presskit": "/work/l3na/02.jpg" }, "picked covers are committed");
 }
 
 // `order` is copied, not aliased: the editor holds its own array and a publish
@@ -165,11 +143,7 @@ const edit = {
 // The tidy on its own.
 {
   assert.deepEqual(tidySequence([]), [], "nothing to tidy");
-  assert.deepEqual(
-    tidySequence(["/a.jpg", { kind: "text", body: "\n\t " }]),
-    ["/a.jpg"],
-    "whitespace is not writing",
-  );
+  assert.deepEqual(tidySequence(["/a.jpg", { kind: "text", body: "\n\t " }]), ["/a.jpg"], "whitespace is not writing");
 }
 
 // Is anything unpublished? The comparison behind the Publish button.
@@ -196,32 +170,20 @@ const edit = {
 
   // Records keyed by slug: refiling a project and refiling it back is not one
   // either, whichever order the keys ended up in.
-  assert.ok(
-    sameJson({ a: "x", b: "y" }, { b: "y", a: "x" }),
-    "slug order is not an edit",
-  );
+  assert.ok(sameJson({ a: "x", b: "y" }, { b: "y", a: "x" }), "slug order is not an edit");
 
   // But a real change still is, at every depth.
-  assert.ok(
-    !sameJson(built, { ...built, coverSlug: "b" }),
-    "a changed field is an edit",
-  );
+  assert.ok(!sameJson(built, { ...built, coverSlug: "b" }), "a changed field is an edit");
   assert.ok(!sameJson({ a: "x" }, { a: "x", b: "y" }), "an added key is an edit");
   assert.ok(!sameJson({ a: "x", b: "y" }, { a: "x" }), "a removed key is an edit");
-  assert.ok(
-    !sameJson({ s: [{ n: 1 }] }, { s: [{ n: 2 }] }),
-    "a change inside an array of objects is an edit",
-  );
+  assert.ok(!sameJson({ s: [{ n: 1 }] }, { s: [{ n: 2 }] }), "a change inside an array of objects is an edit");
 
   // Array order counts — a running order is a sequence, and dragging is the edit.
   assert.ok(!sameJson(["a", "b"], ["b", "a"]), "reordering a list is an edit");
 
   // An omitted optional field and one explicitly undefined mean the same thing;
   // `lib/content.ts` produces the second from the first.
-  assert.ok(
-    sameJson({ q: "x" }, { q: "x", role: undefined }),
-    "absent is undefined",
-  );
+  assert.ok(sameJson({ q: "x" }, { q: "x", role: undefined }), "absent is undefined");
 }
 
 // Reading the repository's own list back in, which is what the editor
@@ -243,10 +205,7 @@ const edit = {
 
   // The round trip: what `projectsFile` writes is what `adoptable` reads.
   const file = projectsFile(null, build);
-  assert.ok(
-    sameJson(adoptable(file, build), build),
-    "a manifest survives the round trip",
-  );
+  assert.ok(sameJson(adoptable(file, build), build), "a manifest survives the round trip");
 
   // The one that matters — `projectsFile` deletes an empty field rather than
   // writing it, so an absent field means empty and must not fall back to the
@@ -261,28 +220,13 @@ const edit = {
   const read = adoptable(emptied, build);
   assert.deepEqual(read.order, [], "an absent order reads as empty");
   assert.deepEqual(read.covers, {}, "an absent cover pick reads as empty");
-  assert.deepEqual(
-    read.hidden,
-    build.hidden,
-    "the fields that were written survive",
-  );
+  assert.deepEqual(read.hidden, build.hidden, "the fields that were written survive");
 
   // Present but malformed — a hand-edited file. Keeping the stale value beats
   // blanking something real.
-  const bad = adoptable(
-    { projects: [], order: "a,b", covers: { editorial: 7 } },
-    build,
-  );
-  assert.deepEqual(
-    bad.order,
-    build.order,
-    "a string where a list belongs falls back",
-  );
-  assert.deepEqual(
-    bad.covers,
-    build.covers,
-    "a number where a path belongs falls back",
-  );
+  const bad = adoptable({ projects: [], order: "a,b", covers: { editorial: 7 } }, build);
+  assert.deepEqual(bad.order, build.order, "a string where a list belongs falls back");
+  assert.deepEqual(bad.covers, build.covers, "a number where a path belongs falls back");
 
   // A file this editor has never written to keeps nothing it did not say.
   assert.ok(
@@ -297,7 +241,7 @@ const edit = {
       copy: {},
       order: [],
       covers: {},
-    avatars: {},
+      avatars: {},
     }),
     "a bare file reads as a bare manifest",
   );
@@ -313,12 +257,7 @@ const edit = {
   // override", which lays the gallery out in the harvester's order and throws
   // away the earlier edit.
   assert.deepEqual(
-    withOverride(
-      { mirage: ["/work/mirage/01.jpg"] },
-      "mirage",
-      null,
-      published,
-    ),
+    withOverride({ mirage: ["/work/mirage/01.jpg"] }, "mirage", null, published),
     published,
     "undo restores what is published",
   );
@@ -331,27 +270,14 @@ const edit = {
   );
 
   // A real edit is stored, and the other galleries are untouched.
-  const edited = withOverride(
-    published,
-    "sago",
-    ["/work/sago/02.jpg"],
-    published,
-  );
+  const edited = withOverride(published, "sago", ["/work/sago/02.jpg"], published);
   assert.deepEqual(edited.sago, ["/work/sago/02.jpg"], "an edit is stored");
-  assert.deepEqual(
-    edited.mirage,
-    published.mirage,
-    "other galleries are untouched",
-  );
+  assert.deepEqual(edited.mirage, published.mirage, "other galleries are untouched");
   assert.notEqual(edited, published, "the map is not mutated in place");
 
   // An intentionally empty list is not an undo — it is a credit block someone
   // emptied on purpose, and it publishes.
-  assert.deepEqual(
-    withOverride({}, "sago", [], published).sago,
-    [],
-    "an empty list is a value, not an absence",
-  );
+  assert.deepEqual(withOverride({}, "sago", [], published).sago, [], "an empty list is a value, not an absence");
 }
 
 /* The guard in `lib/admin/publish.ts` that refuses a publish which
@@ -365,15 +291,8 @@ const edit = {
   const baseline = { ...edit };
 
   // The repo grew a credit block this page has never seen. Refuse.
-  const ahead = adoptable(
-    { projects: [], trash: [], credits: { "i-wanna-be-a-human": [{ role: "Model" }] } },
-    baseline,
-  );
-  assert.equal(
-    sameJson(ahead, baseline),
-    false,
-    "a credit block added since this page loaded is not the baseline",
-  );
+  const ahead = adoptable({ projects: [], trash: [], credits: { "i-wanna-be-a-human": [{ role: "Model" }] } }, baseline);
+  assert.equal(sameJson(ahead, baseline), false, "a credit block added since this page loaded is not the baseline");
 
   // The repo is exactly where this page left it. Publish.
   const level = adoptable({ projects: [], trash: [] }, baseline);
@@ -419,19 +338,11 @@ const edit = {
     bts: { p: { by: "x", frames: [{ src: "/work/p/bts/01.jpg" }] } },
   };
   const back = adoptable(projectsFile({ projects: [], trash: [] }, rich), edit);
-  assert.equal(
-    sameJson(back, rich),
-    true,
-    "every field projectsFile writes is a field adoptable reads back",
-  );
+  assert.equal(sameJson(back, rich), true, "every field projectsFile writes is a field adoptable reads back");
   const written = Object.keys(projectsFile({ projects: [], trash: [] }, rich))
     .filter((k) => k !== "projects" && k !== "trash")
     .sort();
-  assert.deepEqual(
-    written,
-    Object.keys(rich).sort(),
-    "projectsFile writes exactly the manifest's fields and no others",
-  );
+  assert.deepEqual(written, Object.keys(rich).sort(), "projectsFile writes exactly the manifest's fields and no others");
 }
 
 // BTS cleared of every frame leaves no entry; none left, no key.

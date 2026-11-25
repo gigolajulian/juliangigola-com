@@ -3,7 +3,7 @@ import type { Sealer } from "@/lib/seal";
 import type { InboxKV } from "@/lib/kv";
 import { readLead, writeLead } from "@/lib/leads/lead-store";
 import { applyLeadEvent, type LeadEvent, type Paper } from "@/lib/leads/leads";
-import { notionPaper } from "@/lib/leads/sync/notion-lead";
+import { notionPaper } from "@/lib/leads/notion-lead";
 
 /** Never throws: the contract is already stored, and a lead that failed to update must not undo a signature. */
 export async function contractStep(kv: InboxKV, s: Sealer, leadId: string, paper: Paper, event: LeadEvent, notion?: string) {

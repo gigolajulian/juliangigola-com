@@ -9,7 +9,8 @@ vi.mock("@/lib/leads/lead-desk", async (actual) => ({ ...(await actual<typeof im
 const call = deskCall as unknown as Mock;
 
 const iso = new Date().toISOString();
-const on = (email: string, name = "Someone") => ({ id: email, email, name, stage: "Inquiry", stageAt: iso, firstAt: iso, lastAt: iso }) as LeadSummary;
+const on = (email: string, name = "Someone") =>
+  ({ id: email, email, name, stage: "Inquiry", stageAt: iso, firstAt: iso, lastAt: iso }) as LeadSummary;
 const blank = { name: "", email: "", ig: "", phone: "" };
 
 describe("sameAs", () => {
@@ -34,6 +35,11 @@ describe("NewLeadDesk", () => {
     fireEvent.change(screen.getByLabelText(/Instagram/), { target: { value: "@ana" } });
     fireEvent.click(add);
     await waitFor(() => expect(done).toHaveBeenCalledWith("n1", { email: "ig:ana" }));
-    expect(JSON.parse(String(call.mock.calls[0][0].body))).toMatchObject({ name: "Ana", ig: "@ana", stage: "Inquiry", source: "Instagram DM" });
+    expect(JSON.parse(String(call.mock.calls[0][0].body))).toMatchObject({
+      name: "Ana",
+      ig: "@ana",
+      stage: "Inquiry",
+      source: "Instagram DM",
+    });
   });
 });

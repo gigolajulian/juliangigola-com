@@ -20,7 +20,11 @@ export default async function Image({ params }: { params: Promise<{ slug: string
   const page = pageForSession(slug);
   /* Julian's picks for the session when it has them, else its covers. */
   const chosen = CARD_PICKS[slug]?.map((i) => page?.picks?.[i]).filter((x): x is string => !!x);
-  const frames = chosen?.length ? await framesOf(chosen) : page?.picks?.length ? await framesOf(page.picks) : (page?.tiles ?? []).map((t) => t.frame);
+  const frames = chosen?.length
+    ? await framesOf(chosen)
+    : page?.picks?.length
+      ? await framesOf(page.picks)
+      : (page?.tiles ?? []).map((t) => t.frame);
   return renderCard({
     kicker: "Book a session",
     title: m?.name ?? (isSession(slug) ? SESSIONS[slug].name : slug[0].toUpperCase() + slug.slice(1)),

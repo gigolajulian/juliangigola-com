@@ -96,4 +96,14 @@ export const ALT: Record<string, string> = {
   "/work/sian/05.jpg": "Close-up of a person with long dark hair looking up and away, on white",
   "/work/sian/06.jpg": "Person in a black dress and heeled boots seated on the floor, small in a wide white frame",
   "/work/sian/07.jpg": "Person in a black dress and thigh-high stockings kneeling, one hand on the opposite shoulder, on white",
+
+  // JENIN, Studio digitals
+  "/work/jenin/01.jpg": "Person with a dark ponytail in a black tank top and jeans, turned three-quarters to camera on white",
+  "/work/jenin/02.jpg": "Person with long dark hair down in a black tank top, close front view on white seamless",
+  "/work/jenin/03.jpg": "Full-length front view of a person in a black tank top, wide-leg jeans and black flats on white",
+  "/work/jenin/04.jpg": "Full-length profile of a person with long dark hair in a black tank top and jeans on white",
+  "/work/jenin/05.jpg": "Close profile of a person with a dark ponytail in a black tank top on white seamless",
+  "/work/jenin/06.jpg": "Full-length back view of a person with long dark hair, black tank top and jeans, on white",
+  "/work/jenin/07.jpg": "Person with long dark hair laughing in a black tank top, close front view on white seamless",
+  "/work/jenin/08.jpg": "Person with dark hair pulled back in a black tank top, close front view on white seamless",
 };

@@ -24,8 +24,6 @@
 .ed-steps button:disabled { opacity: 1; cursor: default; }
 .ed-steps b { font-weight: 500; color: var(--foreground); margin-right: 0.5rem; }
 .ed-steps [aria-current] { color: var(--foreground); border-color: var(--accent); }
-.ed-steps [data-done] { color: var(--foreground); }
-@media (hover: hover) { .ed-steps [data-done]:not(:disabled):hover { opacity: 0.6; } }
 .ed-body { flex: 1; min-height: 0; overflow: hidden; padding: 1.5rem var(--ed-x) 0; display: flex; flex-direction: column; }
 .ed-l, .ed-r { display: flex; flex-direction: column; min-width: 0; }
 .ed-floor { flex-shrink: 0; padding: 1rem var(--ed-x) 1.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
@@ -33,10 +31,8 @@
 .ed-btn { position: relative; flex-shrink: 0; font: 500 0.6875rem/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; background: var(--foreground); color: var(--background); padding: 1rem 1.375rem; border-radius: 2px; min-height: 3rem; }
 .ed-btn:disabled { opacity: 0.35; pointer-events: none; }
 .ed-btn[data-accent] { background: var(--accent); color: var(--accent-foreground); }
-.ed-btn[data-bad] { background: var(--ed-bad); color: oklch(0.97 0.004 80); opacity: 1; }
+
 @media (hover: hover) { .ed-btn:hover { opacity: 0.85; } }
-.ed-quiet { position: relative; color: var(--muted-foreground); }
-@media (hover: hover) { .ed-quiet:hover { color: var(--foreground); } }
 
 /* the month or week over the days */
 .ed-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 0.75rem 1rem; flex-wrap: wrap; }
@@ -75,8 +71,6 @@
 .ed-day[aria-pressed="true"], .ed-cell[aria-pressed="true"] { background: var(--foreground); color: var(--background); }
 .ed-day[aria-pressed="true"] .label { color: var(--background); }
 .ed-day[aria-pressed="true"] i, .ed-cell[aria-pressed="true"] i { background: var(--background); }
-@keyframes ed-bt-in { from { opacity: 0; transform: translateY(0.35em); filter: blur(6px); } }
-@media (prefers-reduced-motion: reduce) { @keyframes ed-fade-in { from { opacity: 0; } } }
 /* A phone month shows the time picked too, as the week does. */
 
 /* the times, a kind to a row */
@@ -91,47 +85,15 @@
 @media (hover: hover) { .ed-slot:not([aria-pressed="true"]):hover { border-color: var(--foreground); } }
 .ed-none { padding: 1rem 0; color: var(--muted-foreground); border-top: 0.5px solid var(--ed-line); border-bottom: 0.5px solid var(--ed-line); }
 .ed-back { position: relative; display: none; align-items: center; gap: 0.75rem; align-self: flex-start; margin-bottom: 1rem; }
-.ed-row { position: relative; display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: baseline; column-gap: 0.75rem; border-bottom: 0.5px solid var(--ed-line); padding: 0.875rem 0 0.625rem; transition: border-color 0.2s; }
-.ed-row:focus-within { border-bottom-color: var(--accent); }
-.ed-row > .label, .ed-row > legend { color: var(--muted-foreground); }
-.ed-row:focus-within > .label { color: var(--foreground); }
-.ed-row > [data-said], .ed-pair [data-said] { grid-column: 2; margin-top: 0.25rem; }
-.ed-row input, .ed-v { width: 100%; min-width: 0; background: transparent; outline: none; font: 400 1rem/1.4 var(--font-mono); color: var(--foreground); text-transform: none; }
-.ed-row input::placeholder { color: color-mix(in oklab, var(--foreground) 30%, transparent); text-transform: none; }
-fieldset.ed-row { margin: 0; min-width: 0; }
-fieldset.ed-row > legend { float: left; padding: 0; }
-.ed-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.ed-pair label { display: flex; flex-direction: column; min-width: 0; }
-.ed-opts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
-.ed-opts label { position: relative; cursor: pointer; font: 400 1rem/1.4 var(--font-mono); color: var(--muted-foreground); text-transform: none; }
-.ed-opts input:checked + span { color: var(--foreground); text-decoration: underline 2px var(--accent); text-underline-offset: 6px; }
-.ed-opts input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
-.ed-err { padding-top: 0.75rem; font-size: 0.875rem; line-height: 1.5; text-transform: none; }
-.ed-field { min-height: 1.4rem; }
-.ed-exp { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.5rem; }
-.ed-exp > .ed-row + .ed-row { grid-template-columns: 3.75rem minmax(0, 1fr); }
-.ed-copy { margin-top: 1rem; font-size: 0.8125rem; line-height: 1.6; color: var(--muted-foreground); text-transform: none; text-wrap: pretty; }
-.ed-wallet { margin-top: 1rem; }
-.ed-lock { display: flex; align-items: center; gap: 0.5rem; }
-.ed-why { font-size: 0.9375rem; line-height: 1.5; text-transform: none; margin: 1.125rem 0 0.625rem; max-width: 40ch; text-wrap: pretty; }
-.ed-r > .ed-row:first-child { border-top: 0.5px solid var(--ed-line); }
-.ed-next { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); column-gap: 0.75rem; row-gap: 0.375rem; padding: 1rem 0; font-size: 0.875rem; line-height: 1.5; text-transform: none; }
-.ed-next > .label { color: var(--muted-foreground); grid-row: span 2; }
-.ed-grow { position: absolute; z-index: 30; background: var(--accent); pointer-events: none; }
-.ed-grow[data-bad] { background: var(--ed-bad); }
-:root:not([data-classic]) #book-card { transition: background-color var(--dur-xl) var(--ease-out-strong); }
-/* Booked and declined keep the card dark (Julian's mock): the red is
-   the card field's line and the words, not the whole card. */
 
 /* fitted to a short card, a step at a time */
 .ed[data-fit="1"] { --ed-time: 4rem; --ed-cell: 2.625rem; }
 .ed[data-fit="1"] .ed-body { padding-top: 1.125rem; }
 .ed[data-fit="1"] .ed-times { margin-top: 1rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) { --ed-cell: 2.25rem; }
-.ed:is([data-fit="2"], [data-fit="3"]) .ed-big { display: none; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-body { padding-top: 1rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-times { margin-top: 0.875rem; }
-.ed:is([data-fit="2"], [data-fit="3"]) :is(.ed-kind, .ed-row) { padding-block: 0.5rem; }
+
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-slot { height: 2.125rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-day { padding-block: 0.5rem 0.625rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-times > .ed-on { display: block; }
@@ -161,17 +123,11 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed:not([data-fit="3"]) > .ed-body:has(> .ed-times) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: 3rem; align-content: start; }
   .ed:not([data-fit="3"]) > .ed-body > .ed-l { display: contents; }
   .ed:not([data-fit="3"]) > .ed-body > .ed-l > * { grid-column: 1 / -1; }
-  .ed:not([data-fit="3"]) > .ed-body > .ed-l > .ed-big { grid-column: 1; grid-row: 3; align-self: start; justify-content: flex-start; min-height: 0; margin-top: 1.75rem; }
   .ed:not([data-fit="3"]) > .ed-body > .ed-times { grid-column: 2; grid-row: 3; margin-top: 1.75rem; }
   .ed:not([data-fit="3"]) .ed-times > .ed-on { display: none; }
-  .ed:not([data-fit="3"]) .ed-kind { grid-template-columns: minmax(0, 1fr); gap: 0.625rem; }
-  .ed:not([data-fit="3"]) .ed-kind:first-child { border-top: 0; padding-top: 0; }
   .ed:not([data-fit="3"]) .ed-slots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .ed:not([data-fit="1"], [data-fit="3"]) .ed-big { --ed-time: 7rem; }
-  .ed[data-view="month"]:not([data-fit="3"]) .ed-big { display: flex; --ed-time: 5.5rem; }
-  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-l > div:not(.ed-head, .ed-big) { grid-column: 1; grid-row: 2; }
+  .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-l > div:not(.ed-head) { grid-column: 1; grid-row: 2; }
   .ed[data-view="month"]:not([data-fit="3"]) > .ed-body > .ed-times { grid-row: 2 / span 2; margin-top: 1rem; }
-  .ed:is([data-fit="2"]) .ed-big { display: flex; }
   /* A bigger calendar on a desktop: the month takes
      more of the width, the times scroll in their own column instead of
      forcing the smallest fit, and at fit 0 the cells grow into the room
@@ -182,10 +138,6 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed[data-view="month"][data-fit="0"] .ed-cell .ed-n { font-size: clamp(0.75rem, var(--ed-cell) * 0.3, 1.25rem) !important; }
   .ed[data-view="month"][data-fit="0"] .ed-cell { padding-top: calc(var(--ed-cell) * 0.14); }
   .ed[data-view="month"][data-fit="0"] .ed-cell i { width: calc(var(--ed-cell) * 0.36); bottom: calc(var(--ed-cell) * 0.16); }
-}
-/* a landscape screen gives the card the room for two columns */
-@media (min-width: 64rem) and (min-aspect-ratio: 5/4) {
-  :root:not([data-classic]) [data-book-frame] { width: min(74rem, 100%); }
 }
 
 /* a phone: one column, the times four to a row */
@@ -205,9 +157,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-slots { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; padding-right: 2.5rem; mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
   .ed-slots::-webkit-scrollbar { display: none; }
   .ed-slot { height: 3.5rem; font-size: 1.125rem; flex: 0 0 5.75rem; scroll-snap-align: start; }
-  .ed-row, .ed-next { grid-template-columns: 5.25rem minmax(0, 1fr); }
-  .ed-exp { grid-template-columns: minmax(0, 1fr); }
-  .ed-exp > .ed-row + .ed-row { grid-template-columns: 5.25rem minmax(0, 1fr); }
+
   .ed-floor { flex-wrap: wrap; }
   .ed-floor > .ed-btn { flex: 1 0 100%; }
 }
@@ -220,24 +170,19 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* The step bar, the month arrows and the small links keep their drawn
    size; an unseen box gives a mouse 24px (WCAG 2.2, audit)
    and a thumb 2.75rem. */
-:is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 1.5rem); height: max(100%, 1.5rem); translate: -50% -50%; }
+:is(.ed-steps button, .ed-ctl button, .ed-back)::before { content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 1.5rem); height: max(100%, 1.5rem); translate: -50% -50%; }
 @media (pointer: coarse) {
   .ed-ctl { gap: 1.75rem; }
   .ed-steps { gap: 1.25rem; }
-  :is(.ed-steps button, .ed-ctl button, .ed-when > button, .ed-opts label, .ed-quiet, .ed-back)::before { width: max(100%, 2.75rem); height: 2.75rem; }
+  :is(.ed-steps button, .ed-ctl button, .ed-back)::before { width: max(100%, 2.75rem); height: 2.75rem; }
 }
 
-/* the form and the ends may run longer than a short card: they alone scroll */
-.ed-form .ed-body, .ed[data-booked] .ed-body, .ed .ed-body[role="status"] { overflow-y: auto; overscroll-behavior: contain; }
-
-/* a call: a handset or a camera, its length as a timer, the number big */
+/* a call: a handset, its length as a timer */
 .ed-handset { width: 1em; height: 1em; flex-shrink: 0; }
 .ed-call { order: 9; margin-left: auto; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; color: var(--muted-foreground); white-space: nowrap; }
 .ed-call .ed-handset { width: 0.875rem; height: 0.875rem; color: var(--foreground); }
-.ed-via { display: inline-flex; align-items: center; gap: 0.5rem; }
+
 @container card (max-width: 36rem) { .ed-call { display: none; } }
-.ed-row textarea.tp-notes { width: 100%; min-width: 0; resize: none; background: transparent; outline: none; font: 400 1rem/1.4 var(--font-mono); color: var(--foreground); text-transform: none; }
-.ed-row textarea.tp-notes::placeholder { color: color-mix(in oklab, var(--foreground) 30%, transparent); }
 
 /* Over even split in two (a phone on its side, 390 tall): the body
    scrolls, rather than clip the days out of reach (QA on #204). The bar
@@ -251,41 +196,8 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-floor > .ed-btn { min-height: 2.75rem; padding-block: 0.75rem; }
 }
 
-/* A short, wide window (a phone on its side, a laptop squeezed short):
-   the card takes its whole height, at least the window's, and the page
-   (or the sheet) scrolls rather than the card, which squeezed to a strip
-   with its days cut to their names. The title over
-   it closes up and its blurb goes. */
-@media (max-height: 30rem) and (min-width: 40rem) {
-  :root:not([data-classic]) [data-book-frame] { gap: 0.75rem; width: min(70rem, 100%); }
-  :root:not([data-classic]) main > [data-book-frame] { height: auto; }
-  :root:not([data-classic]) [data-book-scroll] { overflow-y: auto; padding-bottom: 1rem; }
-  :root:not([data-classic]) [data-book-frame] header { gap: 0.375rem; }
-  :root:not([data-classic]) [data-book-frame] header > :is(h1, h2) { font-size: 2.25rem; }
-  :root:not([data-classic]) [data-book-frame] header > :is(h1, h2) + p { display: none; }
-  :root:not([data-classic]) [data-book-frame] #book-card { container-type: inline-size; flex: none; }
-  :root:not([data-classic]) [data-book-frame] #book-card .ed { height: auto; }
-  :root:not([data-classic]) [data-book-frame] #book-card .ed-body { overflow: visible; padding-bottom: 1.5rem; }
-}
 /* Scrolled to on a new step: clear of the site's fixed header. */
 .ed { scroll-margin-top: 4.5rem; }
-
-/* /book: the card over the photo wall gets the fill of the session
-   pages' card (`bg-card/60`), not none, since a clear card reads
-   too transparent. Phones have no wall behind it. */
-@media (min-width: 40rem) {
-  /* The same glass as the homepage sheet's card (`glass-surface`): the
-     wall shows through it soft, not sharp. */
-  .book-page div:has(> .ed) { background-color: color-mix(in oklab, var(--card) 60%, transparent); -webkit-backdrop-filter: blur(18px) saturate(1.5); backdrop-filter: blur(18px) saturate(1.5); }
-  @media (prefers-reduced-transparency: reduce) { .book-page div:has(> .ed) { -webkit-backdrop-filter: none; backdrop-filter: none; background-color: var(--card); } }
-  /* The wall runs on under the footer, and the footer is glass over it
-     like the bar at the top. `main` is transformed,
-     so the fixed wall ends at its foot without the reach. */
-  .book-page > .enquiry-backdrop.questions-wall { bottom: -6rem; }
-  body:has(.book-page) > footer { position: relative; isolation: isolate; background: transparent; }
-  body:has(.book-page) > footer::before { content: ""; position: absolute; inset: 0; z-index: -1; -webkit-backdrop-filter: blur(9px) saturate(1.5); backdrop-filter: blur(9px) saturate(1.5); }
-  @media (prefers-reduced-transparency: reduce) { body:has(.book-page) > footer { background: var(--background); } body:has(.book-page) > footer::before { content: none; } }
-}
 
 /* ── one face, two sizes ─────────────────
    Every step opens on one huge line in caps; everything else is small
@@ -302,7 +214,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   font-family: var(--ed-f);
 }
 /* Not inside the reference picker: its labels stay the site's Plex Mono. */
-.ed :is(.label, .ed-v, .ed-n, .ed-slot, .ed-btn, .ed-box, .ed-why, .ed-said, .ed-copy, .ed-err, .ed-opts label, .ed-row input, .ed-row textarea.tp-notes, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-quiet, .ed-on, .ed-none):not(.reference-panel *) {
+.ed :is(.label, .ed-n, .ed-slot, .ed-btn, .ed-blank, .ed-steps button, .ed-steps b, .ed-head h2, .ed-mk, .ed-hero small, .ed-on, .ed-none):not(.reference-panel *) {
   font-family: var(--ed-f) !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
@@ -313,9 +225,8 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 }
 /* Not the reference picker (`reference-picks.tsx`): its chips keep their
    own colours, or the lit chip is a white pill with a white label. */
-.ed .label:not(.reference-panel *), .ed .ed-row > .label { color: var(--ed-mu); }
+.ed .label:not(.reference-panel *) { color: var(--ed-mu); }
 /* Typed into on a touch screen: 16px, or iOS zooms in on focus. */
-@media (pointer: coarse) { .ed :is(.ed-row input, .ed-row textarea.tp-notes) { font-size: 1rem !important; } }
 
 /* the steps: dots between, two squares at the end */
 .ed-steps { gap: 0.625rem; padding-bottom: 0.875rem; border-bottom: 1px solid var(--ed-line); align-items: center; }
@@ -323,19 +234,16 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 /* ::after, so the 44px touch target (::before, below) keeps its own. */
 .ed-steps button + button::after { content: ""; order: -1; width: 3px; height: 3px; background: var(--ed-mu); }
 .ed-steps b { margin-right: 0.3em; color: inherit; }
-.ed-steps :is([aria-current], [data-done]) { color: var(--foreground); }
+.ed-steps [aria-current] { color: var(--foreground); }
 .ed-steps::after { content: ""; margin-left: auto; width: 5px; height: 5px; background: var(--foreground); box-shadow: -9px 0 0 var(--foreground); }
 
 /* the heading: one huge line, its context small at the right */
 .ed-hero { flex-shrink: 0; padding: 2rem var(--ed-x) 0; display: flex; flex-direction: column; gap: 1rem; }
 .ed-hero h2 { display: flex; justify-content: space-between; align-items: flex-end; gap: 0.5rem 1.5rem; flex-wrap: wrap; font: 700 clamp(3rem, 6.2cqw, 5.4rem)/0.84 var(--font-display); letter-spacing: -0.045em; text-transform: uppercase; margin: 0; }
 .ed-hero small { color: var(--ed-mu); text-align: right; padding-bottom: 0.35rem; }
-/* The inquiry's top-right lines in the navbar's mono, like the tile sub-lines. */
-.ed.ed-inq .ed-hero small { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-size: 0.625rem !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.03em !important; line-height: 1.5 !important; }
 .ed-mk { display: flex; align-items: center; gap: 0.625rem; color: var(--ed-mu); padding-bottom: 1.25rem; border-bottom: 1px solid var(--ed-line); }
 .ed-mk i { width: 5px; height: 5px; background: var(--foreground); flex-shrink: 0; }
-.ed-box { border: 1px solid var(--foreground); color: var(--foreground) !important; padding: 0.3rem 0.5rem; margin-left: 0.25rem; }
-@media (hover: hover) { .ed-box:hover { background: var(--foreground); color: var(--background) !important; } }
+
 .ed-body { padding-top: 1.25rem; }
 
 /* the month: boxes all round, the days either side barely there, the pick filled */
@@ -370,57 +278,12 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 
 /* the floor: the same button on every step */
 .ed-btn, .ed-btn[data-accent] { background: var(--foreground); color: var(--background) !important; border-radius: 0; padding: 0.95rem 1.5rem; }
-.ed-btn[data-bad] { background: var(--ed-err); color: var(--background) !important; }
 
-/* details: two fields to a row, labels over values */
-.ed-fields { display: grid !important; grid-template-columns: 1fr 1fr; gap: 0 2rem; align-content: start; }
-.ed-fields > * { grid-column: 1 / -1; }
-.ed-fields > label.ed-row { grid-column: auto; }
-.ed .ed-row { display: flex; flex-direction: column; align-items: stretch; gap: 0.5rem; padding: 0.875rem 0 0.75rem; }
-.ed .ed-row { border-bottom: 1px solid var(--ed-line); }
-.ed-r > .ed-row:first-child, .ed-l > .ed-row:first-child { border-top: 1px solid var(--ed-line); }
-.ed .ed-v { color: var(--foreground); }
-.ed-opts { gap: 0.5rem; }
-.ed-opts label > span { display: inline-flex; border: 1px solid var(--ed-line); padding: 0.55rem 0.8rem; color: var(--ed-mu); }
-.ed-opts input:checked + span { background: var(--foreground); color: var(--background); border-color: var(--foreground); text-decoration: none; }
-.ed-row textarea.tp-notes { border: 1px solid var(--ed-line); padding: 0.75rem; min-height: 4.5rem; }
-.ed-pair { gap: 2rem; }
-
-/* deposit, and its ends */
-.ed-l .ed-row { flex-direction: row; justify-content: space-between; align-items: center; }
-.ed-l .ed-v { width: auto; text-align: right; }
-.ed-copy { margin-top: auto; padding-top: 1rem; color: var(--ed-mu); }
-.ed[data-declined] .ed-said b { color: var(--ed-err); }
-.ed-said { color: var(--ed-mu); max-width: 34ch; }
-.ed-said b { color: var(--foreground); font-weight: 600; }
-.ed-err { color: var(--ed-err); }
-
-/* booked: the check, what was sent, then the rows */
-/* Booked: the check sits on the Booked line in
-   the square's place, and the message is a sentence in the body face,
-   the page's ink, two lines wide, straight over the rows. */
-.ed[data-booked] .ed-mk > i { display: none; }
-.ed[data-booked] .ed-mk > svg { width: 1.125rem; height: 1.125rem; flex-shrink: 0; color: var(--accent); }
-.ed.tp[data-booked] .ed-why { font-family: var(--font-sans) !important; font-size: 1.0625rem !important; font-weight: 400 !important; line-height: 1.5 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--foreground); max-width: none; margin: 1.5rem 0 1.75rem; text-align: justify; text-wrap: pretty; }
-.ed-nb { white-space: nowrap; }
-/* One long line over the rows, not one per column (Julian). */
-.ed[data-booked] .ed-r { border-top: 1px solid var(--ed-line); }
-.ed[data-booked] .ed-r > .ed-row:first-child { border-top: 0; }
-.ed-why { color: var(--ed-mu); max-width: 34ch; margin: 0; }
-.ed-next { display: none; }
-
-@container ed (min-width: 40rem) {
-  .ed[data-booked] .ed-body, .ed .ed-body:has(> .ed-l + .ed-r):not(:has(> .ed-times)) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: stretch; }
-  /* Booked: the summary rows two across under the message. */
-  .ed[data-booked] .ed-body:has(> .ed-l + .ed-r) { grid-template-columns: minmax(0, 1fr); align-content: start; }
-  .ed[data-booked] .ed-r { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: start; }
-  .ed[data-booked] .ed-r > .ed-next { grid-column: 1 / -1; }
-}
 @container card (max-width: 36rem) {
   .ed-hero { padding-top: 1.5rem; }
   .ed-hero h2 { font-size: 3rem; flex-direction: column; align-items: flex-start; }
   .ed-hero small { text-align: left; }
-  .ed-fields { grid-template-columns: minmax(0, 1fr); }
+
   .ed-slots { border: 0; gap: 0.4rem !important; }
   .ed-slot { border: 1px solid var(--ed-line); justify-content: center; min-height: 3.25rem; flex: 0 0 6.5rem; }
   .ed-slot[aria-pressed="true"] { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
@@ -438,106 +301,4 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-cell { display: flex; align-items: flex-start; }
 
 /* Details: the heading's hairline is the first; notes take the full width; hints in caps. */
-.ed-fields > .ed-row:first-child { border-top: 0; }
-.ed-fields > label.ed-row:has(textarea) { grid-column: 1 / -1; }
-.ed .ed-row input::placeholder, .ed .ed-row textarea.tp-notes::placeholder { text-transform: uppercase; }
 
-/* ── the inquiry (inquire-card.tsx) ─────────────────────────────────
-   The inquiry on the same page: six tiles for the kinds, each with who
-   it is for, its two questions in boxes under it, then the details, then
-   what happens next. */
-.ed-inq [hidden] { display: none !important; }
-/* Never clipped: past its room the body scrolls (the Inquiries card is shorter than the booking one). */
-.ed-inq .ed-body { overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-top: 1rem; }
-.ed-inq .ed-hero { padding-top: 1.5rem; gap: 0.75rem; }
-.ed-inq .ed-mk { padding-bottom: 1rem; }
-.ed-inq .ed-floor > .label { min-width: 0; overflow-wrap: anywhere; }
-.ed-inq .ed-fields { display: flex !important; flex-direction: column; flex: 1; min-height: 0; }
-.ed-inq .ed-fields > .ed-row:first-child { border-top: 0; }
-.ed :is(.ed-nx-row b, .ed-nx-d, .ed-kinds em, .ed-kinds small, .ed-inq .ed-floor a) {
-  font-family: var(--ed-f) !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  line-height: 1.3 !important;
-  letter-spacing: 0.01em !important;
-  text-transform: uppercase !important;
-  font-style: normal;
-}
-/* the kinds: tiles, three across, the pick filled */
-.ed-inq .ed-kind-row { flex: none; padding-bottom: 0.25rem; border-bottom: 0; }
-/* Two across: wide enough that the line under each
-   name stays one line, at the tile's foot. */
-.ed-kinds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 4.25rem; gap: 0.5rem; padding-top: 0.5rem; }
-.ed-kinds label { position: relative; display: flex; cursor: pointer; }
-.ed-kinds label > span { flex: 1; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; padding: 0.75rem 0.5rem 0.65rem 0.8rem; border: 1px solid var(--ed-line); color: var(--ed-mu); transition: border-color 0.2s; }
-.ed-kinds em { color: var(--foreground); }
-/* Small, in the navbar's mono; `.ed.ed-inq` outranks the
-   caps rule above, which had been winning. The colour, not opacity, keeps it
-   readable. */
-.ed.ed-inq .ed-kinds small { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-size: 0.625rem !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.03em !important; margin-top: auto; padding-top: 0.5rem; color: var(--ed-mu); text-wrap: balance; }
-.ed-kinds input:checked + span { background: var(--foreground); border-color: var(--foreground); }
-.ed-kinds input:checked + span :is(em, small) { color: var(--background); }
-.ed-kinds input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
-@media (hover: hover) { .ed-kinds label:hover > span { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); } }
-/* its questions: the same box, a field line inside */
-.ed-asks { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; padding: 0.75rem 0 0.5rem; flex: none; }
-.ed .ed-ask { border: 1px solid var(--ed-line); padding: 0.75rem 0.8rem 0.65rem; gap: 0; justify-content: space-between; min-height: 4rem; transition: border-color 0.2s; }
-.ed .ed-ask > .label { color: var(--foreground); }
-.ed .ed-ask input { border-bottom: 1px solid color-mix(in oklab, var(--foreground) 28%, transparent); padding-bottom: 0.45rem; transition: border-color 0.2s; }
-.ed .ed-ask:focus-within { border-color: color-mix(in oklab, var(--foreground) 40%, transparent); }
-.ed .ed-ask:focus-within input { border-bottom-color: var(--accent); }
-/* details: the project box takes the room */
-.ed-inq .ed-row:has(textarea) { flex: 1; min-height: 7rem; }
-@container ed (min-width: 40rem) { .ed-inq .ed-row:has(textarea) { min-height: 0; } .ed-inq textarea.tp-notes { flex: 1; height: auto !important; min-height: 2.75rem; } }
-/* One page: the kinds and their questions on the
-   left, the details on the right from 40rem; one column under it. */
-.ed-inq .ed-one { display: grid !important; grid-template-columns: minmax(0, 1fr); flex: 1 1 auto; min-height: 0; }
-.ed-inq .ed-one > div { display: flex; flex-direction: column; min-width: 0; grid-column: auto; }
-.ed-inq .ed-one .ed-asks { padding: 0.5rem 0 0.75rem; }
-@container ed (min-width: 40rem) {
-  .ed-inq .ed-one { grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); column-gap: 3rem; }
-  .ed-inq .ed-one .ed-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(3.5rem, auto); }
-  .ed-inq .ed-one .ed-asks { grid-template-columns: minmax(0, 1fr); }
-  .ed-inq .ed-one textarea.tp-notes { min-height: 4rem; }
-}
-/* What is written in the fields, in the navbar's mono,
-   sitting right above its line. */
-.ed.ed-inq :is(.ed-row input, .ed-row textarea.tp-notes) { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-weight: var(--v2-label-weight, 500) !important; letter-spacing: 0.03em !important; }
-.ed.ed-inq :is(.ed-row input, .ed-row textarea.tp-notes)::placeholder { font-family: var(--v2-label-family, "IBM Plex Mono", monospace) !important; font-weight: 400 !important; }
-.ed.ed-inq .ed-ask input { padding-bottom: 0.15rem; }
-.ed.ed-inq .ed-one > div > label.ed-row:not(:has(textarea)) { gap: 0.4rem; padding-bottom: 0.3rem; }
-.ed-inq .ed-refs { border-bottom: 0; }
-.ed-inq .ed-refs .contact-field > div { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; }
-.ed-inq .ed-refs .contact-field > div > p.label { flex-basis: 100%; margin: 0 0 0.25rem; }
-/* The two on one line, a size down so both fit a phone's column. */
-.ed.ed-inq .ed-refs .tap-44 { border-radius: 0; border-color: var(--ed-line); padding: 0.6rem 0.4rem; flex: 1 1 0; min-width: 0; text-align: center; white-space: nowrap; font-size: 0.6875rem !important; }
-/* sent: three equal bands, the first marked */
-.ed-nx { flex: 1; display: grid; grid-auto-rows: minmax(3.5rem, 1fr); padding: 1.5rem 0 1.25rem; min-height: 0; }
-.ed-nx-row { display: grid; grid-template-columns: 2.5rem minmax(0, 1fr) 1.25rem; align-items: start; align-content: center; gap: 0.4rem 1rem; color: var(--ed-mu); }
-.ed-nx-row b { color: var(--foreground); padding-top: 0.35em; }
-.ed-nx-row .ed-nx-t { grid-column: 2; font: 700 clamp(1.35rem, 3.4cqw, 2.6rem)/0.95 var(--font-display); letter-spacing: -0.02em; text-transform: uppercase; color: var(--foreground); }
-.ed-nx-row .ed-nx-d { grid-column: 2; }
-.ed-nx-row i { grid-row: 1; grid-column: 3; width: 1.25rem; height: 2px; background: var(--ed-line); margin-top: 0.6em; }
-.ed-nx-row[data-on] i { background: var(--accent); }
-.ed-inq .ed-floor a.ed-btn { text-decoration: none; display: inline-flex; align-items: center; }
-/* in its boxes: the card's own padding, not the box's */
-.contact-card > div:has(> .ed-inq) { padding: 0 !important; }
-.contact-card > div:has(> .ed-inq) { display: flex; flex-direction: column; }
-.contact-card > div > .ed-inq { flex: 1 1 auto; min-height: 0; height: auto; }
-/* The Inquiries card is as tall as its one page needs: it grows into the
-   screen's padding on a short window before
-   the body scrolls inside. */
-@media (min-width: 40rem) { .contact-card:has(.ed.ed-inq) { align-self: center; height: auto; max-width: 48rem; margin-block: 0; max-height: calc(100% + 1.5rem) !important; } }
-/* A short window with a mouse sits closer under the bar (contact.css), so less room to grow into. */
-@media (min-width: 40rem) and (pointer: fine) and (max-height: 48rem) { .contact-card:has(.ed.ed-inq) { max-height: calc(100% + 0.5rem) !important; } }
-.book-form:has(> .ed-inq) { display: contents; }
-@container ed (max-width: 39.99rem) {
-  .ed-kinds { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: auto; }
-  .ed .ed-kinds small { padding-top: 0.9rem; }
-  .ed-asks { grid-template-columns: 1fr; }
-  .ed .ed-ask { min-height: 0; }
-  .ed-inq .ed-row:has(textarea) { flex: none; min-height: 0; }
-  .ed-nx-row .ed-nx-t { font-size: 1.35rem; }
-  .ed-inq .ed-floor { flex-wrap: wrap; }
-  .ed-inq .ed-floor > .ed-btn { flex: 1 0 100%; }
-}

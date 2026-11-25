@@ -27,10 +27,18 @@ export function CampusSpots({ spots }: { spots: HeldSpot[] }) {
       {spots.map((s, i) => (
         <React.Fragment key={s.name}>
           <figure className="s4-ph" data-on={i === cur || undefined}>
-            <Image src={s.src} alt={s.alt} fill sizes="(max-width: 1023px) 100vw, 40vw" style={{ objectFit: "cover", background: s.color }} />
+            <Image
+              src={s.src}
+              alt={s.alt}
+              fill
+              sizes="(max-width: 1023px) 100vw, 40vw"
+              style={{ objectFit: "cover", background: s.color }}
+            />
           </figure>
           <section className="s4-row" data-i={i} data-on={i === cur || undefined} style={{ "--i": i + 1 } as React.CSSProperties}>
-            <h2><span className="lbl mute">{pad(i + 1)}</span> {s.name}</h2>
+            <h2>
+              <span className="lbl mute">{pad(i + 1)}</span> {s.name}
+            </h2>
             <p>{s.note}</p>
           </section>
         </React.Fragment>

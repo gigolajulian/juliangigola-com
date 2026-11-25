@@ -7,7 +7,7 @@ import Image from "next/image";
 import { ADDED_PATH, type TrashedProject, type ManifestRead } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import { AdminFrames } from "@/components/admin/admin-frames";
-import { srcOf } from "@/lib/admin/admin-sequence";
+import { srcOf } from "@/components/admin/use-sequence";
 import { twinStats } from "@/lib/work/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
 import { AdminBts } from "@/components/admin/admin-bts";
@@ -115,9 +115,7 @@ export function AdminProjects({
   React.useEffect(() => {
     if (!opened) return;
     const id = requestAnimationFrame(() => {
-      document
-        .getElementById(`admin-row-${opened}`)
-        ?.scrollIntoView({ block: "center", behavior: "smooth" });
+      document.getElementById(`admin-row-${opened}`)?.scrollIntoView({ block: "center", behavior: "smooth" });
     });
     return () => cancelAnimationFrame(id);
   }, [opened]);
@@ -131,21 +129,12 @@ export function AdminProjects({
      does not have yet, which is the list to read before pressing Publish.
      The open row stays whatever the filter says, for the same reason it
      survives the search. */
-  type Show =
-    | "all"
-    | "unpublished"
-    | "hidden"
-    | "deleted"
-    | "twins"
-    | "b2b"
-    | "unordered";
+  type Show = "all" | "unpublished" | "hidden" | "deleted" | "twins" | "b2b" | "unordered";
   const [show, setShow] = React.useState<Show>("all");
   /* Near-twins and back-to-back pairs on the draft sequence, and whether
      the set was ever put in order here (`content/projects.json` frames). */
-  const sequenceOf = (p: AdminProject) =>
-    (reframed[p.slug] ?? p.images).map((f) => srcOf(f));
-  const ordered = (p: AdminProject) =>
-    reframed[p.slug] !== undefined || reframed[p.origin] !== undefined;
+  const sequenceOf = (p: AdminProject) => (reframed[p.slug] ?? p.images).map((f) => srcOf(f));
+  const ordered = (p: AdminProject) => reframed[p.slug] !== undefined || reframed[p.origin] !== undefined;
   const shows = (p: AdminProject, s: Show) =>
     s === "all"
       ? true
@@ -164,15 +153,10 @@ export function AdminProjects({
   const visible = live.filter(
     (p) =>
       p.slug === opened ||
-      (shows(p, show) &&
-        (query.trim() === "" ||
-          `${p.name} ${p.slug} ${p.category}`
-            .toLowerCase()
-            .includes(query.toLowerCase()))),
+      (shows(p, show) && (query.trim() === "" || `${p.name} ${p.slug} ${p.category}`.toLowerCase().includes(query.toLowerCase()))),
   );
 
-  const toggleUnlisted = (slug: string) =>
-    onListDraft("unlisted", slug, !unlisted.has(slug));
+  const toggleUnlisted = (slug: string) => onListDraft("unlisted", slug, !unlisted.has(slug));
 
   /** The address a row answers at, as the draft has it. */
   const addressOf = (p: AdminProject) => slugs[p.origin] ?? p.slug;
@@ -220,16 +204,11 @@ export function AdminProjects({
 
       const entry = parsed.projects.find((p) => p.slug === slug);
       if (!entry) {
-        throw new Error(
-          `"${slug}" is not in the project list. It may already be removed.`,
-        );
+        throw new Error(`"${slug}" is not in the project list. It may already be removed.`);
       }
 
       parsed.projects = parsed.projects.filter((p) => p.slug !== slug);
-      parsed.trash = [
-        { ...entry, deletedAt: new Date().toISOString() },
-        ...(parsed.trash ?? []),
-      ];
+      parsed.trash = [{ ...entry, deletedAt: new Date().toISOString() }, ...(parsed.trash ?? [])];
       // Hiding something that is no longer published is dead weight, and would
       // silently suppress a future project that reused the slug.
       parsed.hidden = (parsed.hidden ?? []).filter((s) => s !== slug);
@@ -261,9 +240,7 @@ export function AdminProjects({
     }
   }
 
-  const hiddenCount = projects.filter(
-    (p) => hidden.has(p.slug) && !gone.has(p.slug),
-  ).length;
+  const hiddenCount = projects.filter((p) => hidden.has(p.slug) && !gone.has(p.slug)).length;
 
   return (
     <section className="border-t border-border pt-10">
@@ -276,10 +253,9 @@ export function AdminProjects({
       </div>
 
       <p className="mt-3 max-w-prose text-sm leading-relaxed text-muted-foreground">
-        Hide takes a project off every listing and leaves its page open to
-        anybody with the link. Delete takes it off the site: a project added
-        here goes to Recently deleted, where its photographs are kept for a
-        week; a migrated one is unpublished, and Restore brings it back.
+        Hide takes a project off every listing and leaves its page open to anybody with the link. Delete takes it off the site: a project
+        added here goes to Recently deleted, where its photographs are kept for a week; a migrated one is unpublished, and Restore brings it
+        back.
       </p>
 
       <input
@@ -340,28 +316,15 @@ export function AdminProjects({
              select was just fixed for, pointing the other way. Derived from
              `filedAs` instead, so the row, the control and the sitemap all
              say one thing. */
-          const filedName =
-            disciplines.find((d) => d.slug === filedAs)?.name ?? "Unfiled";
+          const filedName = disciplines.find((d) => d.slug === filedAs)?.name ?? "Unfiled";
           const frames = reframed[p.slug] ?? null;
           const seq = sequenceOf(p);
           const photoCount = seq.filter(Boolean).length;
           const twin = twinStats(seq);
           return (
-            <li
-              key={p.slug}
-              id={`admin-row-${p.slug}`}
-              className="border-b border-border scroll-mt-28"
-            >
-              <div
-                className={cn(
-                  "flex flex-wrap items-center gap-x-4 gap-y-2 py-3",
-                  (isHidden || isUnlisted) && "opacity-45",
-                )}
-              >
-                <span
-                  className="relative block h-14 w-11 shrink-0 overflow-hidden"
-                  style={{ backgroundColor: p.cover.color }}
-                >
+            <li key={p.slug} id={`admin-row-${p.slug}`} className="border-b border-border scroll-mt-28">
+              <div className={cn("flex flex-wrap items-center gap-x-4 gap-y-2 py-3", (isHidden || isUnlisted) && "opacity-45")}>
+                <span className="relative block h-14 w-11 shrink-0 overflow-hidden" style={{ backgroundColor: p.cover.color }}>
                   <Image
                     src={p.cover.src}
                     alt=""
@@ -374,23 +337,12 @@ export function AdminProjects({
                 </span>
 
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate text-sm text-foreground">
-                    {p.name}
-                  </span>
+                  <span className="block truncate text-sm text-foreground">{p.name}</span>
                   <span className="label block truncate text-muted-foreground">
-                    {filedName} ·{" "}
-                    {photoCount === p.images.length
-                      ? photoCount
-                      : `${p.images.length} → ${photoCount}`}{" "}
-                    frames
-                    {twin.twins > 0
-                      ? ` · ${twin.twins} ${twin.twins === 1 ? "twin" : "twins"}`
-                      : ""}
-                    {twin.backToBack > 0
-                      ? ` · ${twin.backToBack} back-to-back`
-                      : ""}
-                    {ordered(p) ? "" : " · never ordered"} · /
-                    {addressOf(p)}
+                    {filedName} · {photoCount === p.images.length ? photoCount : `${p.images.length} → ${photoCount}`} frames
+                    {twin.twins > 0 ? ` · ${twin.twins} ${twin.twins === 1 ? "twin" : "twins"}` : ""}
+                    {twin.backToBack > 0 ? ` · ${twin.backToBack} back-to-back` : ""}
+                    {ordered(p) ? "" : " · never ordered"} · /{addressOf(p)}
                     {slugs[p.origin] ? " · renamed" : ""}
                     {frames ? " · edited" : ""}
                     {isUnlisted ? " · hidden" : ""}
@@ -415,9 +367,7 @@ export function AdminProjects({
                       "label max-w-[9rem] border bg-background px-2 py-2 outline-none focus-visible:border-foreground",
                       // Unfiled is a state worth seeing across seventy-three
                       // rows, not a value to read one at a time.
-                      unfiled
-                        ? "border-destructive text-foreground"
-                        : "border-border text-muted-foreground",
+                      unfiled ? "border-destructive text-foreground" : "border-border text-muted-foreground",
                     )}
                   >
                     {/* The option that has to exist for the control to tell
@@ -452,31 +402,24 @@ export function AdminProjects({
                         onto the session page, where it becomes one of that
                         session's sample frames. That is the point of offering
                         them, and also the reason for the heading above them. */}
-                    {[...new Set(disciplines.map((d) => d.group))].map(
-                      (group) => (
-                        <optgroup key={group} label={group}>
-                          {disciplines
-                            .filter((d) => d.group === group)
-                            .map((d) => (
-                              <option key={d.slug} value={d.slug}>
-                                {d.name}
-                              </option>
-                            ))}
-                        </optgroup>
-                      ),
-                    )}
+                    {[...new Set(disciplines.map((d) => d.group))].map((group) => (
+                      <optgroup key={group} label={group}>
+                        {disciplines
+                          .filter((d) => d.group === group)
+                          .map((d) => (
+                            <option key={d.slug} value={d.slug}>
+                              {d.name}
+                            </option>
+                          ))}
+                      </optgroup>
+                    ))}
                   </select>
 
                   <button
                     type="button"
                     onClick={() => onOpened(isOpen ? null : p.slug)}
                     aria-expanded={isOpen}
-                    className={cn(
-                      "label border px-3 py-2 press",
-                      isOpen
-                        ? "border-foreground"
-                        : "border-border hoverable:hover:bg-card",
-                    )}
+                    className={cn("label border px-3 py-2 press", isOpen ? "border-foreground" : "border-border hoverable:hover:bg-card")}
                   >
                     {isOpen ? "Close" : "Edit"}
                   </button>
@@ -525,31 +468,31 @@ export function AdminProjects({
                       </button>
                     )
                   ) : confirming === p.slug ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => void remove(p.slug)}
-                          className="label border border-destructive px-3 py-2 text-destructive press"
-                        >
-                          Really delete
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setConfirming(null)}
-                          className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
+                    <>
                       <button
                         type="button"
-                        onClick={() => setConfirming(p.slug)}
-                        className="label border border-border px-3 py-2 text-muted-foreground press hoverable:hover:text-destructive"
+                        onClick={() => void remove(p.slug)}
+                        className="label border border-destructive px-3 py-2 text-destructive press"
                       >
-                        Delete
+                        Really delete
                       </button>
-                    )}
+                      <button
+                        type="button"
+                        onClick={() => setConfirming(null)}
+                        className="label border border-border px-3 py-2 press hoverable:hover:bg-card"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setConfirming(p.slug)}
+                      className="label border border-border px-3 py-2 text-muted-foreground press hoverable:hover:text-destructive"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </span>
               </div>
 
@@ -558,12 +501,7 @@ export function AdminProjects({
                   as the list is worked through. */}
               {isOpen ? (
                 <>
-                  <AdminFrames
-                    slug={p.slug}
-                    original={p.images}
-                    frames={frames}
-                    onChange={(next) => onOverride("frames", p.slug, next)}
-                  />
+                  <AdminFrames slug={p.slug} original={p.images} frames={frames} onChange={(next) => onOverride("frames", p.slug, next)} />
                   <AdminBts
                     slug={p.slug}
                     published={publishedBts[p.slug]}
@@ -580,36 +518,32 @@ export function AdminProjects({
                     <div className="flex flex-wrap items-baseline justify-between gap-3">
                       <label className="label flex flex-wrap items-baseline gap-1">
                         <span>Address · /work/</span>
-                      <input
-                        type="text"
-                        key={addressOf(p)}
-                        defaultValue={addressOf(p)}
-                        spellCheck={false}
-                        autoCapitalize="none"
-                        onBlur={(e) => rename(p, e.currentTarget.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") e.currentTarget.blur();
-                          if (e.key === "Escape") {
-                            e.currentTarget.value = addressOf(p);
-                            e.currentTarget.blur();
-                          }
-                        }}
-                        className={cn(
-                          "label border-b bg-transparent px-0 py-0 lowercase outline-none",
-                          "border-border text-foreground focus:border-foreground",
-                          badSlug === p.origin && "border-destructive text-destructive",
-                        )}
-                        style={{ width: `${Math.max(8, addressOf(p).length + 2)}ch` }}
-                      />
-                      {badSlug === p.origin ? (
-                        <span className="text-destructive">
-                          · not an address, or taken
-                        </span>
-                      ) : slugs[p.origin] ? (
-                        <span className="text-muted-foreground">
-                          · was /{p.origin}, which will still open
-                        </span>
-                      ) : null}
+                        <input
+                          type="text"
+                          key={addressOf(p)}
+                          defaultValue={addressOf(p)}
+                          spellCheck={false}
+                          autoCapitalize="none"
+                          onBlur={(e) => rename(p, e.currentTarget.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") e.currentTarget.blur();
+                            if (e.key === "Escape") {
+                              e.currentTarget.value = addressOf(p);
+                              e.currentTarget.blur();
+                            }
+                          }}
+                          className={cn(
+                            "label border-b bg-transparent px-0 py-0 lowercase outline-none",
+                            "border-border text-foreground focus:border-foreground",
+                            badSlug === p.origin && "border-destructive text-destructive",
+                          )}
+                          style={{ width: `${Math.max(8, addressOf(p).length + 2)}ch` }}
+                        />
+                        {badSlug === p.origin ? (
+                          <span className="text-destructive">· not an address, or taken</span>
+                        ) : slugs[p.origin] ? (
+                          <span className="text-muted-foreground">· was /{p.origin}, which will still open</span>
+                        ) : null}
                       </label>
                       <button
                         type="button"
@@ -648,16 +582,11 @@ export function AdminProjects({
         })}
       </ul>
 
-      {visible.length === 0 ? (
-        <p className="mt-6 text-sm text-muted-foreground">
-          Nothing matches that.
-        </p>
-      ) : null}
+      {visible.length === 0 ? <p className="mt-6 text-sm text-muted-foreground">Nothing matches that.</p> : null}
 
       <p className="label mt-6 text-muted-foreground">
-        Hiding, deleting a migrated project and restoring it are part of the
-        draft: they publish with the rest when you press Publish. Deleting a
-        project added here commits on its own, immediately.
+        Hiding, deleting a migrated project and restoring it are part of the draft: they publish with the rest when you press Publish.
+        Deleting a project added here commits on its own, immediately.
       </p>
     </section>
   );

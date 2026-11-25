@@ -8,6 +8,7 @@
  * ─────────────────────────────────────────────────────────────── */
 import { secretJson } from "@/lib/secrets";
 import { HttpError } from "@/lib/http";
+import { outbound } from "@/lib/net";
 
 const TOKEN = "https://oauth2.googleapis.com/token";
 export const CALENDAR = "https://www.googleapis.com/calendar/v3";
@@ -16,7 +17,10 @@ export const CALENDAR = "https://www.googleapis.com/calendar/v3";
 const cached = new Map<string, { token: string; until: number }>();
 
 /** Forgets the access token for `secret`, or every one when none is given, so the next call asks Google again (a 401, tests). */
-export const forgetToken = (secret?: string) => void (secret === undefined ? cached.clear() : cached.delete(secret));
+export const forgetToken = (secret?: string) => {
+  if (secret === undefined) cached.clear();
+  else cached.delete(secret);
+};
 
 /** An access token for hello@'s calendar. Throws while `GCAL_OAUTH` is unset or refused. */
 export async function gcalToken(secret: string | undefined, now = Date.now()): Promise<string> {
@@ -24,10 +28,9 @@ export async function gcalToken(secret: string | undefined, now = Date.now()): P
   const held = cached.get(secret);
   if (held && now < held.until) return held.token;
   const { client_id, client_secret, refresh_token } = secretJson<{ [k: string]: string }>(secret, "GCAL_OAUTH");
-  const res = await fetch(TOKEN, {
+  const res = await outbound(TOKEN, {
     method: "POST",
     body: new URLSearchParams({ client_id, client_secret, refresh_token, grant_type: "refresh_token" }),
-    signal: AbortSignal.timeout(8000),
   });
   const tok = (await res.json().catch(() => ({}))) as { access_token?: string; expires_in?: number; error?: string };
   // `error` is a code such as invalid_grant: safe to log, never the token.
@@ -37,14 +40,17 @@ export async function gcalToken(secret: string | undefined, now = Date.now()): P
 }
 
 /** A Google API call as hello@: a Calendar path, or a full URL (Gmail). JSON in, JSON out; a non-2xx throws with Google's status. */
-export async function gcal<T = { [k: string]: unknown }>(secret: string | undefined, path: string, init: { method?: string; body?: unknown } = {}): Promise<T> {
+export async function gcal<T = { [k: string]: unknown }>(
+  secret: string | undefined,
+  path: string,
+  init: { method?: string; body?: unknown } = {},
+): Promise<T> {
   const call = async () =>
-    fetch(path.startsWith("https:") ? path : `${CALENDAR}${path}`, {
+    outbound(path.startsWith("https:") ? path : `${CALENDAR}${path}`, {
       method: init.method ?? (init.body ? "POST" : "GET"),
       headers: { authorization: `Bearer ${await gcalToken(secret)}`, "content-type": "application/json" },
       body: init.body ? JSON.stringify(init.body) : undefined,
-      signal: AbortSignal.timeout(8000),
-    });
+      });
   let res = await call();
   // A token revoked or expired early: once more with a fresh one.
   if (res.status === 401) {

@@ -18,17 +18,14 @@ export const TWIN_THRESHOLD: number = data.threshold;
 
 const PAIRS: Record<string, number> = Object.assign(
   {},
-  ...Object.values(data.sets as Record<string, { pairs: Record<string, number> }>).map(
-    (s) => s.pairs,
-  ),
+  ...Object.values(data.sets as Record<string, { pairs: Record<string, number> }>).map((s) => s.pairs),
 );
 
 /** A pair's score. Pairs under 0.80 are not stored and read as 0.
  * ponytail: sheet.py averages the true sub-0.80 scores, so a three-frame
  * group can come out a hair stricter here; store the full matrix if a
  * group ever disagrees with the contact sheet. */
-export const twinScore = (a: string, b: string): number =>
-  PAIRS[`${a}|${b}`] ?? PAIRS[`${b}|${a}`] ?? 0;
+export const twinScore = (a: string, b: string): number => PAIRS[`${a}|${b}`] ?? PAIRS[`${b}|${a}`] ?? 0;
 
 const cache = new Map<string, Map<string, string>>();
 
@@ -41,9 +38,7 @@ export function twinGroups(srcs: string[]): Map<string, string> {
   /* Only a frame with a partner above the threshold can join a group: an
      average of scores that are all under it stays under it. Clustering the
      few candidates keeps eighty rows of counts cheap. */
-  const cand = srcs.filter((a) =>
-    srcs.some((b) => b !== a && twinScore(a, b) > TWIN_THRESHOLD),
-  );
+  const cand = srcs.filter((a) => srcs.some((b) => b !== a && twinScore(a, b) > TWIN_THRESHOLD));
   const C = cand.map((s) => [s]);
   for (;;) {
     let best: [number, number, number] | null = null;

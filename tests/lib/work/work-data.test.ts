@@ -5,7 +5,7 @@ import { SPLASH_RUN } from "@/lib/work/splash-run";
 import { CALL_CARD, DOORS, HERO } from "@/lib/photos";
 import { INDEX_ORDER, isSession, LENGTH, priceLabel, SESSIONS, TAB_ORDER, type Session } from "@/lib/booking/catalog";
 import { CATEGORIES, PROJECTS } from "@/lib/work/work-data";
-import { PROJECTS as SITE_PROJECTS } from "@/lib/work/work";
+import { PROJECTS as SITE_PROJECTS, titleCase } from "@/lib/work/work";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The archive and the lists built from it: invariants that, broken, show
@@ -52,14 +52,14 @@ describe("v3", () => {
     expect(isSession(undefined)).toBe(false);
   });
   it("says the rate as the card shows it", () => {
-    const s = (o: Partial<Session>) => ({ slug: "portraits", name: "", includes: [], photo: { d: "", l: "" }, from: null, paid: false, ...o }) as Session;
+    const s = (o: Partial<Session>) =>
+      ({ slug: "portraits", name: "", includes: [], photo: { d: "", l: "" }, from: null, paid: false, ...o }) as Session;
     expect(priceLabel(s({ cal: "x/y" }))).toBe("15 min");
     expect(priceLabel(s({ paid: true, from: 400 }))).toBe("From $400");
     expect(priceLabel(s({ paid: true }))).toBe("$100 deposit");
     expect(priceLabel(s({}))).toBe("On request");
   });
 });
-
 
 describe("credits", () => {
   it("puts Julian's own photo credit last on every page", () => {
@@ -68,7 +68,17 @@ describe("credits", () => {
     expect(live.length).toBeGreaterThan(10);
     for (const p of live) {
       const last = p.credits.findIndex((c) => photo.test(c.role.trim()));
-      expect(p.credits.slice(last).every((c) => photo.test(c.role.trim())), p.slug).toBe(true);
+      expect(
+        p.credits.slice(last).every((c) => photo.test(c.role.trim())),
+        p.slug,
+      ).toBe(true);
     }
+  });
+
+  it("title-cases a name: lowercase collab x, a capital after a colon, apostrophes left alone", () => {
+    expect(titleCase("KALA X SHARKS")).toBe("Kala x Sharks");
+    expect(titleCase("ÆRA:WRAITH")).toBe("Æra:Wraith");
+    expect(titleCase("TONIGHT'S THE NIGHT")).toBe("Tonight's The Night");
+    expect(titleCase("BBYXSHEY")).toBe("Bbyxshey");
   });
 });

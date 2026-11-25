@@ -32,7 +32,7 @@ export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   {
     id: "shoot",
     name: "Photography Services Agreement",
-    body: "Photography Services Agreement\n\nThis Agreement is made on {today} between:\nPhotographer: Julian Gigola\nClient: {client}\n\n1. Scope of Work\nThe Photographer agrees to provide the following photography services:\nType of services: to be set\nDate, time and location: {date}, location to be set\nSession length: to be set\nDeliverables: to be set\nThe Photographer selects, edits and grades the final images in his own style. Unedited and RAW files are not delivered. Time beyond the agreed session length is added only if both parties agree in writing, at a rate set before it starts.\n\n2. Compensation\nTotal payment: {fee}\nDeposit: {deposit}, paid to hold the date and credited toward the total. The date is held only once the deposit is paid.\nFinal payment due: to be set\nAdditional costs: none, unless agreed in writing beforehand.\nFinal images are delivered only after payment in full. A payment more than 14 days late may delay delivery or cancel the services, and any amounts already paid stay with the Photographer as payment for work done.\nThe Client agrees not to dispute or charge back payments for services that were provided under this Agreement.\n\n3. Delivery\nDelivery date: to be set\nMethod of delivery: online gallery\nThe Client should download the files once delivered. The Photographer keeps a backup for 90 days after delivery and is not responsible for files after that.\n\n4. Copyright and Image Usage\nThe Photographer owns the copyright in all images taken. Once paid in full, the Client receives a limited, non-exclusive, non-transferable license for the following use:\nUsage granted: {usage}\nAny other use, including commercial use, advertising, resale, sublicensing, contest entries or training artificial intelligence, needs the Photographer's written permission.\nRestrictions on use: The Client may not edit, alter, or apply filters to any images without the Photographer's prior written consent. Cropping to fit a platform is allowed.\nAttribution: When posting on social media or public platforms, the Client must credit the Photographer as @juliangigola.\n\n5. Client Responsibilities\nThe Client is responsible for access to the location, any permits, and venue or location fees, unless agreed otherwise in writing.\nThe session starts at the agreed time. Late arrival does not extend it. If the Client is more than 30 minutes late without notice, the session counts as a no-show.\nThe Client confirms that everyone they bring to the session agrees to be photographed. Anyone under 18 attends only with a parent or guardian present.\n\n6. Cancellation and Rescheduling\nCancellation or rescheduling is made from the link in the booking confirmation, or in writing by email.\nCancelled by the Client 48 hours or more before the session: 90% of the deposit is refunded and 10% is kept as a booking fee.\nCancelled by the Client under 48 hours but 24 hours or more before the session: 70% of the deposit is refunded and 30% is kept.\nCancelled by the Client under 24 hours before, or a no-show: the deposit is kept.\nRescheduling: with at least 24 hours' notice, the session moves up to two times to another open date and the deposit carries over. A later change is a cancellation.\nCancelled by the Photographer: the Client chooses a new date or a full refund of everything paid. This refund is the Photographer's only obligation.\nOutdoor sessions may move to a new date for unsafe weather, at no cost to either party.\n\n7. Model Release\nThe Client grants the Photographer the right to use images from the session for promotional purposes, including the Photographer's portfolio, website, social media and marketing materials. The Client may opt out by writing to the Photographer before the session. The Photographer will not license the Client's likeness to a third party for advertising without the Client's written consent.\n\n8. Safety and Conduct\nThe Photographer may end the session early if conditions become unsafe or if anyone present behaves in a threatening or harassing way. In that case, payments already made are kept.\n\n9. Liability and Force Majeure\nThe Photographer will take all reasonable precautions to ensure the safety and quality of the session. The Photographer is not liable for:\n- Loss or damage due to circumstances beyond his control, such as natural disasters, illness, equipment failure or file corruption.\n- Injury or damage to persons or property during the session, except where caused by his gross negligence.\n- Indirect, incidental or consequential damages of any kind.\nThe Photographer's total liability under this Agreement is limited to the amounts the Client has paid.\nIn the event of force majeure, both parties will work to reschedule the session or agree on an alternative. If that is not possible, the Client receives a refund of amounts paid for work not yet done.\n\n10. Governing Law and Disputes\nThis Agreement is governed by the laws of the State of California. Any dispute will be heard in the courts of Santa Clara County, California, including small claims court.\n\n11. Entire Agreement\nThis Agreement is the entire understanding between the Photographer and the Client and replaces any prior agreements. Changes must be agreed in writing by both parties; email counts as writing. If any part of this Agreement is found unenforceable, the rest still applies. Notices go to the email addresses each party uses for this booking.\n\n12. Signatures\nThe Photographer agrees to these terms by sending this Agreement. The Client agrees by signing online below. Both parties agree that this electronic signature is as binding as a handwritten one. The name, signature, email and time of signing are recorded with this exact text.",
+    body: "Photography Services Agreement\n\nThis Agreement is made on {today} between:\nPhotographer: Julian Gigola\nClient: {client}\n\n1. Scope of Work\nThe Photographer agrees to provide the following photography services:\nType of services: to be set\nDate, time and location: {date}, location to be set\nSession length: to be set\nDeliverables: to be set\nThe Photographer selects, edits and grades the final images in his own style. Unedited and RAW files are not delivered. Time beyond the agreed session length is added only if both parties agree in writing, at a rate set before it starts.\n\n2. Compensation\nTotal payment: {fee}\nDeposit: {deposit}, paid to hold the date and credited toward the total. The date is held only once the deposit is paid.\nFinal payment due: to be set\nAdditional costs: none, unless agreed in writing beforehand.\nFinal images are delivered only after payment in full. A payment more than 14 days late may delay delivery or cancel the services, and any amounts already paid stay with the Photographer as payment for work done.\nThe Client agrees not to dispute or charge back payments for services that were provided under this Agreement.\n\n3. Delivery\nDelivery date: to be set\nMethod of delivery: online gallery\nThe Client should download the files once delivered. The Photographer keeps a backup for 90 days after delivery and is not responsible for files after that.\n\n4. Copyright and Image Usage\nThe Photographer owns the copyright in all images taken. Once paid in full, the Client receives a limited, non-exclusive, non-transferable license for the following use:\nUsage granted: {usage}\nAny other use, including commercial use, advertising, resale, sublicensing, contest entries or training artificial intelligence, needs the Photographer's written permission.\nRestrictions on use: The Client may not edit, alter, or apply filters to any images without the Photographer's prior written consent. Cropping to fit a platform is allowed.\nAttribution: When posting on social media or public platforms, the Client must credit the Photographer as @juliangigola.\n\n5. Client Responsibilities\nThe Client is responsible for access to the location, any permits, and venue or location fees, unless agreed otherwise in writing.\nThe session starts at the agreed time. Late arrival does not extend it. If the Client is more than 30 minutes late without notice, the session counts as a no-show.\nThe Client confirms that everyone they bring to the session agrees to be photographed. Anyone under 18 attends only with a parent or guardian present.\n\n6. Cancellation and Rescheduling\nCancellation or rescheduling is made from the link in the booking confirmation, or in writing by email.\nCanceled by the Client 48 hours or more before the session: 90% of the deposit is refunded and 10% is kept as a booking fee.\nCanceled by the Client under 48 hours but 24 hours or more before the session: 70% of the deposit is refunded and 30% is kept.\nCanceled by the Client under 24 hours before, or a no-show: the deposit is kept.\nRescheduling: with at least 24 hours' notice, the session moves up to two times to another open date and the deposit carries over. A later change is a cancellation.\nCanceled by the Photographer: the Client chooses a new date or a full refund of everything paid. This refund is the Photographer's only obligation.\nOutdoor sessions may move to a new date for unsafe weather, at no cost to either party.\n\n7. Model Release\nThe Client grants the Photographer the right to use images from the session for promotional purposes, including the Photographer's portfolio, website, social media and marketing materials. The Client may opt out by writing to the Photographer before the session. The Photographer will not license the Client's likeness to a third party for advertising without the Client's written consent.\n\n8. Safety and Conduct\nThe Photographer may end the session early if conditions become unsafe or if anyone present behaves in a threatening or harassing way. In that case, payments already made are kept.\n\n9. Liability and Force Majeure\nThe Photographer will take all reasonable precautions to ensure the safety and quality of the session. The Photographer is not liable for:\n- Loss or damage due to circumstances beyond his control, such as natural disasters, illness, equipment failure or file corruption.\n- Injury or damage to persons or property during the session, except where caused by his gross negligence.\n- Indirect, incidental or consequential damages of any kind.\nThe Photographer's total liability under this Agreement is limited to the amounts the Client has paid.\nIn the event of force majeure, both parties will work to reschedule the session or agree on an alternative. If that is not possible, the Client receives a refund of amounts paid for work not yet done.\n\n10. Governing Law and Disputes\nThis Agreement is governed by the laws of the State of California. Any dispute will be heard in the courts of Santa Clara County, California, including small claims court.\n\n11. Entire Agreement\nThis Agreement is the entire understanding between the Photographer and the Client and replaces any prior agreements. Changes must be agreed in writing by both parties; email counts as writing. If any part of this Agreement is found unenforceable, the rest still applies. Notices go to the email addresses each party uses for this booking.\n\n12. Signatures\nThe Photographer agrees to these terms by sending this Agreement. The Client agrees by signing online below. Both parties agree that this electronic signature is as binding as a handwritten one. The name, signature, email and time of signing are recorded with this exact text.",
   },
 ];
 
@@ -43,11 +43,13 @@ export const UNSET = /\bto be set\b/i;
 export type Signature = { name: string; email: string; ip: string; ua: string; at: string; hash: string; mark?: string; typed?: true };
 
 /** Path data from the pad: M, L and Q with plain numbers, nothing that could run or link. */
-export const isMark = (v: string): boolean => v.length >= 8 && v.length <= 40000 && /^M[\d\s.,MLQ-]+$/.test(v) && (v.match(/\d+(\.\d+)?/g)?.length ?? 0) >= 4;
+export const isMark = (v: string): boolean =>
+  v.length >= 8 && v.length <= 40000 && /^M[\d\s.,MLQ-]+$/.test(v) && (v.match(/\d+(\.\d+)?/g)?.length ?? 0) >= 4;
 /** First and last name at least: two words with letters in them. */
 export const isFullName = (n: string) => n.split(/\s+/).filter((w) => /\p{L}/u.test(w)).length >= 2;
 /** The drawn mark as an inline SVG. Only ever given path data that passed `isMark`. */
-export const markSvg = (d: string, attrs = "") => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" ${attrs}><path d="${d}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+export const markSvg = (d: string, attrs = "") =>
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200" ${attrs}><path d="${d}" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 
 export type Contract = {
   id: string;
@@ -72,11 +74,18 @@ export const isContractId = (v: string): boolean => /^[0-9A-Za-z]{16}$/.test(v);
 export const contractUrl = (id: string) => `https://juliangigola.com/contract/${id}`;
 
 const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
-const longDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(new Date(iso));
+const longDay = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(new Date(iso));
 
 /** A template's fields filled from a lead. Unknown values stay readable blanks for him to fill. */
-export function fillContract(body: string, l: Pick<Lead, "name" | "when" | "quote" | "licence"> & Partial<Pick<Lead, "kind" | "deposit" | "events">>, today = new Date().toISOString()): string {
-  const usage = l.licence ? `${l.licence.use || "Licensed use"}, until ${new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}` : "Personal use";
+export function fillContract(
+  body: string,
+  l: Pick<Lead, "name" | "when" | "quote" | "licence"> & Partial<Pick<Lead, "kind" | "deposit" | "events">>,
+  today = new Date().toISOString(),
+): string {
+  const usage = l.licence
+    ? `${l.licence.use || "Licensed use"}, until ${new Date(`${l.licence.end}T12:00:00Z`).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })}`
+    : "Personal use";
   return body
     .replace(/\{client\}/g, l.name)
     .replace(/\{date\}/g, l.when ? longDay(l.when) : "to be set")
@@ -92,11 +101,16 @@ export function cleanContractTemplates(v: unknown): ContractTemplate[] {
   return v
     .filter((t): t is ContractTemplate => !!t && typeof t === "object" && typeof t.name === "string" && typeof t.body === "string")
     .slice(0, 20)
-    .map((t, i) => ({ id: typeof t.id === "string" && t.id ? t.id.slice(0, 40) : `c${i}`, name: t.name.slice(0, 60), body: t.body.slice(0, 20000) }));
+    .map((t, i) => ({
+      id: typeof t.id === "string" && t.id ? t.id.slice(0, 40) : `c${i}`,
+      name: t.name.slice(0, 60),
+      body: t.body.slice(0, 20000),
+    }));
 }
 
 /** The business block on the contract: name, address and email from the invoice details. */
-export const fromLines = (f: Partial<InvoiceFrom> | null | undefined) => [f?.name, f?.a1, f?.a2, f?.a3, f?.email].filter((x): x is string => !!x?.trim()).map((x) => x.trim());
+export const fromLines = (f: Partial<InvoiceFrom> | null | undefined) =>
+  [f?.name, f?.a1, f?.a2, f?.a3, f?.email].filter((x): x is string => !!x?.trim()).map((x) => x.trim());
 
 const clip = (v: unknown, n: number) => (typeof v === "string" ? v.trim().slice(0, n) : "");
 
@@ -109,29 +123,52 @@ export function cleanDraft(given: Record<string, unknown>): { to: Contract["to"]
   if (!name) return { error: "The client's name, please." };
   const email = clip(to.email, 200);
   if (email && !isEmail(email)) return { error: "That email does not look right." };
-  return { to: { name, email, ...(clip(to.address, 300) ? { address: clip(to.address, 300) } : {}) }, text, ...(typeof given.template === "string" ? { template: given.template.slice(0, 40) } : {}) };
+  return {
+    to: { name, email, ...(clip(to.address, 300) ? { address: clip(to.address, 300) } : {}) },
+    text,
+    ...(typeof given.template === "string" ? { template: given.template.slice(0, 40) } : {}),
+  };
 }
 
 /** A new contract, or the draft changed. A signed one never changes. */
-export function draft(c: Contract | null, lead: string, d: { to: Contract["to"]; text: string; template?: string }, at: string): Contract | { error: string } {
+export function draft(
+  c: Contract | null,
+  lead: string,
+  d: { to: Contract["to"]; text: string; template?: string },
+  at: string,
+): Contract | { error: string } {
   if (c?.signed) return { error: "Signed contracts are locked." };
   return { ...(c ?? { id: newToken(), lead, createdAt: at }), ...d, updatedAt: at };
 }
 
 /** The client's signature, or why it was refused. `seen` is the hash the page showed them. */
-export async function sign(c: Contract, by: { name: unknown; email: unknown; agree: unknown; seen: unknown; mark?: unknown; typed?: unknown; ip: string; ua: string }, at: string): Promise<(Contract & { signed: Signature }) | { error: string; status: number }> {
+export async function sign(
+  c: Contract,
+  by: { name: unknown; email: unknown; agree: unknown; seen: unknown; mark?: unknown; typed?: unknown; ip: string; ua: string },
+  at: string,
+): Promise<(Contract & { signed: Signature }) | { error: string; status: number }> {
   if (c.signed) return { error: "This contract is already signed.", status: 409 };
   const name = clip(by.name, 120);
   if (!isFullName(name)) return { error: "Type your first and last name.", status: 400 };
   const typed = by.typed === true;
   if (!typed && (typeof by.mark !== "string" || !isMark(by.mark))) return { error: "Sign in the box.", status: 400 };
   if (typeof by.email !== "string" || !isEmail(by.email)) return { error: "That email does not look right.", status: 400 };
-  if (by.agree !== true) return { error: "Tick I agree to sign.", status: 400 };
+  if (by.agree !== true) return { error: 'Check "I agree" to sign.', status: 400 };
   const hash = await sha256Hex(c.text);
   if (by.seen !== hash) return { error: "This contract changed since you opened it. Reload the page to read the new text.", status: 409 };
-  return { ...c, signed: { name, email: by.email.trim(), ip: by.ip.slice(0, 64), ua: by.ua.slice(0, 400), at, hash, ...(typed ? { typed: true as const } : { mark: by.mark as string }) } };
+  return {
+    ...c,
+    signed: {
+      name,
+      email: by.email.trim(),
+      ip: by.ip.slice(0, 64),
+      ua: by.ua.slice(0, 400),
+      at,
+      hash,
+      ...(typed ? { typed: true as const } : { mark: by.mark as string }),
+    },
+  };
 }
-
 
 /** One contract, opened. Null for a malformed id or a missing record; throws when the record is there but cannot be opened (a rotated LEADS_KEY), like `readLead`. */
 export async function readContract(kv: KV, s: Seal, id: string): Promise<Contract | null> {
@@ -162,13 +199,22 @@ export const publicContract = async (c: Contract) => ({
 export type PublicContract = Awaited<ReturnType<typeof publicContract>>;
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
-const stamp = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "long" }).format(new Date(iso));
+const stamp = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "long" }).format(new Date(iso));
 
 /** The signed copy: one self-contained page, printable to PDF. Everything the client typed is escaped. */
 export function signedCopy(c: Contract): string {
   const s = c.signed;
   const rows: [string, string][] = s
-    ? [["Signed by", s.name], ["Email", s.email], ["Signed at", stamp(s.at)], ["IP address", s.ip], ["Device", s.ua], ["SHA-256 of the text", s.hash], ["Contract", contractUrl(c.id)]]
+    ? [
+        ["Signed by", s.name],
+        ["Email", s.email],
+        ["Signed at", stamp(s.at)],
+        ["IP address", s.ip],
+        ["Device", s.ua],
+        ["SHA-256 of the text", s.hash],
+        ["Contract", contractUrl(c.id)],
+      ]
     : [["Status", "Not signed yet"]];
   return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex">
 <title>Contract, ${esc(c.to.name)}</title>

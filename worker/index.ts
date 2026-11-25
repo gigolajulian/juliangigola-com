@@ -8,15 +8,21 @@
  * then to copy the desk to the Google Sheet (`app/api/leads/sheet`).
  * Mondays at 16:00 and 17:00 UTC, whichever is 9 AM Pacific asks the site
  * to mail hello@ the week (`app/api/leads/weekly`). Hourly too, the 9 AM
- * Pacific run asks for the galleries' daily summary (`app/api/proof/daily`).
+ * Pacific run asks for the galleries' daily summary (`app/api/proof/daily`),
+ * and `health` loads the site's main pages, mailing hello@ from book@ when one
+ * fails. It goes through SITE, so it proves the site's Worker answers, not DNS.
  * ─────────────────────────────────────────────────────────────── */
 
 import { lockOp, type BookingEnv } from "../lib/booking/engine";
 import { manageLinks } from "../lib/booking/manage-link";
 import { confirmOf, sendConfirm } from "../lib/booking/confirm";
 import { TZ } from "../lib/time-zone";
+import { scrubConsole } from "../lib/scrub";
 
 export { BookingLock } from "./booking-lock";
+
+// Logs carry no addresses, phone numbers or keys (`lib/scrub.ts`).
+scrubConsole();
 
 type Env = Pick<BookingEnv, "BOOKING_LOCK" | "CLIENT_EMAIL" | "BOOKING_SECRET"> & { WORKER_KEY?: string; SITE?: CloudflareEnv["ASSETS"] };
 
@@ -52,7 +58,8 @@ async function askSite(env: Env, path: string, label: string, body?: unknown) {
 }
 
 /** Whether it is the 9 o'clock hour in Pacific time: the cron fires at both UTC hours DST can put it on. */
-export const isNineAmPacific = (now: Date) => Number(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", hourCycle: "h23" }).format(now)) === 9;
+export const isNineAmPacific = (now: Date) =>
+  Number(new Intl.DateTimeFormat("en-US", { timeZone: TZ, hour: "numeric", hourCycle: "h23" }).format(now)) === 9;
 
 /** Tells the site's lead desk a reminder went out (the lead key lives there). Never throws. */
 const logSent = (env: Env, email: string, subject: string, booking: string, kind: string) =>
@@ -74,13 +81,41 @@ export async function daily(env: Env, now = new Date()) {
   if (isNineAmPacific(now)) await askSite(env, "/api/proof/daily", "gallery summary");
 }
 
+/** Pages the hourly check loads: the home page, booking and the work. */
+export const HEALTH_PATHS = ["/", "/book", "/portfolio"];
+
+/** Loads each page through SITE; a throw, a 5xx or a 4xx mails hello@ from book@ (at most hourly while it lasts). Never throws. */
+export async function health(env: Env) {
+  if (!env.SITE) return [];
+  const bad: string[] = [];
+  for (const path of HEALTH_PATHS) {
+    const res = await env.SITE.fetch(`https://juliangigola.com${path}`, { redirect: "manual" }).catch((e: unknown) => String(e));
+    if (typeof res === "string") bad.push(`${path}: ${res.slice(0, 200)}`);
+    else if (res.status >= 400) bad.push(`${path}: ${res.status}`);
+  }
+  if (bad.length && env.CLIENT_EMAIL)
+    await env.CLIENT_EMAIL.send({
+      to: "hello@juliangigola.com",
+      from: { name: "Julian Gigola website", email: "book@juliangigola.com" },
+      subject: `Site check failed: ${bad.length} of ${HEALTH_PATHS.length} pages`,
+      text: [...bad, "", "Checked by the booking Worker's hourly run. Logs: npx wrangler tail juliangigola"].join("\n"),
+    }).catch((e: unknown) => console.error("health mail", String(e)));
+  return bad;
+}
+
 export const HOURLY = "0 * * * *";
 export const WEEKLY = "0 16,17 * * 1";
 
 const worker = {
   fetch: () => new Response("Not found.", { status: 404 }),
   scheduled: (event: { cron: string }, env: Env, ctx: { waitUntil(p: Promise<unknown>): void }) =>
-    ctx.waitUntil(event.cron === HOURLY ? Promise.all([remind(env), daily(env)]) : event.cron === WEEKLY ? weekly(env) : syncMail(env).then(() => copySheet(env))),
+    ctx.waitUntil(
+      event.cron === HOURLY
+        ? Promise.all([remind(env), daily(env), health(env)])
+        : event.cron === WEEKLY
+          ? weekly(env)
+          : syncMail(env).then(() => copySheet(env)),
+    ),
 };
 
 export default worker;

@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { BOOKING_PAGES, BOOK_MENU, SESSION_EVENTS, bookingHref, bookingPage, sessionEvent, pageForSession } from "@/lib/booking/service-pages";
+import {
+  BOOKING_PAGES,
+  BOOK_MENU,
+  SESSION_EVENTS,
+  bookingHref,
+  bookingPage,
+  sessionEvent,
+  pageForSession,
+} from "@/lib/booking/service-pages";
 import { BOOKING_SLUGS } from "@/lib/booking/slugs";
 import { byCodeUnit } from "@/lib/utils";
 
@@ -28,7 +36,12 @@ describe("booking pages", () => {
 
   it("shows Fashion its six chosen frames, in order", () => {
     expect(bookingPage("fashion-photography")!.tiles.map((t) => t.frame.src.slice(6))).toEqual([
-      "i-wanna-be-a-human/02.jpg", "i-wanna-be-a-human/09.jpg", "aegis/04.jpg", "poise/09.jpg", "stratus-lookbook-vol-1/03.jpg", "ukiyosunknown/01.jpg",
+      "i-wanna-be-a-human/02.jpg",
+      "i-wanna-be-a-human/09.jpg",
+      "aegis/04.jpg",
+      "poise/09.jpg",
+      "stratus-lookbook-vol-1/03.jpg",
+      "ukiyosunknown/01.jpg",
     ]);
   });
 });

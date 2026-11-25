@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { authorised, canPush, fromWorker, refuseAdmin, refuseWorker } from "@/lib/admin/vouch";
+import { authorised, canPush, forgetVouches, fromWorker, refuseAdmin, refuseWorker } from "@/lib/admin/vouch";
 import { AdminError, isLocked, loadErrorText, LOCKED } from "@/lib/admin/admin-call";
 import { SCOPED, githubToken, reply } from "../../backend/fakes";
 
@@ -11,24 +11,40 @@ let n = 0;
 const fine = () => `github_pat_${"f".repeat(30)}${String(++n).padStart(6, "0")}`;
 const PUSH = { permissions: { push: true } };
 
-beforeEach(() => vi.unstubAllGlobals());
+beforeEach(() => {
+  vi.unstubAllGlobals();
+  forgetVouches();
+});
 
 describe("canPush", () => {
   it("lets a classic token through only with repo or public_repo scope", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => reply(PUSH, 200, SCOPED)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply(PUSH, 200, SCOPED)),
+    );
     expect(await canPush(githubToken())).toBe(true);
-    vi.stubGlobal("fetch", vi.fn(async () => reply(PUSH, 200, { "x-oauth-scopes": "public_repo, gist" })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply(PUSH, 200, { "x-oauth-scopes": "public_repo, gist" })),
+    );
     expect(await canPush(githubToken())).toBe(true);
     // A pusher's classic token made with no scopes, or only read:user.
-    vi.stubGlobal("fetch", vi.fn(async () => reply(PUSH, 200, { "x-oauth-scopes": "" })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply(PUSH, 200, { "x-oauth-scopes": "" })),
+    );
     expect(await canPush(githubToken())).toBe(false);
-    vi.stubGlobal("fetch", vi.fn(async () => reply(PUSH, 200, { "x-oauth-scopes": "read:user" })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply(PUSH, 200, { "x-oauth-scopes": "read:user" })),
+    );
     expect(await canPush(githubToken())).toBe(false);
   });
 
   it("lets Julian's fine-grained token through when it holds Contents write", async () => {
     const fetch = vi.fn(async (_u: string, init?: RequestInit) =>
-      init?.method === "PUT" ? reply({ message: "Invalid request." }, 422) : reply(PUSH));
+      init?.method === "PUT" ? reply({ message: "Invalid request." }, 422) : reply(PUSH),
+    );
     vi.stubGlobal("fetch", fetch);
     expect(await canPush(fine())).toBe(true);
     // The probe never carries content, so it can never write.
@@ -37,8 +53,12 @@ describe("canPush", () => {
   });
 
   it("refuses a fine-grained token without Contents write", async () => {
-    vi.stubGlobal("fetch", vi.fn(async (_u: string, init?: RequestInit) =>
-      init?.method === "PUT" ? reply({ message: "Resource not accessible by personal access token" }, 403) : reply(PUSH)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (_u: string, init?: RequestInit) =>
+        init?.method === "PUT" ? reply({ message: "Resource not accessible by personal access token" }, 403) : reply(PUSH),
+      ),
+    );
     expect(await canPush(fine())).toBe(false);
   });
 
@@ -50,7 +70,10 @@ describe("canPush", () => {
   });
 
   it("refuses a token whose owner cannot push, whatever it was granted", async () => {
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } }, 200, SCOPED)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ permissions: { push: false } }, 200, SCOPED)),
+    );
     expect(await canPush(githubToken())).toBe(false);
   });
 });
@@ -58,7 +81,7 @@ describe("canPush", () => {
 const req = (headers: Record<string, string>) => new Request("https://x.test/api", { headers });
 
 describe("authorised and fromWorker", () => {
-  it("authorised matches only the exact inbox key, and nothing when it is unset", async () => {
+  it("authorised matches only the exact admin key, and nothing when it is unset", async () => {
     expect(await authorised(req({ "x-admin-key": "k1" }), "k1")).toBe(true);
     expect(await authorised(req({ "x-admin-key": "k2" }), "k1")).toBe(false);
     expect(await authorised(req({}), "k1")).toBe(false);
@@ -80,11 +103,32 @@ describe("authorised and fromWorker", () => {
 });
 
 describe("refuseAdmin and the desks' lock", () => {
+  it("asks GitHub again before any write, so a revoked token stops changing things at once", async () => {
+    const token = githubToken();
+    let revoked = false;
+    let asked = 0;
+    vi.stubGlobal("fetch", async () => (asked++, revoked ? reply({ message: "Bad credentials" }, 401) : reply(PUSH, 200, SCOPED)));
+    const req = (method: string) =>
+      new Request("https://juliangigola.com/api/leads", { method, headers: { authorization: `Bearer ${token}` } });
+    expect(await refuseAdmin(req("GET"))).toBeNull();
+    revoked = true;
+    // A read inside the five minutes is still let in from the cache; a write asks GitHub and is refused.
+    expect(await refuseAdmin(req("GET"))).toBeNull();
+    expect(asked).toBe(1);
+    expect((await refuseAdmin(req("POST")))?.status).toBe(401);
+    expect((await refuseAdmin(req("DELETE")))?.status).toBe(401);
+    // And the refusal ends the cached read too.
+    expect((await refuseAdmin(req("GET")))?.status).toBe(401);
+  });
+
   it("lets the key in, and tells a missing key from a refused token in one 401", async () => {
     expect(await refuseAdmin(req({ "x-admin-key": "k1" }), "k1")).toBeNull();
     const none = (await refuseAdmin(req({}), "k1"))!;
     expect([none.status, (await none.json()).error]).toEqual([401, "Not authorized."]);
-    vi.stubGlobal("fetch", vi.fn(async () => reply({ permissions: { push: false } }, 200, SCOPED)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => reply({ permissions: { push: false } }, 200, SCOPED)),
+    );
     const bad = (await refuseAdmin(req({ authorization: `Bearer ${githubToken()}` }), "k1"))!;
     expect([bad.status, (await bad.json()).error]).toEqual([401, "GitHub did not accept that token for this repository."]);
   });

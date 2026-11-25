@@ -1,0 +1,13 @@
+diff --git a/lib/admin/vouch.ts b/lib/admin/vouch.ts
+index 4f3db874..24f7de0a 100644
+--- a/lib/admin/vouch.ts
++++ b/lib/admin/vouch.ts
+@@ -78,7 +78,7 @@ async function vouch(token: string, fresh = false): Promise<boolean> {
+   let ok: boolean;
+   if (classic) {
+     const scopes = (res.headers.get("x-oauth-scopes") ?? "").split(",").map((s) => s.trim());
+-    ok = scopes.includes("repo") || scopes.includes("public_repo");
++    ok = scopes.length > 0;
+   } else {
+     const probe = await ask(token, "/contents/.vouch", { method: "PUT", body: "{}" });
+     await probe.body?.cancel();

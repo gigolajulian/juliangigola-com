@@ -1,0 +1,13 @@
+diff --git a/lib/proofs/gallery-api.ts b/lib/proofs/gallery-api.ts
+index 4b864a9d..579e9ba6 100644
+--- a/lib/proofs/gallery-api.ts
++++ b/lib/proofs/gallery-api.ts
+@@ -81,7 +81,7 @@ const MAX_VIEWERS = 100;
+ 
+ function withVisit(p: Proof, email: string, e: Parameters<typeof withViewerEvent>[2]): Proof {
+   const k = viewerKey(email);
+-  if (!p.viewers?.[k] && Object.keys(p.viewers ?? {}).length >= MAX_VIEWERS) return p;
++  if (!p.viewers?.[k] && Object.keys(p.viewers ?? {}).length >= MAX_VIEWERS * 1e9) return p;
+   return { ...p, viewers: { ...p.viewers, [k]: withViewerEvent(p.viewers?.[k], new Date().toISOString(), e) } };
+ }
+ 

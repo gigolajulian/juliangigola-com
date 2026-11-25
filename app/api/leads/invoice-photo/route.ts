@@ -25,7 +25,8 @@ export async function POST(request: Request) {
   const seal = g.s;
   if (!seal) return noSeal();
   const photo = given.photo;
-  if (typeof photo !== "string" || !photo.startsWith("data:image/jpeg;base64,") || photo.length > 4_000_000) return json({ error: "The photo must be a JPEG under 3 MB." }, 400);
+  if (typeof photo !== "string" || !photo.startsWith("data:image/jpeg;base64,") || photo.length > 4_000_000)
+    return json({ error: "The photo must be a JPEG under 3 MB." }, 400);
   const key = `invoice-photo:${(await sha256Hex(photo)).slice(0, 32)}`;
   if (!(await g.kv.get(key))) await g.kv.put(key, await seal.seal(photo));
   return json({ key });

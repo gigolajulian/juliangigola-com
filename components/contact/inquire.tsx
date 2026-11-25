@@ -25,12 +25,23 @@ function Note() {
       <label className="lbl mute" htmlFor={`r-${k}`}>
         <span>
           {label}
-          <span className="req" aria-hidden="true"> *</span>
+          <span className="req" aria-hidden="true">
+            {" "}
+            *
+          </span>
         </span>
-        {err[k] && v[k] ? <span className="fe" aria-hidden="true">{err[k]}</span> : null}
+        {err[k] && v[k] ? (
+          <span className="fe" aria-hidden="true">
+            {err[k]}
+          </span>
+        ) : null}
       </label>
       {err[k] && !v[k] && React.isValidElement<{ placeholder?: string }>(el) ? React.cloneElement(el, { placeholder: err[k] }) : el}
-      {err[k] ? <p className="sr-only" id={`r-${k}-err`} role="alert">{err[k]}</p> : null}
+      {err[k] ? (
+        <p className="sr-only" id={`r-${k}-err`} role="alert">
+          {err[k]}
+        </p>
+      ) : null}
     </div>
   );
   return (
@@ -53,18 +64,66 @@ function Note() {
         <h2>Start a project</h2>
         <p className="mute">A few lines is enough. Dates and a reference help.</p>
         <div className="reach-row">
-          {fld("name", "Name", <input id="r-name" name="name" autoComplete="name" aria-required placeholder="Your name" value={v.name} onChange={set("name")} aria-invalid={!!err.name || undefined} aria-describedby={err.name ? "r-name-err" : undefined} />)}
-          {fld("email", "Email", <input id="r-email" name="email" type="email" autoComplete="email" aria-required placeholder="you@email.com" value={v.email} onChange={set("email")} aria-invalid={!!err.email || undefined} aria-describedby={err.email ? "r-email-err" : undefined} />)}
+          {fld(
+            "name",
+            "Name",
+            <input
+              id="r-name"
+              name="name"
+              autoComplete="name"
+              aria-required
+              placeholder="Your name"
+              value={v.name}
+              onChange={set("name")}
+              aria-invalid={!!err.name || undefined}
+              aria-describedby={err.name ? "r-name-err" : undefined}
+            />,
+          )}
+          {fld(
+            "email",
+            "Email",
+            <input
+              id="r-email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              aria-required
+              placeholder="you@email.com"
+              value={v.email}
+              onChange={set("email")}
+              aria-invalid={!!err.email || undefined}
+              aria-describedby={err.email ? "r-email-err" : undefined}
+            />,
+          )}
         </div>
-        {fld("message", "Message", <textarea id="r-message" name="message" rows={4} aria-required placeholder="What are you planning, and when?" value={v.message} onChange={set("message")} aria-invalid={!!err.message || undefined} aria-describedby={err.message ? "r-message-err" : undefined} />)}
+        {fld(
+          "message",
+          "Message",
+          <textarea
+            id="r-message"
+            name="message"
+            rows={4}
+            aria-required
+            placeholder="What are you planning, and when?"
+            value={v.message}
+            onChange={set("message")}
+            aria-invalid={!!err.message || undefined}
+            aria-describedby={err.message ? "r-message-err" : undefined}
+          />,
+        )}
         <ReferencePicks resync={state} v3 />
         <Failed state={state} />
         <div className="reach-send">
-          <button className="btn fill" type="submit" disabled={pending}>Send note</button>
+          <button className="btn fill" type="submit" disabled={pending}>
+            Send note
+          </button>
         </div>
       </div>
       <div className="reach-out" hidden={!sent} role="status">
-        <span className="f-ok lbl"><Check />Sent</span>
+        <span className="f-ok lbl">
+          <Check />
+          Sent
+        </span>
         <b>Thanks, {first(v.name)}.</b>
         <p className="mute">A copy is in your inbox.</p>
       </div>
@@ -76,7 +135,9 @@ export function Contact() {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-inquire">
-        <div className="pg-head"><h1 className="pg-t">Get in touch</h1></div>
+        <div className="pg-head">
+          <h1 className="pg-t">Get in touch</h1>
+        </div>
         <div className="reach">
           <Note />
           <div className="reach-call">
@@ -84,7 +145,9 @@ export function Contact() {
             <div className="rc-in">
               <h2>Book a consultation</h2>
               <p>15 minutes, phone or video. Pick a time on my calendar.</p>
-              <div><CallDialog /></div>
+              <div>
+                <CallDialog />
+              </div>
             </div>
           </div>
         </div>
@@ -92,7 +155,11 @@ export function Contact() {
           <h2 className="lbl mute">How a commission runs</h2>
           <ol>
             {STEPS.map(([t, d], i) => (
-              <li key={t}><span className="lbl mute">{`0${i + 1}`}</span><b>{t}</b><p>{d}</p></li>
+              <li key={t}>
+                <span className="lbl mute">{`0${i + 1}`}</span>
+                <b>{t}</b>
+                <p>{d}</p>
+              </li>
             ))}
           </ol>
         </div>
@@ -101,21 +168,27 @@ export function Contact() {
             <Duo dark={DOORS.commissions.d} light={DOORS.commissions.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
             <span className="lbl mute">For art directors and artists</span>
             <h3>Commissions</h3>
-            <p>Campaigns, editorial, cover art and presskits. Three short steps.</p>
-            <div><span className="btn fill">Start an inquiry</span></div>
+            <p>Campaigns, editorial, cover art and press kits. Three short steps.</p>
+            <div>
+              <span className="btn fill">Start an inquiry</span>
+            </div>
           </Link>
           <Link className="door" href="/book">
             <Duo dark={DOORS.book.d} light={DOORS.book.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
             <span className="lbl mute">For private clients</span>
             <h3>Book a session</h3>
             <p>Portraits, graduation, headshots, studio digitals and weddings.</p>
-            <div><span className="btn fill">Pick a session</span></div>
+            <div>
+              <span className="btn fill">Pick a session</span>
+            </div>
           </Link>
         </div>
         <div className="direct lbl">
           <span className="mute">Or write directly</span>
           <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
-          <a href="https://instagram.com/juliangigola" rel="noopener">@juliangigola</a>
+          <a href="https://instagram.com/juliangigola" rel="noopener">
+            @juliangigola
+          </a>
         </div>
         <PageFoot bare />
       </section>
@@ -131,11 +204,18 @@ const STEPS = [
 ] as const;
 
 /* ── /contact/form: the commission stepper (Project, Scope, You, Sent) ── */
-const KINDS = ["Brand campaign", "Editorial", "Cover art", "Artist presskit", "Music video", "Event coverage", "Other"];
+const KINDS = ["Brand campaign", "Editorial", "Cover art", "Artist press kit", "Music video", "Event coverage", "Other"];
 const WHEN = ["This month", "Next month", "Later this year", "Flexible"];
 const BUDGET = ["Under $2k", "$2k to $5k", "$5k to $10k", "$10k and up", "Not sure yet"];
 /* The inbox's shoot types (lib/leads/enquiry.ts SHOOT_TYPES). */
-const TYPE: Record<string, string> = { "Brand campaign": "campaign", Editorial: "editorial", "Cover art": "coverart", "Artist presskit": "presskit", "Music video": "video", "Event coverage": "event" };
+const TYPE: Record<string, string> = {
+  "Brand campaign": "campaign",
+  Editorial: "editorial",
+  "Cover art": "coverart",
+  "Artist press kit": "presskit",
+  "Music video": "video",
+  "Event coverage": "event",
+};
 
 export function CommissionForm() {
   const router = useRouter();
@@ -166,10 +246,13 @@ export function CommissionForm() {
   if (at >= 2 && pick.budget) sum.push(["Budget", pick.budget]);
   if (at >= 3 && v.org) sum.push(["From", v.org]);
 
-  let head: string, sub: string, body: React.ReactNode, cta = "Continue";
+  let head: string,
+    sub: string,
+    body: React.ReactNode,
+    cta = "Continue";
   if (at === 1) {
     head = "Have something in mind?";
-    sub = "Campaigns, editorial, cover art and presskits. I come back with an approach and a quote.";
+    sub = "Campaigns, editorial, cover art and press kits. I'll reply with an approach and a quote.";
     body = (
       <>
         <span className="lbl mute">Pick all that fit</span>
@@ -177,7 +260,13 @@ export function CommissionForm() {
           {KINDS.map((x) => {
             const on = kinds.includes(x);
             return (
-              <button key={x} type="button" className="kind" aria-pressed={on} onClick={() => setKinds(on ? kinds.filter((y) => y !== x) : [...kinds, x])}>
+              <button
+                key={x}
+                type="button"
+                className="kind"
+                aria-pressed={on}
+                onClick={() => setKinds(on ? kinds.filter((y) => y !== x) : [...kinds, x])}
+              >
                 <b>{x}</b>
                 <span className="lbl">{on ? "Picked" : ""}</span>
               </button>
@@ -185,7 +274,10 @@ export function CommissionForm() {
           })}
         </div>
         {/* Every Inquire lands here now (critique); the call and the email stay one tap away. */}
-        <p className="lbl mute in-alt">Prefer to talk? <Link href="/book/consultation">15 min call</Link> <span aria-hidden>·</span> <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>
+        <p className="lbl mute in-alt">
+          Prefer to talk? <Link href="/book/consultation">15 min call</Link> <span aria-hidden>·</span>{" "}
+          <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
+        </p>
       </>
     );
   } else if (at === 2) {
@@ -193,12 +285,19 @@ export function CommissionForm() {
     sub = "A rough answer is enough.";
     body = (
       <>
-        {([["When", "when", WHEN], ["Budget", "budget", BUDGET]] as const).map(([l, key, opts]) => (
+        {(
+          [
+            ["When", "when", WHEN],
+            ["Budget", "budget", BUDGET],
+          ] as const
+        ).map(([l, key, opts]) => (
           <div key={key} className="fld" role="group" aria-label={l}>
             <span className="lbl mute">{l}</span>
             <div className="wrapopts lbl">
               {opts.map((o) => (
-                <button key={o} type="button" className="opt" aria-pressed={pick[key] === o} onClick={() => setPick({ ...pick, [key]: o })}>{o}</button>
+                <button key={o} type="button" className="opt" aria-pressed={pick[key] === o} onClick={() => setPick({ ...pick, [key]: o })}>
+                  {o}
+                </button>
               ))}
             </div>
           </div>
@@ -223,20 +322,24 @@ export function CommissionForm() {
     cta = "Send inquiry";
   } else {
     head = "Sent.";
-    sub = `Thanks${v.name.trim() ? `, ${first(v.name)}` : ""}. I'll come back with an approach and a quote.`;
+    sub = `Thanks${v.name.trim() ? `, ${first(v.name)}` : ""}. I'll reply with an approach and a quote.`;
     body = (
       <div className="done-lines">
         {[
           `${kinds.length ? kinds.join(" and ") : "Your project"}${pick.when ? `, ${pick.when.toLowerCase()}` : ""}${pick.budget ? `, ${pick.budget}` : ""}.`,
           `A copy is in your inbox at ${v.email}.`,
           "If it is urgent, say so in a reply and I will call.",
-        ].map((l) => <p key={l}>{l}</p>)}
+        ].map((l) => (
+          <p key={l}>{l}</p>
+        ))}
       </div>
     );
     cta = "See the work";
   }
 
-  const detail = [kinds.join(", "), pick.when, pick.budget, v.place.trim(), v.org.trim(), seen && `Seen: ${seen}`].filter(Boolean).join(" · ");
+  const detail = [kinds.join(", "), pick.when, pick.budget, v.place.trim(), v.org.trim(), seen && `Seen: ${seen}`]
+    .filter(Boolean)
+    .join(" · ");
   const message = v.msg.trim();
   const next = (form: HTMLFormElement) => {
     if (at === 4) return router.push("/portfolio");
@@ -254,7 +357,13 @@ export function CommissionForm() {
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-flow">
-        <form noValidate onSubmit={(e) => { e.preventDefault(); next(e.currentTarget); }}>
+        <form
+          noValidate
+          onSubmit={(e) => {
+            e.preventDefault();
+            next(e.currentTarget);
+          }}
+        >
           <Hidden type={TYPE[kinds[0]] ?? "other"} detail={detail} />
           <input type="hidden" name="message" value={message} />
           <FlowShell
@@ -267,8 +376,21 @@ export function CommissionForm() {
             body={body}
             bar={
               <>
-                {at > 1 && at < 4 ? <button type="button" className="btn" onClick={() => { setK(at - 1); top(); }}>Back</button> : null}
-                <button type="submit" className="btn fill" disabled={pending}>{cta}</button>
+                {at > 1 && at < 4 ? (
+                  <button
+                    type="button"
+                    className="btn"
+                    onClick={() => {
+                      setK(at - 1);
+                      top();
+                    }}
+                  >
+                    Back
+                  </button>
+                ) : null}
+                <button type="submit" className="btn fill" disabled={pending}>
+                  {cta}
+                </button>
               </>
             }
             photo={{ d: DOORS.commissions.d, l: DOORS.commissions.d }}

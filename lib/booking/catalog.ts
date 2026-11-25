@@ -9,15 +9,26 @@ export type { SessionType };
     `from` stays null until a price is set there. */
 export const SESSION_TYPES: SessionType[] = CONTENT.sessions;
 
-/** A starting price as the service pages, /book?classic and the structured data print it: null is "On request".
+/** A starting price as the service pages and the structured data print it: null is "On request".
     The session cards print `priceLabel` instead, which reads differently (no thousands comma, a call's length, a deposit). */
-export const formatPrice = (from: number | null): string =>
-  from === null ? "On request" : `From $${from.toLocaleString("en-US")}`;
+export const formatPrice = (from: number | null): string => (from === null ? "On request" : `From $${from.toLocaleString("en-US")}`);
 
 const w = (slug: string, n: string) => `/work/${slug}/${n}.jpg`;
 
 /* ── the session catalog: what /book, the homepage and the service pages offer (deposits from lib/leads/deposit-terms.ts) ── */
-export type SessionSlug = "portraits" | "headshots" | "studio-digitals" | "model-test" | "graduation" | "weddings" | "consultation" | "music-photography" | "fashion-photography" | "brand-photography" | "editorial" | "events";
+export type SessionSlug =
+  | "portraits"
+  | "headshots"
+  | "studio-digitals"
+  | "model-test"
+  | "graduation"
+  | "weddings"
+  | "consultation"
+  | "music-photography"
+  | "fashion-photography"
+  | "brand-photography"
+  | "editorial"
+  | "events";
 export type Session = {
   slug: SessionSlug;
   name: string;
@@ -41,7 +52,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   portraits: {
     slug: "portraits",
     name: "Portraits",
-    blurb: "One hour with direction, lighting and edited selects. Studio located in San Jose, available to travel across the SF Bay Area.",
+    blurb: "One hour with direction, lighting and edited selects. My studio is in San Jose, and I travel across the Bay Area.",
     from: null,
     includes: ["One hour, studio or location", "Two looks", "Retouched selects", "Crops for web and print"],
     turnaround: "1 week",
@@ -53,29 +64,32 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   graduation: {
     slug: "graduation",
     name: "Graduation",
-    blurb: "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. Studio located in San Jose, available to travel across the SF Bay Area. On campus at SJSU or SCU; a travel fee applies further out.",
+    blurb:
+      "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. My studio is in San Jose, and I travel across the Bay Area. SJSU and SCU are included. A travel fee applies farther out.",
     from: 400,
     includes: ["90 minutes on location", "Two outfit changes", "Edited gallery", "Print release"],
     turnaround: "1 week",
     cal: "juliangigola/graduation",
-    photo: { d: "/work/graduation/cover.jpg", l: w("graduation", "06"), at: { d: "50% 12%" } },
+    // Julian's picks, 2026-11-24: one main frame per session, the same in both themes.
+    photo: { d: w("graduation", "01"), l: w("graduation", "01"), at: { d: "50% 15%", l: "50% 15%" } },
   },
   headshots: {
     slug: "headshots",
     name: "Headshots",
-    blurb: "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio located in San Jose, available to travel across the SF Bay Area.",
+    blurb:
+      "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. My studio is in San Jose, and I travel across the Bay Area.",
     from: 400,
     includes: ["Studio lighting", "Multiple backgrounds", "Retouched selects", "Crops for web and print"],
     turnaround: "3 business days",
     cal: "juliangigola/headshots",
-    photo: { d: "/v3/headshots-cover.jpg", l: "/v3/headshots-03.jpg" },
+    photo: { d: w("headshots", "04"), l: w("headshots", "04"), at: { d: "50% 30%", l: "50% 30%" } },
   },
   "studio-digitals": {
     slug: "studio-digitals",
     name: "Studio digitals",
-    blurb: "Agency-standard digitals: clean light, no retouching, accurate to how you actually look. Studio located in San Jose.",
+    blurb: "Agency-standard digitals: clean light, no retouching, true to how you look. Studio located in San Jose.",
     from: 300,
-    includes: ["Full length, three-quarter and close", "Front and profile", "Unretouched, as agencies require"],
+    includes: ["Full-length, three-quarter and close-up", "Front and profile views", "Unretouched, to agency standard"],
     turnaround: "2 business days",
     cal: "juliangigola/digitals",
     photo: { d: w("abril", "03"), l: w("abril", "03"), at: { d: "50% 10%", l: "50% 10%" } },
@@ -94,11 +108,11 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   weddings: {
     slug: "weddings",
     name: "Weddings",
-    blurb: "Coverage that reads as editorial rather than as a wedding album. Limited dates each year.",
+    blurb: "Editorial coverage of the full day. Limited dates each year.",
     from: null,
     includes: ["Full-day coverage", "Second shooter available", "Edited gallery", "Print release"],
     turnaround: "4 weeks",
-    photo: { d: w("weddings", "02"), l: w("weddings", "07") },
+    photo: { d: w("weddings", "02"), l: w("weddings", "02") },
   },
   consultation: {
     slug: "consultation",
@@ -132,7 +146,7 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
   "brand-photography": {
     slug: "brand-photography",
     name: "Brand campaigns",
-    blurb: "Campaign imagery from the concept and the art direction to the shoot and the retouch.",
+    blurb: "Campaign imagery, from concept and art direction to shoot and retouch.",
     from: null,
     includes: ["Phone or video", "Dates and references"],
     cal: "juliangigola/campaign",
@@ -162,10 +176,23 @@ const LISTED: Record<SessionSlug, Omit<Session, "paid">> = {
 const eventOf = (s: { cal?: string }) => s.cal?.split("/")[1] ?? "";
 // The price set in /admin (content/site.json) wins, so the home card and /book never disagree.
 const ADMIN_FROM = new Map(SESSION_TYPES.map((t) => [t.slug, t.from]));
-export const SESSIONS = Object.fromEntries(Object.entries(LISTED).map(([k, s]) => [k, { ...s, from: ADMIN_FROM.has(k) ? ADMIN_FROM.get(k)! : s.from, paid: takesDeposit(eventOf(s)) }])) as Record<SessionSlug, Session>;
+export const SESSIONS = Object.fromEntries(
+  Object.entries(LISTED).map(([k, s]) => [
+    k,
+    { ...s, from: ADMIN_FROM.has(k) ? ADMIN_FROM.get(k)! : s.from, paid: takesDeposit(eventOf(s)) },
+  ]),
+) as Record<SessionSlug, Session>;
 export const isSession = (s?: string): s is SessionSlug => !!s && Object.hasOwn(SESSIONS, s);
 /** The session tabs' order (DESIGN.md, Stepper). */
-export const TAB_ORDER: SessionSlug[] = ["portraits", "headshots", "studio-digitals", "model-test", "graduation", "weddings", "consultation"];
+export const TAB_ORDER: SessionSlug[] = [
+  "portraits",
+  "headshots",
+  "studio-digitals",
+  "model-test",
+  "graduation",
+  "weddings",
+  "consultation",
+];
 /** The homepage index and the doors' order. */
 export const INDEX_ORDER: SessionSlug[] = ["portraits", "graduation", "headshots", "studio-digitals", "weddings"];
 export const priceLabel = (s: Session) =>
@@ -176,4 +203,6 @@ const OWN_LENGTH: Partial<Record<SessionSlug, number>> = {
   weddings: 480,
   events: 0,
 };
-export const LENGTH = Object.fromEntries(Object.values(SESSIONS).map((s) => [s.slug, OWN_LENGTH[s.slug] ?? EVENTS[eventOf(s)]?.length ?? 0])) as Record<SessionSlug, number>;
+export const LENGTH = Object.fromEntries(
+  Object.values(SESSIONS).map((s) => [s.slug, OWN_LENGTH[s.slug] ?? EVENTS[eventOf(s)]?.length ?? 0]),
+) as Record<SessionSlug, number>;

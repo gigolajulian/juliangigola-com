@@ -24,14 +24,12 @@ import { wallItem } from "@/lib/work/wall-tile";
 
 export const metadata: Metadata = {
   title: "Frame not found",
-  description:
-    "That page is not on the site. The work, the sessions and the about page are.",
+  description: "That page is not on the site. The work, the sessions and the about page are.",
   /* A 404 inherits the root canonical, which is the homepage: without this
      a search engine could index a missing page as the front door. */
   robots: { index: false, follow: true },
   alternates: { canonical: null },
 };
-
 
 export default function NotFound() {
   const places = [
@@ -44,31 +42,20 @@ export default function NotFound() {
 
   return (
     <NotFoundScene>
-      <div
-        data-fit-page
-        className="relative overflow-hidden"
-        style={{ minHeight: "100dvh", background: "var(--bg)" }}
-      >
+      <div data-fit-page className="relative overflow-hidden" style={{ minHeight: "100dvh", background: "var(--bg)" }}>
         {/* The room: the work itself, drifting on a wall behind the page
             (`DriftWall`), each tile a way into its project. Dimmed toward
             the ground so the words over it still read, and a
             dusting of grain over that. Julian: the 404 gets the drift wall,
             and no grid. */}
         <div className="absolute inset-0">
-          <DriftWall
-            items={WALL.map(wallItem)}
-            speed={24}
-            dim={0.4}
-            build
-            overlayColor="var(--bg)"
-          />
+          <DriftWall items={WALL.map(wallItem)} speed={24} dim={0.4} build overlayColor="var(--bg)" />
         </div>
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-20 mix-blend-overlay"
           style={{
-            backgroundImage:
-              "radial-gradient(color-mix(in oklab, var(--ink) 50%, transparent) 0.5px, transparent 0.5px)",
+            backgroundImage: "radial-gradient(color-mix(in oklab, var(--ink) 50%, transparent) 0.5px, transparent 0.5px)",
             backgroundSize: "3px 3px",
           }}
         />
@@ -92,13 +79,19 @@ export default function NotFound() {
             <div>
               <h1 className="nf-h">This frame never made the edit.</h1>
               <p className="nf-p">
-                The page you were looking for has been moved, renamed, or cut from the selects.{" "}
+                The page you were looking for has been moved, renamed or cut from the selects.{" "}
                 <span className="hoverable:hidden">Head back to the work.</span>
-                <span className="hidden hoverable:inline">Drag your cursor across the numerals to pull them into focus, or head back to the work.</span>
+                <span className="hidden hoverable:inline">
+                  Drag your cursor across the numerals to pull them into focus, or head back to the work.
+                </span>
               </p>
               <div className="ctas">
-                <Link href="/portfolio" className="btn fill">See the work</Link>
-                <Link href="/" className="btn">Back to home</Link>
+                <Link href="/portfolio" className="btn fill">
+                  See the work
+                </Link>
+                <Link href="/" className="btn">
+                  Back to home
+                </Link>
               </div>
             </div>
             <div className="nf-list">

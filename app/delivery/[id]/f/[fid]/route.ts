@@ -14,5 +14,12 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const o = await servedPreview(g.env, g.p.token, fid, small).catch(logged("delivery preview"));
   if (o === undefined) return new Response("Try again shortly", { status: 503, headers: { "retry-after": "5" } });
   if (!o) return new Response("Not found", { status: 404 });
-  return new Response(o.body, { headers: { "content-type": "image/jpeg", "cache-control": "private, max-age=3600", "x-robots-tag": "noindex, nofollow, noimageindex", etag: o.httpEtag } });
+  return new Response(o.body, {
+    headers: {
+      "content-type": "image/jpeg",
+      "cache-control": "private, max-age=3600",
+      "x-robots-tag": "noindex, nofollow, noimageindex",
+      etag: o.httpEtag,
+    },
+  });
 }

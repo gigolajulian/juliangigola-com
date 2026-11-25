@@ -15,17 +15,17 @@ const oklab = (r, g, b) => {
   const l = Math.cbrt(0.4122 * r + 0.5363 * g + 0.0514 * b);
   const m = Math.cbrt(0.2119 * r + 0.6807 * g + 0.1074 * b);
   const s = Math.cbrt(0.0883 * r + 0.2817 * g + 0.63 * b);
-  return [
-    0.2105 * l + 0.7936 * m - 0.0041 * s,
-    1.978 * l - 2.4286 * m + 0.4506 * s,
-    0.0259 * l + 0.7828 * m - 0.8087 * s,
-  ];
+  return [0.2105 * l + 0.7936 * m - 0.0041 * s, 1.978 * l - 2.4286 * m + 0.4506 * s, 0.0259 * l + 0.7828 * m - 0.8087 * s];
 };
 const hex = (c) => "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
 
 const scope = JSON.parse(readFileSync("public/scope.json", "utf8"));
 for (const f of readdirSync("public/covers").filter((f) => /\.jpe?g$/i.test(f) && !/-800\./.test(f))) {
-  const { data } = await sharp(`public/covers/${f}`).resize(12, 15, { fit: "cover" }).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const { data } = await sharp(`public/covers/${f}`)
+    .resize(12, 15, { fit: "cover" })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
   scope[f] = [["", 0, 0, "", "", ...data]];
 }
 const out = {};

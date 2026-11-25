@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { bodyOf, getJson, json, NO_STORE, postJson, taken } from "@/lib/http";
+import { bodyOf, getJson, json, NO_STORE, postJson, SMALL_BODY, taken, textOf } from "@/lib/http";
 
 /* `lib/http.ts`: every API answer is uncached and unindexed, and a bad body
    reads as null rather than a throw out of the handler. */
@@ -49,5 +49,29 @@ describe("postJson and getJson", () => {
     expect(await getJson("/api/x")).toEqual({ ok: false, status: 0 });
     answer(new Response("<html>", { status: 502 }));
     expect(await postJson("/api/x", {}, "PATCH")).toEqual({ ok: false, status: 502, error: undefined, code: undefined });
+  });
+});
+
+describe("bodyOf's size cap", () => {
+  const post = (body: BodyInit, headers: Record<string, string> = {}) => new Request("https://juliangigola.com/api/book", { method: "POST", body, headers, duplex: "half" } as RequestInit);
+  /** A body sent in chunks with no length, as a script can stream one. */
+  const streamed = (bytes: number) =>
+    post(new ReadableStream({ start(c) { for (let n = 0; n < bytes; n += 16_384) c.enqueue(new Uint8Array(Math.min(16_384, bytes - n)).fill(32)); c.close(); } }), {});
+
+  it("reads a small body", async () => {
+    expect(await bodyOf(post(JSON.stringify({ a: 1 })), SMALL_BODY)).toEqual({ a: 1 });
+  });
+
+  it("refuses a body past the cap before parsing it", async () => {
+    const big = JSON.stringify({ a: "x".repeat(SMALL_BODY) });
+    expect(await bodyOf(post(big), SMALL_BODY)).toBeNull();
+  });
+
+  it("stops reading a streamed body once it passes the cap", async () => {
+    // Valid JSON past the cap (leading spaces, then an object), so only the cap can make it null.
+    const tail = new TextEncoder().encode('{"a":1}');
+    const valid = post(new ReadableStream({ start(c) { c.enqueue(new Uint8Array(SMALL_BODY).fill(32)); c.enqueue(tail); c.close(); } }), {});
+    expect(await bodyOf(valid, SMALL_BODY)).toBeNull();
+    expect(await textOf(streamed(10), 100)).toBe(" ".repeat(10));
   });
 });

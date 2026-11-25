@@ -11,7 +11,11 @@ import { ProofWall } from "@/components/proofs/wall";
 const frames = [{ src: "/p/a.jpg", w: 1200, h: 1800 }];
 const isEmail = (v: string) => /^\S+@\S+\.\S+$/.test(v.trim());
 
-function Gate(props: { onAccept: (n: string, e: string) => void; onDone: () => void; words?: { lab: string; title: string; cta: string; note: string } }) {
+function Gate(props: {
+  onAccept: (n: string, e: string) => void;
+  onDone: () => void;
+  words?: { lab: string; title: string; cta: string; note: string };
+}) {
   const grid = React.useRef<HTMLDivElement>(null);
   return (
     <>
@@ -71,7 +75,13 @@ describe("ProofWall", () => {
   });
 
   it("the delivery passes its own words", () => {
-    render(<Gate onAccept={() => {}} onDone={() => {}} words={{ lab: "Finals · 3 photos", title: "Your photos.", cta: "Open photos", note: "The link closes Dec 1." }} />);
+    render(
+      <Gate
+        onAccept={() => {}}
+        onDone={() => {}}
+        words={{ lab: "Finals · 3 photos", title: "Your photos.", cta: "Open photos", note: "The link closes Dec 1." }}
+      />,
+    );
     expect(screen.getByRole("heading", { name: "Your photos." })).toBeTruthy();
     expect(screen.getByRole("button", { name: "Open photos" })).toBeTruthy();
     expect(screen.getByText("The link closes Dec 1.")).toBeTruthy();

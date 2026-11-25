@@ -9,7 +9,11 @@ describe("chrome", () => {
   });
 
   it("MotionGate renders the fallback on the server and its children on the client", () => {
-    const gate = <MotionGate fallback={<span>still</span>}><span>moving</span></MotionGate>;
+    const gate = (
+      <MotionGate fallback={<span>still</span>}>
+        <span>moving</span>
+      </MotionGate>
+    );
     expect(renderToString(gate)).toBe("<span>still</span>");
     render(gate);
     expect(screen.getByText("moving")).toBeTruthy();

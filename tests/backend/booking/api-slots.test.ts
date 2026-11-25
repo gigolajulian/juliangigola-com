@@ -15,9 +15,13 @@ beforeEach(() => {
   forgetToken();
   vi.useFakeTimers({ toFake: ["Date"] });
   vi.setSystemTime(Date.parse("2026-11-11T18:00:00Z"));
-  ctx.env = { GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
+  ctx.env = { DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) }, GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
   vi.stubGlobal("fetch", async (url: string) =>
-    url.includes("oauth2") ? Response.json({ access_token: "t", expires_in: 3600 }) : url.includes("/events?") ? Response.json({ items: [] }) : Response.json({ calendars: { primary: { busy: [] } } }),
+    url.includes("oauth2")
+      ? Response.json({ access_token: "t", expires_in: 3600 })
+      : url.includes("/events?")
+        ? Response.json({ items: [] })
+        : Response.json({ calendars: { primary: { busy: [] } } }),
   );
 });
 afterEach(() => {
@@ -63,5 +67,15 @@ describe("GET /api/slots", () => {
     expect(asks).toBe(before);
     await get(`${OK}&fresh`);
     expect(asks).toBeGreaterThan(before);
+  });
+});
+
+describe("GET /api/slots limit", () => {
+  it("answers 429 past the limiter before asking Google", async () => {
+    ctx.env.DOWNLOAD_LIMIT = { limit: async () => ({ success: false }) };
+    const asked = vi.fn();
+    vi.stubGlobal("fetch", asked);
+    expect((await get(`${OK}&fresh`)).status).toBe(429);
+    expect(asked).not.toHaveBeenCalled();
   });
 });

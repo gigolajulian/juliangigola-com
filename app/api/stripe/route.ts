@@ -18,8 +18,7 @@ import { NO_STORE } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
-const text = (body: string, status: number) =>
-  new Response(body, { status, headers: NO_STORE });
+const text = (body: string, status: number) => new Response(body, { status, headers: NO_STORE });
 
 export async function POST(request: Request) {
   const { env } = await getCloudflareContext({ async: true });
@@ -29,7 +28,21 @@ export async function POST(request: Request) {
   if (!(await verifyStripe(body, request.headers.get("stripe-signature") ?? "", env.STRIPE_WEBHOOK_SECRET)))
     return text("Bad signature.", 401);
 
-  let event: { type?: string; data?: { object?: { id?: string; amount?: number; amount_received?: number; currency?: string; receipt_email?: string | null; latest_charge?: string | null; description?: string | null; metadata?: { [k: string]: string } } } };
+  let event: {
+    type?: string;
+    data?: {
+      object?: {
+        id?: string;
+        amount?: number;
+        amount_received?: number;
+        currency?: string;
+        receipt_email?: string | null;
+        latest_charge?: string | null;
+        description?: string | null;
+        metadata?: { [k: string]: string };
+      };
+    };
+  };
   try {
     event = JSON.parse(body);
   } catch {
@@ -45,13 +58,26 @@ export async function POST(request: Request) {
     return text("ok", 200);
   }
   // The whole env: a hand-picked copy once dropped LEADS_KEY, so no deposit reached the lead's log.
-  const status = await bookDeposit({ ...env, INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY }, pi.id, pi.metadata, pi.amount_received ?? pi.amount);
+  const status = await bookDeposit(
+    { ...env, INBOX: env.INBOX, STRIPE_SECRET_KEY: env.STRIPE_SECRET_KEY },
+    pi.id,
+    pi.metadata,
+    pi.amount_received ?? pi.amount,
+  );
   // Still booking from an earlier delivery: Stripe retries until it ends or hello@ is warned.
   if (status === "booking") return text("Still booking.", 503);
   return text("ok", 200);
 }
 
-type Charge = { id?: string; payment_intent?: string | null; amount?: number; amount_refunded?: number; receipt_email?: string | null; billing_details?: { email?: string | null }; refunds?: { data?: { amount?: number }[] } };
+type Charge = {
+  id?: string;
+  payment_intent?: string | null;
+  amount?: number;
+  amount_refunded?: number;
+  receipt_email?: string | null;
+  billing_details?: { email?: string | null };
+  refunds?: { data?: { amount?: number }[] };
+};
 
 /** A refund, from the site or by hand in the dashboard, on the client's activity log. A full refund shares the
  * site's own ref (`refund-<intent>`), so a cancel's refund is never logged twice; a partial one is keyed by the running total. */
@@ -60,7 +86,13 @@ async function refunded(env: CloudflareEnv, c: Charge | undefined) {
   if (!c?.payment_intent || !email || !c.amount_refunded) return text("ok", 200);
   const full = c.amount_refunded >= (c.amount ?? Infinity);
   await recordLead(env, email, {
-    event: { at: new Date().toISOString(), kind: "refund", ref: full ? `refund-${c.payment_intent}` : `refund-${c.payment_intent}-${c.amount_refunded}`, note: "Stripe", amount: (c.refunds?.data?.[0]?.amount ?? c.amount_refunded) / 100 },
+    event: {
+      at: new Date().toISOString(),
+      kind: "refund",
+      ref: full ? `refund-${c.payment_intent}` : `refund-${c.payment_intent}-${c.amount_refunded}`,
+      note: "Stripe",
+      amount: (c.refunds?.data?.[0]?.amount ?? c.amount_refunded) / 100,
+    },
   });
   return text("ok", 200);
 }

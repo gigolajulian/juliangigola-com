@@ -19,13 +19,30 @@ let session: Record<string, unknown>;
 const seal = async () => (await sealer(LEADS_KEY))!;
 beforeEach(async () => {
   kv = new FakeKV();
-  ctx.env = { INBOX: kv, LEADS_KEY, STRIPE_SECRET_KEY: "sk_test_x", PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) } };
+  ctx.env = {
+    INBOX: kv,
+    LEADS_KEY,
+    STRIPE_SECRET_KEY: "sk_test_x",
+    PUBLIC_WRITE_LIMIT: { limit: async () => ({ success: true }) },
+    DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
+  };
   // Two selects, one included at $15: $15 owed.
-  const p = { token: TOKEN, name: "Test", included: 1, price: 15, days: 14, createdAt: new Date().toISOString(), frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })), selects: ["a", "b"], notes: {}, views: 0 };
+  const p = {
+    token: TOKEN,
+    name: "Test",
+    included: 1,
+    price: 15,
+    days: 14,
+    createdAt: new Date().toISOString(),
+    frames: ["a", "b", "c"].map((id) => ({ id, file: `${id}.jpg`, w: 1, h: 1 })),
+    selects: ["a", "b"],
+    notes: {},
+    views: 0,
+  };
   await writeProof(kv as never, await seal(), p as Proof);
   session = { id: "cs_test_x", status: "complete", payment_status: "paid", amount_total: 1500, metadata: { proof: TOKEN } };
   vi.stubGlobal("fetch", async (url: string) => {
-    if (url.endsWith("/checkout/sessions/cs_test_x")) return reply(session);
+    if (url.includes("/checkout/sessions/cs_test_x?expand")) return reply(session);
     throw new Error(`unexpected fetch ${url}`);
   });
 });

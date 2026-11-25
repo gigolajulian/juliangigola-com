@@ -14,7 +14,19 @@ import { media } from "@/lib/device";
    desktop the page's last block sinks and dims while this slides over it.
    Styles: app/styles/v4pages.css. */
 /* Julian's lines. A project page takes one by its slug, so it reads the same on every visit; every other page says the first. */
-const PHRASES = ["Book me", "Shoot with me", "You're next", "Work with me", "Book a shoot", "Bring me your idea", "Book your next shoot", "Book a session with me", "Make something with me", "Plan a shoot with me", "Your idea, on camera"];
+const PHRASES = [
+  "Book me",
+  "Shoot with me",
+  "You're next",
+  "Work with me",
+  "Book a shoot",
+  "Bring me your idea",
+  "Book your next shoot",
+  "Book a session with me",
+  "Make something with me",
+  "Plan a shoot with me",
+  "Your idea, on camera",
+];
 const phraseFor = (path: string) => {
   const slug = path.match(/^\/portfolio\/([^/]+)$/)?.[1];
   if (!slug || slug === "video") return PHRASES[0];
@@ -36,14 +48,23 @@ export function PageFoot({ bare = false }: { bare?: boolean } = {}) {
   const phrase = phraseFor(usePathname());
 
   React.useEffect(() => {
-    const el = foot.current, r = row.current;
+    const el = foot.current,
+      r = row.current;
     if (!el || !r || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const mqD = media("held");
     // What sinks: a block that names itself (the project page's Next), else the one right above the footer.
     let sink = document.querySelector<HTMLElement>("[data-sink]") ?? (el.previousElementSibling as HTMLElement | null);
     // a block hidden at this size (the phone list on /portfolio/video) is skipped
     while (sink && !sink.offsetHeight && sink.previousElementSibling) sink = sink.previousElementSibling as HTMLElement;
-    let raf = 0, t0 = 0, y0 = scrollY, x = 0, v = 0, pk = 0, W = 0, out = 0, hot = false;
+    let raf = 0,
+      t0 = 0,
+      y0 = scrollY,
+      x = 0,
+      v = 0,
+      pk = 0,
+      W = 0,
+      out = 0,
+      hot = false;
     // What moves: the block, or on a grid (/portfolio) only the tiles in its last screen. Sinking and dimming
     // the whole grid while its photos drift dropped frames.
     let parts: HTMLElement[] = [];
@@ -112,50 +133,90 @@ export function PageFoot({ bare = false }: { bare?: boolean } = {}) {
         <div>
           <p className="mute">Book online</p>
           {BOOK_ROWS.map((b) => (
-            <p key={b.slug}><Link href={`/book/${b.slug}`}>{b.name}</Link></p>
+            <p key={b.slug}>
+              <Link href={`/book/${b.slug}`}>{b.name}</Link>
+            </p>
           ))}
         </div>
         <div>
           <p className="mute">Inquire</p>
           {QUOTE_OPTS.map((o) => (
-            <p key={o.key}><Link href={ASK[o.key] ? `/contact/form?type=${ASK[o.key]}` : "/contact/form"}>{o.name}</Link></p>
+            <p key={o.key}>
+              <Link href={ASK[o.key] ? `/contact/form?type=${ASK[o.key]}` : "/contact/form"}>{o.name}</Link>
+            </p>
           ))}
         </div>
         <div>
           <p className="mute">Pages</p>
-          <p><Link href="/">Home</Link></p>
-          <p><Link href="/portfolio">Portfolio</Link></p>
-          <p><Link href="/book">Sessions</Link></p>
-          <p><Link href="/about">About</Link></p>
+          <p>
+            <Link href="/">Home</Link>
+          </p>
+          <p>
+            <Link href="/portfolio">Portfolio</Link>
+          </p>
+          <p>
+            <Link href="/book">Sessions</Link>
+          </p>
+          <p>
+            <Link href="/about">About</Link>
+          </p>
         </div>
         <div>
           <p className="mute">Reach</p>
-          <p><a href="mailto:hello@juliangigola.com"><span className="dk">hello@juliangigola.com</span><span className="po">Email me</span></a></p>
-          <p><a href="https://instagram.com/juliangigola" rel="noopener"><span className="dk">Instagram&nbsp;</span>@juliangigola</a></p>
+          <p>
+            <a href="mailto:hello@juliangigola.com">
+              <span className="dk">hello@juliangigola.com</span>
+              <span className="po">Email me</span>
+            </a>
+          </p>
+          <p>
+            <a href="https://instagram.com/juliangigola" rel="noopener">
+              <span className="dk">Instagram&nbsp;</span>@juliangigola
+            </a>
+          </p>
           <p className="mute v4f-based">Based</p>
-          <p><span className="dk">San Francisco Bay Area</span><span className="po">SF Bay Area</span></p>
+          <p>
+            <span className="dk">San Francisco Bay Area</span>
+            <span className="po">SF Bay Area</span>
+          </p>
         </div>
       </nav>
       {/* bare, on a phone: one row instead of the columns (Julian: "too much info" at 390) */}
       {bare ? (
         <nav className="v4f-short lbl" aria-label="Footer">
-          {[["Home", "/"], ["Portfolio", "/portfolio"], ["Sessions", "/book"], ["About", "/about"], ["Contact", "/contact"]].map(([t, h]) => <Link key={h} href={h}>{t}</Link>)}
+          {[
+            ["Home", "/"],
+            ["Portfolio", "/portfolio"],
+            ["Sessions", "/book"],
+            ["About", "/about"],
+            ["Contact", "/contact"],
+          ].map(([t, h]) => (
+            <Link key={h} href={h}>
+              {t}
+            </Link>
+          ))}
         </nav>
       ) : null}
       {bare ? null : (
         <Link className="v4f-phrase" href="/book" aria-label={phrase}>
           {/* shortcut: five copies cover a 3440px screen; add more if the phrase gets shorter or screens wider */}
           <span className="v4f-row" ref={row} aria-hidden>
-            {[0, 1, 2, 3, 4].map((n) => <span key={n}>{phrase}</span>)}
+            {[0, 1, 2, 3, 4].map((n) => (
+              <span key={n}>{phrase}</span>
+            ))}
           </span>
         </Link>
       )}
       <div className="v4f-line lbl mute">
         <span>&copy; {year} Julian Gigola</span>
-        {time ? <span className="v4f-time"><span className="dk">San Jose </span><span className="t">{time}</span></span> : null}
+        {time ? (
+          <span className="v4f-time">
+            <span className="dk">San Jose </span>
+            <span className="t">{time}</span>
+          </span>
+        ) : null}
         <Link href="/legal">Legal</Link>
       </div>
     </footer>
   );
 }
-

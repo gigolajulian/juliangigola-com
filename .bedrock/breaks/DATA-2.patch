@@ -1,0 +1,11 @@
+diff --git a/instrumentation.ts b/instrumentation.ts
+index 30e275fc..b89398de 100644
+--- a/instrumentation.ts
++++ b/instrumentation.ts
+@@ -6,5 +6,5 @@ export async function register() {
+ /** Anything a route or page throws mails hello@ (`lib/email/error-alert.ts`), once an hour per route. */
+ export async function onRequestError(err: unknown, request: { method: string; path: string }, context: { routePath?: string }) {
+   const { reportError } = await import("@/lib/email/error-alert");
+-  await reportError(`${request.method} ${context.routePath ?? "unknown route"}`, err);
++  void reportError;
+ }

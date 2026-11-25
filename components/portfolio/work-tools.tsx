@@ -4,13 +4,7 @@ const VIEWS = [
   [
     "grid",
     "Grid view",
-    <svg
-      key="g"
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      aria-hidden="true"
-    >
+    <svg key="g" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
       <rect x="1.5" y="1.5" width="5.5" height="5.5" />
       <rect x="9" y="1.5" width="5.5" height="5.5" />
       <rect x="1.5" y="9" width="5.5" height="5.5" />
@@ -20,13 +14,7 @@ const VIEWS = [
   [
     "strip",
     "Strip view",
-    <svg
-      key="s"
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      aria-hidden="true"
-    >
+    <svg key="s" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
       <rect x="1.5" y="2" width="3.5" height="12" />
       <rect x="6.25" y="2" width="3.5" height="12" />
       <rect x="11" y="2" width="3.5" height="12" />
@@ -35,13 +23,7 @@ const VIEWS = [
   [
     "color",
     "Color view",
-    <svg
-      key="c"
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      aria-hidden="true"
-    >
+    <svg key="c" width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
       <g transform="rotate(45 8 8)">
         <rect x="6.4" y=".6" width="3.2" height="4.4" rx="1.4" />
         <rect x="5.2" y="5" width="5.6" height="1.5" rx=".5" />
@@ -53,19 +35,8 @@ const VIEWS = [
 
 export const LOUPE = (
   <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
-    <circle
-      cx="6"
-      cy="6"
-      r="4.5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.3"
-    />
-    <path
-      d="M9.4 9.4L13 13"
-      stroke="currentColor"
-      strokeWidth="1.3"
-    />
+    <circle cx="6" cy="6" r="4.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+    <path d="M9.4 9.4L13 13" stroke="currentColor" strokeWidth="1.3" />
   </svg>
 );
 
@@ -113,7 +84,11 @@ export function SearchField({
           else e.currentTarget.blur();
         }}
       />
-      {head ? null : <kbd className="wkey" aria-hidden="true">/</kbd>}
+      {head ? null : (
+        <kbd className="wkey" aria-hidden="true">
+          /
+        </kbd>
+      )}
       <button
         type="button"
         className="wclr"
@@ -183,7 +158,14 @@ export function Views({
       {/* Grid, Strip and Canvas: one set. On a phone it folds to the view that is on
           (data-rep), and the first tap unfolds it (Julian). */}
       <div className={unfold ? "vset open" : "vset"}>
-      <button type="button" aria-pressed={canvas} aria-label="Canvas view" title="Canvas view" data-rep={rep === "canvas" ? "" : undefined} onClick={() => fold(() => go("canvas"))}>
+        <button
+          type="button"
+          aria-pressed={canvas}
+          aria-label="Canvas view"
+          title="Canvas view"
+          data-rep={rep === "canvas" ? "" : undefined}
+          onClick={() => fold(() => go("canvas"))}
+        >
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">
             {/* Two columns out of step, their ends faded: the field runs past the edge (Julian's pick). */}
             <rect x="1.5" y="1" width="5.5" height="6.5" />
@@ -192,23 +174,23 @@ export function Views({
             <rect x="9" y="3.5" width="5.5" height="6.5" />
             <rect x="9" y="11.5" width="5.5" height="3.5" opacity=".55" />
           </svg>
-      </button>
-      {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
-        <button
-          key={v}
-          type="button"
-          aria-pressed={!canvas && view === v}
-          aria-label={label}
-          title={label}
-          data-rep={rep === v ? "" : undefined}
-          onPointerDown={v === "strip" ? () => warm(8) : undefined}
-          onPointerEnter={v === "strip" ? () => warm(8) : undefined}
-          onFocus={v === "strip" ? () => warm(8) : undefined}
-          onClick={() => fold(() => go(v))}
-        >
-          {icon}
         </button>
-      ))}
+        {[VIEWS[1], VIEWS[0]].map(([v, label, icon]) => (
+          <button
+            key={v}
+            type="button"
+            aria-pressed={!canvas && view === v}
+            aria-label={label}
+            title={label}
+            data-rep={rep === v ? "" : undefined}
+            onPointerDown={v === "strip" ? () => warm(8) : undefined}
+            onPointerEnter={v === "strip" ? () => warm(8) : undefined}
+            onFocus={v === "strip" ? () => warm(8) : undefined}
+            onClick={() => fold(() => go(v))}
+          >
+            {icon}
+          </button>
+        ))}
       </div>
     </div>
   );

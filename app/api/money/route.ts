@@ -50,9 +50,21 @@ export async function GET(request: Request) {
     ]);
     const data = (list.data ?? []) as Txn[];
     const body: MoneyAnswer = {
-      ...(balance ? { available: usd(balance.available as Amount[]), pending: usd(balance.pending as Amount[]), test: key.startsWith("sk_test_") } : {}),
+      ...(balance
+        ? { available: usd(balance.available as Amount[]), pending: usd(balance.pending as Amount[]), test: key.startsWith("sk_test_") }
+        : {}),
       more: !!list.has_more,
-      txns: data.map((t) => ({ id: t.id, at: new Date(t.created * 1000).toISOString(), type: t.type, amount: t.amount, fee: t.fee, net: t.net, currency: t.currency, status: t.status, what: what(t) })),
+      txns: data.map((t) => ({
+        id: t.id,
+        at: new Date(t.created * 1000).toISOString(),
+        type: t.type,
+        amount: t.amount,
+        fee: t.fee,
+        net: t.net,
+        currency: t.currency,
+        status: t.status,
+        what: what(t),
+      })),
     };
     return json(body);
   } catch (e) {

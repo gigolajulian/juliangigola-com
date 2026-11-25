@@ -13,14 +13,12 @@ describe("AdminSeo", () => {
     vi.stubGlobal("fetch", vi.fn());
     render(<AdminSeo />);
     expect(screen.getByRole("heading", { name: /SEO/ })).toBeTruthy();
-    expect(await screen.findByText("Sign in with the inbox key or the GitHub token first.")).toBeTruthy();
+    expect(await screen.findByText("Sign in with the admin key or the GitHub token first.")).toBeTruthy();
   });
 
   it("pulls the range and switches it", async () => {
     window.localStorage.setItem(TOKEN_STORE, "tok");
-    const fetchMock = vi.fn(
-      async () => new Response(JSON.stringify({ visits: 7, google: { error: "not linked" } }), { status: 200 }),
-    );
+    const fetchMock = vi.fn(async () => new Response(JSON.stringify({ visits: 7, google: { error: "not linked" } }), { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);
     render(<AdminSeo />);
     expect(await screen.findByText("Google: not linked")).toBeTruthy();

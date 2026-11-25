@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { COOLDOWN_MS, DAILY_CAP, dayKey } from "@/lib/leads/enquiry";
-import { FakeEmail, FakeKV, reply } from "../../backend/fakes";
+import { FakeEmail, FakeKV, FakeStore, fakeLock, reply } from "../../backend/fakes";
+import { BookingLock } from "@/worker/booking-lock";
 import { byCodeUnit } from "@/lib/utils";
 
 /* The contact form's server action (`lib/leads/enquiry-action.ts`). Its one
@@ -9,7 +10,9 @@ import { byCodeUnit } from "@/lib/utils";
    stored enquiry into an error. No real mail is sent: EMAIL is a fake. */
 
 const ctx = vi.hoisted(() => ({ env: {} as Record<string, unknown>, cf: {} as Record<string, unknown>, ip: "203.0.113.7" }));
-vi.mock("@opennextjs/cloudflare", () => ({ getCloudflareContext: async () => ({ env: ctx.env, cf: ctx.cf, ctx: { waitUntil: () => {} } }) }));
+vi.mock("@opennextjs/cloudflare", () => ({
+  getCloudflareContext: async () => ({ env: ctx.env, cf: ctx.cf, ctx: { waitUntil: () => {} } }),
+}));
 vi.mock("next/headers", () => ({ headers: async () => new Headers({ "cf-connecting-ip": ctx.ip }) }));
 
 const { submitEnquiry } = await import("@/lib/leads/enquiry-action");
@@ -55,7 +58,14 @@ describe("submitEnquiry", () => {
     const res = await send();
     expect(res.status).toBe("sent");
     const [key] = msgs();
-    expect(kv.json(key)).toMatchObject({ type: "portrait", name: "QA Test", email: "qa@example.com", detail: "Oct, SF", country: "US", read: false });
+    expect(kv.json(key)).toMatchObject({
+      type: "portrait",
+      name: "QA Test",
+      email: "qa@example.com",
+      detail: "Oct, SF",
+      country: "US",
+      read: false,
+    });
     expect(kv.data.get(key)!.metadata).toMatchObject({ name: "QA Test", read: false });
     const cool = [...kv.data.keys()].find((k) => k.startsWith("cool:"))!;
     expect(cool).toMatch(/^cool:[0-9a-f]{32}$/);
@@ -96,6 +106,27 @@ describe("submitEnquiry", () => {
     const res = await send();
     expect(res.status).toBe("unconfigured");
     expect(res.mailto).toBeTruthy();
+    expect(msgs()).toEqual([]);
+  });
+
+  it("lets one of two sends at once take the last place of the day, through the booking lock", async () => {
+    const storage = new FakeStore();
+    await storage.put("quota:contact", { day: new Date().toISOString().slice(0, 10), count: DAILY_CAP - 1 });
+    ctx.env.BOOKING_LOCK = fakeLock(new BookingLock({ storage } as never, {}));
+    // Two senders, so the cooldown passes both: only the quota stands between them.
+    const ips = ["198.51.100.1", "198.51.100.2"];
+    const keep = ctx.ip;
+    Object.defineProperty(ctx, "ip", { get: () => ips.shift() ?? keep, configurable: true });
+    const both = await Promise.all([send(), send({ ...GOOD, email: "other@example.com" })]);
+    Object.defineProperty(ctx, "ip", { value: keep, writable: true, configurable: true });
+    expect(both.map((r) => r.status).sort()).toEqual(["sent", "unconfigured"]);
+    expect(msgs()).toHaveLength(1);
+  });
+
+  it("falls back to the day count when the lock has no quota yet, and still stops at the cap", async () => {
+    ctx.env.BOOKING_LOCK = fakeLock({ fetch: async () => Response.json({ error: "unknown op" }, { status: 400 }) });
+    await kv.put(dayKey(Date.now()), String(DAILY_CAP));
+    expect((await send()).status).toBe("unconfigured");
     expect(msgs()).toEqual([]);
   });
 
@@ -144,7 +175,12 @@ describe("submitEnquiry", () => {
 
   it("stores uploaded images beside the enquiry, JPEG and PNG only, real ones, within the size limits", async () => {
     const HEIC = [0, 0, 0, 0x18, ...[..."ftypheic"].map((c) => c.charCodeAt(0))];
-    const HEAD: Record<string, number[]> = { "image/jpeg": [0xff, 0xd8, 0xff], "image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a], "image/heic": HEIC, "": HEIC };
+    const HEAD: Record<string, number[]> = {
+      "image/jpeg": [0xff, 0xd8, 0xff],
+      "image/png": [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a],
+      "image/heic": HEIC,
+      "": HEIC,
+    };
     const img = (name: string, size: number, type = "image/jpeg", head = HEAD[type] ?? []) => {
       const b = new Uint8Array(size);
       b.set(head);

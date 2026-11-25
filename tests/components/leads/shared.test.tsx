@@ -6,7 +6,11 @@ import type { LeadSummary } from "@/lib/leads/leads";
 
 describe("adminCall", () => {
   afterEach(() => vi.unstubAllGlobals());
-  const answer = (body: string, status: number) => vi.stubGlobal("fetch", vi.fn(async () => new Response(body, { status })));
+  const answer = (body: string, status: number) =>
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(body, { status })),
+    );
 
   it("hands back the JSON of a 2xx", async () => {
     answer('{"rows":[]}', 200);
@@ -27,7 +31,17 @@ describe("adminCall", () => {
 });
 
 const iso = new Date().toISOString();
-const lead = (o: Partial<LeadSummary> = {}): LeadSummary => ({ id: "a", email: "ana@x.com", name: "Ana", stage: "Inquiry", stageAt: iso, firstAt: iso, lastAt: iso, unread: false, ...o });
+const lead = (o: Partial<LeadSummary> = {}): LeadSummary => ({
+  id: "a",
+  email: "ana@x.com",
+  name: "Ana",
+  stage: "Inquiry",
+  stageAt: iso,
+  firstAt: iso,
+  lastAt: iso,
+  unread: false,
+  ...o,
+});
 
 describe("leads/shared", () => {
   it("matches searches name, email, kind and snippet", () => {

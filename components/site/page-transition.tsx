@@ -5,7 +5,6 @@ import { ViewTransition } from "react";
 import { usePathname } from "next/navigation";
 import { noSubscribe } from "@/lib/utils";
 
-
 /* ── one page becomes the next by zooming ─────────────────────────
  * Opening a page reads as zooming into it, and leaving one as zooming
  * back out (Julian's call). The boundary wraps every page's content
@@ -24,6 +23,7 @@ const clearNav = () => {
   delete root.dataset.nav;
   delete root.dataset.navBar;
   delete root.dataset.navSide;
+  delete root.dataset.navStep;
 };
 
 /* The bar's order, left to right, the wordmark first. A press in the bar
@@ -51,10 +51,7 @@ const takeHolds = () => {
 /** All of them, 300ms at most. */
 const settle = (all: Promise<unknown>[]) => Promise.race([Promise.all(all), cap()]);
 const sectionOf = (path: string) =>
-  SECTIONS.reduce(
-    (found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found),
-    -1,
-  );
+  SECTIONS.reduce((found, s, i) => (path === s || (s !== "/" && path.startsWith(`${s}/`)) ? i : found), -1);
 
 /* Julian (iPhone): opening a set from the portfolio crashed Safari, and the
    wordmark home went black for half a second. The page is snapshotted whole
@@ -83,7 +80,11 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
      way halfway and fell back to the browser's own crossfade. */
   const path = usePathname();
   /* Off on the server and the first paint. The boundary stays mounted either way so the page is never rebuilt. */
-  const on = React.useSyncExternalStore(noSubscribe, () => true, () => false);
+  const on = React.useSyncExternalStore(
+    noSubscribe,
+    () => true,
+    () => false,
+  );
   const shown = React.useRef(path);
   React.useLayoutEffect(() => {
     shown.current = path;
@@ -111,10 +112,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     if (!on) return;
     const root = document.documentElement;
     let clear = 0;
-    const set = (
-      way: "in" | "out",
-      from: "page" | "bar" = "page",
-    ) => {
+    const set = (way: "in" | "out", from: "page" | "bar" = "page") => {
       root.dataset.nav = way;
       /* Kept for the visit: a page reached by a press is not a cold load,
          and the cover's entrance starts at once (`globals.css`). */
@@ -131,36 +129,26 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       clear = window.setTimeout(clearNav, 10000);
     };
     const onClick = (e: MouseEvent) => {
-      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey)
-        return;
-      const a = (e.target as Element | null)?.closest<HTMLAnchorElement>(
-        "a[href]",
-      );
+      if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey) return;
+      const a = (e.target as Element | null)?.closest<HTMLAnchorElement>("a[href]");
       if (!a || a.target === "_blank" || a.origin !== location.origin) return;
       if (a.pathname === location.pathname) return;
       // The page leaving, before it is snapshotted.
       gauge();
       /* A crumb ("← All work") and any link marked so are the way out; the
          wordmark too, since home is where every trip started. */
-      const out =
-        a.dataset.back !== undefined ||
-        a.textContent?.trimStart().startsWith("←") ||
-        a.pathname === "/";
+      const out = a.dataset.back !== undefined || a.textContent?.trimStart().startsWith("←") || a.pathname === "/";
       const from = a.closest("header") ? "bar" : "page";
       set(out ? "out" : "in", from);
+      /* A booking step (`data-step`, components/booking/packages.tsx) travels sideways (v3.css). */
+      if (a.dataset.step !== undefined) root.dataset.navStep = "";
+      else delete root.dataset.navStep;
       const here = sectionOf(location.pathname);
       /* Portfolio leads the bar, so the homepage's own screens
          (Sessions, About, Contact) sit to its right; only the
          wordmark's home is to its left. */
-      const there =
-        a.pathname === "/" && a.hash ? SECTIONS.length : sectionOf(a.pathname);
-      if (
-        from !== "page" &&
-        a.pathname !== location.pathname &&
-        here >= 0 &&
-        there >= 0 &&
-        here !== there
-      )
+      const there = a.pathname === "/" && a.hash ? SECTIONS.length : sectionOf(a.pathname);
+      if (from !== "page" && a.pathname !== location.pathname && here >= 0 && there >= 0 && here !== there)
         root.dataset.navSide = there > here ? "right" : "left";
       else delete root.dataset.navSide;
     };
@@ -179,7 +167,10 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       if (replaying || location.pathname === shown.current) return;
       /* Back from Cover art (its viewer) to the home: a clean cut (Julian's call). A copy of the viewer holds the screen until the home is in
          place under it with its covers decoded, then goes in one frame. Not a view transition: Safari snapshots the home before its covers paint. */
-      const parts = location.pathname === "/" && shown.current.startsWith("/portfolio/coverart") ? document.querySelectorAll<HTMLElement>("[data-zoom-backdrop], [role=dialog][aria-modal=true]") : [];
+      const parts =
+        location.pathname === "/" && shown.current.startsWith("/portfolio/coverart")
+          ? document.querySelectorAll<HTMLElement>("[data-zoom-backdrop], [role=dialog][aria-modal=true]")
+          : [];
       if (parts.length) {
         const lid = document.createElement("div");
         lid.setAttribute("aria-hidden", "true");
@@ -189,10 +180,17 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         for (const n of parts) {
           const c = n.cloneNode(true) as HTMLElement;
           // a copy restarts its CSS animations: the neighbours faded in again from nothing. Each element keeps where it is now, still.
-          const from = [n, ...n.querySelectorAll<HTMLElement>("*")], to = [c, ...c.querySelectorAll<HTMLElement>("*")];
+          const from = [n, ...n.querySelectorAll<HTMLElement>("*")],
+            to = [c, ...c.querySelectorAll<HTMLElement>("*")];
           from.forEach((e, k) => {
             const cs = getComputedStyle(e);
-            Object.assign(to[k].style, { opacity: cs.opacity, transform: cs.transform, visibility: cs.visibility, filter: cs.filter, clipPath: cs.clipPath });
+            Object.assign(to[k].style, {
+              opacity: cs.opacity,
+              transform: cs.transform,
+              visibility: cs.visibility,
+              filter: cs.filter,
+              clipPath: cs.clipPath,
+            });
           });
           lid.append(c);
         }
@@ -201,7 +199,14 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
            paints, and the row's own ease-in done (60 to 90ms), each wait 300ms at most. By its own clock, not the landing
            hook: on a warm Back that never came and the copy held for 2.25s. */
         const t0 = performance.now();
-        const settled = () => settle(document.querySelector(".mt-covers")?.getAnimations?.({ subtree: true }).filter((a) => a.effect?.getTiming().iterations !== Infinity).map((a) => a.finished.catch(() => {})) ?? []);
+        const settled = () =>
+          settle(
+            document
+              .querySelector(".mt-covers")
+              ?.getAnimations?.({ subtree: true })
+              .filter((a) => a.effect?.getTiming().iterations !== Infinity)
+              .map((a) => a.finished.catch(() => {})) ?? [],
+          );
         const look = () => {
           if (!document.querySelector(".mt-covers") && performance.now() - t0 < 1500) return void requestAnimationFrame(look);
           // one 300ms clock from the row's first frame for the whole hold: the two capped waits chained ran to 407 and 417ms
@@ -213,8 +218,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
         return;
       }
       set("out");
-      const ua = (e as PopStateEvent & { hasUAVisualTransition?: boolean })
-        .hasUAVisualTransition;
+      const ua = (e as PopStateEvent & { hasUAVisualTransition?: boolean }).hasUAVisualTransition;
       if (ua || !document.startViewTransition) return;
       e.stopImmediatePropagation();
       gauge();

@@ -38,33 +38,23 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
   The exit at p .76 to .96 goes on this element.
 
 ## Commissions (`commissions.tsx`)
-- `.mt-comm-head` is sticky (CSS). `section[data-cur]`, `[data-mt-count]`,
-  `[data-mt-name]` inside `.ln` (overflow clip) for the name line rise. React renders them from the
-  frame motion/commissions.ts tells it (`tell`, `useTold`); the driver runs the rise.
-- Figures carry `data-i`. Phone held label: not built.
-- Logos: `.mt-logos-row` is a native sideways row; `.mt-logos-track` takes the
-  drift transform. The second copy `.set[data-copy]` is `display: none` until the
-  drift shows it (it is already `aria-hidden`).
+- Four frames, no driver: the rise and fade are CSS from the section's `--in` (`flow.css`, `.mt-cm-grid figure` `--e`).
 
 ## Cover art and Motion (`rows.tsx`)
-- `.mt-row` is a native snap row; `.mt-track` takes the vertical-to-sideways
+- Motion only: `.mt-row` is a native snap row; `.mt-track` takes the vertical-to-sideways
   transform on D. `section[data-cur]` and `.mt-item[data-on]` follow the row's own
   scroll (replace the source with p when the row is held).
-- Sleeves: `.mt-sleeve` with `--o` (rest .5), `.disc` reads it, `.face .back` is the
-  flip side (`data-flip` on sleeves that have one).
+- Cover art: four `.mt-cv-sleeve`, no driver. The slide in and the record (`.mt-cv-disc`, `--o`, `--r`) are CSS from the section's `--in` and `--p` (`flow.css`).
 - Title lines: `.mt-ttl > .ln > span`.
 - Films: `.mt-film[data-film]` holds the poster; the preview iframe goes inside.
 
-## Book online and By quote
-- `section[data-on]` (row key); By quote `section[data-client]` and `data-opt`.
-  The client rotation is `motion/quote.ts`: it tells by-quote.tsx (`tell`, `useTold`) the client to show,
-  which React renders as `data-q`, `data-client`, the name and `data-sw`. It pauses while a card is open (`.mt[data-cards="open"]`).
+## Book online
+- `section[data-on]` (row key).
 - `.mt-bar`: the held bottom bar (sticky inside its section).
+- By quote (`by-quote.tsx`) has no hooks.
 
 ## About (`about.tsx`)
-- Wordmark letters: `.mt-wordmark > span[style="--j:i"]`.
-- Sentence words: `.mt-say > span[style="--w:i"]`, `--n` on `.mt-say`.
-- Rows `li[style="--j"]`, facts `div[style="--j"]`, hairline `hr`, button `.mt-more-me`.
+- No hooks: the statement is static (`.mt-st`, sentence `.mt-st-t`, facts `.mt-st-facts`, portrait `.mt-st-ph`, marks `.mt-st-logos`).
 
 ## Footer (`foot.tsx`)
 - Wall: one still, `.mt-fwall > img` (the next one sits under it unseen).

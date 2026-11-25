@@ -8,11 +8,26 @@ vi.mock("@/components/booking/picker/time-picker", () => ({ TimePicker: () => <p
 afterEach(() => vi.unstubAllGlobals());
 
 const inDays = (n: number) => new Date(Date.now() + n * 864e5).toISOString();
-const booking: Managed = { id: "b1", slug: "portraits", session: "Portraits", start: inDays(5), end: inDays(5), firstStart: undefined, where: undefined, moves: 0, fee: undefined, paid: true, deposit: undefined, cancelled: false };
+const booking: Managed = {
+  id: "b1",
+  slug: "portraits",
+  session: "Portraits",
+  start: inDays(5),
+  end: inDays(5),
+  firstStart: undefined,
+  where: undefined,
+  moves: 0,
+  fee: undefined,
+  paid: true,
+  deposit: undefined,
+  cancelled: false,
+};
 
 describe("ManageBooking", () => {
   it("cancels with the refund spelled out first", async () => {
-    const fetch = vi.fn(() => Promise.resolve(new Response(JSON.stringify({ record: { ...booking, cancelled: true }, refunded: true }), { status: 200 })));
+    const fetch = vi.fn(() =>
+      Promise.resolve(new Response(JSON.stringify({ record: { ...booking, cancelled: true }, refunded: true }), { status: 200 })),
+    );
     vi.stubGlobal("fetch", fetch);
     render(<ManageBooking booking={booking} token="t" />);
     expect(screen.getByRole("heading", { name: "Portraits" })).toBeTruthy();
@@ -26,7 +41,12 @@ describe("ManageBooking", () => {
 
   it("30 hours out: says 70% goes back before the cancel, and what the server sent after", async () => {
     const soon: Managed = { ...booking, start: new Date(Date.now() + 30 * 36e5).toISOString(), deposit: 200 };
-    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(JSON.stringify({ record: { ...soon, cancelled: true }, refunded: true, back: 140 }), { status: 200 }))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() =>
+        Promise.resolve(new Response(JSON.stringify({ record: { ...soon, cancelled: true }, refunded: true, back: 140 }), { status: 200 })),
+      ),
+    );
     render(<ManageBooking booking={soon} token="t" open="cancel" />);
     expect(screen.getByText(/\$140 of your \$200 deposit is refunded to your card and \$60 is kept/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Cancel booking" }));
@@ -40,14 +60,17 @@ describe("ManageBooking", () => {
     render(<ManageBooking booking={{ ...booking, start: new Date(Date.now() + 10 * 36e5).toISOString() }} token="t" open="reschedule" />);
     expect(screen.queryByText("picker")).toBeNull();
     expect(screen.queryByRole("button", { name: "Reschedule" })).toBeNull();
-    expect(screen.getByText(/under 24 hours before your session, so it can no longer be moved/)).toBeTruthy();
+    expect(screen.getByText(/Your session is less than 24 hours away, so it can no longer be moved/)).toBeTruthy();
   });
 
   it("says why a cancel was refused instead of calling every 409 a taken time", async () => {
-    vi.stubGlobal("fetch", vi.fn(() => Promise.resolve(new Response(JSON.stringify({ error: "This booking is already cancelled." }), { status: 409 }))));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => Promise.resolve(new Response(JSON.stringify({ error: "This booking is already canceled." }), { status: 409 }))),
+    );
     render(<ManageBooking booking={booking} token="t" open="cancel" />);
     fireEvent.click(screen.getByRole("button", { name: "Cancel booking" }));
-    expect(await screen.findByText("This booking is already cancelled.")).toBeTruthy();
+    expect(await screen.findByText("This booking is already canceled.")).toBeTruthy();
     expect(screen.queryByText(/just taken/)).toBeNull();
   });
 

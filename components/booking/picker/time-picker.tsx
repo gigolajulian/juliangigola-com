@@ -19,9 +19,25 @@ export function TimePicker(props: Props) {
   /* While the times load the bar is already there, held off, so it does not
      pop in late on a short screen, where it is the thing at the foot of
      the view (iPhone Duo folded). */
-  const heldBar = <button type="button" className="btn fill" disabled>Continue</button>;
+  const heldBar = (
+    <button type="button" className="btn fill" disabled>
+      Continue
+    </button>
+  );
   // in the div `BookSteps` puts the shell in, so the shell stays one element as the times come
-  const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => <div className="contents">{skin!.shell({ steps: v3steps, at: 1, head: v3paid ? "Book a session" : skin!.name === "Consultation" ? "Book a consultation" : "Book a call", sub: v3sub, body, sum: [], bar })}</div>;
+  const v3plain = (body: React.ReactNode, bar?: React.ReactNode) => (
+    <div className="contents">
+      {skin!.shell({
+        steps: v3steps,
+        at: 1,
+        head: v3paid ? "Book a session" : skin!.name === "Consultation" ? "Book a consultation" : "Book a call",
+        sub: v3sub,
+        body,
+        sum: [],
+        bar,
+      })}
+    </div>
+  );
   /* It reads the visitor's zone and clock: until it has mounted, the empty box
      under a held Continue (from the first paint), drawn here and not by
      `BookTimes`, so the shell is never swapped for another and remounted. */
@@ -31,15 +47,31 @@ export function TimePicker(props: Props) {
   // the same shell the held picker draws (steps, sub, J and G), so nothing moves when it mounts (CLS 0.107 at 1440, audit)
   if (!mounted) return skin ? v3plain(jg, heldBar) : <div aria-label={title} className={className} />;
   if (state === "fallback") return skin ? v3plain(fallback) : <>{fallback}</>;
-  const waiting = <p role="status" className="lbl mute">Loading availability</p>;
+  const waiting = (
+    <p role="status" className="lbl mute">
+      Loading availability
+    </p>
+  );
   if (skin && (state === "loading" || !days || held)) return v3plain(jg, heldBar);
-  if (skin && !pick) return Object.values(days ?? {}).some((l) => l.length) ? v3plain(waiting, heldBar) : v3plain(<p className="lbl mute">No open times in the next few months. <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a></p>);
+  if (skin && !pick)
+    return Object.values(days ?? {}).some((l) => l.length)
+      ? v3plain(waiting, heldBar)
+      : v3plain(
+          <p className="lbl mute">
+            No open times in the next few months. <a href="mailto:hello@juliangigola.com">hello@juliangigola.com</a>
+          </p>,
+        );
   if (state === "loading" || !days || (held && !skin)) {
     return (
       // Held to the card's inset and a phone card's height while it waits
       // (the embed's `block` had it on the card's edge, in a sliver).
-      <div aria-label={title} className={cn(className, "!flex items-center justify-center px-[var(--card-x,1.25rem)] max-sm:min-h-[24rem]")}>
-        <div className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] items-center justify-center">{jg}</div>
+      <div
+        aria-label={title}
+        className={cn(className, "!flex items-center justify-center px-[var(--card-x,1.25rem)] max-sm:min-h-[24rem]")}
+      >
+        <div className="pointer-events-none absolute inset-0 flex -translate-y-[var(--card-lift,0px)] items-center justify-center">
+          {jg}
+        </div>
       </div>
     );
   }
@@ -47,7 +79,9 @@ export function TimePicker(props: Props) {
     return (
       <div aria-label={title} className={cn("flex flex-col items-center justify-center gap-4 p-6 text-center", className)}>
         <p className="label text-muted-foreground">No open times in the next few months.</p>
-        <a href="mailto:hello@juliangigola.com" className="label border-b border-border">hello@juliangigola.com</a>
+        <a href="mailto:hello@juliangigola.com" className="label border-b border-border">
+          hello@juliangigola.com
+        </a>
       </div>
     );
   }

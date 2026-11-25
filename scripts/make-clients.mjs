@@ -34,13 +34,7 @@
  * client is added a few times a year, which is not a build-time concern.
  */
 
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  writeFileSync,
-} from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import sharp from "sharp";
@@ -52,9 +46,7 @@ const to = join(root, "lib/work/clients-data.ts");
 
 mkdirSync(served, { recursive: true });
 
-const files = existsSync(from)
-  ? readdirSync(from).filter((f) => /\.(svg|png)$/i.test(f))
-  : [];
+const files = existsSync(from) ? readdirSync(from).filter((f) => /\.(svg|png)$/i.test(f)) : [];
 
 /**
  * The inside of an SVG, with every colour handed to `currentColor`.
@@ -74,17 +66,11 @@ function inlineSvg(svg, name) {
   const declared = svg.match(/viewBox="([^"]+)"/i)?.[1];
   const width = Number(svg.match(/\swidth="(\d*\.?\d+)(?:px)?"/i)?.[1]);
   const height = Number(svg.match(/\sheight="(\d*\.?\d+)(?:px)?"/i)?.[1]);
-  const viewBox =
-    declared ?? (width && height ? `0 0 ${width} ${height}` : undefined);
-  if (!viewBox)
-    throw new Error(
-      `${name}: no viewBox and no width/height — nothing to scale it by`,
-    );
+  const viewBox = declared ?? (width && height ? `0 0 ${width} ${height}` : undefined);
+  if (!viewBox) throw new Error(`${name}: no viewBox and no width/height — nothing to scale it by`);
 
   if (/<(style|linearGradient|radialGradient|image)\b/i.test(svg))
-    throw new Error(
-      `${name}: has a style block, gradient or raster. Flatten it to paths in one colour first.`,
-    );
+    throw new Error(`${name}: has a style block, gradient or raster. Flatten it to paths in one colour first.`);
 
   /* An SVG is a document and may carry script — a `<script>` element, or an
      `onload` on any node. This markup is injected with
@@ -95,17 +81,13 @@ function inlineSvg(svg, name) {
      file that does is either broken or not a logo, and quietly removing part
      of it would publish a mark nobody had looked at. */
   if (/<script\b/i.test(svg) || /\son[a-z]+\s*=/i.test(svg))
-    throw new Error(
-      `${name}: contains script or an event handler. A logo needs neither — export it again as plain paths.`,
-    );
+    throw new Error(`${name}: contains script or an event handler. A logo needs neither — export it again as plain paths.`);
 
   /* Same reasoning for anything reaching outside the file: a mark that loads
      from a URL can be changed by somebody else, and `foreignObject` is a hole
      straight back into HTML. */
   if (/<foreignObject\b/i.test(svg) || /<use\b[^>]*href="(?!#)/i.test(svg))
-    throw new Error(
-      `${name}: references something outside the file. Flatten it first.`,
-    );
+    throw new Error(`${name}: references something outside the file. Flatten it first.`);
 
   const body = svg
     .replace(/^[\s\S]*?<svg[^>]*>/i, "")
@@ -159,31 +141,19 @@ async function maskPng(file, slug, name) {
       .then((st) => st.channels[3].min >= 250));
 
   if (opaque) {
-    const flat = await sharp(file)
-      .removeAlpha()
-      .raw()
-      .toBuffer({ resolveWithObject: true });
+    const flat = await sharp(file).removeAlpha().raw().toBuffer({ resolveWithObject: true });
     const { width, height, channels } = flat.info;
     const lum = (x, y) => {
       const i = (y * width + x) * channels;
       return (flat.data[i] + flat.data[i + 1] + flat.data[i + 2]) / 3;
     };
-    const corners = [
-      lum(0, 0),
-      lum(width - 1, 0),
-      lum(0, height - 1),
-      lum(width - 1, height - 1),
-    ];
+    const corners = [lum(0, 0), lum(width - 1, 0), lum(0, height - 1), lum(width - 1, height - 1)];
     const ground = corners.reduce((a, b) => a + b, 0) / 4;
     const inkIsLight = ground < 128;
 
     const rgba = Buffer.alloc(width * height * 4);
     for (let i = 0; i < width * height; i++) {
-      const l =
-        (flat.data[i * channels] +
-          flat.data[i * channels + 1] +
-          flat.data[i * channels + 2]) /
-        3;
+      const l = (flat.data[i * channels] + flat.data[i * channels + 1] + flat.data[i * channels + 2]) / 3;
       // The mark is always written as black ink; only the alpha carries the
       // shape, and `currentColor` supplies the colour at render.
       rgba[i * 4] = 0;
@@ -200,10 +170,7 @@ async function maskPng(file, slug, name) {
     );
   }
 
-  const { data, info } = await sharp(source)
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(source).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
 
   let top = info.height;
   let left = info.width;
@@ -220,10 +187,7 @@ async function maskPng(file, slug, name) {
     }
   }
 
-  if (right < 0)
-    throw new Error(
-      `${name}: nothing in it. An empty canvas, or a mark the same colour as its own ground.`,
-    );
+  if (right < 0) throw new Error(`${name}: nothing in it. An empty canvas, or a mark the same colour as its own ground.`);
 
   const width = right - left + 1;
   const height = bottom - top + 1;
@@ -283,11 +247,7 @@ async function maskPng(file, slug, name) {
 async function inkCoverage(buffer) {
   // A fixed width, so coverage is comparable between a 1600px export and a
   // 120px one. Height follows the aspect.
-  const { data, info } = await sharp(buffer)
-    .resize({ width: 200 })
-    .ensureAlpha()
-    .raw()
-    .toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(buffer).resize({ width: 200 }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
 
   let alpha = 0;
   for (let i = 3; i < data.length; i += 4) alpha += data[i];
@@ -300,18 +260,14 @@ for (const file of files) {
   const path = join(from, file);
   const isSvg = file.toLowerCase().endsWith(".svg");
 
-  const mark = isSvg
-    ? inlineSvg(readFileSync(path, "utf8"), file)
-    : await maskPng(path, slug, file);
+  const mark = isSvg ? inlineSvg(readFileSync(path, "utf8"), file) : await maskPng(path, slug, file);
 
   /* Measured off the rendered mark in both cases. An SVG is rasterised with
      its colours intact and then read for alpha, which is why the source has
      to be one colour on transparency — the same requirement the inlining
      already imposes. */
   const rendered = isSvg
-    ? Buffer.from(
-        `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${mark.viewBox}">${mark.body.replace(/currentColor/g, "#000")}</svg>`,
-      )
+    ? Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${mark.viewBox}">${mark.body.replace(/currentColor/g, "#000")}</svg>`)
     : // The file `maskPng` just wrote. It was a `.png` until the masks went
       // to lossless WebP, and this line was left reading a file that no
       // longer exists, so any PNG source crashed the run.
@@ -356,10 +312,7 @@ for (const file of files) {
 {
   const weights = Object.values(marks).map((m) => m.aspect * m.ink);
   const sorted = [...weights].sort((a, b) => a - b);
-  const median =
-    sorted.length % 2
-      ? sorted[(sorted.length - 1) / 2]
-      : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
+  const median = sorted.length % 2 ? sorted[(sorted.length - 1) / 2] : (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2;
 
   for (const mark of Object.values(marks)) {
     const raw = Math.sqrt(median / (mark.aspect * mark.ink));

@@ -13,7 +13,7 @@ import { HomeAbout } from "./about";
 import { HomeFoot } from "./foot";
 import { HomeIntro } from "./intro";
 import { MotionLayer } from "./motion";
-import { glideTo } from "@/components/site/smooth-scroll";
+import { glideTo, jumpTo } from "@/components/site/smooth-scroll";
 import { useBackHome } from "./back";
 
 /* The inquiry card (its dialog and form) is not in the home page's first load (audit): fetched once By quote
@@ -22,7 +22,11 @@ import { useBackHome } from "./back";
    300ms even when the module is already here. */
 let InquiryCard: typeof import("./inquiry-card").InquiryCard | undefined;
 let inqMod: Promise<unknown> | undefined;
-const warmInq = () => (inqMod ??= import("./inquiry-card").then((m) => (InquiryCard = m.InquiryCard), () => (inqMod = undefined)));
+const warmInq = () =>
+  (inqMod ??= import("./inquiry-card").then(
+    (m) => (InquiryCard = m.InquiryCard),
+    () => (inqMod = undefined),
+  ));
 
 /* v4 homepage (docs/mt-decisions.md): the screens at their resting
    state, with HomeIntro and MotionLayer on top. Motion hooks: MOTION-HOOKS.md. */
@@ -31,8 +35,6 @@ export function Home({ data }: { data: HomeData }) {
   useBackHome();
   const [book, setBook] = React.useState<BookRow["slug"] | null>(null);
   const [inq, setInq] = React.useState<{ from: InquiryMode; opt?: QuoteOpt["key"] } | null>(null);
-  // the booking photo follows the last row touched in either list: a quote option's key, or null for the sessions
-  const [quotePhoto, setQuotePhoto] = React.useState<QuoteOpt["key"] | null>(null);
   // The control that opened a card gets focus back when it closes (spec 3.6, 3.11).
   const opener = React.useRef<HTMLElement | null>(null);
   // a booking opened from the footer hands focus back to its footer link; from Sessions itself, to its row (book-online.tsx)
@@ -48,9 +50,15 @@ export function Home({ data }: { data: HomeData }) {
   const [inqUsed, setInqUsed] = React.useState(false);
   if (inq && !inqUsed) setInqUsed(true);
   const [, inqIn] = React.useReducer((n: number) => n + 1, 0);
-  React.useEffect(() => void (inq && !InquiryCard && warmInq().then(inqIn)), [inq]);
+  // what this render drew, not the module now: the import can land between this commit and the effect, and nothing would draw the card
+  const drewCard = !!InquiryCard;
   React.useEffect(() => {
-    const io = window.IntersectionObserver ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmInq(), io?.disconnect()), { rootMargin: "100% 0px" }) : null;
+    if (inq && !drewCard) void warmInq().then(inqIn);
+  }, [inq, drewCard]);
+  React.useEffect(() => {
+    const io = window.IntersectionObserver
+      ? new IntersectionObserver((es) => es.some((e) => e.isIntersecting) && (warmInq(), io?.disconnect()), { rootMargin: "100% 0px" })
+      : null;
     document.querySelectorAll(".mt-quote, #contact").forEach((el) => io?.observe(el));
     const idle = () => ("requestIdleCallback" in window ? requestIdleCallback(warmInq, { timeout: 3000 }) : setTimeout(warmInq, 1500));
     if (document.readyState === "complete") idle();
@@ -66,7 +74,8 @@ export function Home({ data }: { data: HomeData }) {
     const target = () => (location.hash.length > 1 ? document.getElementById(location.hash.slice(1)) : null);
     const land = () => {
       const el = target();
-      if (el) scrollTo({ top: scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0) });
+      // jumpTo, not scrollTo: the browser's own jump can land in a held row, whose snap glide (Lenis) would carry on over a plain scrollTo
+      if (el) jumpTo(scrollY + el.getBoundingClientRect().top - (parseFloat(getComputedStyle(el).scrollMarginTop) || 0));
       return el;
     };
     const card = (el: HTMLElement | null) => {
@@ -93,20 +102,30 @@ export function Home({ data }: { data: HomeData }) {
     // a link to one of these from the home itself changes the hash without a load
     addEventListener("hashchange", arrive);
     document.addEventListener("click", go, true);
-    return () => (clearTimeout(t), removeEventListener("load", land), removeEventListener("hashchange", arrive), document.removeEventListener("click", go, true));
+    return () => (
+      clearTimeout(t),
+      removeEventListener("load", land),
+      removeEventListener("hashchange", arrive),
+      document.removeEventListener("click", go, true)
+    );
   }, []);
   return (
     <CardsCtx.Provider value={cards}>
       <HomeIntro extras={data.extras} />
       <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
         <HomeHero frames={data.hero} extras={data.extras} />
-        {/* order: Motion, Cover art, About, Sessions, By quote, then Commissions */}
-        <HomeFilms films={data.films} />
-        <HomeCovers />
-        <HomeAbout disciplines={data.disciplines} />
-        <BookOnline open={book} opener={bookOpener} onClose={() => setBook(null)} quotePhoto={quotePhoto} onRowPick={() => setQuotePhoto(null)} />
-        <ByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
+        {/* order: About, Commissions, By quote, Motion, Sessions, then Cover art */}
+        <HomeAbout />
         <HomeCommissions frames={data.commissions} />
+        <ByQuote />
+        <HomeFilms films={data.films} />
+        <BookOnline
+          open={book}
+          opener={bookOpener}
+          onClose={() => setBook(null)}
+          samples={data.samples}
+        />
+        <HomeCovers />
         <HomeFoot />
       </section>
       <MotionLayer />

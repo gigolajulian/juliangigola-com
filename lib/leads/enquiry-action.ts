@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { ContactState } from "@/lib/leads/enquiry";
-import { toNotion } from "@/lib/leads/sync/notion-lead";
+import { toNotion } from "@/lib/leads/notion-lead";
 import { logMail, recordLead } from "@/lib/leads/lead-store";
 import { later } from "@/lib/later";
 import imageLoader from "@/image-loader";
@@ -28,6 +28,8 @@ import {
   takeUploads,
   visitContext,
 } from "@/lib/leads/enquiry";
+import { outbound } from "@/lib/net";
+import { lockOp, type LockEnv } from "@/lib/booking/engine";
 
 /**
  * Handles a contact submission.
@@ -63,11 +65,7 @@ const FROM = "enquiries@notifications.juliangigola.com";
  * the alternative is no cooldown at all.
  */
 async function senderHash(headers: Headers, day: string): Promise<string> {
-  const ip =
-    headers.get("cf-connecting-ip") ??
-    headers.get("x-real-ip") ??
-    headers.get("user-agent") ??
-    "unknown";
+  const ip = headers.get("cf-connecting-ip") ?? headers.get("x-real-ip") ?? headers.get("user-agent") ?? "unknown";
   return (await sha256Hex(`${day}:${ip}`)).slice(0, 32);
 }
 
@@ -77,10 +75,7 @@ type Values = { type: string; name: string; email: string; detail: string; messa
 type Inbox = CloudflareEnv["INBOX"];
 type Stored = ReturnType<typeof enquiry> & { context?: ReturnType<typeof visitContext>; picks?: string[]; files?: string[] };
 
-export async function submitEnquiry(
-  _prev: ContactState,
-  formData: FormData,
-): Promise<ContactState> {
+export async function submitEnquiry(_prev: ContactState, formData: FormData): Promise<ContactState> {
   const read = (key: string) => String(formData.get(key) ?? "").trim();
 
   /* The honeypot.
@@ -104,9 +99,7 @@ export async function submitEnquiry(
     };
   }
 
-  const type = (SHOOT_TYPES as readonly string[]).includes(values.type)
-    ? values.type
-    : "other";
+  const type = (SHOOT_TYPES as readonly string[]).includes(values.type) ? values.type : "other";
   const mailto = mailtoFor(type, values);
 
   try {
@@ -130,7 +123,7 @@ export async function submitEnquiry(
     const day = new Date(now).toISOString().slice(0, 10);
     const hash = await senderHash(await headers(), day);
 
-    const gate = await rateLimit(inbox, hash, now, values, mailto);
+    const gate = await rateLimit(inbox, hash, now, values, mailto, env);
     if ("refused" in gate) return gate.refused;
 
     const country = typeof cf?.country === "string" ? cf.country : undefined;
@@ -147,8 +140,7 @@ export async function submitEnquiry(
     return {
       status: "unconfigured",
       values,
-      message:
-        "Something went wrong storing that. Nothing was lost. Use the email link below and it will reach me directly.",
+      message: "Something went wrong storing that. Nothing was lost. Use the email link below and it will reach me directly.",
       mailto,
     };
   }
@@ -180,6 +172,19 @@ function mailtoFor(type: string, values: Values): string {
   return `mailto:${TO}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
 
+/** The day's count from the booking lock, taken and counted in one step so two sends at once cannot both pass the
+    last place. Null when there is no lock or it cannot answer (a Worker not yet deployed with `take`): the KV count,
+    racy but still a ceiling, stands in, so the form never opens wider than before. */
+async function quotaFromLock(lock: LockEnv | undefined, now: number) {
+  if (!lock?.BOOKING_LOCK) return null;
+  try {
+    return await lockOp(lock, "take", { key: "contact", day: new Date(now).toISOString().slice(0, 10), cap: DAILY_CAP });
+  } catch (e) {
+    console.error("contact: quota from KV", String(e));
+    return null;
+  }
+}
+
 /** The cooldown, then the daily ceiling. Either refuses, or hands back today's count. */
 async function rateLimit(
   inbox: Inbox,
@@ -187,6 +192,7 @@ async function rateLimit(
   now: number,
   values: Values,
   mailto: string,
+  lock?: LockEnv,
 ): Promise<{ refused: ContactState } | { today: number }> {
   /* The cooldown. One enquiry per sender every five minutes.
    *
@@ -201,7 +207,7 @@ async function rateLimit(
       refused: {
         status: "error",
         values,
-        message: `That has been sent. If you have something to add, you can write again in ${waitPhrase(gate.waitSeconds)}, or reply to the email link below any time.`,
+        message: `That has been sent. If you have something to add, you can write again in ${waitPhrase(gate.waitSeconds)}, or use the email link below any time.`,
         mailto,
       },
     };
@@ -211,8 +217,9 @@ async function rateLimit(
    * address; this is what stands behind it. Counted rather than measured
    * because KV cannot be asked how many keys it holds without listing them
    * all, which is the expensive thing being avoided. */
-  const today = Number((await inbox.get(dayKey(now))) ?? 0);
-  if (today >= DAILY_CAP) {
+  const held = await quotaFromLock(lock, now);
+  const today = held ? held.count : Number((await inbox.get(dayKey(now))) ?? 0);
+  if (held ? !held.ok : today >= DAILY_CAP) {
     return {
       refused: {
         status: "unconfigured",
@@ -260,7 +267,14 @@ async function storeEnquiry(
   // After the response, so a slow Notion never holds up the visitor or the email.
   await later(toNotion(env.NOTION_TOKEN, { stored, status: "Inquiry", kind: stored.type }));
   // Held, so the mail logged below folds in after it, not over it.
-  const lead = recordLead(env, stored.email, { event: { at: stored.at, kind: "inquiry", ref: key, note: stored.type }, name: stored.name, kind: stored.type, snippet: stored.message, refs: uploads.length, source: context?.referrer || "Direct" });
+  const lead = recordLead(env, stored.email, {
+    event: { at: stored.at, kind: "inquiry", ref: key, note: stored.type },
+    name: stored.name,
+    kind: stored.type,
+    snippet: stored.message,
+    refs: uploads.length,
+    source: context?.referrer || "Direct",
+  });
   await later(lead);
   /* Their images beside it, for /admin's Inbox (`ref:<key>:<n>`, read
      and deleted with the message by `app/api/inbox/route.ts`). Best
@@ -285,12 +299,16 @@ async function storeEnquiry(
    record: KV refuses a second write to the day's key within a second, and
    that must not turn a stored enquiry into an error or skip the mail. */
 async function countSend(inbox: Inbox, hash: string, now: number, today: number) {
-  await inbox.put(cooldownKey(hash), String(now), {
-    expirationTtl: Math.ceil(COOLDOWN_MS / 1000),
-  }).catch((err: unknown) => console.error("contact: cooldown not written", err));
-  await inbox.put(dayKey(now), String(today + 1), {
-    expirationTtl: 2 * 24 * 60 * 60,
-  }).catch((err: unknown) => console.error("contact: day count not written", err));
+  await inbox
+    .put(cooldownKey(hash), String(now), {
+      expirationTtl: Math.ceil(COOLDOWN_MS / 1000),
+    })
+    .catch((err: unknown) => console.error("contact: cooldown not written", err));
+  await inbox
+    .put(dayKey(now), String(today + 1), {
+      expirationTtl: 2 * 24 * 60 * 60,
+    })
+    .catch((err: unknown) => console.error("contact: day count not written", err));
 }
 
 /* A copy to Julian's mail, so an enquiry reaches him where he already
@@ -325,8 +343,18 @@ async function sendNotices(
        call it optional there, and the runtime threw "Email must have at
        least one recipient" on every enquiry until it was set. */
     const mail = (copy: ReturnType<typeof emailCopy>, attachments: typeof files) =>
-      env.EMAIL?.send({ to: TO, from: { name: "Julian Gigola website", email: FROM }, ...copy, replyTo: { name: stored.name, email: stored.email }, attachments });
-    const { subject, ...copy } = emailCopy(stored, LOOKS, inline.map((a) => a.src));
+      env.EMAIL?.send({
+        to: TO,
+        from: { name: "Julian Gigola website", email: FROM },
+        ...copy,
+        replyTo: { name: stored.name, email: stored.email },
+        attachments,
+      });
+    const { subject, ...copy } = emailCopy(
+      stored,
+      LOOKS,
+      inline.map((a) => a.src),
+    );
     try {
       await mail({ subject, ...copy }, files);
     } catch (err) {
@@ -339,10 +367,7 @@ async function sendNotices(
     }
     if (env.EMAIL) await lead.then(() => logMail(env, stored.email, subject, { to: "hello@", kind: "inquiry" }));
   } catch (err) {
-    console.error(
-      "contact: stored the enquiry but could not mail a copy",
-      err,
-    );
+    console.error("contact: stored the enquiry but could not mail a copy", err);
   }
 }
 
@@ -362,14 +387,11 @@ async function pickAttachments(picks: string[], assets?: { fetch: typeof fetch }
         const path = sized.replace(/^(?:https?:\/\/[^/]+)?\/cdn-cgi\/image\/[^/]+\//, "");
         const signal = AbortSignal.timeout(8000);
         const res = /^https?:/.test(path)
-          ? await fetch(path, {
+          ? await outbound(path, {
               signal,
               cf: { image: { width: 1600, quality: 82 } },
             } as RequestInit)
-          : await assets?.fetch(
-              new URL(path.replace(/^\/?/, "/"), "https://juliangigola.com"),
-              { signal },
-            );
+          : await assets?.fetch(new URL(path.replace(/^\/?/, "/"), "https://juliangigola.com"), { signal });
         if (!res?.ok) {
           console.error("contact: pick not attached", src, res?.status);
           return null;

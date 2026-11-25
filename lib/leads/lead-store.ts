@@ -4,11 +4,26 @@ import { canonical } from "@/lib/seal";
 import { sealer, type Sealer } from "@/lib/seal";
 import { notify, pushFor } from "./lead-push";
 import { appendLog, forgetLog, newEvents } from "./activity-log";
-import { applyLeadEvent, LEAD_PREFIX, leadIdOf, leadStoreKey, leadSummary, trashDaysLeft, type Change, type Lead, type LeadSummary, type Person, type Sent } from "./leads";
+import {
+  applyLeadEvent,
+  LEAD_PREFIX,
+  leadIdOf,
+  leadStoreKey,
+  leadSummary,
+  LEAD_VERSION,
+  trashDaysLeft,
+  upgradeLead,
+  type Change,
+  type Lead,
+  type LeadSummary,
+  type Person,
+  type Sent,
+} from "./leads";
 import { mailable } from "./lead-crm";
 import { everyKey, type InboxKV as KV } from "@/lib/kv";
 import { logged } from "@/lib/utils";
 import { later } from "@/lib/later";
+import { alertLater } from "@/lib/email/error-alert";
 
 /** Where leads live: the INBOX namespace, sealed with LEADS_KEY. */
 export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
@@ -16,19 +31,37 @@ export type LeadStore = { INBOX?: KV; LEADS_KEY?: string; VAPID_KEY?: string };
 /** One lead, opened. Null when it is not there; throws when it cannot be opened (a rotated LEADS_KEY). */
 export async function readLead(kv: KV, s: Sealer, id: string): Promise<Lead | null> {
   const raw = await kv.get(leadStoreKey(id));
-  return raw ? s.open<Lead>(raw) : null;
+  return raw ? upgradeLead(await s.open<Lead>(raw)) : null;
 }
 
+/** What a route answers, with status 500, for a lead that is there but will not open (a rotated LEADS_KEY). */
+export const UNOPENABLE = "That lead cannot be opened. LEADS_KEY may have changed.";
+
+/** `readLead` for a route: a lead that will not open is logged under `label` and reads as undefined, so the route answers JSON. */
+export const openLead = (kv: KV, s: Sealer, id: string, label = "lead open"): Promise<Lead | null | undefined> =>
+  readLead(kv, s, id).catch(logged(label, id));
+
 /** Every lead, opened in full: for the numbers and the export, never the list.
-    Throws if any one lead cannot be opened (a rotated LEADS_KEY), like `readLead`. */
-export async function everyLead(inbox: KV, seal: Sealer) {
+    A lead that will not open (a rotated LEADS_KEY, a newer build's shape) is logged, mailed to hello@ and left out, so
+    one bad record never fails the rest. `strict` throws instead: a copy that replaces the whole Sheet must not drop rows. */
+export async function everyLead(inbox: KV, seal: Sealer, { strict = false } = {}) {
   const out: (Lead & { id: string })[] = [];
+  let skipped = 0;
   for await (const k of everyKey(inbox, LEAD_PREFIX)) {
-    const l = await readLead(inbox, seal, leadIdOf(k.name));
+    const l = await openLead(inbox, seal, leadIdOf(k.name), "lead skipped");
     if (l) out.push(Object.assign(l, { id: leadIdOf(k.name) }));
+    else if (l === undefined) skipped++;
+  }
+  if (skipped) {
+    await alertLater("leads skipped", `${skipped} lead(s) would not open`);
+    if (strict) throw new Error(`${skipped} lead(s) would not open; not copied`);
   }
   return out;
 }
+
+/** A summary from the list's metadata, or null (logged) when it will not open. */
+const openSummary = (seal: Sealer, name: string, sealed: string) =>
+  seal.open<LeadSummary>(sealed).catch((e: unknown) => (console.error("lead summary skipped", name, String(e)), null));
 
 /** Bytes the sealed summary may take: KV metadata holds 1024, as JSON. */
 const META_MAX = 1000;
@@ -45,7 +78,8 @@ const SHRINK: ((m: LeadSummary) => LeadSummary)[] = [
     The summary shrinks until it fits, so a long CJK name and message never
     make the put throw and the lead go unrecorded.
     `from`: the lead before this write (null for a new one); its new events go to the activity log. Left out (a move, a backfill), nothing is logged. */
-export async function writeLead(kv: KV, s: Sealer, id: string, lead: Lead, from?: Lead | null): Promise<void> {
+export async function writeLead(kv: KV, s: Sealer, id: string, given: Lead, from?: Lead | null): Promise<void> {
+  const lead = { ...given, v: LEAD_VERSION };
   let summary = leadSummary(lead);
   let meta = await s.seal(summary);
   for (const cut of SHRINK) {
@@ -81,28 +115,26 @@ export async function canonLeads(kv: KV, s: Sealer): Promise<number> {
   return moved;
 }
 
-/** Every lead's summary from the list's metadata, newest first, each with its id.
-    Trash empties itself: 30 days after it went in, a lead goes for good.
-    The list is the only reader, so it is the one place that checks. */
-export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<LeadSummary[]> {
+/** Every lead's summary from the list's metadata, newest first, each with its id, read only. A lead 30 days in
+    the trash is left out and its id given in `expired`, for the caller to bury (`buryLead`). A summary that will
+    not open is logged and left out. */
+export async function leadSummaries(kv: KV, seal: Sealer, now: number): Promise<{ leads: LeadSummary[]; expired: string[] }> {
   const leads: LeadSummary[] = [];
+  const expired: string[] = [];
   for await (const k of everyKey<{ s?: string }>(kv, LEAD_PREFIX)) {
-    if (!k.metadata?.s) continue;
-    const one = await seal.open<LeadSummary>(k.metadata.s);
-    if (one.trashedAt && trashDaysLeft(one.trashedAt, now) <= 0) {
-      await buryLead(kv, seal, leadIdOf(k.name));
-      continue;
-    }
-    leads.push({ ...one, id: leadIdOf(k.name) });
+    const one = k.metadata?.s ? await openSummary(seal, k.name, k.metadata.s) : null;
+    if (!one) continue;
+    if (one.trashedAt && trashDaysLeft(one.trashedAt, now) <= 0) expired.push(leadIdOf(k.name));
+    else leads.push({ ...one, id: leadIdOf(k.name) });
   }
-  return leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt));
+  return { leads: leads.sort((a, b) => b.lastAt.localeCompare(a.lastAt)), expired };
 }
 
 /** The ids of every lead in the trash, from the list's metadata. */
 export async function trashedIds(kv: KV, seal: Sealer): Promise<string[]> {
   const ids: string[] = [];
   for await (const k of everyKey<{ s?: string }>(kv, LEAD_PREFIX)) {
-    if (k.metadata?.s && (await seal.open<LeadSummary>(k.metadata.s)).trashedAt) ids.push(leadIdOf(k.name));
+    if (k.metadata?.s && (await openSummary(seal, k.name, k.metadata.s))?.trashedAt) ids.push(leadIdOf(k.name));
   }
   return ids;
 }
@@ -164,38 +196,59 @@ export const logMail = (env: LeadStore, email: string | undefined, subject: stri
  * or no address), or failed (no key, or the read or write threw; logged).
  */
 export type Recorded = { status: "written"; lead: Lead } | { status: "same" | "skipped" | "failed" };
-export async function recordLead(env: LeadStore, email: string, c: Change): Promise<Recorded> {
+/** Past a failed lead write, the wait before reading and writing again: KV takes one write a second to a key. */
+export const LEAD_RETRY_MS = 1100;
+
+export async function recordLead(env: LeadStore, email: string, change: Change | Change[]): Promise<Recorded> {
   const seal = sealer(env.LEADS_KEY);
   if (!env.INBOX || !email.includes("@")) return { status: "skipped" };
   if (!seal) {
     console.error("lead", "LEADS_KEY unset or malformed, not recorded");
     return { status: "failed" };
   }
-  try {
+  const changes = Array.isArray(change) ? change : [change];
+  const once = async () => {
     const s = await seal;
     // Mail from the art director lands on the client's lead (`findLead`).
-    const { id, lead: before } = await findLead(env.INBOX, s, email);
-    const after = applyLeadEvent(before, email, c);
-    if (after === before) return { status: "same" };
-    await writeLead(env.INBOX, s, id, after, before);
-    // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
-    const push = pushFor(after, c.event);
-    if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));
-    return { status: "written", lead: after };
+    const { id, lead: before } = await findLead(env.INBOX!, s, email);
+    const after = changes.reduce<Lead | null>((l, c) => applyLeadEvent(l, email, c), before);
+    if (!after || after === before) return { status: "same" } as const;
+    await writeLead(env.INBOX!, s, id, after, before);
+    return { status: "written", lead: after } as const;
+  };
+  let out: Awaited<ReturnType<typeof once>>;
+  try {
+    out = await once();
   } catch (e) {
-    console.error("lead", String(e));
-    return { status: "failed" };
+    // A second write to the key within a second is refused: read again and write once more.
+    console.error("lead, retrying", String(e));
+    await new Promise((go) => setTimeout(go, LEAD_RETRY_MS));
+    try {
+      out = await once();
+    } catch (e2) {
+      console.error("lead, not recorded", String(e2));
+      return { status: "failed" };
+    }
   }
+  if (out.status === "written") {
+    // Something reached the site: ping his devices (`lib/leads/lead-push.ts`).
+    for (const c of changes) {
+      const push = pushFor(out.lead, c.event);
+      if (push && env.VAPID_KEY) await later(notify(env.INBOX, env.VAPID_KEY, push));
+    }
+  }
+  return out;
 }
 
 /** A gallery's "proofs" opens taken off a person's lead (a visit he forgot, his own test). A lead made only of
     this gallery's opens, with nothing of his on it, goes with them. */
 export async function dropProofOpens(kv: KV, s: Sealer, email: string, token: string) {
-  const id = await s.id(email);
-  const lead = await readLead(kv, s, id);
+  // Through `findLead`, like `recordLead`: an open from a person's other address landed on the lead that lists it.
+  const { id, lead } = await findLead(kv, s, email);
   const events = lead?.events.filter((e) => !(e.kind === "proofs" && e.ref === token));
   if (lead && events && events.length < lead.events.length) {
-    if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion) await writeLead(kv, s, id, { ...lead, events });
+    if (events.length || lead.notes || lead.remind || lead.invoices?.length || lead.deposit || lead.notion || lead.people?.length)
+      await writeLead(kv, s, id, { ...lead, events });
     else await kv.delete(leadStoreKey(id));
   }
 }

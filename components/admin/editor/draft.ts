@@ -16,10 +16,17 @@ export type SetOverride = <K extends keyof Overrides>(kind: K, slug: string, nex
 
 /** The overrides with one project's entry changed. Null is no edit: frames, credits and copy fall back to what is
     published (`withOverride`), a category drops its entry. A slug renamed back to its original is no rename at all. */
-export function withProjectOverride<K extends keyof Overrides>(o: Overrides, kind: K, slug: string, next: OverrideOf<K> | null, published: Overrides): Overrides {
+export function withProjectOverride<K extends keyof Overrides>(
+  o: Overrides,
+  kind: K,
+  slug: string,
+  next: OverrideOf<K> | null,
+  published: Overrides,
+): Overrides {
   const now = o[kind] as Record<string, OverrideOf<K>>;
   let out: Record<string, OverrideOf<K>>;
-  if (kind === "frames" || kind === "credits" || kind === "copy") out = withOverride(now, slug, next, published[kind] as Record<string, OverrideOf<K>>);
+  if (kind === "frames" || kind === "credits" || kind === "copy")
+    out = withOverride(now, slug, next, published[kind] as Record<string, OverrideOf<K>>);
   else {
     out = { ...now };
     if (next === null || (kind === "slugs" && next === slug)) delete out[slug];
@@ -52,11 +59,9 @@ export function withListDraft<K extends keyof ListDraft>(d: ListDraft, kind: K, 
 export function movedTabs(draft: SiteContent, manifest: Draft, baseline: Baseline) {
   const tabs = new Set<View>();
   for (const key of Object.keys(draft) as (keyof SiteContent)[])
-    if (!sameJson(draft[key], baseline.content[key]))
-      tabs.add(FIELD_TAB[key] ?? "home");
+    if (!sameJson(draft[key], baseline.content[key])) tabs.add(FIELD_TAB[key] ?? "home");
   for (const key of Object.keys(manifest) as (keyof Draft)[])
-    if (!sameJson(manifest[key], baseline.manifest[key]))
-      tabs.add(key === "order" || key === "covers" ? "disciplines" : "projects");
+    if (!sameJson(manifest[key], baseline.manifest[key])) tabs.add(key === "order" || key === "covers" ? "disciplines" : "projects");
   return tabs;
 }
 
@@ -67,8 +72,7 @@ export function changedSlugs(manifest: Draft, baseline: Baseline) {
   for (const key of maps) {
     const a = manifest[key] as Record<string, unknown>;
     const b = baseline.manifest[key] as Record<string, unknown>;
-    for (const slug of new Set([...Object.keys(a), ...Object.keys(b)]))
-      if (!sameJson(a[slug], b[slug])) out.add(slug);
+    for (const slug of new Set([...Object.keys(a), ...Object.keys(b)])) if (!sameJson(a[slug], b[slug])) out.add(slug);
   }
   for (const key of ["hidden", "unlisted"] as const) {
     const a = new Set(manifest[key]);
@@ -124,8 +128,7 @@ export function draftProjects(
         isTextRef(f) ? [] : [typeof f === "string" ? f : f.src],
       )[0];
 
-      if (filed === p.categorySlug && (!opener || opener === p.images[0]))
-        return p;
+      if (filed === p.categorySlug && (!opener || opener === p.images[0])) return p;
 
       return {
         ...p,
@@ -140,14 +143,8 @@ export function draftProjects(
            fixed box under `object-cover`, and the mat is only what shows
            for the instant before the frame paints. The build reads the
            real frame. */
-        cover:
-          opener && opener !== p.images[0]
-            ? { ...p.cover, src: opener }
-            : p.cover,
+        cover: opener && opener !== p.images[0] ? { ...p.cover, src: opener } : p.cover,
       };
     })
-    .sort(
-      (a, b) =>
-        (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity),
-    );
+    .sort((a, b) => (rank.get(a.slug) ?? Infinity) - (rank.get(b.slug) ?? Infinity));
 }

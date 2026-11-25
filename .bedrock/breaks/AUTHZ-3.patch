@@ -1,0 +1,13 @@
+diff --git a/lib/admin/vouch.ts b/lib/admin/vouch.ts
+index 4f3db874..0e23bd34 100644
+--- a/lib/admin/vouch.ts
++++ b/lib/admin/vouch.ts
+@@ -136,7 +136,7 @@ export async function refuseWorker(request: Request, secret?: string): Promise<R
+ 
+ /** The admin gate: the admin key, or a GitHub token that can push. A write re-checks the token with GitHub, never the cache. */
+ export async function isAdmin(request: Request, key?: string) {
+-  if (await authorised(request, key)) return true;
++  if ((await authorised(request, key)) || !bearer(request)) return true;
+   const token = bearer(request);
+   const write = !["GET", "HEAD"].includes(request.method.toUpperCase());
+   return !!token && (await canPush(token, write));

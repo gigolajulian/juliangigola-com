@@ -35,7 +35,12 @@ const rec = (id: string, hoursOut: number, more: Partial<BookingRecord> = {}): B
 beforeEach(() => {
   store = new FakeStore();
   client = new FakeEmail();
-  env = { BOOKING_LOCK: fakeLock(new BookingLock({ storage: store }, {})) as never, CLIENT_EMAIL: client as never, BOOKING_SECRET: "booking-secret-for-tests", WORKER_KEY: "worker-key-for-tests" };
+  env = {
+    BOOKING_LOCK: fakeLock(new BookingLock({ storage: store }, {})) as never,
+    CLIENT_EMAIL: client as never,
+    BOOKING_SECRET: "booking-secret-for-tests",
+    WORKER_KEY: "worker-key-for-tests",
+  };
 });
 
 describe("reminders", () => {
@@ -49,15 +54,23 @@ describe("reminders", () => {
     await saveBooking(store, rec("fresh", 23.5, { at: new Date().toISOString() }));
 
     const logged: unknown[] = [];
-    env.SITE = { fetch: async (_: string, init: RequestInit) => (logged.push(JSON.parse(String(init.body))), Response.json({ logged: true })) } as never;
+    env.SITE = {
+      fetch: async (_: string, init: RequestInit) => (logged.push(JSON.parse(String(init.body))), Response.json({ logged: true })),
+    } as never;
     expect(await remind(env)).toBe(2);
     // Each one is logged on the person's lead, through the site.
-    expect(logged).toEqual([expect.objectContaining({ email: "due@example.com", kind: "reminder", booking: "due" }), expect.objectContaining({ email: "missed@example.com" })]);
-    expect(client.sent.map((x) => x.to)).toEqual([expect.objectContaining({ email: "due@example.com" }), expect.objectContaining({ email: "missed@example.com" })]);
+    expect(logged).toEqual([
+      expect.objectContaining({ email: "due@example.com", kind: "reminder", booking: "due" }),
+      expect.objectContaining({ email: "missed@example.com" }),
+    ]);
+    expect(client.sent.map((x) => x.to)).toEqual([
+      expect.objectContaining({ email: "due@example.com" }),
+      expect.objectContaining({ email: "missed@example.com" }),
+    ]);
     const m = client.sent[0];
     expect(m.subject).toMatch(/^Tomorrow: Portraits, /);
     expect(String(m.text)).toContain("See you tomorrow.");
-    expect(String(m.text)).toContain("a cancel keeps the deposit");
+    expect(String(m.text)).toContain("a cancellation keeps the deposit");
     expect(String(m.text)).toContain("https://juliangigola.com/booking/due?t=");
 
     // The next hour does not send it again.
@@ -77,7 +90,10 @@ describe("reminders", () => {
   });
 
   it("a call reads as a call", async () => {
-    await saveBooking(store, rec("call", 23.5, { slug: "music-call", session: "Music call", call: true, where: "https://meet.google.com/abc-defg-hij" }));
+    await saveBooking(
+      store,
+      rec("call", 23.5, { slug: "music-call", session: "Music call", call: true, where: "https://meet.google.com/abc-defg-hij" }),
+    );
     await remind(env);
     expect(String(client.sent[0].text)).toContain("Talk tomorrow.");
     expect(String(client.sent[0].text)).not.toContain("deposit");

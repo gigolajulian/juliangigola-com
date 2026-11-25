@@ -45,18 +45,26 @@ describe("image loader, CDN on", () => {
 
   it("sizes a provider still and keeps a given quality", async () => {
     const loader = await load(true);
-    expect(loader({ src: "https://i.ytimg.com/vi/x/hq.jpg", width: 400, quality: 82 })).toBe("/cdn-cgi/image/width=400,quality=82,format=auto/https://i.ytimg.com/vi/x/hq.jpg");
+    expect(loader({ src: "https://i.ytimg.com/vi/x/hq.jpg", width: 400, quality: 82 })).toBe(
+      "/cdn-cgi/image/width=400,quality=82,format=auto/https://i.ytimg.com/vi/x/hq.jpg",
+    );
     expect(loader({ src: "https://example.com/a.jpg", width: 400 })).toBe("https://example.com/a.jpg");
   });
 
   it("on a branch preview, asks the live zone", async () => {
     const loader = await load(true, "https://juliangigola.com");
-    expect(loader({ src: "/work/iris/01.jpg", width: 500 })).toBe("https://juliangigola.com/cdn-cgi/image/width=500,quality=78,format=auto/work/iris/01-w640.jpg");
-    expect(loader({ src: "https://i.ytimg.com/vi/x/hq.jpg", width: 400 })).toBe("https://juliangigola.com/cdn-cgi/image/width=400,quality=78,format=auto/https://i.ytimg.com/vi/x/hq.jpg");
+    expect(loader({ src: "/work/iris/01.jpg", width: 500 })).toBe(
+      "https://juliangigola.com/cdn-cgi/image/width=500,quality=78,format=auto/work/iris/01-w640.jpg",
+    );
+    expect(loader({ src: "https://i.ytimg.com/vi/x/hq.jpg", width: 400 })).toBe(
+      "https://juliangigola.com/cdn-cgi/image/width=400,quality=78,format=auto/https://i.ytimg.com/vi/x/hq.jpg",
+    );
   });
 
   it("an empty origin changes nothing, and the origin does nothing with the CDN off", async () => {
-    expect((await load(true, ""))({ src: "/work/iris/01.jpg", width: 500 })).toBe("/cdn-cgi/image/width=500,quality=78,format=auto/work/iris/01-w640.jpg");
+    expect((await load(true, ""))({ src: "/work/iris/01.jpg", width: 500 })).toBe(
+      "/cdn-cgi/image/width=500,quality=78,format=auto/work/iris/01-w640.jpg",
+    );
     expect((await load(false, "https://juliangigola.com"))({ src: "/work/iris/01.jpg", width: 500 })).toBe("/work/iris/01-w640.jpg");
   });
 });

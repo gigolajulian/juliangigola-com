@@ -1,14 +1,18 @@
 import { isGithubToken, REPO } from "@/lib/admin/github-repo";
 import { json } from "@/lib/http";
 import { sha256Hex } from "@/lib/token";
+import { outbound } from "@/lib/net";
 
 /* ── the key the editor already has ───────────────────────────────
  * Whoever can push to the repository publishes the site, so a GitHub token
  * that can push is the site's real credential and the one /admin already
  * holds. A request carrying it as a bearer token is checked against GitHub
  * — does this token see the repository, with push? — and the answer is
- * remembered for five minutes by a hash of it, so a panel's every click is
- * not a round trip.
+ * remembered for five minutes by a hash of it, so a panel's every read is
+ * not a round trip. Every write asks GitHub again (`fresh`): a token revoked
+ * at GitHub stops changing anything at once, and reads within five minutes.
+ * Signing out everywhere is revoking the token at GitHub, or rotating the
+ * INBOX_KEY secret for the admin key.
  *
  * Two gates, one copy each, so a change to how the site trusts a request is
  * a change in one place:
@@ -21,9 +25,10 @@ import { sha256Hex } from "@/lib/token";
  * ─────────────────────────────────────────────────────────────── */
 const VOUCHED_MS = 5 * 60 * 1000;
 const vouched = new Map<string, number>();
+/** Drops every remembered token, so a test starts from a cold isolate. */
+export const forgetVouches = () => vouched.clear();
 
-const sha256Bytes = async (s: string) =>
-  new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)));
+const sha256Bytes = async (s: string) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)));
 
 /**
  * The two kinds of token /admin is set up with: a fine-grained one (what its
@@ -39,9 +44,8 @@ const API = `https://api.github.com/repos/${REPO.owner}/${REPO.repo}`;
 // Bounded, and closed on failure: a slow GitHub must not hang the gate
 // open, and an unreachable one must not open it.
 const ask = (token: string, path = "", init: RequestInit = {}) =>
-  fetch(API + path, {
+  outbound(API + path, {
     ...init,
-    signal: AbortSignal.timeout(8000),
     headers: {
       authorization: `Bearer ${token}`,
       accept: "application/vnd.github+json",
@@ -49,13 +53,14 @@ const ask = (token: string, path = "", init: RequestInit = {}) =>
     },
   });
 
-async function vouch(token: string): Promise<boolean> {
+async function vouch(token: string, fresh = false): Promise<boolean> {
   if (!isGithubToken(token)) return false;
   const classic = CLASSIC.test(token);
   if (!classic && !FINE.test(token)) return false;
   const id = await sha256Hex(token);
   const until = vouched.get(id);
-  if (until && until > Date.now()) return true;
+  if (!fresh && until && until > Date.now()) return true;
+  vouched.delete(id);
 
   // The user's role: can whoever owns this token push here at all?
   const res = await ask(token);
@@ -84,17 +89,16 @@ async function vouch(token: string): Promise<boolean> {
 }
 
 /** True when GitHub says this token can push to the site's repository. */
-export async function canPush(token: string): Promise<boolean> {
+export async function canPush(token: string, fresh = false): Promise<boolean> {
   try {
-    return await vouch(token);
+    return await vouch(token, fresh);
   } catch {
     return false;
   }
 }
 
 /** The bearer token on a request, when it carries one. */
-export const bearer = (request: Request): string | undefined =>
-  /^Bearer\s+(\S+)$/i.exec(request.headers.get("authorization") ?? "")?.[1];
+export const bearer = (request: Request): string | undefined => /^Bearer\s+(\S+)$/i.exec(request.headers.get("authorization") ?? "")?.[1];
 
 /**
  * Whether the request carries the right key.
@@ -130,11 +134,12 @@ export async function refuseWorker(request: Request, secret?: string): Promise<R
   return json({ error: "Not authorized." }, 401);
 }
 
-/** The admin gate: the admin key, or a GitHub token that can push. */
+/** The admin gate: the admin key, or a GitHub token that can push. A write re-checks the token with GitHub, never the cache. */
 export async function isAdmin(request: Request, key?: string) {
   if (await authorised(request, key)) return true;
   const token = bearer(request);
-  return !!token && (await canPush(token));
+  const write = !["GET", "HEAD"].includes(request.method.toUpperCase());
+  return !!token && (await canPush(token, write));
 }
 
 /**

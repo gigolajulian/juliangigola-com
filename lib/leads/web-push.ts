@@ -7,13 +7,18 @@
  * which also carries the public half the browser subscribes with.
  * ─────────────────────────────────────────────────────────────── */
 import { secretJson } from "@/lib/secrets";
+import { outbound } from "@/lib/net";
 
 export type Subscription = { endpoint: string; keys: { p256dh: string; auth: string } };
 export type Push = { title: string; body: string; tag?: string; url?: string };
 
 const enc = new TextEncoder();
 type Bytes = Uint8Array<ArrayBuffer>;
-export const b64url = (u: Bytes) => btoa(String.fromCharCode(...u)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+export const b64url = (u: Bytes) =>
+  btoa(String.fromCharCode(...u))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
 export const unb64url = (s: string) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
 const join = (...parts: Bytes[]) => {
   const out = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
@@ -54,7 +59,9 @@ export async function encrypt(sub: Subscription, payload: string): Promise<Bytes
   const { cek, nonce } = await contentKeys(ecdh, auth, uaPublic, asPublic, salt);
   const key = await crypto.subtle.importKey("raw", cek, "AES-GCM", false, ["encrypt"]);
   // 0x02: the last (and only) record.
-  const sealed = new Uint8Array(await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, key, join(enc.encode(payload), new Uint8Array([2]))));
+  const sealed = new Uint8Array(
+    await crypto.subtle.encrypt({ name: "AES-GCM", iv: nonce }, key, join(enc.encode(payload), new Uint8Array([2]))),
+  );
   const rs = new Uint8Array([0, 0, 16, 0]); // 4096
   return join(salt, rs, new Uint8Array([asPublic.length]), asPublic, sealed);
 }
@@ -75,7 +82,7 @@ export async function vapid(jwk: JsonWebKey, endpoint: string, now = Date.now())
 export async function send(secret: string, sub: Subscription, push: Push): Promise<"ok" | "gone" | "failed"> {
   try {
     const jwk = secretJson<JsonWebKey>(secret, "VAPID_KEY");
-    const res = await fetch(sub.endpoint, {
+    const res = await outbound(sub.endpoint, {
       method: "POST",
       headers: {
         authorization: await vapid(jwk, sub.endpoint),

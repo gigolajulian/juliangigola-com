@@ -1,25 +1,37 @@
-import { scrollGoal, settleTo, shiftScroll } from "@/components/site/smooth-scroll";
+import { scrollGoal, settleTo } from "@/components/site/smooth-scroll";
 import { matches } from "@/lib/device";
 import { holdEase as ease, holdUnease as unease } from "@/lib/motion/hold-ease";
 import { captionsOff, vimeoListen, vimeoPlays } from "@/lib/work/videos";
-import { clamp, rise, smooth, tell, type Ctx, type Driver } from "./engine";
-import { sleeveTilt } from "@/components/cover/sleeve-tilt";
-
+import { clamp, rise, type Ctx, type Driver } from "./engine";
 
 /* Snap: a hold never rests between two items. When the scroll stops inside the hold, the page glides to the
    nearest one. Within a step of the item it rested on it leans 0.44 of a step the way the scroll went, so one wheel notch (100px, a small part of a step) moves on instead of
    falling back. `at`: the hold's share as an item position; `share`: an item's resting share of the hold. */
 const LEAN = 0.44;
-function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, share: (i: number) => number, busy: () => boolean, signal: AbortSignal) {
+function snap(
+  el: HTMLElement,
+  ctx: Ctx,
+  n: number,
+  at: (p: number) => number,
+  share: (i: number) => number,
+  busy: () => boolean,
+  signal: AbortSignal,
+) {
   if (matches("calm")) return;
-  let t = 0, rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
+  let t = 0,
+    rest = NaN; // the item position the page last settled on; NaN outside the hold, so arriving is plain nearest
   const settle = () => {
     // fine pointers only: a finger's own momentum is left alone, on an iPad too
     if (!ctx.held || !ctx.fine || busy()) return;
-    const top = el.getBoundingClientRect().top + scrollY, range = el.offsetHeight - innerHeight, y = scrollGoal(), p = (y - top) / range;
+    const top = el.getBoundingClientRect().top + scrollY,
+      range = el.offsetHeight - innerHeight,
+      y = scrollGoal(),
+      p = (y - top) / range;
     // the two ends are items too: resting exactly there keeps `rest`, a pixel past them the page is free
     if (y < top - 1 || y > top + range + 1) return void (rest = NaN);
-    const f = at(p), i = clamp(Math.round(f + (Math.abs(f - rest) < 1 ? Math.sign(f - rest) * LEAN : 0)), 0, n - 1), to = top + share(i) * range;
+    const f = at(p),
+      i = clamp(Math.round(f + (Math.abs(f - rest) < 1 ? Math.sign(f - rest) * LEAN : 0)), 0, n - 1),
+      to = top + share(i) * range;
     rest = i;
     // 1px: scrollY is fractional, an exact compare would glide forever
     if (Math.abs(to - y) > 1) settleTo(to);
@@ -38,212 +50,6 @@ function snap(el: HTMLElement, ctx: Ctx, n: number, at: (p: number) => number, s
    sideways. Motion (spec 3.8): a vertical stack there, see films() below.
    Everywhere else the native snap rows stay. */
 
-/** What covers() keeps between frames: the row's measure, the item it last stepped to, and a drag in progress. */
-type Covers = {
-  el: HTMLElement;
-  ctx: Ctx;
-  row: HTMLElement;
-  track: HTMLElement;
-  items: HTMLElement[];
-  n: number;
-  o: number[];
-  step: number;
-  c0: number;
-  mid: number;
-  range: number;
-  cur: number;
-  base: number;
-  lastX: number;
-  down: number | null;
-  downY: number;
-  dragged: boolean;
-};
-const MILLI = 1000; // --o is kept to three decimals
-
-function measureCovers(s: Covers) {
-  const { row, items } = s;
-  // flow.css scales the row as it enters and settles: measure it at rest
-  row.style.transform = "none";
-  const a = items[0].getBoundingClientRect();
-  s.step = items[1].getBoundingClientRect().left - a.left;
-  s.c0 = row.getBoundingClientRect().left + parseFloat(getComputedStyle(row).paddingLeft) + a.width / 2;
-  s.mid = innerWidth / 2;
-  s.range = s.el.offsetHeight - innerHeight;
-  row.style.transform = "";
-  s.cur = -1;
-  s.lastX = NaN;
-}
-
-/* Record rule: out at the stage centre, back in the sleeve `fall` px away. */
-function discs(s: Covers, x: number, fall: number, k = 1) {
-  const { o, items } = s;
-  for (let i = 0; i < s.n; i++) {
-    // eased: the record leaves and returns slowly at both ends instead of at one speed
-    const v = Math.round(smooth(clamp(1 - Math.abs(s.c0 + i * s.step - x - s.mid) / fall)) * k * MILLI) / MILLI;
-    if (v !== o[i]) items[i].style.setProperty("--o", String((o[i] = v)));
-  }
-}
-
-// Snap rows: the disc only exists on the current sleeve, which changes at half a step, so it is back in by then.
-function loose(s: Covers) {
-  if (!s.ctx.held) discs(s, s.row.scrollLeft, s.step / 2);
-}
-
-function coverFrame(s: Covers, p: number) {
-  const { n, step } = s;
-  // the first record starts inside its sleeve and comes out over the first 5% of the hold
-  const k = smooth(clamp(p / 0.05));
-  p = ease(p);
-  const i = Math.round(p * (n - 1)), x = p * (n - 1) * step;
-  if (i !== s.cur) {
-    // HomeCovers (rows.tsx) is told the item; the row's scroll stays at 0 and the transform carries all of it.
-    tell(s.el, { cur: i });
-    s.base = s.row.scrollLeft;
-    s.cur = i;
-  } else if (x === s.lastX) return;
-  s.lastX = x;
-  s.track.style.transform = `translate3d(${(s.base - x).toFixed(2)}px,0,0)`;
-  // 420 of the 520 design px between covers; by the measured step, so it holds where the covers stand closer (tall windows)
-  discs(s, x, step * (420 / 520), k);
-}
-
-// The title line rises when HomeCovers (rows.tsx) commits the new item (on touch too). A turned sleeve turns back.
-function coverTold(s: Covers) {
-  for (const it of s.items) it.removeAttribute("data-tp-fl");
-  rise(s.el.querySelector(".mt-ttl .ln > span"));
-}
-
-/* Sideways drag moves the page scroll, so the two never disagree. */
-const coverTop = (s: Covers) => s.el.getBoundingClientRect().top + scrollY;
-
-function dragStart(s: Covers, e: PointerEvent) {
-  if (!s.ctx.held || e.button) return;
-  s.down = e.clientX;
-  s.downY = scrollY;
-  s.dragged = false;
-}
-
-function dragMove(s: Covers, e: PointerEvent) {
-  if (s.down === null) return;
-  if (!e.buttons) return void (s.down = null);
-  const dx = e.clientX - s.down;
-  if (!s.dragged && Math.abs(dx) < 6) return;
-  if (!s.dragged) s.row.setPointerCapture(e.pointerId);
-  s.dragged = true;
-  // From the drag's start, not step by step: scrollY rounds and the error would add up.
-  const t = coverTop(s);
-  shiftScroll(clamp(s.downY - (dx * s.range) / ((s.n - 1) * s.step), t, t + s.range) - scrollY);
-}
-
-// a cancelled drag gets no click to clear `dragged`, which would keep the hover tilt off until the next press
-function dragCancel(s: Covers) {
-  s.down = null;
-  s.dragged = false;
-}
-
-function dragClick(s: Covers, e: MouseEvent) {
-  if (!s.dragged) return;
-  s.dragged = false;
-  e.preventDefault();
-  e.stopPropagation();
-}
-
-// Tab to a cover: the browser scrolls the hidden row to show it. Put that back and move the page there instead.
-function coverFocus(s: Covers, e: FocusEvent) {
-  const t = e.target as Element, it = t.closest<HTMLElement>(".mt-item"), i = it ? s.items.indexOf(it) : -1;
-  if (!s.ctx.held || i < 0 || !t.matches(":focus-visible")) return;
-  s.row.scrollLeft = s.base;
-  shiftScroll(coverTop(s) + unease(i / (s.n - 1)) * s.range - scrollY);
-}
-
-// Left and right step one item, to that item's own place in the hold (the shares are uneven), and stop at the ends.
-function coverKey(s: Covers, e: KeyboardEvent) {
-  if (!s.ctx.held || (e.key !== "ArrowRight" && e.key !== "ArrowLeft")) return;
-  e.preventDefault();
-  const at = Math.max(0, s.cur), i = clamp(at + (e.key === "ArrowRight" ? 1 : -1), 0, s.n - 1);
-  if (i !== at) scrollTo({ top: coverTop(s) + unease(i / (s.n - 1)) * s.range, behavior: "smooth" });
-}
-
-// a tap turns a sleeve with a back over, a second tap turns it back (touch-parity.css), one sleeve at a time. Mouse pointers flip on hover instead.
-function flip(s: Covers, it: HTMLElement) {
-  if (s.ctx.fine) return;
-  for (const o of s.items) if (o !== it) o.removeAttribute("data-tp-fl");
-  it.toggleAttribute("data-tp-fl");
-}
-
-// After the engine's own resize pass, so ctx is current.
-function coverResize(s: Covers) {
-  const was = s.cur; // measureCovers() resets it
-  measureCovers(s);
-  if (s.ctx.held) return;
-  if (was > 0) s.row.scrollLeft = was * s.step; // the row rested at 0 while held; land it on the told item
-  s.track.style.transform = "";
-  loose(s);
-}
-
-function coversOff(s: Covers, ac: AbortController, mo: MutationObserver) {
-  ac.abort();
-  mo.disconnect();
-  s.track.style.transform = "";
-  for (const k of ["data-mt-par", "data-mt-lid"]) document.documentElement.removeAttribute(k);
-  for (const it of s.items) {
-    it.classList.remove("hv");
-    it.style.setProperty("--o", "0.5");
-  }
-}
-
-function covers(): Driver {
-  return {
-    name: "covers",
-    setup(el, ctx) {
-      const row = el.querySelector<HTMLElement>(".mt-row");
-      if (!row) return;
-      const track = row.firstElementChild as HTMLElement;
-      const items = [...track.children] as HTMLElement[];
-      const n = items.length;
-      if (n < 2) return;
-      const ac = new AbortController();
-      const opts = { signal: ac.signal };
-      const s: Covers = { el, ctx, row, track, items, n, o: Array(n).fill(-1), step: 1, c0: 0, mid: 0, range: 0, cur: -1, base: 0, lastX: NaN, down: null, downY: 0, dragged: false };
-
-      /* Parallax: the heading and the row ride up at their own rates and the stage hands over to Motion (rows.css). */
-      document.documentElement.setAttribute("data-mt-par", "");
-      // the lid: Cover art waits under Commissions, which lifts off it like a lid (rows.css)
-      document.documentElement.setAttribute("data-mt-lid", "");
-
-      const mo = new MutationObserver(() => coverTold(s));
-      mo.observe(el, { attributeFilter: ["data-cur"] });
-
-      row.addEventListener("pointerdown", (e) => dragStart(s, e), opts);
-      row.addEventListener("pointermove", (e) => dragMove(s, e), opts);
-      row.addEventListener("pointerup", () => void (s.down = null), opts);
-      row.addEventListener("pointercancel", () => dragCancel(s), opts);
-      row.addEventListener("click", (e) => dragClick(s, e), { capture: true, signal: ac.signal });
-      row.addEventListener("dragstart", (e) => void (ctx.held && e.preventDefault()), opts);
-      row.addEventListener("focusin", (e) => coverFocus(s, e), opts);
-      row.addEventListener("keydown", (e) => coverKey(s, e), opts);
-      row.addEventListener("scroll", () => loose(s), { passive: true, signal: ac.signal });
-      snap(el, ctx, n, (p) => ease(p) * (n - 1), (i) => unease(i / (n - 1)), () => s.down !== null, ac.signal);
-
-      for (const it of items) if (it.hasAttribute("data-flip")) it.addEventListener("click", () => flip(s, it), opts);
-
-      /* Hover lift (fine pointers): tilt toward the pointer, up to 9deg each way. rows.css does the rest. */
-      for (const it of items) sleeveTilt(it, () => ctx.held && ctx.fine && !s.dragged, opts);
-
-      addEventListener("resize", () => requestAnimationFrame(() => coverResize(s)), opts);
-
-      measureCovers(s);
-      loose(s);
-      return { frame: (p: number) => coverFrame(s, p), off: () => coversOff(s, ac, mo) };
-    },
-  };
-}
-
-/* Previews: a muted player in the current film, and one in the film before and after it, started and
-   then paused so they are loaded when their turn comes. The poster stays on top
-   until the player says it plays (same wait as video.tsx Loop). Players only ever start while the
-   page rests, the current film's first, the others one at a time. */
-/** A preview player: whether it has played yet, when it was mounted, and the timer that lifts its poster. */
 type Pv = { player: HTMLIFrameElement | HTMLVideoElement; isYoutube: boolean; played: boolean; startAt: number; timer: number };
 /** What films() keeps: the current film, its players, and when the page last moved. */
 type Films = {
@@ -264,7 +70,9 @@ type PlayerMsg = { event?: string; info?: number | { playerState?: number }; dat
 
 const win = (v: Pv) => (v.player instanceof HTMLIFrameElement ? v.player.contentWindow : null);
 const say = (v: Pv, yt: string, vimeo: string) =>
-  v.player instanceof HTMLVideoElement ? void (vimeo === "play" ? v.player.play().catch(() => {}) : v.player.pause()) : v.player.contentWindow?.postMessage(JSON.stringify(v.isYoutube ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
+  v.player instanceof HTMLVideoElement
+    ? void (vimeo === "play" ? v.player.play().catch(() => {}) : v.player.pause())
+    : v.player.contentWindow?.postMessage(JSON.stringify(v.isYoutube ? { event: "command", func: yt, args: [] } : { method: vimeo }), "*");
 
 function kill(s: Films, i: number) {
   const v = s.pool.get(i);
@@ -295,7 +103,8 @@ function mountFile(s: Films, i: number, film: HTMLElement, file: string) {
 }
 
 function mount(s: Films, i: number) {
-  const film = s.items[i], src = film.dataset.preview ?? "";
+  const film = s.items[i],
+    src = film.dataset.preview ?? "";
   if (film.dataset.file) return mountFile(s, i, film, film.dataset.file);
   const yt = src.includes("youtube");
   const f = document.createElement("iframe");
@@ -365,7 +174,12 @@ function heard(s: Films, e: MessageEvent) {
   const { m } = got;
   // Vimeo: the poster lifts only when the player says frames are moving
   if (m?.event === "ready") return void vimeoListen(win(v));
-  const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" && m.info && typeof m.info === "object" ? m.info.playerState : undefined;
+  const state =
+    m?.event === "onStateChange"
+      ? m.info
+      : m?.event === "infoDelivery" && m.info && typeof m.info === "object"
+        ? m.info.playerState
+        : undefined;
   const plays = vimeoPlays(m) || state === 1;
   if (!plays && typeof state !== "number") return;
   if (plays) {
@@ -427,9 +241,29 @@ function films(): Driver {
       const ac = new AbortController();
       const opts = { signal: ac.signal };
       // phones and tablets play the current film's preview too, unless the visitor asked to save data
-      const s: Films = { el, ctx, row, items, n, cur: +(el.dataset.cur ?? 0), pool: new Map(), pvT: 0, seen: false, movedAt: 0, touchFilms: false };
+      const s: Films = {
+        el,
+        ctx,
+        row,
+        items,
+        n,
+        cur: +(el.dataset.cur ?? 0),
+        pool: new Map(),
+        pvT: 0,
+        seen: false,
+        movedAt: 0,
+        touchFilms: false,
+      };
       // each film rests at the middle of its share of the hold; the shares are eased like Cover art's (rows.tsx)
-      snap(el, ctx, n, (p) => ease(p) * n - 0.5, (i) => unease((i + 0.5) / n), () => false, ac.signal);
+      snap(
+        el,
+        ctx,
+        n,
+        (p) => ease(p) * n - 0.5,
+        (i) => unease((i + 0.5) / n),
+        () => false,
+        ac.signal,
+      );
       row.addEventListener("keydown", (e) => filmKey(s, e), opts);
       addEventListener("scroll", () => (s.movedAt = performance.now()), { passive: true, signal: ac.signal });
       s.touchFilms = !navigator.connection?.saveData;
@@ -446,4 +280,4 @@ function films(): Driver {
   };
 }
 
-export const rowsDrivers: Driver[] = [covers(), films()];
+export const rowsDrivers: Driver[] = [films()];

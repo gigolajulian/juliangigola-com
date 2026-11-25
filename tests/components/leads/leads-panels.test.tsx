@@ -9,9 +9,16 @@ afterEach(() => vi.unstubAllGlobals());
 
 describe("InvoiceRow", () => {
   it("shows what is due and refuses a PDF until his details are in", async () => {
-    vi.stubGlobal("fetch", vi.fn(() => json({ from: null })));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => json({ from: null })),
+    );
     const l = lead("a", { name: "Ana Ruiz" });
-    render(<ul><InvoiceRow inv={inv("1126")} l={l} full={{ ...l, events: [] } as unknown as Lead} /></ul>);
+    render(
+      <ul>
+        <InvoiceRow inv={inv("1126")} l={l} full={{ ...l, events: [] } as unknown as Lead} />
+      </ul>,
+    );
     expect(screen.getByText(/\$800\.00 due/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "PDF" }));
     expect((await screen.findByRole("alert")).textContent).toBe("Add your details for invoices first.");
@@ -20,13 +27,21 @@ describe("InvoiceRow", () => {
 });
 
 describe("ContractBlock", () => {
-  const draft = { id: "k1", lead: "lead:a", to: { name: "Ana Ruiz", email: "ana@x.com" }, text: "Between Julian Gigola and Ana Ruiz.", createdAt: iso, updatedAt: iso };
+  const draft = {
+    id: "k1",
+    lead: "lead:a",
+    to: { name: "Ana Ruiz", email: "ana@x.com" },
+    text: "Between Julian Gigola and Ana Ruiz.",
+    createdAt: iso,
+    updatedAt: iso,
+  };
 
   function stub(contract: unknown) {
     const fetch = vi.fn((url: string, init: RequestInit = {}) => {
       if (url.includes("?templates")) return json({ templates: [{ id: "shoot", name: "Shoot", body: "x" }] });
       if (init.method === "POST") return json({ contract: draft, url: null });
-      if (init.method === "PATCH") return json({ contract: { ...draft, ...JSON.parse(String(init.body)), sentAt: iso }, url: "https://juliangigola.com/c/k1" });
+      if (init.method === "PATCH")
+        return json({ contract: { ...draft, ...JSON.parse(String(init.body)), sentAt: iso }, url: "https://juliangigola.com/c/k1" });
       return json({ contract, url: null });
     });
     vi.stubGlobal("fetch", fetch);
@@ -56,15 +71,32 @@ describe("ContractBlock", () => {
   });
 
   it("shows the route's error when the lead's contract fails to load", async () => {
-    vi.stubGlobal("fetch", vi.fn(() => json({ error: "Unauthorized" }, 401)));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => json({ error: "Unauthorized" }, 401)),
+    );
     render(<ContractBlock leadId="a" changed={() => {}} />);
     expect(await screen.findByText("Unauthorized")).toBeTruthy();
   });
 });
 
+describe("ContractBlock templates", () => {
+  it("says the templates did not load under Make contract", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string) => (url.endsWith("?templates") ? json({ error: "Down." }, 500) : json({ contract: null, url: null }))),
+    );
+    render(<ContractBlock leadId="a" changed={() => {}} />);
+    expect(await screen.findByText("Contract templates did not load.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Make contract" })).toBeTruthy();
+  });
+});
+
 describe("ContractTemplatesDesk", () => {
   it("adds a template and saves the list with PUT", async () => {
-    const fetch = vi.fn((_: string, init: RequestInit = {}) => (init.method === "PUT" ? json(JSON.parse(String(init.body))) : json({ templates: [{ id: "shoot", name: "Shoot", body: "x" }] })));
+    const fetch = vi.fn((_: string, init: RequestInit = {}) =>
+      init.method === "PUT" ? json(JSON.parse(String(init.body))) : json({ templates: [{ id: "shoot", name: "Shoot", body: "x" }] }),
+    );
     vi.stubGlobal("fetch", fetch);
     render(<ContractTemplatesDesk />);
     fireEvent.click(await screen.findByRole("button", { name: "Add a contract" }));

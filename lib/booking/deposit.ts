@@ -50,6 +50,8 @@ export function amountOf(slug: string): number {
 }
 /** How old a webhook's timestamp may be before it is treated as a replay. */
 const TOLERANCE_S = 300;
+/** The wait before the lock is asked again after an error. */
+export const RETRY_MS = 1000;
 /** Each paid event's name, as its rule titles it. */
 export const SESSION: { [slug: string]: string } = Object.fromEntries(DEPOSIT_SESSIONS.map((s) => [s, EVENTS[s].title]));
 
@@ -116,7 +118,9 @@ type Env = BookingEnv & { INBOX: NonNullable<CloudflareEnv["INBOX"]>; STRIPE_SEC
 /** "Visa ending 4242", from the charge; nothing if Stripe will not say. */
 async function cardOf(key: string, intent: string) {
   try {
-    const pi = (await stripe(key, `/payment_intents/${intent}?expand[]=latest_charge`)) as { latest_charge?: { payment_method_details?: { card?: { brand?: string; last4?: string } } } };
+    const pi = (await stripe(key, `/payment_intents/${intent}?expand[]=latest_charge`)) as {
+      latest_charge?: { payment_method_details?: { card?: { brand?: string; last4?: string } } };
+    };
     const c = pi.latest_charge?.payment_method_details?.card;
     return c?.last4 ? `${c.brand ? c.brand[0].toUpperCase() + c.brand.slice(1) : "Card"} ending ${c.last4}` : undefined;
   } catch {
@@ -159,15 +163,23 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
   const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, `$${usd}`].join(", ") : `$${usd}`;
   const refs = await refsOf(env.INBOX, intent);
   // A refund after an error is not a taken time: say what broke.
-  const next = broke && status === "refunded" ? `The booking failed on an error (${broke}), so Stripe refunded them. Nothing is booked.` : NEXT[status];
+  const next =
+    broke && status === "refunded"
+      ? `The booking failed on an error (${broke}), so Stripe refunded them. Check Calendar for an event the error may have left.`
+      : NEXT[status];
   const lines = [who ? `${who.name} <${who.email}>` : "Unknown client", next, `Stripe: ${link}`];
   if (refs.files.length) lines.push("", `References attached: ${refs.files.length}`);
   if (refs.picks.length) lines.push("", "Picked from my work:", ...refs.picks.map((src) => `https://juliangigola.com${src}`));
   const subject = `${SAID[status]}: ${what}`;
   await alertAndLog(env, subject, lines, { who, log: { kind: `deposit-${status}`, booking: intent }, attachments: refs.files });
   // The money itself, on the activity log: what was paid in, and out again on a refund.
-  if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "payment", ref: intent, note: "Deposit", amount: usd } });
-  if (who && status === "refunded") await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "refund", ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: usd } });
+  // One write for both lines: KV takes one write a second to a key.
+  const at = new Date().toISOString();
+  if (who)
+    await recordLead(env, who.email, [
+      { event: { at, kind: "payment" as const, ref: intent, note: "Deposit", amount: usd } },
+      ...(status === "refunded" ? [{ event: { at, kind: "refund" as const, ref: `refund-${intent}`, note: "Deposit, the time was gone", amount: usd } }] : []),
+    ]);
 }
 
 /**
@@ -176,7 +188,12 @@ async function tell(env: Env, status: keyof typeof SAID, b: Booking | string, li
  * ponytail: KV is not a lock, so two deliveries in the same second could both
  * book. Stripe spaces its retries by minutes; a Durable Object if that changes.
  */
-export async function bookDeposit(env: Env, intent: string, metadata: { [k: string]: string } | undefined, cents?: number): Promise<Status> {
+export async function bookDeposit(
+  env: Env,
+  intent: string,
+  metadata: { [k: string]: string } | undefined,
+  cents?: number,
+): Promise<Status> {
   const parsed = fromMetadata(metadata);
   // What the intent took, from Stripe; unset, the session's own deposit.
   const usd = cents !== undefined ? cents / 100 : parsed.ok ? depositFor(parsed.booking.slug) : LEGACY_DEPOSIT;
@@ -194,14 +211,27 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     if (r.status === "booking" && Date.now() - Date.parse(r.at) > STUCK_MS) {
       const who = parsed.ok ? parsed.booking : undefined;
       const what = who ? [SESSION[who.slug] ?? who.slug, whenPT(who.start), who.name, `$${usd}`].join(", ") : `$${usd}`;
-      await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch(logged("deposit record", "warned"));
-      if (who) await recordLead(env, who.email, { event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what }, name: who.name, kind: who.slug, flag: "stuck" });
+      await env.INBOX.put(key, JSON.stringify({ ...r, warned: true }), { expirationTtl: 90 * 864e2 }).catch(
+        logged("deposit record", "warned"),
+      );
+      if (who)
+        await recordLead(env, who.email, {
+          event: { at: new Date().toISOString(), kind: "deposit-stuck", ref: intent, note: what },
+          name: who.name,
+          kind: who.slug,
+          flag: "stuck",
+        });
       const subject = `Deposit stuck: check Stripe and the calendar: ${what}`;
-      await alertAndLog(env, subject, [
-        who ? `${who.name} <${who.email}>` : "Unknown client",
-        `Paid, and the booking was started at ${r.at} but never finished. Check the calendar for the booking, then book or refund in Stripe by hand.`,
-        `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
-      ], { who, log: { kind: "deposit-stuck", booking: intent } });
+      await alertAndLog(
+        env,
+        subject,
+        [
+          who ? `${who.name} <${who.email}>` : "Unknown client",
+          `Paid, and the booking was started at ${r.at} but never finished. Check the calendar for the booking, then book or refund in Stripe by hand.`,
+          `Stripe: ${dashboardLink(intent, env.STRIPE_SECRET_KEY)}`,
+        ],
+        { who, log: { kind: "deposit-stuck", booking: intent } },
+      );
       return "failed";
     }
     return r.status;
@@ -230,25 +260,45 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
     const want = parsed.booking;
     // The site's engine rechecks and books in one step, inside its lock.
     // Only the booking itself may end in a refund: a step after it never undoes a booked time.
-    const own = await lockOp(env, "book", { ...want, intent, deposit: usd }).catch((e: unknown) => {
-      broke = String(e);
-      console.error("deposit book", broke);
-      return null;
-    });
+    // An error can come after the lock booked (its answer lost on the way back), so it is asked once more before
+    // any refund: a book by intent returns the booking it already made (`bookOwn`) instead of booking twice.
+    const book = () => lockOp(env, "book", { ...want, intent, deposit: usd });
+    const own = await book()
+      .catch(async (e: unknown) => {
+        console.error("deposit book", String(e));
+        await new Promise((go) => setTimeout(go, RETRY_MS));
+        return book();
+      })
+      .catch((e: unknown) => {
+        broke = String(e);
+        console.error("deposit book again", broke);
+        return null;
+      });
     if (own?.ok) {
       const booking = own.record;
       await put({ status: "booked", booking: { uid: booking.id, start: booking.start } });
       await tell(env, "booked", want, link, intent, usd);
       // Not `confirmOf`: this mail maps the paid Booking and adds the card Stripe charged. The fee comes from the record, so it says 90% back.
-      await afterBooked(env, booking, async () => ({
-        ...want,
-        session: SESSION[want.slug] ?? want.slug,
-        start: booking.start,
-        end: booking.end,
-        uid: booking.id,
-        deposit: { ref: intent, at: new Date().toISOString(), amount: usd, card: await cardOf(env.STRIPE_SECRET_KEY, intent), fee: booking.fee },
-        manage: await manageLinks(env.BOOKING_SECRET, booking),
-      }), { deposit: link, email: want.email });
+      await afterBooked(
+        env,
+        booking,
+        async () => ({
+          ...want,
+          session: SESSION[want.slug] ?? want.slug,
+          start: booking.start,
+          end: booking.end,
+          uid: booking.id,
+          deposit: {
+            ref: intent,
+            at: new Date().toISOString(),
+            amount: usd,
+            card: await cardOf(env.STRIPE_SECRET_KEY, intent),
+            fee: booking.fee,
+          },
+          manage: await manageLinks(env.BOOKING_SECRET, booking),
+        }),
+        { deposit: link, email: want.email },
+      );
       return "booked";
     }
   }
@@ -278,7 +328,12 @@ export async function bookDeposit(env: Env, intent: string, metadata: { [k: stri
       type: "booking",
     };
     await env.INBOX.put(enquiryKey(now, id.slice(0, 8)), JSON.stringify(row), { metadata: summary(row) });
-    await recordLead(env, who.email, { event: { at: row.at, kind: "deposit-stuck", ref: intent, note: row.detail }, name: who.name, kind: typeof b === "string" ? undefined : b.slug, flag: "stuck" });
+    await recordLead(env, who.email, {
+      event: { at: row.at, kind: "deposit-stuck", ref: intent, note: row.detail },
+      name: who.name,
+      kind: typeof b === "string" ? undefined : b.slug,
+      flag: "stuck",
+    });
     await tell(env, "failed", b, link, intent, usd);
     return "failed";
   }
@@ -299,13 +354,26 @@ export async function cancelBooking(
   const who = { name: r.name, email: r.email };
   const key = env.STRIPE_SECRET_KEY;
   const refund = r.intent && key && o.refund ? { ...o.refund, key } : undefined;
-  let refunded: boolean | undefined;
-  if (refund) refunded = await stripe(refund.key, "/refunds", refund.form, refund.ref).then(() => true, () => false);
+  // A refund owed with no key to send it is a failed refund (by hand), never "kept".
+  let refunded: boolean | undefined = r.intent && o.refund && !key ? false : undefined;
+  if (refund)
+    refunded = await stripe(refund.key, "/refunds", refund.form, refund.ref).then(
+      () => true,
+      () => false,
+    );
   const at = o.oneStamp ? new Date().toISOString() : undefined;
   await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "cancel", ref: `cancel:${r.id}`, note: o.note } });
   // What went back, off this booking's record, so the log says what Stripe did.
-  if (refunded && refund) await recordLead(env, r.email, { event: { at: at ?? new Date().toISOString(), kind: "refund", ref: refund.ref, note: o.refundNote, amount: o.back } });
-  await alertAndLog(env, o.subject, [`${r.name} <${r.email}>`, o.line, o.money(refunded), ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])], { who, log: { kind: "cancelled", booking: r.id } });
+  if (refunded && refund)
+    await recordLead(env, r.email, {
+      event: { at: at ?? new Date().toISOString(), kind: "refund", ref: refund.ref, note: o.refundNote, amount: o.back },
+    });
+  await alertAndLog(
+    env,
+    o.subject,
+    [`${r.name} <${r.email}>`, o.line, o.money(refunded), ...(r.intent && key ? [`Stripe: ${dashboardLink(r.intent, key)}`] : [])],
+    { who, log: { kind: "cancelled", booking: r.id } },
+  );
   const gone = { ...who, session: r.session, start: was.start, end: was.end };
   if (await sendCancelled(env.CLIENT_EMAIL, gone, { refund: o.mail(refunded), usd: o.usd, back: o.back }))
     await logMail(env, r.email, cancelledSubject(gone), { to: "client", kind: "cancelled", booking: r.id });
@@ -343,12 +411,35 @@ function clientCancel(r: BookingRecord, was: BookingRecord): CancelTerms {
   return {
     refund: share ? { form: { payment_intent: r.intent ?? "", ...(share === 1 ? {} : { amount: String(cents) }) }, ref } : undefined,
     note: [r.session, whenPT(was.start)].join(", "),
-    refundNote: share === 1 ? "Deposit, cancelled 48 hours or more ahead" : `${pct}% of the deposit, cancelled ${share === EARLY_SHARE ? "48 hours or more" : "24 to 48 hours"} ahead`,
+    refundNote:
+      share === 1
+        ? "Deposit, cancelled 48 hours or more ahead"
+        : `${pct}% of the deposit, cancelled ${share === EARLY_SHARE ? "48 hours or more" : "24 to 48 hours"} ahead`,
     oneStamp: false,
     subject: `Cancelled: ${cancelled(r, was)}`,
     line: "Cancelled by the client. The event is off the calendar.",
-    money: (refunded) => (!r.intent ? "No deposit." : refunded ? (share === 1 ? `Deposit refunded: $${back}.` : `Refunded $${back} of the $${paid} deposit (${pct}%). $${paid - back} kept.`) : refunded === false ? `The refund FAILED: refund $${back} by hand in Stripe.` : "Under 24 hours: the deposit is kept."),
-    mail: (refunded) => (!r.intent ? "none" : refunded ? (share === 1 ? "refunded" : share === EARLY_SHARE ? "early" : "part") : refunded === false ? "late" : "kept"),
+    money: (refunded) =>
+      !r.intent
+        ? "No deposit."
+        : refunded
+          ? share === 1
+            ? `Deposit refunded: $${back}.`
+            : `Refunded $${back} of the $${paid} deposit (${pct}%). $${paid - back} kept.`
+          : refunded === false
+            ? `The refund FAILED: refund $${back} by hand in Stripe.`
+            : "Under 24 hours: the deposit is kept.",
+    mail: (refunded) =>
+      !r.intent
+        ? "none"
+        : refunded
+          ? share === 1
+            ? "refunded"
+            : share === EARLY_SHARE
+              ? "early"
+              : "part"
+          : refunded === false
+            ? "late"
+            : "kept",
     usd: paid,
     back,
   };
@@ -365,7 +456,12 @@ function deskCancel(r: BookingRecord, was: BookingRecord): CancelTerms {
     oneStamp: true,
     subject: `Cancelled by you: ${cancelled(r, was)}`,
     line: "Cancelled from the lead desk. The event is off the calendar and the client is told.",
-    money: (refunded) => (!r.intent ? "No deposit." : refunded ? `Deposit refunded in full: $${paid}.` : `The refund FAILED: refund $${paid} by hand in Stripe.`),
+    money: (refunded) =>
+      !r.intent
+        ? "No deposit."
+        : refunded
+          ? `Deposit refunded in full: $${paid}.`
+          : `The refund FAILED: refund $${paid} by hand in Stripe.`,
     mail: (refunded) => (!r.intent ? "mineFree" : refunded ? "mine" : "late"),
     usd: paid,
     back: paid,

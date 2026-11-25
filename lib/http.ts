@@ -24,23 +24,76 @@ export const statusOf = (e: unknown) => (e instanceof HttpError ? e.status : und
 /** An upstream call failed: log it under `label`, answer 502 with `error` (a fixed line on public routes; admin routes pass `errorText(e)` through). */
 export function upstreamError(label: string, e: unknown, error: string) {
   console.error(label, String(e));
+  // hello@ hears of it, once an hour per label. Lazy, so a client bundle never loads the mail code.
+  void import("@/lib/email/error-alert").then((m) => m.alertLater(label, e)).catch(() => {});
   return json({ error }, 502);
 }
 
-/** The public-write limiter (`PUBLIC_WRITE_LIMIT`, five a minute per address and `kind`): the 429 to answer, or null to go on. */
-export async function limited(limiter: { limit(o: { key: string }): Promise<{ success: boolean }> }, kind: string, request: Request) {
+type Limiter = { limit(o: { key: string }): Promise<{ success: boolean }> };
+
+/** A rate-limit binding (`PUBLIC_WRITE_LIMIT` five a minute, `DOWNLOAD_LIMIT` sixty) per address and `kind`, and per
+    `target` when given (a link, a gallery, an address typed in): many addresses aimed at one target meet the same
+    limit as one. The 429 to answer, or null to go on. */
+export async function limited(limiter: Limiter, kind: string, request: Request, target?: string) {
   const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  return (await limiter.limit({ key: `${kind}:${ip}` })).success ? null : json({ error: "Too many tries. Wait a minute." }, 429);
+  if ((await limiter.limit({ key: `${kind}:${ip}` })).success && (target === undefined || (await limitedFor(limiter, kind, target)) === null))
+    return null;
+  return tooMany();
+}
+
+/** The same limit on `target` alone, for a target known only once the body is read. */
+export async function limitedFor(limiter: Limiter, kind: string, target: string) {
+  return (await limiter.limit({ key: `${kind}:t:${target}` })).success ? null : tooMany();
+}
+
+function tooMany() {
+  const res = json({ error: "Too many tries. Wait a minute." }, 429);
+  // The limiter's window is a minute; a client or crawler told when may come back waits instead of hammering.
+  res.headers.set("retry-after", "60");
+  return res;
+}
+
+/** Past this a body is refused unread: the admin's largest JSON is a 4 MB invoice photo. Public routes pass less. */
+export const BODY_MAX = 5_000_000;
+/** A public route's JSON: a booking, a move, a deposit start. */
+export const SMALL_BODY = 64 * 1024;
+
+/** The body as text, read no further than `max` bytes: null past it, so a huge body never fills the isolate. */
+export async function textOf(request: Request, max: number): Promise<string | null> {
+  if (Number(request.headers.get("content-length")) > max) return null;
+  if (!request.body) return "";
+  const reader = request.body.getReader();
+  const parts: Uint8Array[] = [];
+  let size = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    size += value.byteLength;
+    if (size > max) {
+      await reader.cancel().catch(() => {});
+      return null;
+    }
+    parts.push(value);
+  }
+  const all = new Uint8Array(size);
+  let at = 0;
+  for (const p of parts) {
+    all.set(p, at);
+    at += p.byteLength;
+  }
+  return new TextDecoder().decode(all);
 }
 
 /**
- * The request body as an object, or null when it is not one. `request.json()`
+ * The request body as an object, or null when it is not one or is over `max` bytes. `request.json()`
  * throws on a malformed body, and a throw out of a handler is the Worker's
  * generic 500 for a request that was simply wrong.
  */
-export async function bodyOf(request: Request): Promise<Record<string, unknown> | null> {
+export async function bodyOf(request: Request, max = BODY_MAX): Promise<Record<string, unknown> | null> {
   try {
-    const b: unknown = await request.json();
+    const text = await textOf(request, max);
+    if (text === null) return null;
+    const b: unknown = JSON.parse(text);
     return isRecord(b) ? b : null;
   } catch {
     return null;
@@ -61,7 +114,12 @@ async function reply<T>(sent: Promise<Response>): Promise<Reply<T>> {
   const body: unknown = await res.json().catch(() => null);
   if (res.ok) return { ok: true, status: res.status, data: body as T };
   const b = isRecord(body) ? body : {};
-  return { ok: false, status: res.status, error: typeof b.error === "string" ? b.error : undefined, code: typeof b.code === "string" ? b.code : undefined };
+  return {
+    ok: false,
+    status: res.status,
+    error: typeof b.error === "string" ? b.error : undefined,
+    code: typeof b.code === "string" ? b.code : undefined,
+  };
 }
 
 export const getJson = <T>(url: string, init?: RequestInit) => reply<T>(fetch(url, init));

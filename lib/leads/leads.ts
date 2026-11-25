@@ -25,7 +25,18 @@ import { DAY_MS } from "@/lib/time-zone";
  * failed to update must not fail the form.
  * ─────────────────────────────────────────────────────────────── */
 
-export const STAGES = ["Inquiry", "Replied", "Call booked", "Quoted", "Confirmed", "Shot", "Invoiced", "Selecting", "Delivered", "Lost"] as const;
+export const STAGES = [
+  "Inquiry",
+  "Replied",
+  "Call booked",
+  "Quoted",
+  "Confirmed",
+  "Shot",
+  "Invoiced",
+  "Selecting",
+  "Delivered",
+  "Lost",
+] as const;
 export type Stage = (typeof STAGES)[number];
 /** The stages of a booked job: confirmed and after, not lost. */
 export const WON: readonly Stage[] = ["Confirmed", "Shot", "Invoiced", "Selecting", "Delivered"];
@@ -33,11 +44,34 @@ export const WON: readonly Stage[] = ["Confirmed", "Shot", "Invoiced", "Selectin
 /** What happened, as it reached the site. `stage` is Julian's own move. */
 export type LeadEvent = {
   at: string;
-  kind: "inquiry" | "call" | "booking" | "no-deposit" | "deposit-stuck" | "stage" | "snooze" | "mail" | "replied" | "wrote" | "archive" | "trash" | "proofs"
+  kind:
+    | "inquiry"
+    | "call"
+    | "booking"
+    | "no-deposit"
+    | "deposit-stuck"
+    | "stage"
+    | "snooze"
+    | "mail"
+    | "replied"
+    | "wrote"
+    | "archive"
+    | "trash"
+    | "proofs"
     // Julian's own hand (`lib/leads/lead-crm.ts`): added, details changed, merged, a reminder, a quote.
-    | "added" | "edit" | "merge" | "remind" | "quote" | "invoice"
+    | "added"
+    | "edit"
+    | "merge"
+    | "remind"
+    | "quote"
+    | "invoice"
     // From outside or by hand: Stripe payments and refunds, a client moving or cancelling, selects sent, an invoice settled.
-    | "payment" | "refund" | "reschedule" | "cancel" | "selects" | "invoice-paid"
+    | "payment"
+    | "refund"
+    | "reschedule"
+    | "cancel"
+    | "selects"
+    | "invoice-paid"
     // Julian marked it on the desk, ref = "no-show:<booking id>".
     | "no-show"
     // The client's first download of their finals: Delivered.
@@ -72,7 +106,7 @@ export const isPaper = (v: unknown): v is Paper => (PAPER as readonly unknown[])
 /** Something on the lead that needs him, beyond its stage. */
 export type Flag = "stuck" | "no-deposit";
 
-/** A hand edit the lead desk sends to PATCH /api/leads, beside the lead's key. */
+/** A hand edit the lead desk sends to PATCH /api/leads, beside the lead's plain `id`. */
 export type LeadPatch = {
   stage?: string;
   snoozeUntil?: string;
@@ -84,6 +118,7 @@ export type LeadPatch = {
   details?: { name?: string; phone?: string; ig?: string; company?: string; source?: string; kind?: string };
   quote?: number | null;
   lostReason?: string;
+  /** The plain id of another lead to fold into this one. */
   mergeFrom?: string;
   invoice?: unknown;
   licence?: { use?: string; end?: string } | null;
@@ -124,9 +159,17 @@ export type ShootPlan = {
 export type Task = { id: string; text: string; due?: string; who?: string; doneAt?: string };
 
 /** Someone else on the same job: the art director, the producer, the stylist. Their mail lands on this lead. */
-export type Person = { name: string; email: string; role?: string; phone?: string; /** Copied on gallery and delivery mail; unset reads as on. */ cc?: boolean };
+export type Person = {
+  name: string;
+  email: string;
+  role?: string;
+  phone?: string;
+  /** Copied on gallery and delivery mail; unset reads as on. */ cc?: boolean;
+};
 
 export type Lead = {
+  /** The shape this record was written in (`LEAD_VERSION`); none means version 1. */
+  v?: number;
   /** An email address, or `ig:@handle` / `tel:+n` for a lead added by hand without one. Check `mailable()` before mailing it. */
   email: string;
   name: string;
@@ -182,8 +225,43 @@ export type Lead = {
 
 export type Licence = { use: string; end: string };
 
+/* ── lead versions ──────────────────────────────────────────────────
+ * Every lead is written with `v: LEAD_VERSION`. A read upgrades an older
+ * record step by step (`UPGRADES[n]` turns version n into n + 1), so data
+ * from any earlier build still opens; nothing rewrites the store in bulk,
+ * the next write keeps the new shape. A record newer than this build is
+ * refused rather than rewritten without the fields it does not know.
+ * ─────────────────────────────────────────────────────────────── */
+export const LEAD_VERSION = 1;
+const UPGRADES: Record<number, (l: Lead) => Lead> = {};
+
+/** A stored lead in this build's shape. Throws for a record written by a newer build. */
+export function upgradeLead(stored: Lead): Lead {
+  let l: Lead = { ...stored, events: stored.events ?? [], unread: stored.unread ?? false };
+  const from = l.v ?? 1;
+  if (from > LEAD_VERSION) throw new Error(`lead version ${from} is newer than this build (${LEAD_VERSION})`);
+  for (let n = from; n < LEAD_VERSION; n++) l = UPGRADES[n](l);
+  return { ...l, v: LEAD_VERSION };
+}
+
 /** What the list shows, sealed into KV metadata (under its 1024-byte cap). `id` is added when listed. */
-export type LeadSummary = Omit<Lead, "events" | "notion" | "deposit" | "notes" | "remind" | "phone" | "ig" | "company" | "lostReason" | "source" | "invoices" | "people" | "plan" | "tasks"> & {
+export type LeadSummary = Omit<
+  Lead,
+  | "events"
+  | "notion"
+  | "deposit"
+  | "notes"
+  | "remind"
+  | "phone"
+  | "ig"
+  | "company"
+  | "lostReason"
+  | "source"
+  | "invoices"
+  | "people"
+  | "plan"
+  | "tasks"
+> & {
   paid?: true;
   id?: string;
   /** When his reminder is due, and its words, cut short. */
@@ -280,7 +358,10 @@ export function applyLeadEvent(lead: Lead | null, email: string, c: Change): Lea
     const sent = c.mailed ? next.invoices?.filter((v) => !v.sentAt && namesInvoice(c.mailed!, v.no)) : undefined;
     if (sent?.length) {
       next.invoices = next.invoices!.map((v) => (sent.includes(v) ? { ...v, sentAt: event.at } : v));
-      next.events = [...next.events, ...sent.map((v) => ({ at: event.at, kind: "invoice" as const, ref: event.ref, note: `${v.no} sent` }))].slice(-KEEP);
+      next.events = [
+        ...next.events,
+        ...sent.map((v) => ({ at: event.at, kind: "invoice" as const, ref: event.ref, note: `${v.no} sent` })),
+      ].slice(-KEEP);
     }
     next.unread = false;
     return tidy(next);
@@ -364,8 +445,15 @@ export function quoteTrail(l: Pick<Lead, "stage" | "stageAt" | "events">): Quote
   const at = (e: LeadEvent) => Date.parse(e.at);
   const wrote = Math.max(0, ...l.events.filter((e) => e.kind === "wrote").map(at));
   const from = Math.max(Date.parse(l.stageAt), wrote);
-  const sent = l.events.filter((e) => e.kind === "replied" && at(e) >= from + DAY_MS).map(at).sort((a, b) => a - b);
-  return { from: new Date(from).toISOString(), n: sent.length, ...(sent.length ? { last: new Date(sent[sent.length - 1]).toISOString() } : {}) };
+  const sent = l.events
+    .filter((e) => e.kind === "replied" && at(e) >= from + DAY_MS)
+    .map(at)
+    .sort((a, b) => a - b);
+  return {
+    from: new Date(from).toISOString(),
+    n: sent.length,
+    ...(sent.length ? { last: new Date(sent[sent.length - 1]).toISOString() } : {}),
+  };
 }
 
 type Quoted = Pick<Lead, "stage" | "stageAt" | "snoozeUntil"> & { events?: LeadEvent[]; quiet?: QuoteTrail };
@@ -415,8 +503,24 @@ export function paperDue(l: Pick<Lead, "stage" | "when" | "contract" | "release"
 
 // Name and email capped: KV metadata holds 1024 bytes, and the sealed summary
 // grows by a third, so one long name must not cost the whole lead.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig, company, lostReason, source, invoices, people, plan, tasks, ...rest }: Lead): LeadSummary => ({
+/* eslint-disable @typescript-eslint/no-unused-vars -- the named fields are dropped from the summary */
+export const leadSummary = ({
+  events,
+  notion,
+  deposit,
+  notes,
+  remind,
+  phone,
+  ig,
+  company,
+  lostReason,
+  source,
+  invoices,
+  people,
+  plan,
+  tasks,
+  ...rest
+}: Lead): LeadSummary => ({
   ...rest,
   ...(rest.stage === "Quoted" ? { quiet: quoteTrail({ ...rest, events }) } : {}),
   ...(remind ? { due: remind.at, dueText: remind.text.slice(0, 40) } : {}),
@@ -426,6 +530,7 @@ export const leadSummary = ({ events, notion, deposit, notes, remind, phone, ig,
   ...(rest.licence ? { licence: { use: rest.licence.use.slice(0, 40), end: rest.licence.end } } : {}),
   ...(deposit ? { paid: true as const } : {}),
 });
+/* eslint-enable @typescript-eslint/no-unused-vars */
 
 /* ── the Inbox, backfilled ────────────────────────────────────────
  * The old admin inbox, folded into the leads.

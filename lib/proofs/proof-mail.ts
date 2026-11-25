@@ -17,7 +17,8 @@ const SITE = "https://juliangigola.com";
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const longDay = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, month: "long", day: "numeric" }).format(new Date(iso));
-const day = (iso: string) => new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" }).format(new Date(iso));
+const day = (iso: string) =>
+  new Intl.DateTimeFormat("en-US", { timeZone: TZ, weekday: "short", month: "short", day: "numeric" }).format(new Date(iso));
 export const proofUrl = (token: string) => `${SITE}/proof/${token}`;
 
 const C = { bg: "#ebedef", fg: "#141211", mu: "#515354", ac: "#007a7b", rule: "border-top:1px solid rgba(0,0,0,0.12)" };
@@ -26,7 +27,13 @@ const label = `font-size:11px;letter-spacing:0.14em;text-transform:uppercase;col
 type Inline = { content: Uint8Array; filename: string; type: string; disposition: "inline"; contentId: string };
 /** A file the client keeps, like the signed contract. */
 type Attached = { content: Uint8Array; filename: string; type: string; disposition: "attachment" };
-const png = (id: string, b64: string): Inline => ({ content: Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)), filename: `${id}.png`, type: "image/png", disposition: "inline", contentId: id });
+const png = (id: string, b64: string): Inline => ({
+  content: Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)),
+  filename: `${id}.png`,
+  type: "image/png",
+  disposition: "inline",
+  contentId: id,
+});
 const logos = () => [png("name-ink", NAME_INK), png("name-w", NAME_W)];
 const DARK = `@media (prefers-color-scheme: dark){body,.page{background:#0b0a09!important}.fg{color:#f1f0ed!important}.mu{color:#92908d!important}.ac{color:#50b7b7!important}.rule{border-color:rgba(255,255,255,0.11)!important}.cta{background:#f1f0ed!important;color:#0b0a09!important}.ink-l{display:none!important}.ink-d{display:block!important}${SIG_DARK}}`;
 
@@ -50,7 +57,10 @@ ${body}
 
 const rows = (r: [string, string][]) =>
   `<tr><td class="rule" style="${C.rule}"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" class="mono" style="font-size:13px;line-height:1.5">${r
-    .map(([k, v], i) => `<tr><td class="mu rule" style="color:${C.mu};padding:12px 16px 12px 0;width:38%;white-space:nowrap${i ? `;${C.rule}` : ""}">${k}</td><td class="fg rule" style="color:${C.fg};padding:12px 0;overflow-wrap:anywhere;word-break:break-word${i ? `;${C.rule}` : ""}">${esc(v)}</td></tr>`)
+    .map(
+      ([k, v], i) =>
+        `<tr><td class="mu rule" style="color:${C.mu};padding:12px 16px 12px 0;width:38%;white-space:nowrap${i ? `;${C.rule}` : ""}">${k}</td><td class="fg rule" style="color:${C.fg};padding:12px 0;overflow-wrap:anywhere;word-break:break-word${i ? `;${C.rule}` : ""}">${esc(v)}</td></tr>`,
+    )
     .join("")}</table></td></tr>`;
 
 /** The "Your proofs are ready" mail. `strip` is up to four frames sent inline. */
@@ -59,10 +69,18 @@ export function proofMail(p: Proof, strip: { id: string; bytes: Uint8Array }[]) 
   const closes = p.closesAt ? day(p.closesAt) : "";
   const n = p.frames.length;
   const lead = `Thanks again for the shoot. All ${n} frames are up. Select the ${p.included === 10 ? "ten" : p.included} you want and I'll retouch them.`;
-  const terms: [string, string][] = [["Frames", String(n)], ["Included", `${p.included} retouched`], ["Extra frames", `$${p.price} each`], ...(closes ? [["Open until", closes] as [string, string]] : [])];
+  const terms: [string, string][] = [
+    ["Frames", String(n)],
+    ["Included", `${p.included} retouched`],
+    ["Extra frames", `$${p.price} each`],
+    ...(closes ? [["Open until", closes] as [string, string]] : []),
+  ];
   const imgs = strip.length
     ? `<tr><td style="padding-bottom:30px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>${strip
-        .map((f) => `<td width="25%" style="padding:0 2px"><img src="cid:f-${f.id}" width="126" alt="" style="display:block;width:100%;height:auto;border:0"></td>`)
+        .map(
+          (f) =>
+            `<td width="25%" style="padding:0 2px"><img src="cid:f-${f.id}" width="126" alt="" style="display:block;width:100%;height:auto;border:0"></td>`,
+        )
         .join("")}</tr></table></td></tr>`
     : "";
   const html = page(
@@ -75,10 +93,31 @@ ${p.note ? `<tr><td class="mono fg rule" style="font-size:13px;line-height:1.65;
 ${imgs}
 ${rows(terms)}
 <tr><td style="padding:28px 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">Open proofs</a></td></tr>
-<tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">1. Tap the ring on a frame to select it. Tap the photo to see it large.<br>2. Hit Send selects. Extras are paid on the way out.<br>3. I retouch your selects and email you the finals.</td></tr>`,
+<tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">1. Tap the ring on a frame to select it. Tap the photo to see it large.<br>2. Hit Send selects. Extras are paid at checkout.<br>3. I retouch your selects and email you the finals.</td></tr>`,
   );
-  const text = ["Your proofs are ready.", "", lead, ...(p.note ? ["", p.note] : []), "", ...terms.map(([k, v]) => `${k}: ${v}`), "", `Open proofs: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
-  const attachments: Inline[] = [...logos(), ...strip.map((f) => ({ content: f.bytes, filename: `${f.id}.jpg`, type: "image/jpeg", disposition: "inline" as const, contentId: `f-${f.id}` }))];
+  const text = [
+    "Your proofs are ready.",
+    "",
+    lead,
+    ...(p.note ? ["", p.note] : []),
+    "",
+    ...terms.map(([k, v]) => `${k}: ${v}`),
+    "",
+    `Open proofs: ${url}`,
+    "",
+    "Questions? Reply to this email.",
+    SIG_TEXT,
+  ].join("\n");
+  const attachments: Inline[] = [
+    ...logos(),
+    ...strip.map((f) => ({
+      content: f.bytes,
+      filename: `${f.id}.jpg`,
+      type: "image/jpeg",
+      disposition: "inline" as const,
+      contentId: `f-${f.id}`,
+    })),
+  ];
   return { subject: "Your proofs are ready", html, text, attachments };
 }
 
@@ -90,7 +129,11 @@ export function deliveryMail(p: Proof) {
   const n = p.finals?.length ?? 0;
   const closes = p.closesAt ? day(p.closesAt) : "";
   const lead = `Thanks again for the shoot. Your ${n} finished ${n === 1 ? "photo is" : "photos are"} ready, full size. Save them one by one or all at once.`;
-  const terms: [string, string][] = [["Photos", String(n)], ["Format", "JPEG, full size"], ...(closes ? [["Open until", closes] as [string, string]] : [])];
+  const terms: [string, string][] = [
+    ["Photos", String(n)],
+    ["Format", "JPEG, full size"],
+    ...(closes ? [["Open until", closes] as [string, string]] : []),
+  ];
   const html = page(
     "Your photos are ready",
     `Your photos at full resolution.${p.closesAt ? ` Save them by ${longDay(p.closesAt)}.` : ""}`,
@@ -102,7 +145,19 @@ ${rows(terms)}
 <tr><td style="padding:28px 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">See your photos</a></td></tr>
 <tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">Save a copy somewhere safe. The link closes${closes ? ` on ${closes}` : ""}.</td></tr>`,
   );
-  const text = ["Your photos are ready.", "", lead, ...(p.note ? ["", p.note] : []), "", ...terms.map(([k, v]) => `${k}: ${v}`), "", `See your photos: ${url}`, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
+  const text = [
+    "Your photos are ready.",
+    "",
+    lead,
+    ...(p.note ? ["", p.note] : []),
+    "",
+    ...terms.map(([k, v]) => `${k}: ${v}`),
+    "",
+    `See your photos: ${url}`,
+    "",
+    "Questions? Reply to this email.",
+    SIG_TEXT,
+  ].join("\n");
   return { subject: "Your photos are ready", html, text, attachments: logos() };
 }
 
@@ -137,17 +192,23 @@ const numberList = (p: Proof) => {
   return p.selects.map((id) => String(order.indexOf(id) + 1).padStart(3, "0")).sort(byCodeUnit);
 };
 
-const fileList = (p: Proof) => p.selects.map((id) => {
-  const f = p.frames.find((x) => x.id === id);
-  return `${f?.file ?? id}${p.notes[id] ? ` · ${p.notes[id]}` : ""}`;
-});
+const fileList = (p: Proof) =>
+  p.selects.map((id) => {
+    const f = p.frames.find((x) => x.id === id);
+    return `${f?.file ?? id}${p.notes[id] ? ` · ${p.notes[id]}` : ""}`;
+  });
 
 /** The receipt the client gets when they send. */
 export function receiptMail(p: Proof) {
   const x = extraFrames(p.selects.length, p.included, p.price);
   const files = numberList(p);
   const paid = p.paid ? `$${(p.paid.amount / 100).toFixed(2)}` : "";
-  const summary: [string, string][] = [["Selected", String(p.selects.length)], ["Included", String(p.included)], ["Extra", String(x.n)], ...(paid ? [["Paid", paid] as [string, string]] : [])];
+  const summary: [string, string][] = [
+    ["Selected", String(p.selects.length)],
+    ["Included", String(p.included)],
+    ["Extra", String(x.n)],
+    ...(paid ? [["Paid", paid] as [string, string]] : []),
+  ];
   const lead = `I have your ${p.selects.length} ${p.selects.length === 1 ? "frame" : "frames"}${Object.keys(p.notes).length ? " and your notes" : ""}. I'll email you when the finals are ready.`;
   const html = page(
     "Selects are in",
@@ -158,13 +219,26 @@ export function receiptMail(p: Proof) {
 ${rows(summary)}
 <tr><td class="mono fg rule" style="${C.rule};font-size:12px;line-height:1.9;color:${C.fg};padding-top:18px">${files.map(esc).join("<br>")}</td></tr>`,
   );
-  const text = ["Selects are in.", "", lead, "", summary.map(([k, v]) => `${k}: ${v}`).join(" · "), "", ...files, "", "Questions? Reply to this email.", SIG_TEXT].join("\n");
+  const text = [
+    "Selects are in.",
+    "",
+    lead,
+    "",
+    summary.map(([k, v]) => `${k}: ${v}`).join(" · "),
+    "",
+    ...files,
+    "",
+    "Questions? Reply to this email.",
+    SIG_TEXT,
+  ].join("\n");
   return { subject: "Selects are in", html, text, attachments: logos() };
 }
 
 /** Julian's alert to hello@: plain lines for `alertHello()` in `lib/email/hello-mail.ts`. */
 export function alertLines(p: Proof): { subject: string; lines: string[] } {
-  const paid = p.paid ? `, $${(p.paid.amount / 100).toFixed(0)} paid${p.paid.pending ? " by bank, clearing in about 4 business days" : ""}` : "";
+  const paid = p.paid
+    ? `, $${(p.paid.amount / 100).toFixed(0)} paid${p.paid.pending ? " by bank, clearing in about 4 business days" : ""}`
+    : "";
   return {
     subject: `Selects in: ${p.name} (${p.selects.length}${paid})`,
     lines: [
@@ -184,9 +258,12 @@ export function alertLines(p: Proof): { subject: string; lines: string[] } {
 export function actionAlert(p: Proof, who: string, kind: "open" | "download", id?: string): { subject: string; lines: string[] } {
   const name = p.viewers?.[who.toLowerCase()]?.name;
   const by = name ? `${name} (${who})` : who;
-  const file = id === "all" ? "all photos as one zip" : p.finals?.find((f) => f.id === id)?.file ?? id ?? "a photo";
+  const file = id === "all" ? "all photos as one zip" : (p.finals?.find((f) => f.id === id)?.file ?? id ?? "a photo");
   const what = kind === "open" ? `opened ${p.deliveredAt ? "the delivery" : "the proofs"}` : `downloaded ${file}`;
-  return { subject: `${kind === "open" ? "Opened" : "Downloaded"}: ${p.name}`, lines: [`${by} ${what} of ${p.name}.`, "", (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))] };
+  return {
+    subject: `${kind === "open" ? "Opened" : "Downloaded"}: ${p.name}`,
+    lines: [`${by} ${what} of ${p.name}.`, "", (p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))],
+  };
 }
 
 const COUNTED = { open: "opened", pick: "picked", send: "sent selects", download: "downloaded" } as const;
@@ -205,8 +282,11 @@ export function digestMail(proofs: Proof[], since: string, until: string): { sub
     for (const [who, v] of Object.entries(p.viewers ?? {})) {
       if (isTestEmail(who)) continue;
       const n: Partial<Record<Counted, number>> = {};
-      for (const e of v.events) if (e.at > since && e.at <= until && e.kind in COUNTED) n[e.kind as Counted] = (n[e.kind as Counted] ?? 0) + 1;
-      const said = (Object.keys(COUNTED) as Counted[]).filter((k) => n[k]).map((k) => (k === "send" ? COUNTED[k] : `${COUNTED[k]} ${n[k]}${k === "open" ? (n[k] === 1 ? " time" : " times") : ""}`));
+      for (const e of v.events)
+        if (e.at > since && e.at <= until && e.kind in COUNTED) n[e.kind as Counted] = (n[e.kind as Counted] ?? 0) + 1;
+      const said = (Object.keys(COUNTED) as Counted[])
+        .filter((k) => n[k])
+        .map((k) => (k === "send" ? COUNTED[k] : `${COUNTED[k]} ${n[k]}${k === "open" ? (n[k] === 1 ? " time" : " times") : ""}`));
       if (said.length) rows.push(`  ${v.name ? `${v.name} (${who})` : who}: ${said.join(", ")}`);
     }
     if (!rows.length) continue;
@@ -214,7 +294,10 @@ export function digestMail(proofs: Proof[], since: string, until: string): { sub
     out.push(`${p.name}`, ...rows, `  ${(p.deliveredAt ? deliveryUrl : proofUrl)(publicId(p))}`, "");
   }
   if (!out.length) return null;
-  return { subject: `Galleries today: ${total} ${total === 1 ? "visitor" : "visitors"}`, lines: ["Since yesterday's summary:", "", ...out.slice(0, -1)] };
+  return {
+    subject: `Galleries today: ${total} ${total === 1 ? "visitor" : "visitors"}`,
+    lines: ["Since yesterday's summary:", "", ...out.slice(0, -1)],
+  };
 }
 
 /** Whether this open or download is worth a mail: not a test address, and not the same thing again within `gap` minutes. */
@@ -225,15 +308,28 @@ export function worthMail(events: ViewerEvent[], kind: "open" | "download", at: 
 
 /** Julian's own subject for a proof or delivery mail: one line, control characters out, 150 at most; empty keeps the default. */
 export function subjectOr(given: unknown, fallback: string): string {
-  const v = typeof given === "string" ? given.replace(/[\x00-\x1f\x7f]+/g, " ").replace(/\s+/g, " ").trim().slice(0, 150) : "";
+  const v =
+    typeof given === "string"
+      ? given
+          .replace(/[\x00-\x1f\x7f]+/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .slice(0, 150)
+      : "";
   return v || fallback;
 }
 
 /** The wordmark's inline parts (`cid:name-ink`, `cid:name-w`) as the site's files, under `base`. */
-export const webImages = (html: string, base = "") => html.replace("cid:name-ink", `${base}/email-name-ink.png`).replace("cid:name-w", `${base}/email-name-w.png`);
+export const webImages = (html: string, base = "") =>
+  html.replace("cid:name-ink", `${base}/email-name-ink.png`).replace("cid:name-w", `${base}/email-name-w.png`);
 
 /** `cc`: the other people on the lead with "copy on gallery mail" ticked (`copiesFor` in lib/leads/lead-store). */
-export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined, to: string, m: { subject: string; html: string; text: string; attachments: (Inline | Attached)[] }, cc: string[] = []): Promise<boolean> {
+export async function sendClient(
+  mailer: CloudflareEnv["CLIENT_EMAIL"] | undefined,
+  to: string,
+  m: { subject: string; html: string; text: string; attachments: (Inline | Attached)[] },
+  cc: string[] = [],
+): Promise<boolean> {
   if (!mailer) return false;
   // Plain addresses: Cloudflare refuses an EmailAddress without a name, which fails every client mail.
   const head = { to, from: FROM, replyTo: REPLY_TO, ...(cc.length ? { cc } : {}) };
@@ -241,10 +337,16 @@ export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefin
     await mailer.send({ ...head, ...m });
     return true;
   } catch (e) {
-    console.error("proof mail", m.subject, String(e));
+    // The error only: the mail's heading names the client.
+    console.error("proof mail", String(e));
     // Inline parts refused: send without the frames, the logo linked.
     try {
-      await mailer.send({ ...head, subject: m.subject, text: m.text, html: webImages(m.html.replace(/<tr><td style="padding-bottom:30px"><table[\s\S]*?<\/table><\/td><\/tr>/, ""), SITE) });
+      await mailer.send({
+        ...head,
+        subject: m.subject,
+        text: m.text,
+        html: webImages(m.html.replace(/<tr><td style="padding-bottom:30px"><table[\s\S]*?<\/table><\/td><\/tr>/, ""), SITE),
+      });
       return true;
     } catch (e2) {
       console.error("proof mail, plain", String(e2));
@@ -257,7 +359,12 @@ export async function sendClient(mailer: CloudflareEnv["CLIENT_EMAIL"] | undefin
 
 /* ── contracts: the link to sign, and the signed copy ── */
 
-type ContractMailIn = { id: string; to: { name: string }; text: string; signed?: { name: string; at: string; hash: string; email: string } };
+type ContractMailIn = {
+  id: string;
+  to: { name: string };
+  text: string;
+  signed?: { name: string; at: string; hash: string; email: string };
+};
 const contractLink = (id: string) => `${SITE}/contract/${id}`;
 const first = (name: string) => name.split(/\s+/)[0] ?? "";
 
@@ -281,8 +388,14 @@ export function contractMail(c: ContractMailIn) {
 export function signedMail(c: ContractMailIn, copy?: { html: string; filename: string }) {
   const s = c.signed!;
   const when = new Intl.DateTimeFormat("en-US", { timeZone: TZ, dateStyle: "long", timeStyle: "short" }).format(new Date(s.at));
-  const record: [string, string][] = [["Signed by", s.name], ["Signed at", when], ["SHA-256", s.hash]];
-  const lead = copy ? "Thanks for signing. Your signed copy is attached, below and on the same link any time." : "Thanks for signing. Your copy is below and on the same link any time.";
+  const record: [string, string][] = [
+    ["Signed by", s.name],
+    ["Signed at", when],
+    ["SHA-256", s.hash],
+  ];
+  const lead = copy
+    ? "Thanks for signing. Your signed copy is attached and below. The same link opens it any time."
+    : "Thanks for signing. Your copy is below. The same link opens it any time.";
   const html = page(
     "Contract signed",
     "Thanks for signing. Your copy is inside.",
@@ -292,7 +405,20 @@ export function signedMail(c: ContractMailIn, copy?: { html: string; filename: s
 ${rows(record)}
 <tr><td class="mono fg rule" style="${C.rule};font-size:12px;line-height:1.7;color:${C.fg};padding-top:18px;white-space:pre-wrap">${esc(c.text)}</td></tr>`,
   );
-  const text = ["Contract signed.", "", lead, contractLink(c.id), "", ...record.map(([k, v]) => `${k}: ${v}`), "", c.text, "", SIG_TEXT].join("\n");
-  const file: Attached[] = copy ? [{ content: new TextEncoder().encode(copy.html), filename: copy.filename, type: "text/html", disposition: "attachment" }] : [];
+  const text = [
+    "Contract signed.",
+    "",
+    lead,
+    contractLink(c.id),
+    "",
+    ...record.map(([k, v]) => `${k}: ${v}`),
+    "",
+    c.text,
+    "",
+    SIG_TEXT,
+  ].join("\n");
+  const file: Attached[] = copy
+    ? [{ content: new TextEncoder().encode(copy.html), filename: copy.filename, type: "text/html", disposition: "attachment" }]
+    : [];
   return { subject: "Contract signed", html, text, attachments: [...logos(), ...file] };
 }

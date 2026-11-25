@@ -3,13 +3,20 @@
 
 import type { InboxKV as KV } from "@/lib/kv";
 import type { Seal } from "@/lib/seal";
-import { type Proof, aliasKey, isDateId, isOpen, proofDay, proofKey, publicId, shootIdTag } from "@/lib/proofs/proof-model";
+import { logged } from "@/lib/utils";
+import { type Proof, aliasKey, isDateId, isOpen, isStrongId, proofDay, proofKey, publicId, shootIdTag } from "@/lib/proofs/proof-model";
+import { sha256Hex } from "@/lib/token";
 
 /* ── the gate's password ──────────────────────────────────────────
    PBKDF2-SHA256, 100,000 rounds (the most Workers allows) and a random salt. A right password sets an HttpOnly
    cookie: an HMAC of the gallery and its hash under LEADS_KEY, so a new password, or none, ends every old cookie. */
-const b64 = (b: ArrayBuffer | Uint8Array) => btoa(String.fromCharCode(...new Uint8Array(b))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-const unb64 = (s: string): Uint8Array<ArrayBuffer> => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+const b64 = (b: ArrayBuffer | Uint8Array) =>
+  btoa(String.fromCharCode(...new Uint8Array(b)))
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+const unb64 = (s: string): Uint8Array<ArrayBuffer> =>
+  Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
 const enc = (s: string) => new TextEncoder().encode(s);
 async function pbkdf2(pw: string, salt: Uint8Array<ArrayBuffer>) {
   const k = await crypto.subtle.importKey("raw", enc(pw), "PBKDF2", false, ["deriveBits"]);
@@ -20,20 +27,30 @@ export async function hashPass(pw: string): Promise<NonNullable<Proof["pass"]>> 
   return { salt: b64(salt), hash: b64(await pbkdf2(pw, salt)) };
 }
 export async function checkPass(pass: NonNullable<Proof["pass"]>, pw: string): Promise<boolean> {
-  const a = await pbkdf2(pw, unb64(pass.salt)), b = unb64(pass.hash);
+  const a = await pbkdf2(pw, unb64(pass.salt)),
+    b = unb64(pass.hash);
   let d = a.length ^ b.length;
   for (let i = 0; i < a.length; i++) d |= a[i] ^ (b[i] ?? 0);
   return d === 0;
 }
 export const passCookie = (p: Pick<Proof, "token" | "link">) => `gp_${publicId(p)}`;
-const hmacKey = (secret: string) => crypto.subtle.importKey("raw", enc(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+const hmacKey = (secret: string) =>
+  crypto.subtle.importKey("raw", enc(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
 const passMsg = (p: Pick<Proof, "token" | "pass">) => enc(`${p.token}:${p.pass?.hash}`);
-export const passValue = async (p: Pick<Proof, "token" | "pass">, secret: string) => b64(await crypto.subtle.sign("HMAC", await hmacKey(secret), passMsg(p)));
+export const passValue = async (p: Pick<Proof, "token" | "pass">, secret: string) =>
+  b64(await crypto.subtle.sign("HMAC", await hmacKey(secret), passMsg(p)));
 /** No password, or the request's cookie (the raw Cookie header) carries this gallery's current one. */
-export async function passOk(p: Pick<Proof, "token" | "link" | "pass">, cookie: string | null | undefined, secret: string | undefined): Promise<boolean> {
+export async function passOk(
+  p: Pick<Proof, "token" | "link" | "pass">,
+  cookie: string | null | undefined,
+  secret: string | undefined,
+): Promise<boolean> {
   if (!p.pass) return true;
   const name = passCookie(p);
-  const v = cookie?.split(/;\s*/).find((c) => c.startsWith(`${name}=`))?.slice(name.length + 1);
+  const v = cookie
+    ?.split(/;\s*/)
+    .find((c) => c.startsWith(`${name}=`))
+    ?.slice(name.length + 1);
   if (!v || !secret) return false;
   try {
     return await crypto.subtle.verify("HMAC", await hmacKey(secret), unb64(v), passMsg(p));
@@ -42,7 +59,11 @@ export async function passOk(p: Pick<Proof, "token" | "link" | "pass">, cookie: 
   }
 }
 /** Why a client cannot see a gallery right now, or null when they can. Closed is the clock (or a missing gallery). */
-export async function shutReason(p: Proof | null, cookie: string | null | undefined, secret: string | undefined): Promise<"closed" | "offline" | "locked" | null> {
+export async function shutReason(
+  p: Proof | null | undefined,
+  cookie: string | null | undefined,
+  secret: string | undefined,
+): Promise<"closed" | "offline" | "locked" | null> {
   if (!p) return "closed";
   if (p.offline) return "offline";
   if (!isOpen(p)) return "closed";
@@ -53,7 +74,6 @@ export function forDesk<T extends Proof>(p: T): Omit<T, "pass"> & { hasPass: boo
   const { pass, ...rest } = p;
   return { ...rest, hasPass: !!pass };
 }
-
 
 /** One gallery, opened. Null when it is not there; throws when it cannot be opened (a rotated LEADS_KEY), like `readLead` and `readContract`. */
 export async function readProof(kv: KV, s: Seal, token: string): Promise<Proof | null> {
@@ -68,10 +88,33 @@ export async function findProof(kv: KV, s: Seal, id: string): Promise<Proof | nu
   const token = isDateId(id) ? await kv.get(aliasKey(id)) : null;
   return token ? readProof(kv, s, token) : null;
 }
-/** The gallery a link opens (page, frames, card): only by its public id, so a renamed gallery's old link closes. */
-export async function readPublic(kv: KV, s: Seal, id: string): Promise<Proof | null> {
-  const p = await findProof(kv, s, id);
-  return p && publicId(p) === id ? p : null;
+/** Who is asking, for a public read: their address and the limiter wrong guesses count against. */
+export type Guard = { ip: string; limiter?: { limit(o: { key: string }): Promise<{ success: boolean }> } };
+/** The guard for a request: Cloudflare's address for it and PUBLIC_WRITE_LIMIT. */
+export const guardOf = (env: { PUBLIC_WRITE_LIMIT?: Guard["limiter"] }, h: Headers): Guard => ({
+  ip: h.get("cf-connecting-ip") ?? "unknown",
+  limiter: env.PUBLIC_WRITE_LIMIT,
+});
+const guessKey = async (ip: string) => `proofguess:${(await sha256Hex(ip)).slice(0, 32)}`;
+/** Seconds an address that keeps guessing old ids reads none of them. */
+export const GUESS_BLOCK_S = 3600;
+
+/** The gallery a link opens (page, frames, card): only by its public id, so a renamed gallery's old link closes.
+    `undefined` when it is there but will not open (a rotated LEADS_KEY, a bad record): logged, never thrown, so a
+    client's page shows the gallery closed rather than an error. */
+export async function readPublic(kv: KV, s: Seal, id: string, guard?: Guard): Promise<Proof | null | undefined> {
+  /* Old date ids (`MMDDYYYY-NN-xxxx`) carry only 4 random characters, and the day and counter are guessable. On a
+     public read each miss on one counts against the limiter; past it that address reads no old id for an hour.
+     A real link hits first time; walking a day takes hundreds of addresses. The shoot id and the 16-character token
+     are long enough. */
+  const weak = !!guard && isDateId(id) && !isStrongId(id);
+  const block = weak ? await guessKey(guard.ip) : "";
+  if (weak && (await kv.get(block)) !== null) return null;
+  const p = await findProof(kv, s, id).catch(logged("proof open", id));
+  const found = p && publicId(p) === id ? p : p === undefined ? undefined : null;
+  if (weak && found === null && guard.limiter && !(await guard.limiter.limit({ key: `proof-miss:${guard.ip}` })).success)
+    await kv.put(block, "1", { expirationTtl: GUESS_BLOCK_S });
+  return found;
 }
 /** A new shoot id: the shoot day Lightroom sent, else today in Pacific, and a tag no gallery or alias has. */
 export async function nextProofId(kv: KV, day: string = proofDay()): Promise<string> {
@@ -84,18 +127,35 @@ export async function nextProofId(kv: KV, day: string = proofDay()): Promise<str
 /** Listed with a small summary in metadata so the desk never opens every record. */
 export async function writeProof(kv: KV, s: Seal, p: Proof): Promise<void> {
   await kv.put(proofKey(p.token), await s.seal(p), {
-    metadata: { name: p.name.slice(0, 80), frames: p.frames.length, selects: p.selects.length, sentAt: p.sentAt ?? null, submittedAt: p.submittedAt ?? null, closesAt: p.closesAt ?? null },
+    metadata: {
+      name: p.name.slice(0, 80),
+      frames: p.frames.length,
+      selects: p.selects.length,
+      sentAt: p.sentAt ?? null,
+      submittedAt: p.submittedAt ?? null,
+      closesAt: p.closesAt ?? null,
+    },
   });
 }
 
-export type ProofSummary = { token: string; name: string; frames: number; selects: number; sentAt: string | null; submittedAt: string | null; closesAt: string | null };
+export type ProofSummary = {
+  token: string;
+  name: string;
+  frames: number;
+  selects: number;
+  sentAt: string | null;
+  submittedAt: string | null;
+  closesAt: string | null;
+};
 
+/** Its own paging, not `everyKey`: `lib/kv.ts` loads OpenNext, which the delivery downloads in `worker.ts` must not. */
 export async function listProofs(kv: KV): Promise<ProofSummary[]> {
+  const prefix = proofKey("");
   const out: ProofSummary[] = [];
   let cursor: string | undefined;
   do {
-    const page = await kv.list<Omit<ProofSummary, "token">>({ prefix: "proof:", cursor });
-    for (const k of page.keys) if (k.metadata) out.push({ token: k.name.slice(6), ...k.metadata });
+    const page = await kv.list<Omit<ProofSummary, "token">>({ prefix, cursor });
+    for (const k of page.keys) if (k.metadata) out.push({ token: k.name.slice(prefix.length), ...k.metadata });
     cursor = page.list_complete ? undefined : page.cursor;
   } while (cursor);
   return out;

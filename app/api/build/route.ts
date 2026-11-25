@@ -11,5 +11,5 @@ import { json } from "@/lib/http";
 export const dynamic = "force-dynamic";
 
 export function GET() {
-  return json({ sha: process.env.BUILD_SHA ?? "local" });
+  return json({ sha: process.env.BUILD_SHA ?? "local", version: process.env.BUILD_VERSION ?? "local" });
 }

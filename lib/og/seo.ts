@@ -64,8 +64,7 @@ const from = (slug: string): string | null => {
   const s = SESSION_TYPES.find((t) => t.slug === slug);
   return s && s.from !== null ? formatPrice(s.from) : null;
 };
-const sentence = (...parts: (string | null)[]) =>
-  parts.filter(Boolean).join(" ");
+const sentence = (...parts: (string | null)[]) => parts.filter(Boolean).join(" ");
 
 /* ── the disciplines, at /portfolio/<slug> ───────────────────────
  * Where a booking page sells the same thing (`lib/booking/service-pages.ts`), the work
@@ -133,8 +132,7 @@ export const DISCIPLINE_SEO: Record<string, PageSeo> = {
   },
   automotive: {
     title: "Automotive Photographer, SF Bay Area",
-    description: (n) =>
-      `Automotive and car photography in San Francisco, San Jose and the Bay Area. ${n} frames by Julian Gigola.`,
+    description: (n) => `Automotive and car photography in San Francisco, San Jose and the Bay Area. ${n} frames by Julian Gigola.`,
   },
 };
 
@@ -168,7 +166,7 @@ export const SESSION_SEO: Record<string, { title: string; description: string }>
     // The price before the details, so a results page that cuts the
     // description short cuts the details rather than the price.
     description: sentence(
-      "Graduation photos across the SF Bay Area: on campus at SJSU and Santa Clara University, or further out.",
+      "Graduation photos across the SF Bay Area: on campus at SJSU and Santa Clara University, or farther out.",
       from("graduation") ? `${from("graduation")}.` : null,
       "90 minutes, two outfit changes.",
     ),
@@ -340,8 +338,7 @@ export function siteGraph() {
 
 /** A JSON-LD payload, safe to inline: `<` escaped so no string in it can
     close the script element (the Next.js JSON-LD guide's advice). */
-export const ldJson = (data: unknown) =>
-  JSON.stringify(data).replace(/</g, "\\u003c");
+export const ldJson = (data: unknown) => JSON.stringify(data).replace(/</g, "\\u003c");
 
 /* ── a booking page's own graph ───────────────────────────────────
  * Beside the site's graph: the service this page sells, the places it is
@@ -375,9 +372,7 @@ export function serviceGraph(p: ServiceLd) {
         description: p.description,
         url,
         provider: { "@id": `${SITE}/#business` },
-        areaServed: p.places
-          .filter((name) => name !== "Anywhere else")
-          .map((name) => ({ "@type": "City", name })),
+        areaServed: p.places.filter((name) => name !== "Anywhere else").map((name) => ({ "@type": "City", name })),
         ...(p.price !== null
           ? {
               offers: {

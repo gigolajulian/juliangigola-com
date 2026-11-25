@@ -33,8 +33,7 @@ const CRAWLER = "facebookexternalhit/1.1";
    square, which is soft at 56px on a retina screen; the page a search
    crawler is served carries a 150px one beside it. Asked for first, with
    the link preview as the fallback. */
-const INDEXER =
-  "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
+const INDEXER = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)";
 
 const args = process.argv.slice(2);
 const force = args.includes("--force");
@@ -55,26 +54,18 @@ const manifest = JSON.parse(readFileSync(MANIFEST, "utf8"));
 /* The credit overrides, and the credits on projects added in /admin: a
    project added there carries its own list, which the first version of
    this missed, so NOVA's model had no face. */
-for (const list of [
-  ...Object.values(manifest.credits ?? {}),
-  ...(manifest.projects ?? []).map((p) => p.credits ?? []),
-]) {
+for (const list of [...Object.values(manifest.credits ?? {}), ...(manifest.projects ?? []).map((p) => p.credits ?? [])]) {
   if (!Array.isArray(list)) continue;
   for (const c of list) {
     const h = (c.instagram || (c.name ?? "").replace(/^@/, "")).toLowerCase();
-    if (c.instagram ? IG.test(h) : (c.name ?? "").startsWith("@") && IG.test(h))
-      collected.add(h);
+    if (c.instagram ? IG.test(h) : (c.name ?? "").startsWith("@") && IG.test(h)) collected.add(h);
   }
 }
-for (const [, name] of readFileSync("lib/work/work-data.ts", "utf8").matchAll(
-  /"name": "@([A-Za-z0-9._]{1,30})"/g,
-)) {
+for (const [, name] of readFileSync("lib/work/work-data.ts", "utf8").matchAll(/"name": "@([A-Za-z0-9._]{1,30})"/g)) {
   if (IG.test(name.toLowerCase())) collected.add(name.toLowerCase());
 }
 
-const handles = [...collected].filter((h) =>
-  asked.length ? asked.includes(h) : true,
-);
+const handles = [...collected].filter((h) => (asked.length ? asked.includes(h) : true));
 
 if (!handles.length) {
   console.log("No handles on any credit yet. Add them in /admin.");
@@ -103,27 +94,22 @@ for (const handle of handles) {
     });
     if (!page.ok) throw new Error(`profile ${page.status}`);
     const html = await page.text();
-    const found =
-      /<img[^>]+src="([^"]*s150x150[^"]+)"/.exec(html)?.[1] ??
-      /<meta property="og:image" content="([^"]+)"/.exec(html)?.[1];
+    const found = /<img[^>]+src="([^"]*s150x150[^"]+)"/.exec(html)?.[1] ?? /<meta property="og:image" content="([^"]+)"/.exec(html)?.[1];
     if (!found) throw new Error("no picture on the page");
 
     const src = found.replaceAll("&amp;", "&");
     // Instagram's own CDN or nothing: this writes a file into the repo.
     const host = new URL(src).hostname;
-    if (!/(^|\.)cdninstagram\.com$|(^|\.)fbcdn\.net$/.test(host))
-      throw new Error(`picture at ${host}`);
+    if (!/(^|\.)cdninstagram\.com$|(^|\.)fbcdn\.net$/.test(host)) throw new Error(`picture at ${host}`);
 
     const shot = await fetch(src, {
       headers: { "user-agent": CRAWLER },
       signal: AbortSignal.timeout(20000),
     });
     const type = shot.headers.get("content-type") ?? "";
-    if (!shot.ok || !type.startsWith("image/"))
-      throw new Error(`picture ${shot.status} ${type}`);
+    if (!shot.ok || !type.startsWith("image/")) throw new Error(`picture ${shot.status} ${type}`);
     const bytes = Buffer.from(await shot.arrayBuffer());
-    if (!bytes.length || bytes.length > 400_000)
-      throw new Error(`${bytes.length} bytes`);
+    if (!bytes.length || bytes.length > 400_000) throw new Error(`${bytes.length} bytes`);
 
     writeFileSync(path, bytes);
     avatars[handle] = `/people/${handle}.jpg`;
@@ -137,13 +123,9 @@ for (const handle of handles) {
 }
 
 // Sorted, so the committed file does not churn on iteration order.
-file.avatars = Object.fromEntries(
-  Object.entries(avatars).sort(([a], [b]) => (a < b ? -1 : 1)),
-);
+file.avatars = Object.fromEntries(Object.entries(avatars).sort(([a], [b]) => (a < b ? -1 : 1)));
 if (!Object.keys(file.avatars).length) delete file.avatars;
 writeFileSync(MANIFEST, `${JSON.stringify(file, null, 2)}\n`);
 
-console.log(
-  `faces: ${got} fetched, ${kept} already had one, ${missed.length} missed`,
-);
+console.log(`faces: ${got} fetched, ${kept} already had one, ${missed.length} missed`);
 for (const m of missed) console.log(`  missed ${m}`);

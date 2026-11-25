@@ -6,5 +6,4 @@
  * the lightbox's swipe past the ends of a sequence and by the filmstrip
  * past its last frame.
  */
-export const rubberband = (over: number, dim: number, c = 0.55) =>
-  (over * dim * c) / (dim + c * Math.abs(over));
+export const rubberband = (over: number, dim: number, c = 0.55) => (over * dim * c) / (dim + c * Math.abs(over));

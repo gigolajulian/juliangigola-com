@@ -10,7 +10,14 @@ import * as contract from "@/app/contract/[id]/page";
 import * as delivery from "@/app/delivery/[id]/page";
 import * as book from "@/app/book/page";
 
-vi.mock("next/navigation", () => ({ redirect: vi.fn(), notFound: vi.fn(), usePathname: () => "/", useRouter: () => ({}), useSearchParams: () => new URLSearchParams(), useParams: () => ({}) }));
+vi.mock("next/navigation", () => ({
+  redirect: vi.fn(),
+  notFound: vi.fn(),
+  usePathname: () => "/",
+  useRouter: () => ({}),
+  useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({}),
+}));
 
 /* The pages no stranger should find: every one is out of the index, and the
    per-person ones are rendered per request. The bodies need the Worker's
@@ -47,6 +54,10 @@ describe("private pages", () => {
 
 describe("/book", () => {
   it("is the public booking page with its own canonical", () => {
-    expect(book.metadata).toMatchObject({ title: "Book a session", alternates: { canonical: "/book" }, openGraph: { title: "Book a session | Julian Gigola" } });
+    expect(book.metadata).toMatchObject({
+      title: "Book a session",
+      alternates: { canonical: "/book" },
+      openGraph: { title: "Book a session | Julian Gigola" },
+    });
   });
 });

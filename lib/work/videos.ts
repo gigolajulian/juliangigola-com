@@ -78,8 +78,7 @@ export const SECTIONS: { id: VideoSection; name: string }[] = [
   { id: "commercial", name: "Commercial" },
 ];
 
-export const sectionName = (id: VideoSection): string =>
-  SECTIONS.find((s) => s.id === id)?.name ?? "Video";
+export const sectionName = (id: VideoSection): string => SECTIONS.find((s) => s.id === id)?.name ?? "Video";
 
 /* ── what may be in an id ─────────────────────────────────────────
  * Both of these end up inside a URL that becomes an iframe's `src`, and the
@@ -94,8 +93,7 @@ export const sectionName = (id: VideoSection): string =>
 const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
 const VIMEO_ID = /^\d{6,12}$/;
 
-export const isValidId = (provider: Provider, id: string): boolean =>
-  provider === "youtube" ? YOUTUBE_ID.test(id) : VIMEO_ID.test(id);
+export const isValidId = (provider: Provider, id: string): boolean => (provider === "youtube" ? YOUTUBE_ID.test(id) : VIMEO_ID.test(id));
 
 /**
  * What Julian pasted, as a provider and an id.
@@ -105,9 +103,7 @@ export const isValidId = (provider: Provider, id: string): boolean =>
  * Returns null rather than guessing: a link that cannot be read has to be
  * said so, or the tile is a dead player nobody notices until a client does.
  */
-export function parseVideoUrl(
-  raw: string,
-): { provider: Provider; videoId: string } | null {
+export function parseVideoUrl(raw: string): { provider: Provider; videoId: string } | null {
   const text = raw.trim();
   if (!text) return null;
 
@@ -134,8 +130,7 @@ export function parseVideoUrl(
   if (host === "youtube.com" || host === "youtube-nocookie.com") {
     // /watch?v=ID, and /embed/ID, /v/ID, /shorts/ID, /live/ID
     const fromQuery = url.searchParams.get("v") ?? "";
-    if (YOUTUBE_ID.test(fromQuery))
-      return { provider: "youtube", videoId: fromQuery };
+    if (YOUTUBE_ID.test(fromQuery)) return { provider: "youtube", videoId: fromQuery };
 
     const known = ["embed", "v", "shorts", "live"];
     if (parts.length >= 2 && known.includes(parts[0])) {
@@ -159,10 +154,7 @@ export function parseVideoUrl(
        an unlisted link. `video` names the thing that follows it in both album
        and player URLs; everywhere else the first number is the id. */
     const after = parts.indexOf("video");
-    const id =
-      after !== -1
-        ? (parts[after + 1] ?? "")
-        : (parts.find((p) => VIMEO_ID.test(p)) ?? "");
+    const id = after !== -1 ? (parts[after + 1] ?? "") : (parts.find((p) => VIMEO_ID.test(p)) ?? "");
     return VIMEO_ID.test(id) ? { provider: "vimeo", videoId: id } : null;
   }
 
@@ -175,22 +167,16 @@ export function parseVideoUrl(
  * Both endpoints are public, take no key, and are named in `connect-src`. A
  * failure is not an error: the title comes back empty, to be typed instead.
  */
-export async function lookupVideo(parsed: {
-  provider: Provider;
-  videoId: string;
-}): Promise<{ title: string; poster?: string }> {
+export async function lookupVideo(parsed: { provider: Provider; videoId: string }): Promise<{ title: string; poster?: string }> {
   let title = "";
   let poster: string | undefined;
   try {
     const endpoint =
       parsed.provider === "youtube"
-        ? `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(
-            `https://www.youtube.com/watch?v=${parsed.videoId}`,
-          )}`
-        : `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(
-            `https://vimeo.com/${parsed.videoId}`,
-          )}`;
-    const res = await fetch(endpoint, { cache: "no-store" });
+        ? `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${parsed.videoId}`)}`
+        : `https://vimeo.com/api/oembed.json?url=${encodeURIComponent(`https://vimeo.com/${parsed.videoId}`)}`;
+    // Plain fetch with its own timeout: scripts/check-videos.mjs runs this file under bare node, where "@/lib" does not resolve.
+    const res = await fetch(endpoint, { cache: "no-store", signal: AbortSignal.timeout(8000) });
     if (res.ok) {
       const body = (await res.json()) as {
         title?: string;
@@ -200,11 +186,7 @@ export async function lookupVideo(parsed: {
       // Only Vimeo's is kept: YouTube's oEmbed hands back the small
       // `hqdefault`, which `posterFor` already derives, and storing it would
       // pin the tile to the one still rather than leaving the choice open.
-      if (
-        parsed.provider === "vimeo" &&
-        body.thumbnail_url?.startsWith("https://i.vimeocdn.com/")
-      )
-        poster = body.thumbnail_url;
+      if (parsed.provider === "vimeo" && body.thumbnail_url?.startsWith("https://i.vimeocdn.com/")) poster = body.thumbnail_url;
     }
   } catch {
     // Offline, or the provider is having a day. The link is still good.
@@ -269,7 +251,12 @@ export const previewUrl = (v: Video): string => {
 const AGAIN = [0, 400, 1200, 2500, 5000];
 const say = (w: Window | null | undefined, msgs: object[]) => {
   if (!w) return;
-  for (const ms of AGAIN) setTimeout(() => { try { for (const m of msgs) w.postMessage(JSON.stringify(m), "*"); } catch {} }, ms);
+  for (const ms of AGAIN)
+    setTimeout(() => {
+      try {
+        for (const m of msgs) w.postMessage(JSON.stringify(m), "*");
+      } catch {}
+    }, ms);
 };
 export const captionsOff = (w: Window | null | undefined) =>
   say(w, [
@@ -286,17 +273,15 @@ export const vimeoListen = (w: Window | null | undefined) => {
   say(w, [{ method: "disableTextTrack" }]);
 };
 /** true for the Vimeo message that says frames are moving */
-export const vimeoPlays = (m: { event?: string; data?: { seconds?: number } } | null | undefined) => m?.event === "playProgress" && (m.data?.seconds ?? 0) > 0;
+export const vimeoPlays = (m: { event?: string; data?: { seconds?: number } } | null | undefined) =>
+  m?.event === "playProgress" && (m.data?.seconds ?? 0) > 0;
 
 /** Where the video lives, for the visitor who would rather watch it there. */
 export const watchUrl = (v: Video): string =>
-  v.provider === "youtube"
-    ? `https://www.youtube.com/watch?v=${v.videoId}`
-    : `https://vimeo.com/${v.videoId}`;
+  v.provider === "youtube" ? `https://www.youtube.com/watch?v=${v.videoId}` : `https://vimeo.com/${v.videoId}`;
 
 /** Everything in one section, in the order the content file holds them. */
-export const inSection = (videos: Video[], section: VideoSection): Video[] =>
-  videos.filter((v) => v.section === section);
+export const inSection = (videos: Video[], section: VideoSection): Video[] => videos.filter((v) => v.section === section);
 
 /** How many films the motion page shows: the sections plus the reel. Every
     count on the site reads this, so adding a reel or a section is one edit. */

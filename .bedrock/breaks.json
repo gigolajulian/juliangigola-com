@@ -1,0 +1,223 @@
+{
+ "WEB-10": {
+  "file": "lib/booking/deposit.ts",
+  "find": "Math.abs(now / 1000 - +t) > TOLERANCE_S) return false;",
+  "replace": "Math.abs(now / 1000 - +t) > TOLERANCE_S * 1e9) return false;"
+ },
+ "SEC-5": {
+  "file": "lib/admin/vouch.ts",
+  "find": "if (!expected || !given) return false;",
+  "replace": "if (!expected) return true;\n  if (!given) return false;"
+ },
+ "AUTHZ-3": {
+  "file": "lib/admin/vouch.ts",
+  "find": "if (await authorised(request, key)) return true;",
+  "replace": "if ((await authorised(request, key)) || !bearer(request)) return true;"
+ },
+ "AUTHZ-1": {
+  "edits": [
+   {
+    "file": "lib/booking/manage-link.ts",
+    "find": "enc.encode(`${id}.${e}`)",
+    "replace": "enc.encode(`${e}`)"
+   },
+   {
+    "file": "lib/booking/manage-link.ts",
+    "find": "enc.encode(`${id}.${m[1]}`)",
+    "replace": "enc.encode(`${m[1]}`)"
+   },
+   {
+    "file": "lib/proofs/proof-store.ts",
+    "find": "const passMsg = (p: Pick<Proof, \"token\" | \"pass\">) => enc(`${p.token}:${p.pass?.hash}`);",
+    "replace": "const passMsg = (p: Pick<Proof, \"token\" | \"pass\">) => enc(`gallery:${p.pass ? \"set\" : \"\"}`);"
+   },
+   {
+    "file": "lib/proofs/proof-store.ts",
+    "find": ".find((c) => c.startsWith(`${name}=`))",
+    "replace": ".find((c) => c.startsWith(\"gp_\"))"
+   }
+  ]
+ },
+ "AUTHZ-2": {
+  "file": "lib/admin/vouch.ts",
+  "find": "ok = scopes.includes(\"repo\") || scopes.includes(\"public_repo\");",
+  "replace": "ok = scopes.length > 0;"
+ },
+ "WEB-1": {
+  "file": "next.config.ts",
+  "find": "\"object-src 'none'\",",
+  "replace": "\"object-src *\","
+ },
+ "WEB-4": {
+  "file": "lib/leads/enquiry.ts",
+  "find": ".filter((src) => /^\\/(work\\/[\\w-]+|hero|covers)\\/[\\w.-]+\\.(jpe?g|png|webp)$/i.test(src))",
+  "replace": ".filter((src) => /\\.(jpe?g|png|webp)$/i.test(src))"
+ },
+ "WEB-5": {
+  "file": "lib/leads/enquiry.ts",
+  "find": "? head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff",
+  "replace": "? head.length > 0"
+ },
+ "WEB-7": {
+  "file": "lib/leads/enquiry.ts",
+  "find": "s.replace(/[&<>\"]/g,",
+  "replace": "s.replace(/[&\"]/g,"
+ },
+ "ABU-3": {
+  "file": "lib/http.ts",
+  "find": "res.headers.set(\"retry-after\", \"60\");",
+  "replace": ""
+ },
+ "ABU-13": {
+  "file": "lib/leads/enquiry-action.ts",
+  "find": "if (held ? !held.ok : today >= DAILY_CAP) {",
+  "replace": "if (held ? !held.ok : today >= DAILY_CAP * 1e6) {"
+ },
+ "PRIV-4": {
+  "file": "lib/seal.ts",
+  "find": "return `${b64(iv)}.${b64(ct)}`;",
+  "replace": "return `${b64(iv)}.${b64(ct)}.${JSON.stringify(value)}`;"
+ },
+ "SEC-3": {
+  "file": ".github/workflows/ci.yml",
+  "find": "      - run: node scripts/test/gate.mjs --backend",
+  "replace": "      - run: npm install\n      - run: node scripts/test/gate.mjs --backend"
+ },
+ "REL-1": {
+  "file": "lib/booking/deposit.ts",
+  "find": "const sigs = parts.filter(([k]) => k === \"v1\").map(([, v]) => v);",
+  "replace": "const sigs = parts.filter(([k]) => k === \"v1\").map(() => \"\");"
+ },
+ "JOB-1": {
+  "edits": [
+   {
+    "file": "lib/booking/engine.ts",
+    "find": "const had = await store.get<string>(intentKey(b.intent));",
+    "replace": "const had = null as string | null;"
+   },
+   {
+    "file": "lib/leads/enquiry-action.ts",
+    "find": "  if (!lock?.BOOKING_LOCK) return null;",
+    "replace": "  if (lock) return null;"
+   }
+  ]
+ },
+ "REL-7": {
+  "file": ".github/workflows/ci.yml",
+  "find": "  contents: read",
+  "replace": "  contents: write"
+ },
+ "ABU-11": {
+  "file": "lib/http.ts",
+  "find": "    if (size > max) {",
+  "replace": "    if (size > max * 1e9) {"
+ },
+ "MEM-4": {
+  "file": "lib/http.ts",
+  "find": "    if (size > max) {",
+  "replace": "    if (size < 0) {"
+ },
+ "MEM-3": {
+  "file": "lib/proofs/gallery-api.ts",
+  "find": ">= MAX_VIEWERS) return p;",
+  "replace": ">= MAX_VIEWERS * 1e9) return p;"
+ },
+ "ABU-9": {
+  "file": "app/api/book/route.ts",
+  "find": "if (byEmail >= CALLS_PER_EMAIL ||",
+  "replace": "if (byEmail >= CALLS_PER_EMAIL * 1e9 ||"
+ },
+ "INP-2": {
+  "file": "lib/leads/lead-store.ts",
+  "find": "    console.error(\"lead, retrying\", String(e));",
+  "replace": "    console.error(\"lead, retrying\", String(e));\n    if (e) return { status: \"failed\" };"
+ },
+ "MONEY-1": {
+  "file": "lib/proofs/submit.ts",
+  "find": "if (charge && (charge.refunded || (charge.amount_refunded ?? 0) > 0)) return null;",
+  "replace": "if (charge && charge.refunded && false) return null;"
+ },
+ "ABU-1": {
+  "file": "lib/http.ts",
+  "find": "return (await limiter.limit({ key: `${kind}:t:${target}` })).success ? null : tooMany();",
+  "replace": "return (await limiter.limit({ key: `${kind}:t:${target}` })).success || target ? null : tooMany();"
+ },
+ "OBS-1": {
+  "file": "lib/email/error-alert.ts",
+  "find": "    await alertHello(env.EMAIL, `Site error: ${label}`, [",
+  "replace": "    if (!label) await alertHello(env.EMAIL, `Site error: ${label}`, ["
+ },
+ "DATA-2": {
+  "file": "instrumentation.ts",
+  "find": "  await reportError(`${request.method} ${context.routePath ?? \"unknown route\"}`, err);",
+  "replace": "  void reportError;"
+ },
+ "NET-1": {
+  "file": "lib/net.ts",
+  "find": "const tries = (retry ?? (method === \"GET\" || method === \"HEAD\")) ? RETRIES + 1 : 1;",
+  "replace": "const tries = retry === undefined && method === \"never\" ? RETRIES + 1 : 1;"
+ },
+ "PRIV-2": {
+  "file": "lib/scrub.ts",
+  "find": ".replace(EMAIL, \"[email]\")",
+  "replace": ".replace(EMAIL, (m) => m)"
+ },
+ "DATA-3": {
+  "file": "lib/leads/lead-store.ts",
+  "find": "return raw ? upgradeLead(await s.open<Lead>(raw)) : null;",
+  "replace": "return raw ? await s.open<Lead>(raw) : null;"
+ },
+ "TIME-1": {
+  "file": "lib/booking/slots.ts",
+  "find": "  const off = offset(ms, tz) / 6e4;",
+  "replace": "  const off = offset(Date.UTC(2026, 0, 1), tz) / 6e4;"
+ },
+ "AUTH-2": {
+  "file": "lib/admin/vouch.ts",
+  "find": "const write = ![\"GET\", \"HEAD\"].includes(request.method.toUpperCase());",
+  "replace": "const write = request.method === \"never\";"
+ },
+ "SEC-12": {
+  "file": "public/.well-known/security.txt",
+  "find": "Contact: mailto:hello@juliangigola.com",
+  "replace": "Contact: mailto:nobody@example.com"
+ },
+ "REL-9": {
+  "file": "next.config.ts",
+  "find": "BUILD_VERSION: SITE_VERSION,",
+  "replace": "BUILD_VERSION: \"3.0.0\","
+ },
+ "A11Y-2": {
+  "edits": [
+   {
+    "file": "app/styles/v4pages.css",
+    "find": "@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {",
+    "replace": "@media (hover: hover) and (pointer: fine) {"
+   },
+   {
+    "file": "components/portfolio/drift.tsx",
+    "find": "matchMedia(\"(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)\")",
+    "replace": "matchMedia(\"(hover: hover) and (pointer: fine)\")"
+   }
+  ]
+ },
+ "A11Y-7": {
+  "edits": [
+   {
+    "file": "components/booking/book-times.tsx",
+    "find": "underline-offset-4 max-w-full [overflow-wrap:anywhere] hoverable",
+    "replace": "underline-offset-4 hoverable"
+   },
+   {
+    "file": "app/styles/v3.css",
+    "find": "letter-spacing:-.05em;overflow-wrap:anywhere;hyphens:auto}",
+    "replace": "letter-spacing:-.05em}"
+   }
+  ]
+ },
+ "MEM-6": {
+  "file": "components/site/chrome.tsx",
+  "find": "export function SiteHeader() {",
+  "replace": "const LEAK: string[][] = [];\nexport function SiteHeader() {\n  LEAK.push(new Array(400_000).fill(String(Math.random())));"
+ }
+}

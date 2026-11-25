@@ -17,23 +17,34 @@ const RES = 3;
 
 /** Where the photo sits in a box of bw x bh: its size and offset. */
 export function coverFit(iw: number, ih: number, bw: number, bh: number, c: Crop) {
-  const s = Math.max(bw / iw, bh / ih) * c.z, w = iw * s, h = ih * s;
+  const s = Math.max(bw / iw, bh / ih) * c.z,
+    w = iw * s,
+    h = ih * s;
   return { w, h, left: -(w - bw) * c.x, top: -(h - bh) * c.y };
 }
 
 export const loadImage = (src: string) =>
-  new Promise<HTMLImageElement>((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => no(new Error("Could not read the photo.")); i.src = src; });
+  new Promise<HTMLImageElement>((ok, no) => {
+    const i = new Image();
+    i.onload = () => ok(i);
+    i.onerror = () => no(new Error("Could not read the photo."));
+    i.src = src;
+  });
 
 /** A picked file, down to 2400 px on its long side, as a JPEG data URL: what is stored. */
 export async function shrink(file: File) {
   const url = URL.createObjectURL(file);
   try {
-    const img = await loadImage(url), k = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
+    const img = await loadImage(url),
+      k = Math.min(1, 2400 / Math.max(img.naturalWidth, img.naturalHeight));
     const c = document.createElement("canvas");
-    c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+    c.width = Math.round(img.naturalWidth * k);
+    c.height = Math.round(img.naturalHeight * k);
     c.getContext("2d")!.drawImage(img, 0, 0, c.width, c.height);
     return c.toDataURL("image/jpeg", 0.88);
-  } finally { URL.revokeObjectURL(url); }
+  } finally {
+    URL.revokeObjectURL(url);
+  }
 }
 
 /** Dark wordmark over a light patch, light over a dark one: the mean luminance under it. */
@@ -47,7 +58,8 @@ function toneOf(ctx: CanvasRenderingContext2D, k: number): "dark" | "light" {
 /** The column as drawn: canvas with the photo framed, and the tone under the wordmark. */
 function draw(img: HTMLImageElement, c: Crop, k: number) {
   const cv = document.createElement("canvas");
-  cv.width = Math.round(COL.w * k); cv.height = Math.round(COL.h * k);
+  cv.width = Math.round(COL.w * k);
+  cv.height = Math.round(COL.h * k);
   const ctx = cv.getContext("2d", { willReadFrequently: true })!;
   const p = coverFit(img.naturalWidth, img.naturalHeight, cv.width, cv.height, c);
   ctx.drawImage(img, p.left, p.top, p.w, p.h);
@@ -62,8 +74,12 @@ export async function framed(src: string, c: Crop) {
   const { cv, ctx, tone } = draw(await loadImage(src), c, RES);
   // The page's fade: clear at 55% down, #0D0D0F at 85% at the foot.
   const g = ctx.createLinearGradient(0, cv.height * 0.55, 0, cv.height);
-  g.addColorStop(0, "rgba(13,13,15,0)"); g.addColorStop(1, "rgba(13,13,15,0.85)");
-  ctx.fillStyle = g; ctx.fillRect(0, cv.height * 0.55, cv.width, cv.height * 0.45);
-  const blob = await new Promise<Blob>((ok, no) => cv.toBlob((b) => (b ? ok(b) : no(new Error("Could not frame the photo."))), "image/jpeg", 0.86));
+  g.addColorStop(0, "rgba(13,13,15,0)");
+  g.addColorStop(1, "rgba(13,13,15,0.85)");
+  ctx.fillStyle = g;
+  ctx.fillRect(0, cv.height * 0.55, cv.width, cv.height * 0.45);
+  const blob = await new Promise<Blob>((ok, no) =>
+    cv.toBlob((b) => (b ? ok(b) : no(new Error("Could not frame the photo."))), "image/jpeg", 0.86),
+  );
   return { jpeg: new Uint8Array(await blob.arrayBuffer()), w: cv.width, h: cv.height, tone };
 }

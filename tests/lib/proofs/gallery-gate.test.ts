@@ -3,7 +3,20 @@ import { cleanSettings, deliveryView, publicView, type Proof } from "@/lib/proof
 
 /* Gate polish (Julian 2026-11-15): a subheading under the gate's heading, and file names on thumbnails only when he turns them on. */
 
-const p = (over: Partial<Proof> = {}): Proof => ({ token: "11152026-k7m2q9xd", name: "Nov 1 portraits", included: 2, price: 15, days: 14, createdAt: "2026-11-01T00:00:00Z", frames: [{ id: "a", file: "ANA_041.jpg", w: 1, h: 1 }], finals: [{ id: "a", file: "ANA_041.jpg", w: 1, h: 1, bytes: 1, crc: 0 }], selects: [], notes: {}, views: 0, ...over });
+const p = (over: Partial<Proof> = {}): Proof => ({
+  token: "11152026-k7m2q9xd",
+  name: "Nov 1 portraits",
+  included: 2,
+  price: 15,
+  days: 14,
+  createdAt: "2026-11-01T00:00:00Z",
+  frames: [{ id: "a", file: "ANA_041.jpg", w: 1, h: 1 }],
+  finals: [{ id: "a", file: "ANA_041.jpg", w: 1, h: 1, bytes: 1, crc: 0 }],
+  selects: [],
+  notes: {},
+  views: 0,
+  ...over,
+});
 
 describe("gate polish", () => {
   it("cleans the subheading and the labels switch", () => {

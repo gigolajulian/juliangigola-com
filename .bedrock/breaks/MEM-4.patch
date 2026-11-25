@@ -1,0 +1,13 @@
+diff --git a/lib/http.ts b/lib/http.ts
+index 4f29e7b2..ff43f155 100644
+--- a/lib/http.ts
++++ b/lib/http.ts
+@@ -69,7 +69,7 @@ export async function textOf(request: Request, max: number): Promise<string | nu
+     const { done, value } = await reader.read();
+     if (done) break;
+     size += value.byteLength;
+-    if (size > max) {
++    if (size < 0) {
+       await reader.cancel().catch(() => {});
+       return null;
+     }

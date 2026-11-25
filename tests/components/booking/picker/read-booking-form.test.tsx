@@ -12,8 +12,30 @@ const form = (fields: Record<string, string>) => {
 /* The booking form as `book` reads it (`use-picker.tsx`), both looks. */
 describe("readBookingForm", () => {
   it("reads the editorial card: first and last, a call's kind, a location with its question", () => {
-    const f = readBookingForm(form({ first: " Ana ", last: "Lee ", email: " ana@example.com", phone: "(408) 555 0134", via: "Phone", opt: "Outdoor", detail: " Alum Rock ", notes: " hi " }), "portraits");
-    expect(f).toMatchObject({ name: "Ana Lee", firstName: "Ana", email: " ana@example.com", phone: "+14085550134", phoneRaw: "(408) 555 0134", via: "Phone", where: "Outdoor: Alum Rock", notes: "hi", refs: null });
+    const f = readBookingForm(
+      form({
+        first: " Ana ",
+        last: "Lee ",
+        email: " ana@example.com",
+        phone: "(408) 555 0134",
+        via: "Phone",
+        opt: "Outdoor",
+        detail: " Alum Rock ",
+        notes: " hi ",
+      }),
+      "portraits",
+    );
+    expect(f).toMatchObject({
+      name: "Ana Lee",
+      firstName: "Ana",
+      email: " ana@example.com",
+      phone: "+14085550134",
+      phoneRaw: "(408) 555 0134",
+      via: "Phone",
+      where: "Outdoor: Alum Rock",
+      notes: "hi",
+      refs: null,
+    });
     expect(f.typed.first).toBe(" Ana ");
   });
 

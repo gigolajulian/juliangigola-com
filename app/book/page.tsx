@@ -1,39 +1,22 @@
 import type { Metadata } from "next";
 import { shareOg } from "@/lib/og/share";
-import { BookPicker, type Bookable } from "@/components/booking/book-picker";
 import { SessionBook } from "@/components/booking/book";
-import { sessionEvent, pageForSession } from "@/lib/booking/service-pages";
-import { wallOf } from "@/lib/work/work";
-import { formatPrice, isSession, SESSION_TYPES } from "@/lib/booking/catalog";
+import { Packages } from "@/components/booking/packages";
+import { isSession } from "@/lib/booking/catalog";
 
 export const metadata: Metadata = {
   title: "Book a session",
   description:
     "Pick a session and a time: portraits, graduation, headshots, studio digitals, model tests and weddings in the San Francisco Bay Area.",
   alternates: { canonical: "/book" },
-...shareOg("Book a session","Portraits, graduation, headshots, studio digitals, model tests and weddings in the San Francisco Bay Area. Pick a time on my calendar."),
+  ...shareOg(
+    "Book a session",
+    "Portraits, graduation, headshots, studio digitals, model tests and weddings in the San Francisco Bay Area. Pick a time on my calendar.",
+  ),
 };
 
-/* The four sessions, each a bookable event (`SESSION_EVENTS`, `lib/booking/service-pages.ts`);
-   weddings book a call (its page's `book.cal`). The lengths are the events' own. */
-const LENGTHS: Record<string, string> = {
-  portraits: "1 hour",
-  graduation: "90 minutes",
-  headshots: "45 minutes",
-  "studio-digitals": "45 minutes",
-  weddings: "Call",
-};
-
-/* JG V3: the stepper, on portraits unless `?session=` names another.
-   `?classic` keeps the page as it was before V3. */
-export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string; classic?: string }> }) {
-  const { session, classic } = await searchParams;
-  if (classic === undefined) return <SessionBook slug={isSession(session) ? session : "portraits"} />;
-  const sessions: Bookable[] = SESSION_TYPES.flatMap((s) => {
-    const cal = sessionEvent(s.slug) ?? pageForSession(s.slug)?.book.cal;
-    // Its wall, as its own booking page has (`/book/[slug]`).
-    const wall = wallOf(pageForSession(s.slug)?.gallery.href.split("/").pop() ?? "");
-    return cal ? [{ slug: s.slug, name: s.name, blurb: s.blurb, rate: formatPrice(s.from), length: LENGTHS[s.slug], cal, wall }] : [];
-  });
-  return <BookPicker sessions={sessions} start={session} />;
+/* The package cards; `?session=` (the old links) opens that session's stepper. */
+export default async function BookPage({ searchParams }: { searchParams: Promise<{ session?: string }> }) {
+  const { session } = await searchParams;
+  return isSession(session) ? <SessionBook slug={session} /> : <Packages />;
 }

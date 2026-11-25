@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { readFileSync } from "node:fs";
 import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // `work`, not `work-data`. The generated manifest is every project the old
 // site ever had; `work.ts` is the set actually published, with hidden ones
@@ -7,6 +8,10 @@ import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 // would have got, because it looks like the site meant to take them there.
 import { LINKABLE, CATEGORIES, LISTINGS, categoryHref } from "./lib/work/work";
 import { BOOKING_SLUGS } from "./lib/booking/slugs";
+
+/** The site's one version (version.json; package.json's stays out of commits), checked against RELEASES.md and the tags
+    by scripts/check-version.mjs. */
+const SITE_VERSION: string = JSON.parse(readFileSync("version.json", "utf8")).version;
 
 /**
  * The old site published every project at the site root — `/wired-magazine`,
@@ -28,9 +33,7 @@ const projectRedirects = LINKABLE.map((p) => ({
  * and both land on the page as it is now. Generated from the manifest so
  * a rename cannot be made without its redirect.
  */
-const renameRedirects = LINKABLE.filter(
-  (p): p is typeof p & { origin: string } => !!p.origin,
-).flatMap((p) => [
+const renameRedirects = LINKABLE.filter((p): p is typeof p & { origin: string } => !!p.origin).flatMap((p) => [
   {
     source: `/work/${p.origin}`,
     destination: `/portfolio/${p.slug}`,
@@ -176,13 +179,10 @@ const LOCAL = process.env.JG_LOCAL === "1";
  * Setting the variable by hand wins, for a local build that wants the same.
  */
 const CI_BRANCH = process.env.WORKERS_CI_BRANCH;
-const IMAGE_CDN_ORIGIN =
-  process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ??
-  (CI_BRANCH && CI_BRANCH !== "main" ? "https://juliangigola.com" : "");
+const IMAGE_CDN_ORIGIN = process.env.NEXT_PUBLIC_IMAGE_CDN_ORIGIN ?? (CI_BRANCH && CI_BRANCH !== "main" ? "https://juliangigola.com" : "");
 
 // Dev-only allowance so impeccable live mode can load. Guarded by NODE_ENV.
-const __impeccableLiveDev =
-  process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
+const __impeccableLiveDev = process.env.NODE_ENV === "development" ? " http://localhost:8400" : "";
 
 /**
  * Security headers.
@@ -257,13 +257,11 @@ const csp = [
   // The two players, and only as an embed. `frame-ancestors 'self'` above
   // is the other direction and still says no other site may frame this one.
   // 'self' is the SEO tab's frame of the site's own pages.
-  // And the booking calendars on /book and the session pages (Google Calendar
-  // appointment schedules, `components/booking/book-picker.tsx`).
   // Stripe's Payment Element for the $100 deposit (`lib/booking/deposit.ts`): its
   // script and frames from js.stripe.com, 3D Secure from hooks.stripe.com,
   // and its calls to api.stripe.com.
   // `w.soundcloud.com`: SoundCloud's player, for a cover whose song is only there (`components/cover/cover-sound.tsx`).
-  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://calendar.google.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com https://w.soundcloud.com",
+  "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com https://js.stripe.com https://*.js.stripe.com https://hooks.stripe.com https://w.soundcloud.com",
   // `vimeo.com` and `youtube.com` are oEmbed lookups made by /admin when a
   // link is pasted: the title, and the poster Vimeo does not publish at a
   // guessable URL. No page on the site fetches either.
@@ -276,6 +274,11 @@ const csp = [
   ...(LOCAL ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
+const WITH_PAYMENT = 'camera=(), microphone=(), geolocation=(), payment=(self "https://js.stripe.com")';
+const NO_PAYMENT = "camera=(), microphone=(), geolocation=(), payment=()";
+/** Pages that never take a payment in place. `public/_headers` lists the same for the prerendered copies. */
+const NO_PAYMENT_PATHS = ["/admin", "/admin/:path*", "/proof/:path*", "/delivery/:path*", "/visit", "/client/:path*"];
+
 const securityHeaders = [
   { key: "Content-Security-Policy", value: csp },
   { key: "X-Frame-Options", value: "SAMEORIGIN" },
@@ -283,10 +286,10 @@ const securityHeaders = [
   // Send the origin cross-site, never the path — a project URL can name a
   // client before the work is public.
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  {
-    key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), payment=()",
-  },
+  // Payment only for Stripe's frames: the deposit step's Apple Pay and Google Pay buttons live in a js.stripe.com
+  // iframe, and `payment=()` switched them off. Site-wide because the step opens in soft navigations from any page;
+  // the private routes below keep `payment=()`.
+  { key: "Permissions-Policy", value: WITH_PAYMENT },
   { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
   // A year, subdomains included. No `preload`: that is a one-way door onto a
   // list that is slow to leave, and it should be a deliberate decision rather
@@ -319,9 +322,10 @@ const LEADS_HOST = "leads.juliangigola.com";
 const nextConfig: NextConfig = {
   // `next dev` refuses its scripts to other hosts; these two are the same app.
   allowedDevOrigins: [ADMIN_HOST, LEADS_HOST],
-  // The build stamp `/api/build` reports (Workers Builds sets the sha).
+  // The build stamp `/api/build` reports (Workers Builds sets the sha), and the one version line (REL-9).
   env: {
     BUILD_SHA: process.env.WORKERS_CI_COMMIT_SHA ?? "local",
+    BUILD_VERSION: SITE_VERSION,
     NEXT_PUBLIC_IMAGE_CDN_ORIGIN: IMAGE_CDN_ORIGIN,
   },
   // Hides the floating dev badge that sits over the bottom-left corner of
@@ -338,16 +342,6 @@ const nextConfig: NextConfig = {
      Next's 1MB default would refuse the second or third. */
   experimental: {
     serverActions: { bodySizeLimit: "24mb" },
-  },
-
-  /**
-   * DialKit on the dev server only (Julian). A production build gets
-   * `lib/dev/dialkit-stub.ts` in its place: the configs' defaults and no panel,
-   * so visitors never download 72KB gzipped of tuning panels.
-   */
-  turbopack: {
-    resolveAlias:
-      process.env.NODE_ENV === "production" ? { dialkit: "./lib/dev/dialkit-stub.ts" } : {},
   },
 
   /**
@@ -422,6 +416,13 @@ const nextConfig: NextConfig = {
       // that reaches a URL anyway. `/api/inbox` and `/api/leads` say the same on their own responses.
       { source: "/admin", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
       { source: "/admin/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] },
+      // Last, so it overrides the site-wide Permissions-Policy: no payment on the private pages or the admin hosts.
+      ...NO_PAYMENT_PATHS.map((source) => ({ source, headers: [{ key: "Permissions-Policy", value: NO_PAYMENT }] })),
+      ...[ADMIN_HOST, LEADS_HOST].map((value) => ({
+        source: "/:path*",
+        has: [{ type: "host" as const, value }],
+        headers: [{ key: "Permissions-Policy", value: NO_PAYMENT }],
+      })),
     ];
   },
 
@@ -471,13 +472,11 @@ const nextConfig: NextConfig = {
       ...categoryPathRedirects,
       ...workRedirects,
       ...disciplineRedirects,
-    ].filter(
-      (r) => {
-        if (seen.has(r.source)) return false;
-        seen.add(r.source);
-        return true;
-      },
-    );
+    ].filter((r) => {
+      if (seen.has(r.source)) return false;
+      seen.add(r.source);
+      return true;
+    });
   },
 };
 

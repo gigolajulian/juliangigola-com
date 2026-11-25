@@ -38,7 +38,11 @@ describe("subscribe", () => {
 
 describe("pushFor", () => {
   it("pings arrivals with the lead's name and kind, nothing else", () => {
-    expect(pushFor({ name: "Ana", kind: "portraits" } as never, { kind: "inquiry" } as never)).toEqual({ title: "New inquiry", body: "Ana, portraits", url: "/admin/leads" });
+    expect(pushFor({ name: "Ana", kind: "portraits" } as never, { kind: "inquiry" } as never)).toEqual({
+      title: "New inquiry",
+      body: "Ana, portraits",
+      url: "/admin/leads",
+    });
     expect(pushFor({ name: "Ana" } as never, { kind: "booking" } as never)?.body).toBe("Ana");
     expect(pushFor({ name: "Ana" } as never, { kind: "note" } as never)).toBeNull();
   });

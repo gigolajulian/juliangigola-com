@@ -46,11 +46,7 @@ const BROWSERS: Project[] = [
       /* Chromium's own throttling of a window in the background, off for
          the same reason as App Nap above. */
       launchOptions: {
-        args: [
-          "--disable-background-timer-throttling",
-          "--disable-backgrounding-occluded-windows",
-          "--disable-renderer-backgrounding",
-        ],
+        args: ["--disable-background-timer-throttling", "--disable-backgrounding-occluded-windows", "--disable-renderer-backgrounding"],
       },
     },
   },

@@ -11,12 +11,16 @@ export function walk(pages: string[], at: number, path: string, popped: boolean)
   return [pages, at]; // a history entry from before this document: place unknown, so not counted
 }
 
-let pages: string[] = [], at = 0, popped = false, popAt = 0, listening = false;
+let pages: string[] = [],
+  at = 0,
+  popped = false,
+  listening = false,
+  poppedTo = "";
 
 // Back or Forward to another page; a hash or query step on the same page is not a move.
 const pop = () => {
-  popAt = Date.now();
   popped = location.pathname !== pages[at];
+  poppedTo = popped ? location.pathname : "";
 };
 
 /** Hears Back and Forward from now on. Idempotent. */
@@ -34,10 +38,12 @@ export function notePath(path: string) {
   popped = false;
 }
 
-/** When the last Back or Forward was. */
-export function lastPopAt() {
+/** Whether the page now showing was reached by Back or Forward. True once: the first reader clears it. */
+export function takePop() {
   listenNav();
-  return popAt;
+  const hit = poppedTo !== "" && poppedTo === location.pathname;
+  poppedTo = "";
+  return hit;
 }
 
 /** Whether the page before this one in this tab was on this site. */

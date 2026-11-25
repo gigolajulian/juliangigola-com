@@ -15,10 +15,13 @@ vi.mock("@/components/booking/picker/time-picker", () => ({
 }));
 
 import { BookTimes } from "@/components/booking/book-times";
+import type { StepsSkin } from "@/components/booking/picker/parts";
+
+const skin: StepsSkin = { name: "Portraits", from: null, shell: () => null };
 
 describe("BookTimes", () => {
   it("mounts the picker with a way out when times fail", () => {
-    render(<BookTimes path="juliangigola/portraits" title="Pick a time" />);
+    render(<BookTimes path="juliangigola/portraits" title="Pick a time" skin={skin} />);
     expect(screen.getByTestId("tp").getAttribute("data-path")).toBe("juliangigola/portraits");
     expect(screen.getByRole("alert").textContent).toMatch(/Times didn.t load/);
     expect(screen.getByRole("link", { name: "Inquire" }).getAttribute("href")).toBe("/contact/form");
@@ -26,7 +29,7 @@ describe("BookTimes", () => {
   });
 
   it("Try again mounts a fresh picker", () => {
-    render(<BookTimes path="juliangigola/portraits" title="Pick a time" />);
+    render(<BookTimes path="juliangigola/portraits" title="Pick a time" skin={skin} />);
     const before = seen.mounts;
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(seen.mounts).toBeGreaterThan(before);

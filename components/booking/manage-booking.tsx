@@ -20,7 +20,15 @@ import { postJson } from "@/lib/http";
 export type Managed = ReturnType<typeof clientView>;
 
 const stampIn = (iso: string, timeZone?: string) =>
-  new Intl.DateTimeFormat("en-US", { timeZone, weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit", timeZoneName: "short" }).format(new Date(iso));
+  new Intl.DateTimeFormat("en-US", {
+    timeZone,
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(new Date(iso));
 
 export function ManageBooking({ booking, token, open }: { booking: Managed; token: string; open?: string }) {
   const [b, setB] = React.useState(booking);
@@ -35,7 +43,7 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
   const [back, setBack] = React.useState(0);
   const usd = b.deposit ?? LEGACY_DEPOSIT;
   const past = Date.parse(b.start) <= now;
-  const share = refundShare({ intent: b.paid ? "x" : undefined, start: b.start, firstStart: b.firstStart, fee: b.fee }, now);
+  const share = b.paid ? refundShare({ start: b.start, firstStart: b.firstStart, fee: b.fee }, now) : 0;
   const top = b.fee ? "90% back" : "a full refund";
   const movable = (b.moves ?? 0) < MAX_MOVES && Date.parse(b.start) - now >= MOVE_HOURS * 36e5;
   const part = refundCents(usd, share) / 100;
@@ -49,7 +57,11 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
     if (!out?.record) {
       setState("");
       // 409 is also "already cancelled" and "has started": only the taken time has its own words, the rest says what the server said.
-      setError(!r.ok && r.code === "taken" ? "That time was just taken. Pick another." : ((!r.ok && r.error) || "That did not go through. Try again, or reply to your confirmation email."));
+      setError(
+        !r.ok && r.code === "taken"
+          ? "That time was just taken. Pick another."
+          : (!r.ok && r.error) || "That did not go through. Try again, or reply to your confirmation email.",
+      );
       return;
     }
     setB(out.record);
@@ -62,11 +74,16 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
   return (
     <section className="v3 mx-auto flex min-h-svh max-w-2xl flex-col justify-center gap-8 px-4 py-24">
       <div className="flex flex-col gap-3">
-        <span className="lbl mute">{state === "cancelled" ? "Cancelled" : state === "moved" ? "Moved" : "Your booking"}</span>
+        <span className="lbl mute">{state === "cancelled" ? "Canceled" : state === "moved" ? "Moved" : "Your booking"}</span>
         <h1 className="text-2xl">{b.session}</h1>
         <p className="mute">
           {stampIn(b.start, TZ)}
-          {b.where ? <><br />{b.where}</> : null}
+          {b.where ? (
+            <>
+              <br />
+              {b.where}
+            </>
+          ) : null}
         </p>
       </div>
 
@@ -74,12 +91,14 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
         <p>
           {refunded === true
             ? back && back < usd
-              ? `It's cancelled, and $${back} of your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
-              : `It's cancelled, and your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
+              ? `It's canceled, and $${back} of your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
+              : `It's canceled, and your $${usd} deposit is on its way back to your card. Banks take 5 to 10 days.`
             : refunded === false && b.paid && share
-              ? "It's cancelled. The refund did not go through on its own; I'll send it by hand and email you."
-              : "It's cancelled. A note is on its way to your inbox."}{" "}
-          <Link href="/book" className="underline">Book another time</Link>
+              ? "It's canceled. The refund did not go through on its own; I'll send it by hand and email you."
+              : "It's canceled. A note is on its way to your inbox."}{" "}
+          <Link href="/book" className="underline">
+            Book another time
+          </Link>
         </p>
       ) : past ? (
         <p>This session has started. Reply to your confirmation email if something changed.</p>
@@ -98,9 +117,11 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           </p>
           <div className="flex gap-3">
             <button type="button" className="btn fill" disabled={state === "busy"} onClick={() => act({ action: "cancel" })}>
-              {state === "busy" ? "Cancelling" : "Cancel booking"}
+              {state === "busy" ? "Canceling" : "Cancel booking"}
             </button>
-            <button type="button" className="btn" onClick={() => setMode("")}>Keep it</button>
+            <button type="button" className="btn" onClick={() => setMode("")}>
+              Keep it
+            </button>
           </div>
         </div>
       ) : mode === "reschedule" ? (
@@ -114,32 +135,44 @@ export function ManageBooking({ booking, token, open }: { booking: Managed; toke
           {b.paid ? (
             <p className="mute">
               {share >= EARLY_SHARE
-                ? `Your $${usd} deposit moves with it. A cancel is judged by the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}: ${top} ${REFUND_HOURS} hours or more before it, 70% back ${PART_HOURS} hours or more before, nothing after.`
+                ? `Your $${usd} deposit moves with it. A cancellation is judged by the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}: ${top} ${REFUND_HOURS} hours or more before it, 70% back ${PART_HOURS} hours or more before, nothing after.`
                 : share
-                  ? `Your $${usd} deposit moves with it. A cancel now refunds 70% of it: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${REFUND_HOURS} hours away.`
+                  ? `Your $${usd} deposit moves with it. A cancellation now refunds 70% of it: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${REFUND_HOURS} hours away.`
                   : `Your $${usd} deposit moves with it. It is no longer refundable: the time you first booked, ${stampIn(b.firstStart ?? b.start, TZ)}, is under ${PART_HOURS} hours away.`}
             </p>
           ) : null}
-          <button type="button" className="btn self-start" onClick={() => setMode("")}>Back</button>
+          <button type="button" className="btn self-start" onClick={() => setMode("")}>
+            Back
+          </button>
         </div>
       ) : (
         <div className="flex flex-col gap-4">
           <div className="flex gap-3">
-            {movable ? <button type="button" className="btn fill" onClick={() => setMode("reschedule")}>Reschedule</button> : null}
-            <button type="button" className="btn" onClick={() => setMode("cancel")}>Cancel</button>
+            {movable ? (
+              <button type="button" className="btn fill" onClick={() => setMode("reschedule")}>
+                Reschedule
+              </button>
+            ) : null}
+            <button type="button" className="btn" onClick={() => setMode("cancel")}>
+              Cancel
+            </button>
           </div>
           <p className="mute">
             {(b.moves ?? 0) >= MAX_MOVES
               ? "This booking has been moved twice, so it can no longer be moved."
               : !movable
-                ? `It's under ${MOVE_HOURS} hours before your session, so it can no longer be moved.`
+                ? `Your session is less than ${MOVE_HOURS} hours away, so it can no longer be moved.`
                 : (b.moves ?? 0) === 1
                   ? `You can move this booking one more time, until ${MOVE_HOURS} hours before it.`
                   : `A booking can be moved twice, until ${MOVE_HOURS} hours before it.`}
           </p>
         </div>
       )}
-      {error ? <p role="alert" className="text-accent">{error}</p> : null}
+      {error ? (
+        <p role="alert" className="text-accent">
+          {error}
+        </p>
+      ) : null}
       {state === "moved" ? <p>Moved. A new confirmation is on its way to your inbox.</p> : null}
     </section>
   );

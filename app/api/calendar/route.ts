@@ -1,9 +1,8 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { TZ, DAY_MS } from "@/lib/time-zone";
 import { gcal } from "@/lib/google";
 import { looksLikeEmail } from "@/lib/utils";
 import { busyAll, EXTRA_KEY, isIcs, readExtras, instantIn, type Extra } from "@/lib/booking/slots";
-import { refuseAdmin } from "@/lib/admin/vouch";
+import { gate } from "@/lib/admin/gate";
 import { bodyOf, json, statusOf, upstreamError } from "@/lib/http";
 
 /* ── the Leads app's Calendar ─────────────────────────────────────
@@ -25,14 +24,12 @@ const DAY = /^\d{4}-\d{2}-\d{2}$/;
 const TIME = /^([01]\d|2[0-3]):[0-5]\d$/;
 const MAX_EXTRAS = 10;
 
+/** The desk's admin gate and INBOX (`lib/admin/gate.ts`), then the calendar's own binding. */
 async function calendarGate(request: Request) {
-  const { env } = await getCloudflareContext({ async: true });
-  // Who is asking first: what this build is missing is for /admin only.
-  const denied = await refuseAdmin(request, env.INBOX_KEY);
-  if (denied) return { error: denied };
-  if (!env.INBOX) return { error: json({ error: "No INBOX bound." }, 503) };
-  if (!env.GCAL_OAUTH) return { error: json({ error: "The calendar is not connected (GCAL_OAUTH)." }, 503) };
-  return { env };
+  const g = await gate(request, "No INBOX bound.");
+  if (g.error) return { error: g.error };
+  if (!g.env.GCAL_OAUTH) return { error: json({ error: "The calendar is not connected (GCAL_OAUTH)." }, 503) };
+  return { env: g.env };
 }
 
 type GEvent = {
@@ -85,7 +82,9 @@ export async function GET(request: Request) {
         booking: !!e.extendedProperties?.private?.jgBooking,
         free: e.transparency === "transparent",
       })),
-      busy: busy.filter((x) => x.label).map((x) => ({ label: x.label, start: new Date(x.start).toISOString(), end: new Date(x.end).toISOString() })),
+      busy: busy
+        .filter((x) => x.label)
+        .map((x) => ({ label: x.label, start: new Date(x.start).toISOString(), end: new Date(x.end).toISOString() })),
       extras: extras.map((x) => ({ label: x.label, src: shown(x.src), ics: isIcs(x.src), failed: failed.includes(x.label) })),
     });
   } catch (e) {
@@ -111,7 +110,8 @@ async function post(request: Request) {
     const { from = "", to = from, start, end, note } = body.block;
     if (!DAY.test(from) || !DAY.test(to) || to < from) return json({ error: "Pick the days." }, 400);
     const timed = start !== undefined || end !== undefined;
-    if (timed && (from !== to || !TIME.test(start ?? "") || !TIME.test(end ?? "") || end! <= start!)) return json({ error: "A time block is one day, start before end." }, 400);
+    if (timed && (from !== to || !TIME.test(start ?? "") || !TIME.test(end ?? "") || end! <= start!))
+      return json({ error: "A time block is one day, start before end." }, 400);
     const next = new Date(Date.parse(`${to}T00:00:00Z`) + DAY_MS).toISOString().slice(0, 10);
     const ev = await gcal<GEvent>(env.GCAL_OAUTH, "/calendars/primary/events?sendUpdates=none", {
       body: {
@@ -141,7 +141,9 @@ async function post(request: Request) {
   }
 
   if (body.extra) {
-    const label = String(body.extra.label ?? "").trim().slice(0, 40);
+    const label = String(body.extra.label ?? "")
+      .trim()
+      .slice(0, 40);
     const src = String(body.extra.src ?? "").trim();
     let ok = looksLikeEmail(src);
     if (isIcs(src)) {

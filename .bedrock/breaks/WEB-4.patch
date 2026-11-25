@@ -1,0 +1,13 @@
+diff --git a/lib/leads/enquiry.ts b/lib/leads/enquiry.ts
+index 8f9afb0f..df2e414e 100644
+--- a/lib/leads/enquiry.ts
++++ b/lib/leads/enquiry.ts
+@@ -153,7 +153,7 @@ export const takePicks = (raw: string): string[] =>
+   raw
+     // A multipart form sends its line breaks as CRLF.
+     .split(/\r?\n/)
+-    .filter((src) => /^\/(work\/[\w-]+|hero|covers)\/[\w.-]+\.(jpe?g|png|webp)$/i.test(src))
++    .filter((src) => /\.(jpe?g|png|webp)$/i.test(src))
+     .slice(0, MAX_REFS);
+ 
+ /** Their company's site, read off a work address; none for a free one. */

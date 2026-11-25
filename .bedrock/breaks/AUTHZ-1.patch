@@ -1,0 +1,44 @@
+diff --git a/lib/booking/manage-link.ts b/lib/booking/manage-link.ts
+index 03412482..681ddd4f 100644
+--- a/lib/booking/manage-link.ts
++++ b/lib/booking/manage-link.ts
+@@ -17,7 +17,7 @@ const key = (secret: string, use: "sign" | "verify") =>
+ /** The token for booking `id`, good until `exp` (ms). */
+ export async function bookingToken(secret: string, id: string, exp: number) {
+   const e = Math.floor(exp / 1000);
+-  return `${e}.${b64url(await crypto.subtle.sign("HMAC", await key(secret, "sign"), enc.encode(`${id}.${e}`)))}`;
++  return `${e}.${b64url(await crypto.subtle.sign("HMAC", await key(secret, "sign"), enc.encode(`${e}`)))}`;
+ }
+ 
+ /** Whether `token` opens booking `id` now. */
+@@ -25,7 +25,7 @@ export async function tokenOpens(secret: string | undefined, id: string, token:
+   const m = /^(\d{9,11})\.([A-Za-z0-9_-]{43})$/.exec(token ?? "");
+   if (!secret || !m || +m[1] * 1000 < now) return false;
+   // `verify` compares in constant time.
+-  return crypto.subtle.verify("HMAC", await key(secret, "verify"), Buffer.from(m[2], "base64url"), enc.encode(`${id}.${m[1]}`));
++  return crypto.subtle.verify("HMAC", await key(secret, "verify"), Buffer.from(m[2], "base64url"), enc.encode(`${m[1]}`));
+ }
+ 
+ /** The two links for the client's mail, or null while BOOKING_SECRET is unset. */
+diff --git a/lib/proofs/proof-store.ts b/lib/proofs/proof-store.ts
+index 1970123c..0ae8f5b3 100644
+--- a/lib/proofs/proof-store.ts
++++ b/lib/proofs/proof-store.ts
+@@ -36,7 +36,7 @@ export async function checkPass(pass: NonNullable<Proof["pass"]>, pw: string): P
+ export const passCookie = (p: Pick<Proof, "token" | "link">) => `gp_${publicId(p)}`;
+ const hmacKey = (secret: string) =>
+   crypto.subtle.importKey("raw", enc(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign", "verify"]);
+-const passMsg = (p: Pick<Proof, "token" | "pass">) => enc(`${p.token}:${p.pass?.hash}`);
++const passMsg = (p: Pick<Proof, "token" | "pass">) => enc(`gallery:${p.pass ? "set" : ""}`);
+ export const passValue = async (p: Pick<Proof, "token" | "pass">, secret: string) =>
+   b64(await crypto.subtle.sign("HMAC", await hmacKey(secret), passMsg(p)));
+ /** No password, or the request's cookie (the raw Cookie header) carries this gallery's current one. */
+@@ -49,7 +49,7 @@ export async function passOk(
+   const name = passCookie(p);
+   const v = cookie
+     ?.split(/;\s*/)
+-    .find((c) => c.startsWith(`${name}=`))
++    .find((c) => c.startsWith("gp_"))
+     ?.slice(name.length + 1);
+   if (!v || !secret) return false;
+   try {

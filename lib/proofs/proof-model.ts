@@ -43,7 +43,8 @@ export type Final = ProofFrame & {
 };
 
 /** A model label from Lightroom: a collection name, one line, up to 40 characters. */
-export const isModel = (v: unknown): v is string => typeof v === "string" && v.trim() === v && v.length > 0 && v.length <= 40 && !/[\x00-\x1f\x7f]/.test(v);
+export const isModel = (v: unknown): v is string =>
+  typeof v === "string" && v.trim() === v && v.length > 0 && v.length <= 40 && !/[\x00-\x1f\x7f]/.test(v);
 /** How a label shows on a card: "M04" or "04" as "04", any other name as it is. */
 export const modelLabel = (m: string) => (/^M?\d+$/i.test(m) ? m.replace(/^M/i, "") : m);
 
@@ -83,7 +84,8 @@ export type Proof = {
   /** Open Checkout session for the extras, while one is pending. */
   checkout?: string;
   /** `pending`: a bank (ACH) payment Stripe has accepted but not settled, about 4 business days; `failed`: it bounced, so `amount` no longer counts it. */
-  paid?: { session: string; amount: number; at: string; pending?: boolean; failed?: boolean };
+  /** `sessions`: every Checkout session counted so far, so none counts twice across reopens. */
+  paid?: { session: string; amount: number; at: string; pending?: boolean; failed?: boolean; sessions?: string[] };
   /** When the client hit Send: selects are locked from here. */
   submittedAt?: string;
   /** When the client's receipt mail went out; unset if it failed. */
@@ -123,7 +125,13 @@ export type Notify = (typeof NOTIFY)[number];
 
 export type CardCrop = { id: string; x: number; y: number; w: number };
 
-export type ViewerEvent = { at: string; kind: "open" | "pick" | "unpick" | "review" | "pay" | "send" | "download"; id?: string; device?: string; place?: string };
+export type ViewerEvent = {
+  at: string;
+  kind: "open" | "pick" | "unpick" | "review" | "pay" | "send" | "download";
+  id?: string;
+  device?: string;
+  place?: string;
+};
 
 export type Viewer = {
   /** The name they typed at the gate (`?proofwall=1`), latest wins. */
@@ -146,13 +154,34 @@ export type Viewer = {
 const MAX_EVENTS = 400;
 
 /** A reserved test address (RFC 2606/6761: example.com/net/org, .test, .invalid, .example, .localhost): QA at a gallery's gate, never a client. */
-export const isTestEmail = (v: string) => /@(?:[^@\s]+\.)?(?:example\.(?:com|net|org)|[^@\s]+\.(?:test|invalid|example|localhost))$/i.test(v.trim());
+export const isTestEmail = (v: string) =>
+  /@(?:[^@\s]+\.)?(?:example\.(?:com|net|org)|[^@\s]+\.(?:test|invalid|example|localhost))$/i.test(v.trim());
 export const viewerKey = (email: string) => email.trim().toLowerCase();
 
 /** "iPhone · Safari" from a user agent. shortcut: the common devices and browsers only, "Other" for the rest. */
 export function device(ua: string): string {
-  const d = /iPad/.test(ua) ? "iPad" : /iPhone/.test(ua) ? "iPhone" : /Android/.test(ua) ? "Android" : /Macintosh/.test(ua) ? "Mac" : /Windows/.test(ua) ? "Windows" : /Linux/.test(ua) ? "Linux" : "Other";
-  const b = /Edg\//.test(ua) ? "Edge" : /Firefox\/|FxiOS/.test(ua) ? "Firefox" : /Chrome\/|CriOS/.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Other";
+  const d = /iPad/.test(ua)
+    ? "iPad"
+    : /iPhone/.test(ua)
+      ? "iPhone"
+      : /Android/.test(ua)
+        ? "Android"
+        : /Macintosh/.test(ua)
+          ? "Mac"
+          : /Windows/.test(ua)
+            ? "Windows"
+            : /Linux/.test(ua)
+              ? "Linux"
+              : "Other";
+  const b = /Edg\//.test(ua)
+    ? "Edge"
+    : /Firefox\/|FxiOS/.test(ua)
+      ? "Firefox"
+      : /Chrome\/|CriOS/.test(ua)
+        ? "Chrome"
+        : /Safari\//.test(ua)
+          ? "Safari"
+          : "Other";
   return `${d} · ${b}`;
 }
 
@@ -160,7 +189,16 @@ export function device(ua: string): string {
 export function withViewerEvent(
   v: Viewer | undefined,
   at: string,
-  e: { kind?: ViewerEvent["kind"]; id?: string; picks?: string[]; looks?: Record<string, number>; seconds?: number; device?: string; place?: string; name?: string },
+  e: {
+    kind?: ViewerEvent["kind"];
+    id?: string;
+    picks?: string[];
+    looks?: Record<string, number>;
+    seconds?: number;
+    device?: string;
+    place?: string;
+    name?: string;
+  },
 ): Viewer {
   const base: Viewer = v ?? { first: at, last: at, visits: 0, seconds: 0, devices: [], places: [], picks: [], looks: {}, events: [] };
   const out: Viewer = { ...base, last: at, events: [...base.events], looks: { ...base.looks } };
@@ -170,7 +208,13 @@ export function withViewerEvent(
     if (e.device && !out.devices.includes(e.device)) out.devices = [...out.devices, e.device];
     if (e.place && !out.places.includes(e.place)) out.places = [...out.places, e.place];
   }
-  if (e.kind) out.events.push({ at, kind: e.kind, ...(e.kind === "open" ? { device: e.device, place: e.place } : {}), ...(e.id ? { id: e.id } : {}) });
+  if (e.kind)
+    out.events.push({
+      at,
+      kind: e.kind,
+      ...(e.kind === "open" ? { device: e.device, place: e.place } : {}),
+      ...(e.id ? { id: e.id } : {}),
+    });
   if (e.picks) {
     for (const id of e.picks) if (!base.picks.includes(id)) out.events.push({ at, kind: "pick", id });
     for (const id of base.picks) if (!e.picks.includes(id)) out.events.push({ at, kind: "unpick", id });
@@ -178,7 +222,8 @@ export function withViewerEvent(
   }
   // Beacons are capped so a stuck tab cannot claim hours.
   if (e.seconds) out.seconds += Math.min(120, Math.max(0, Math.round(e.seconds)));
-  for (const [id, ms] of Object.entries(e.looks ?? {})) if (typeof ms === "number" && ms > 0) out.looks[id] = (out.looks[id] ?? 0) + Math.min(120_000, Math.round(ms));
+  for (const [id, ms] of Object.entries(e.looks ?? {}))
+    if (typeof ms === "number" && ms > 0) out.looks[id] = (out.looks[id] ?? 0) + Math.min(120_000, Math.round(ms));
   out.events = out.events.slice(-MAX_EVENTS);
   return out;
 }
@@ -217,7 +262,13 @@ export const finalKeys = (token: string, id: string) => [finalKey(token, id), fi
 /** Days a delivery stays open from Send finals. Extend still adds days. */
 export const DELIVERY_DAYS = 60;
 /** Every derived file a frame can have in R2, for deletes. */
-export const frameKeys = (token: string, id: string) => [frameKey(token, id), markedKey(token, id), cardKey(token, id), thumbKey(token, id, true), thumbKey(token, id, false)];
+export const frameKeys = (token: string, id: string) => [
+  frameKey(token, id),
+  markedKey(token, id),
+  cardKey(token, id),
+  thumbKey(token, id, true),
+  thumbKey(token, id, false),
+];
 
 const B36 = "0123456789abcdefghijklmnopqrstuvwxyz";
 /** 4 base36 characters, uniform: the part of a date id nobody can guess. */
@@ -298,7 +349,8 @@ export function amountOwed(p: Pick<Proof, "selects" | "included" | "price" | "ba
 }
 
 /** Whether the client can still see the gallery. Unsent galleries are open (Julian previews them). */
-export const isOpen =(p: Pick<Proof, "closesAt" | "offline">, now = Date.now()) => !p.offline && (!p.closesAt || Date.parse(p.closesAt) > now);
+export const isOpen = (p: Pick<Proof, "closesAt" | "offline">, now = Date.now()) =>
+  !p.offline && (!p.closesAt || Date.parse(p.closesAt) > now);
 
 /** The gallery's cover for link previews: its first frame, the site's rule for every set. Only when watermarked and open, so a preview never carries a clean file. */
 export const coverFrame = (p: Pick<Proof, "frames" | "watermark" | "closesAt" | "card" | "offline" | "pass">): ProofFrame | null =>
@@ -318,7 +370,10 @@ export type Remind =
   | { stage: RemindStage; state: "sent"; at: string }
   | { stage: RemindStage | null; state: "never"; why: string };
 
-export function remindState(p: Pick<Proof, "email" | "sentAt" | "submittedAt" | "deliveredAt" | "firstDownloadAt" | "closesAt" | "offline" | "reminded">, now = Date.now()): Remind {
+export function remindState(
+  p: Pick<Proof, "email" | "sentAt" | "submittedAt" | "deliveredAt" | "firstDownloadAt" | "closesAt" | "offline" | "reminded">,
+  now = Date.now(),
+): Remind {
   const stage: RemindStage | null = p.deliveredAt ? "finals" : p.sentAt ? "proofs" : null;
   if (!stage) return { stage, state: "never", why: "Not sent yet." };
   const at = p.reminded?.[stage];
@@ -380,7 +435,22 @@ export function deliveryView(p: Proof) {
   const finals = shotOrder(p.finals ?? []);
   // The gate's photo: Julian's preview pick when it is one of the finals, else the first final.
   const cover = finals.find((f) => f.id === p.card?.id)?.id ?? finals[0]?.id ?? null;
-  return { finals: finals.map(({ id, file, w, h, bytes, crc, model, top }) => ({ id, file, w, h, bytes, v: crc, model: model ?? null, top: !!top })), cover, closesAt: p.closesAt ?? null, subhead: p.subhead ?? null, labels: !!p.labels };
+  return {
+    finals: finals.map(({ id, file, w, h, bytes, crc, model, top }) => ({
+      id,
+      file,
+      w,
+      h,
+      bytes,
+      v: crc,
+      model: model ?? null,
+      top: !!top,
+    })),
+    cover,
+    closesAt: p.closesAt ?? null,
+    subhead: p.subhead ?? null,
+    labels: !!p.labels,
+  };
 }
 export type PublicDelivery = ReturnType<typeof deliveryView>;
 
@@ -403,14 +473,36 @@ export function cleanNotes(given: unknown, selects: string[]): Record<string, st
 }
 
 /** Settings Lightroom or /admin may set. Numbers are clamped so a typo cannot price a frame at $15,000. */
-type Settings = Partial<Pick<Proof, "name" | "email" | "note" | "included" | "price" | "days" | "balance" | "watermark" | "card" | "notify" | "offline" | "subhead" | "labels">>;
+type Settings = Partial<
+  Pick<
+    Proof,
+    | "name"
+    | "email"
+    | "note"
+    | "included"
+    | "price"
+    | "days"
+    | "balance"
+    | "watermark"
+    | "card"
+    | "notify"
+    | "offline"
+    | "subhead"
+    | "labels"
+  >
+>;
 export function cleanSettings(given: Record<string, unknown>): Settings {
   const out: Settings = {};
-  const int = (v: unknown, lo: number, hi: number) => (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v)) ? Math.min(hi, Math.max(lo, Math.round(Number(v)))) : undefined;
+  const int = (v: unknown, lo: number, hi: number) =>
+    (typeof v === "number" || typeof v === "string") && Number.isFinite(Number(v))
+      ? Math.min(hi, Math.max(lo, Math.round(Number(v))))
+      : undefined;
   if (typeof given.name === "string" && given.name.trim()) out.name = given.name.trim().slice(0, 120);
   if (typeof given.email === "string") out.email = isEmail(given.email) ? given.email.trim() : undefined;
   if (typeof given.note === "string") out.note = given.note.trim().slice(0, 600) || undefined;
-  const inc = int(given.included, 0, 500), pr = int(given.price, 0, 500), d = int(given.days, 1, 90);
+  const inc = int(given.included, 0, 500),
+    pr = int(given.price, 0, 500),
+    d = int(given.days, 1, 90);
   if (inc !== undefined) out.included = inc;
   if (pr !== undefined) out.price = pr;
   if (d !== undefined) out.days = d;
@@ -420,7 +512,10 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
   // The preview pick: {id, x, y, w} in source pixels, or null to go back to the first frame.
   if (given.card === null) out.card = undefined;
   else if (given.card && typeof given.card === "object") {
-    const c = given.card as Record<string, unknown>, x = int(c.x, 0, 20000), y = int(c.y, 0, 20000), w = int(c.w, 50, 20000);
+    const c = given.card as Record<string, unknown>,
+      x = int(c.x, 0, 20000),
+      y = int(c.y, 0, 20000),
+      w = int(c.w, 50, 20000);
     if (isFrameId(c.id) && x !== undefined && y !== undefined && w !== undefined) out.card = { id: c.id, x, y, w };
   }
   // "selects" (or null) goes back to the old way: Selects in only.
@@ -429,6 +524,7 @@ export function cleanSettings(given: Record<string, unknown>): Settings {
   if (typeof given.subhead === "string") out.subhead = given.subhead.replace(/\s+/g, " ").trim().slice(0, 80) || undefined;
   if (typeof given.labels === "boolean") out.labels = given.labels || undefined;
   if (typeof given.offline === "boolean") out.offline = given.offline || undefined;
-  if (typeof given.watermark === "boolean" || given.watermark === "true" || given.watermark === "false") out.watermark = given.watermark === true || given.watermark === "true";
+  if (typeof given.watermark === "boolean" || given.watermark === "true" || given.watermark === "false")
+    out.watermark = given.watermark === true || given.watermark === "true";
   return out;
 }

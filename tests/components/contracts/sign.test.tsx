@@ -5,7 +5,13 @@ import type { PublicContract } from "@/lib/contracts/contract";
 
 afterEach(() => vi.unstubAllGlobals());
 
-const initial: PublicContract = { to: { name: "Ana Reyes", email: "", address: "" }, from: ["Julian Gigola"], text: "The terms.", hash: "abc123", signed: null };
+const initial: PublicContract = {
+  to: { name: "Ana Reyes", email: "", address: "" },
+  from: ["Julian Gigola"],
+  text: "The terms.",
+  hash: "abc123",
+  signed: null,
+};
 const signed = { name: "Ana Reyes", at: "2026-11-20T20:00:00.000Z", hash: "abc123", mark: null };
 
 function setup() {
@@ -72,6 +78,12 @@ describe("ContractSign", () => {
     fireEvent.click(sign);
     await waitFor(() => expect(screen.getByRole("status").textContent).toContain("Signed by Ana Reyes"));
     const init = (fetch.mock.calls[0] as unknown as [string, RequestInit])[1];
-    expect(JSON.parse(String(init.body))).toEqual({ name: "Ana Reyes", email: "ana@x.com", agree: true, hash: "abc123", mark: "M100 50 L200 100" });
+    expect(JSON.parse(String(init.body))).toEqual({
+      name: "Ana Reyes",
+      email: "ana@x.com",
+      agree: true,
+      hash: "abc123",
+      mark: "M100 50 L200 100",
+    });
   });
 });

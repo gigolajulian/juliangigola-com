@@ -28,10 +28,13 @@ async function loadIntent(key: string, id: string): Promise<Intent | "missing" |
   }
 }
 
-export async function GET(_request: Request, ctx: { params: Promise<{ id: string }> }) {
+export async function GET(request: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!isIntentId(id)) return json({ error: "Unknown deposit." }, 404);
   const { env } = await getCloudflareContext({ async: true });
+  // Each poll asks Stripe; the card's own poll is 20 tries a second apart.
+  const busy = await limited(env.DOWNLOAD_LIMIT, "poll", request, id);
+  if (busy) return busy;
   if (!env.STRIPE_SECRET_KEY) return json({ status: "pending" });
   const pi = await loadIntent(env.STRIPE_SECRET_KEY, id);
   if (pi === "missing") return json({ error: "Unknown deposit." }, 404);
@@ -54,7 +57,7 @@ export async function PUT(request: Request, ctx: { params: Promise<{ id: string 
   if (!isIntentId(id)) return json({ error: "Unknown deposit." }, 404);
   const { env } = await getCloudflareContext({ async: true });
   if (!env.STRIPE_SECRET_KEY) return json({ error: "Deposits are off." }, 503);
-  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "refs", request);
+  const slow = await limited(env.PUBLIC_WRITE_LIMIT, "refs", request, id);
   if (slow) return slow;
 
   const pi = await loadIntent(env.STRIPE_SECRET_KEY, id);
@@ -67,7 +70,9 @@ export async function PUT(request: Request, ctx: { params: Promise<{ id: string 
   const files = await takeUploads(form.getAll("refs"), MAX_REFS - picks.length);
   const ttl = { expirationTtl: 30 * 864e2 };
   await Promise.all([
-    ...files.map(async (f, n) => env.INBOX.put(refKey(id, `f${n}`), await f.arrayBuffer(), { ...ttl, metadata: { name: f.name.slice(0, 80), type: f.type } })),
+    ...files.map(async (f, n) =>
+      env.INBOX.put(refKey(id, `f${n}`), await f.arrayBuffer(), { ...ttl, metadata: { name: f.name.slice(0, 80), type: f.type } }),
+    ),
     ...(picks.length ? [env.INBOX.put(refKey(id, "picks"), picks.join("\n"), ttl)] : []),
   ]);
   return json({ files: files.length, picks: picks.length });

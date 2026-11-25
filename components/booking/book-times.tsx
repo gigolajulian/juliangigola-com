@@ -8,13 +8,14 @@ import type { StepsSkin } from "@/components/booking/picker/parts";
 /* ── the booking calendar ────────────────────────────────────────
  * The site's own time picker (`time-picker.tsx`, times from
  * `app/api/slots`). If the times do not come, the visitor gets a way to
- * try again, Inquire and the address, in the box the picker would fill. * ─────────────────────────────────────────────────────────────── */
+ * try again, Inquire and the address, in the box the picker would fill.
+ * ─────────────────────────────────────────────────────────────── */
 
 const EMAIL = "hello@juliangigola.com";
 
-function TimesDown({ title, className, retry, again }: { title: string; className?: string; retry: () => void; again: boolean }) {
+function TimesDown({ title, retry, again }: { title: string; retry: () => void; again: boolean }) {
   return (
-    <div role="region" aria-label={title} className={`times-down flex flex-col ${className ?? ""}`}>
+    <div role="region" aria-label={title} className="times-down flex flex-col">
       {/* In flow, so the v3 stepper (no fixed box) makes room for it. */}
       <div className="flex flex-1 flex-col items-center justify-center gap-5 p-6 text-center">
         {/* role=alert: a screen reader hears that the times failed, not silence. */}
@@ -32,7 +33,10 @@ function TimesDown({ title, className, retry, again }: { title: string; classNam
         >
           Inquire
         </Link>
-        <a href={`mailto:${EMAIL}`} className="text-sm normal-case text-muted-foreground underline decoration-border underline-offset-4 hoverable:hover:decoration-current">
+        <a
+          href={`mailto:${EMAIL}`}
+          className="text-sm normal-case text-muted-foreground underline decoration-border underline-offset-4 max-w-full [overflow-wrap:anywhere] hoverable:hover:decoration-current"
+        >
           {EMAIL}
         </a>
       </div>
@@ -40,15 +44,24 @@ function TimesDown({ title, className, retry, again }: { title: string; classNam
   );
 }
 
-/** The site's own time picker for `path`. `className` sizes the box.
-    `skin`: the JG V3 stepper. */
-export function BookTimes({ path, title, className, skin, startView }: { path: string; title: string; className?: string; skin?: StepsSkin; startView?: "week" | "month" }) {
+/** The site's own time picker for `path`. `skin`: the JG V3 stepper. */
+export function BookTimes({
+  path,
+  title,
+  skin,
+  startView,
+}: {
+  path: string;
+  title: string;
+  skin: StepsSkin;
+  startView?: "week" | "month";
+}) {
   // Try again mounts a fresh picker, which asks for the times anew.
   const [tries, setTries] = React.useState(0);
   /* The picker reads the visitor's zone and clock, so until it has mounted it
      draws its empty box (`TimePicker`). It is the one element here from the
      server on: a <FlowShell> swapped for a <TimePicker> remounted the whole
      shell, photo and all, at hydration (LCP on /book). */
-  const down = <TimesDown title={title} className={className} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
-  return <TimePicker key={tries} path={path} title={title} className={className} fallback={down} skin={skin} startView={startView} />;
+  const down = <TimesDown title={title} retry={() => setTries((n) => n + 1)} again={tries > 0} />;
+  return <TimePicker key={tries} path={path} title={title} fallback={down} skin={skin} startView={startView} />;
 }

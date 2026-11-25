@@ -16,7 +16,9 @@ const at = (name: string) => RATIOS.find((r) => r.name === name)!;
 const to = (page: Page, y: number) => page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
 /** A section's top in page coordinates, its height, and the screen height. */
 const boxOf = (page: Page, sel: string) =>
-  page.locator(sel).evaluate((el) => ({ top: el.getBoundingClientRect().top + scrollY, h: (el as HTMLElement).offsetHeight, vh: innerHeight }));
+  page
+    .locator(sel)
+    .evaluate((el) => ({ top: el.getBoundingClientRect().top + scrollY, h: (el as HTMLElement).offsetHeight, vh: innerHeight }));
 /** Scrolls until the section's top sits at f of the screen height. */
 const topAt = async (page: Page, sel: string, f: number) => {
   const b = await boxOf(page, sel);
@@ -44,31 +46,46 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
   await home(page);
   await expect(page.locator("html[data-mt-held]")).toBeAttached();
 
-  const covers = page.locator('[data-mt="covers"]');
-  await expect(covers).toHaveAttribute("data-hold");
-  const { top, h, vh } = await boxOf(page, '[data-mt="covers"]');
+  const held = page.locator('[data-mt="motion"]');
+  await expect(held).toHaveAttribute("data-hold");
+  const { top, h, vh } = await boxOf(page, '[data-mt="motion"]');
   expect(h, "the hold makes the section taller than the screen").toBeGreaterThan(vh);
   /** --p, and the hold's progress at the scroll as it is now. */
   const read = () =>
-    covers.evaluate((el, [t, run]) => ({ p: parseFloat(el.style.getPropertyValue("--p")), at: Math.min(1, Math.max(0, (scrollY - t) / run)) }), [top, h - vh] as const);
+    held.evaluate(
+      (el, [t, run]) => ({ p: parseFloat(el.style.getPropertyValue("--p")), at: Math.min(1, Math.max(0, (scrollY - t) / run)) }),
+      [top, h - vh] as const,
+    );
   // the middle last: the snap glides from there to an item, and a jump made mid-glide is taken back by the glide
-  for (const [y, want] of [[top, 0], [top + h - vh, 1], [top + (h - vh) / 2, null]] as const) {
+  for (const [y, want] of [
+    // Motion rests each film at the middle of its share, so the snap glides off both ends: only --p following the scroll is checked there
+    [top, null],
+    [top + h - vh, null],
+    [top + (h - vh) / 2, null],
+  ] as const) {
     await to(page, y);
-    await expect.poll(async () => { const r = await read(); return Math.abs(r.p - r.at); }, { message: `--p follows the scroll from ${Math.round(y)}` }).toBeLessThan(0.05);
+    await expect
+      .poll(
+        async () => {
+          const r = await read();
+          return Math.abs(r.p - r.at);
+        },
+        { message: `--p follows the scroll from ${Math.round(y)}` },
+      )
+      .toBeLessThan(0.05);
     if (want !== null) expect((await read()).p, `--p at ${want}`).toBeCloseTo(want, 1);
   }
 
-  for (const name of ["book", "quote"]) {
-    await topAt(page, `[data-mt="${name}"]`, 0.2);
-    const [book, quote] = await Promise.all([noBar(page, "book"), noBar(page, "quote")]);
-    expect(book, `book has no bar with ${name} up`).toBe(true);
-    expect(quote, `quote has no bar with ${name} up`).toBe(true);
-  }
+  await topAt(page, '[data-mt="book"]', 0.2);
+  expect(await noBar(page, "book"), "book has no bar on a laptop").toBe(true);
   expect(errors).toEqual([]);
   await ctx.close();
 });
 
-test("phone: no holds, and Book online and By quote take the bar once their top is above 0.45 of the screen", async ({ browser, browserName }) => {
+test("phone: no holds, and Book online takes the bar once its top is above 0.45 of the screen", async ({
+  browser,
+  browserName,
+}) => {
   const { ctx, page } = await open(browser, browserName, at("phone"));
   const errors = errorsOn(page);
   await home(page);
@@ -79,13 +96,10 @@ test("phone: no holds, and Book online and By quote take the bar once their top 
 
   await topAt(page, '[data-mt="book"]', 0.2);
   await expect.poll(() => bar(page, "book"), { message: "book up" }).toBe(true);
-  expect(await bar(page, "quote"), "quote still below").toBe(false);
 
   await topAt(page, '[data-mt="book"]', 0.8);
   await expect.poll(() => bar(page, "book"), { message: "book back down" }).toBe(false);
 
-  await topAt(page, '[data-mt="quote"]', 0.2);
-  await expect.poll(() => bar(page, "quote"), { message: "quote up" }).toBe(true);
   expect(errors).toEqual([]);
   await ctx.close();
 });

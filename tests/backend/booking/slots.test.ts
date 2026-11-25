@@ -23,7 +23,10 @@ beforeEach(() => {
   busy = [];
   shifts = [];
   asked = [];
-  ctx.env = { GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }) };
+  ctx.env = {
+    DOWNLOAD_LIMIT: { limit: async () => ({ success: true }) },
+    GCAL_OAUTH: JSON.stringify({ client_id: "a", client_secret: "b", refresh_token: "c" }),
+  };
   vi.stubGlobal("fetch", async (url: string, init?: RequestInit) => {
     if (url.includes("oauth2")) return Response.json({ access_token: "t", expires_in: 3600 });
     if (url.includes("/events?")) return Response.json({ items: shifts });
@@ -35,7 +38,18 @@ beforeEach(() => {
 describe("startsFor", () => {
   it("offers Wed to Sun, starts 10 AM to 7 PM Pacific, by the session's length", () => {
     const day = startsFor(EVENTS.portraits, [], WED10 - 36e5 * 10, WED10 + 864e5 - 36e5 * 10, NOW);
-    expect(day.map((s) => localIso(s, "America/Los_Angeles").slice(11, 16))).toEqual(["10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"]);
+    expect(day.map((s) => localIso(s, "America/Los_Angeles").slice(11, 16))).toEqual([
+      "10:00",
+      "11:00",
+      "12:00",
+      "13:00",
+      "14:00",
+      "15:00",
+      "16:00",
+      "17:00",
+      "18:00",
+      "19:00",
+    ]);
     // Monday and Tuesday are closed.
     expect(startsFor(EVENTS.portraits, [], WED10 - 2 * 864e5 - 10 * 36e5, WED10 - 10 * 36e5, NOW - 7 * 864e5)).toEqual([]);
   });
@@ -46,7 +60,9 @@ describe("startsFor", () => {
     // 11:00 ends at 12:00, an hour before; 3 PM starts an hour after 2.
     expect(day).toEqual([0, 1, 5, 6, 7]);
     // A call has no travel.
-    expect(startsFor(EVENTS["music-call"], b, WED10 + 2 * 36e5, WED10 + 5 * 36e5, NOW).map((s) => (s - WED10) / 36e5)).toEqual([2, 2.5, 4, 4.5]);
+    expect(startsFor(EVENTS["music-call"], b, WED10 + 2 * 36e5, WED10 + 5 * 36e5, NOW).map((s) => (s - WED10) / 36e5)).toEqual([
+      2, 2.5, 4, 4.5,
+    ]);
   });
 
   it("holds the notice and how far ahead", () => {
@@ -57,8 +73,12 @@ describe("startsFor", () => {
 
   it("follows Julian's hours: the week he set, and single dates", () => {
     const hm = (xs: number[]) => xs.map((s) => localIso(s, "America/Los_Angeles").slice(5, 16));
-    const hours = { week: [null, null, null, [720, 900], null, null, null] as const, days: { "2026-11-16": [480, 600] as const, "2026-11-25": null } };
-    const two = (from: number) => hm(startsFor(EVENTS.portraits, [], from, from + 864e5, NOW - 7 * 864e5, { week: [...hours.week], days: hours.days }));
+    const hours = {
+      week: [null, null, null, [720, 900], null, null, null] as const,
+      days: { "2026-11-16": [480, 600] as const, "2026-11-25": null },
+    };
+    const two = (from: number) =>
+      hm(startsFor(EVENTS.portraits, [], from, from + 864e5, NOW - 7 * 864e5, { week: [...hours.week], days: hours.days }));
     // A Monday opened 8 to 10.
     expect(two(WED10 - 2 * 864e5 - 10 * 36e5)).toEqual(["11-16T08:00", "11-16T09:00", "11-16T10:00"]);
     // Wednesday now 12 to 3; the next Wednesday closed.
@@ -68,7 +88,10 @@ describe("startsFor", () => {
 
   it("takes only well-formed hours, and drops past dates", () => {
     const week = [null, null, null, [600, 1140], null, null, null];
-    expect(cleanHours({ week, days: { "2026-11-01": null, "2026-11-20": [600, 720] } }, "2026-11-04")).toEqual({ week, days: { "2026-11-20": [600, 720] } });
+    expect(cleanHours({ week, days: { "2026-11-01": null, "2026-11-20": [600, 720] } }, "2026-11-04")).toEqual({
+      week,
+      days: { "2026-11-20": [600, 720] },
+    });
     expect(cleanHours({ week: week.slice(1) }, "2026-11-04")).toBeNull();
     expect(cleanHours({ week: [[700, 600], ...week.slice(1)] }, "2026-11-04")).toBeNull();
     expect(cleanHours({ week: [[600, 610], ...week.slice(1)] }, "2026-11-04")).toBeNull();
@@ -83,6 +106,15 @@ describe("startsFor", () => {
     expect(instantIn(2026, 3, 7, 600)).toBe(Date.parse("2026-03-07T18:00:00Z"));
     expect(localIso(Date.parse("2026-03-08T17:00:00Z"), "Europe/Paris")).toBe("2026-03-08T18:00:00+01:00");
   });
+
+  it("follows the clocks back when daylight time ends", () => {
+    // Sunday 2026-11-01, the day PST starts: 10 AM is UTC-8, the day before UTC-7.
+    expect(instantIn(2026, 11, 1, 600)).toBe(Date.parse("2026-11-01T18:00:00Z"));
+    expect(instantIn(2026, 10, 31, 600)).toBe(Date.parse("2026-10-31T17:00:00Z"));
+    // Paris fell back a week earlier, so for that week the gap is eight hours, not nine.
+    expect(localIso(Date.parse("2026-10-27T17:00:00Z"), "Europe/Paris")).toBe("2026-10-27T18:00:00+01:00");
+    expect(localIso(Date.parse("2026-11-02T18:00:00Z"), "America/Los_Angeles")).toBe("2026-11-02T10:00:00-08:00");
+  });
 });
 
 describe("GET /api/slots", () => {
@@ -95,6 +127,20 @@ describe("GET /api/slots", () => {
     expect(r).toMatchObject({ title: "Portraits", length: 60, where: true });
     expect(r.slots["2026-11-18"][0]).toBe("2026-11-18T15:00:00-05:00");
     expect(Object.keys(r.slots)).toEqual(["2026-11-18"]);
+    vi.useRealTimers();
+  });
+
+  it("keeps the same Pacific hours on both sides of the clocks going back", async () => {
+    vi.setSystemTime(Date.parse("2026-10-20T18:00:00Z"));
+    busy = [];
+    const first = async (day: string) =>
+      (await (await get(`slug=portraits&start=${day}&end=${day}&timeZone=UTC`)).json()).slots[day]?.[0] as string;
+    const [before, after] = [await first("2026-10-28"), await first("2026-11-04")];
+    expect(localIso(Date.parse(before), "America/Los_Angeles").slice(11, 16)).toBe(
+      localIso(Date.parse(after), "America/Los_Angeles").slice(11, 16),
+    );
+    // The same wall time is an hour later in UTC once PST starts.
+    expect(Date.parse(after) - Date.parse("2026-11-04T00:00:00Z") - (Date.parse(before) - Date.parse("2026-10-28T00:00:00Z"))).toBe(3600e3);
     vi.useRealTimers();
   });
 

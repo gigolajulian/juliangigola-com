@@ -5,9 +5,6 @@ import { matches } from "@/lib/device";
 import { startEngine } from "./engine";
 import { heroDrivers, heroStill } from "./hero";
 import { rowsDrivers } from "./rows";
-import { commissionsDrivers } from "./commissions";
-import { aboutDrivers } from "./about";
-import { quoteDrivers } from "./quote";
 import { footDrivers } from "./foot";
 import { depthDrivers } from "./depth";
 import { startReveal } from "./reveal";
@@ -15,9 +12,6 @@ import { barDrivers } from "./bars";
 import "./motion.css";
 import "./hero.css";
 import "./rows.css";
-import "./commissions.css";
-import "./about.css";
-import "./quote.css";
 import "./foot.css";
 import "./depth.css";
 import "./touch-parity.css";
@@ -29,7 +23,13 @@ export function MotionLayer() {
   React.useEffect(() => {
     const root = document.querySelector<HTMLElement>(".v3home.mt");
     if (!root) return;
-    const stop = startEngine(root, [...heroDrivers, ...rowsDrivers, ...commissionsDrivers, ...aboutDrivers, ...quoteDrivers, ...footDrivers, ...depthDrivers, ...barDrivers]);
+    const stop = startEngine(root, [
+      ...heroDrivers,
+      ...rowsDrivers,
+      ...footDrivers,
+      ...depthDrivers,
+      ...barDrivers,
+    ]);
     const stopReveal = startReveal(root);
     const still = matches("calm") ? heroStill(root) : null;
     return () => (stop(), stopReveal(), still?.());
@@ -39,7 +39,9 @@ export function MotionLayer() {
   // shortcut: the cause on this page is not found, drop this once it is.
   React.useEffect(() => {
     const vv = window.visualViewport;
-    const fix = () => void (scrollX && scrollTo(0, scrollY));
+    const fix = () => {
+      if (scrollX) scrollTo(0, scrollY);
+    };
     vv?.addEventListener("scroll", fix);
     return () => vv?.removeEventListener("scroll", fix);
   }, []);

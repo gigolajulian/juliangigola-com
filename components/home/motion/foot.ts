@@ -84,7 +84,10 @@ function measure(f: Foot, ctx: Ctx) {
 /* One phrase as a mask. Drawn at 280px or less with no canvas scale: above
    about 300px fillText punches the variable font's overlaps out as holes. */
 function mask(f: Foot, br: DOMRect) {
-  const ph = f.row.firstElementChild as HTMLElement, cs = getComputedStyle(ph), fs = parseFloat(cs.fontSize), pr = ph.getBoundingClientRect();
+  const ph = f.row.firstElementChild as HTMLElement,
+    cs = getComputedStyle(ph),
+    fs = parseFloat(cs.fontSize),
+    pr = ph.getBoundingClientRect();
   const zoom = (f.maskZoom = Math.min(1, 280 / fs));
   const [c, k] = buf();
   c.width = Math.ceil(f.phraseW * zoom);
@@ -127,15 +130,23 @@ function grad(k: CanvasRenderingContext2D, gx: number, gy: number, r0: number, r
    spot's box inside the phrase band. */
 function draw(f: Foot, r: DOMRect, u: number) {
   const { btn, cut, g, row } = f;
-  const [washC, wash] = f.bufs.wash, [blurC, blur] = f.bufs.blur, [sharpC, sharp] = f.bufs.sharp, [maskC, maskCtx] = f.bufs.mask;
+  const [washC, wash] = f.bufs.wash,
+    [blurC, blur] = f.bufs.blur,
+    [sharpC, sharp] = f.bufs.sharp,
+    [maskC, maskCtx] = f.bufs.mask;
   const br = btn.getBoundingClientRect();
   if (!f.phraseMask && f.phraseW && document.fonts.status === "loaded") f.phraseMask = mask(f, br);
   const phraseMask = f.phraseMask;
   if (!phraseMask) return;
-  const dpr = Math.min(2, devicePixelRatio || 1), Ru = R * u, bw = 2 * Ru, bh = br.height;
+  const dpr = Math.min(2, devicePixelRatio || 1),
+    Ru = R * u,
+    bw = 2 * Ru,
+    bh = br.height;
   const snap = (n: number) => Math.round(n * dpr) / dpr;
-  const ox = snap(f.spotX - Ru), oy = snap(br.top - r.top);
-  const cw = Math.round(bw * dpr), ch = Math.round(bh * dpr);
+  const ox = snap(f.spotX - Ru),
+    oy = snap(br.top - r.top);
+  const cw = Math.round(bw * dpr),
+    ch = Math.round(bh * dpr);
   if (cut.width !== cw || cut.height !== ch) {
     cut.style.width = `${bw}px`;
     cut.style.height = `${bh}px`;
@@ -152,7 +163,9 @@ function draw(f: Foot, r: DOMRect, u: number) {
   wash.fillStyle = f.ink;
   wash.fillRect(0, 0, bw, bh);
 
-  const gx = (f.spotX - ox) * dpr, gy = (f.spotY - oy) * dpr, ud = u * dpr;
+  const gx = (f.spotX - ox) * dpr,
+    gy = (f.spotY - oy) * dpr,
+    ud = u * dpr;
   // blur without ctx.filter (Safari): down to 1/6 and back up
   blur.imageSmoothingQuality = "high";
   blur.globalCompositeOperation = "copy";
@@ -171,7 +184,9 @@ function draw(f: Foot, r: DOMRect, u: number) {
   // letters in view, times the spot falloff
   maskCtx.globalCompositeOperation = "source-over";
   maskCtx.clearRect(0, 0, cw, ch);
-  const left = br.left - r.left + f.pad + f.rowX - ox, mw = (phraseMask.width / f.maskZoom) * dpr, mh = (phraseMask.height / f.maskZoom) * dpr;
+  const left = br.left - r.left + f.pad + f.rowX - ox,
+    mw = (phraseMask.width / f.maskZoom) * dpr,
+    mh = (phraseMask.height / f.maskZoom) * dpr;
   for (let i = 0; i < row.children.length; i++) {
     const lx = (left + i * f.phraseW) * dpr;
     if (lx < cw && lx + mw > 0) maskCtx.drawImage(phraseMask, lx, 0, mw, mh);
@@ -191,7 +206,8 @@ function onMove(f: Foot, e: PointerEvent) {
 
 // phrase: one speed easing toward idle plus whatever the scroll adds
 function drift(f: Foot, c: Ctx, busy: boolean) {
-  const dt = c.dt, k = dt / 16.7;
+  const dt = c.dt,
+    k = dt / 16.7;
   f.kick = clamp(f.kick * Math.pow(0.94, k) + c.dy * 0.0012, -0.35, 0.35);
   if (Math.abs(f.kick) < 0.0005) f.kick = 0;
   // 68 design px a second, 54 under the pointer
@@ -203,7 +219,9 @@ function drift(f: Foot, c: Ctx, busy: boolean) {
 
 // dot pointer over the phrase band
 function moveDot(f: Foot, r: DOMRect, c: Ctx, busy: boolean, lx: number, ly: number) {
-  const k = c.dt / 16.7, u = c.u, { dot } = f;
+  const k = c.dt / 16.7,
+    u = c.u,
+    { dot } = f;
   const was = f.hot;
   f.hot = !busy && f.px >= 0 && ly > r.height - 448 * u && ly < r.height - 88 * u;
   if (f.hot !== was) f.el.toggleAttribute("data-hot", f.hot);
@@ -225,7 +243,10 @@ function moveDot(f: Foot, r: DOMRect, c: Ctx, busy: boolean, lx: number, ly: num
 
 // spot
 function moveSpot(f: Foot, r: DOMRect, c: Ctx, busy: boolean, lx: number, ly: number) {
-  const dt = c.dt, k = dt / 16.7, u = c.u, { hot } = f;
+  const dt = c.dt,
+    k = dt / 16.7,
+    u = c.u,
+    { hot } = f;
   const show = hot || (!busy && f.btn.matches(":focus-visible"));
   if (show && f.spotAlpha === 0) {
     f.ink = getComputedStyle(f.stage).getPropertyValue("--phr").trim() || "#8a8a8a";
@@ -249,7 +270,8 @@ function tick(f: Foot, c: Ctx) {
   if (c.top > c.vh || c.top + c.h < 0) return;
   const r = f.stage.getBoundingClientRect();
   if (r.bottom < 0 || r.top > c.vh || !r.width) return;
-  const sec = c.dt / MS, busy = f.mt?.dataset.cards === "open";
+  const sec = c.dt / MS,
+    busy = f.mt?.dataset.cards === "open";
   if (f.dirty) {
     f.dirty = false;
     measure(f, c);
@@ -263,7 +285,8 @@ function tick(f: Foot, c: Ctx) {
   f.wall.style.opacity = f.reveal.toFixed(3);
 
   if (!c.fine) return;
-  const lx = f.px - r.left, ly = f.py - r.top;
+  const lx = f.px - r.left,
+    ly = f.py - r.top;
   moveDot(f, r, c, busy, lx, ly);
   moveSpot(f, r, c, busy, lx, ly);
 }
@@ -288,14 +311,39 @@ function setup(el: HTMLElement) {
   const dot = make(stage, "i", "mt-fdot");
   const g = cut.getContext("2d")!;
   const f: Foot = {
-    el, stage, wall, btn, row, mt: el.closest<HTMLElement>(".mt"), cut, dot, g,
+    el,
+    stage,
+    wall,
+    btn,
+    row,
+    mt: el.closest<HTMLElement>(".mt"),
+    cut,
+    dot,
+    g,
     bufs: { wash: buf(), blur: buf(), sharp: buf(), mask: buf() },
     clones: [],
-    reveal: 0, dirty: true,
-    px: -1, py: -1,
-    phraseW: 0, pad: 0, phraseX: 0, phraseV: 0, kick: 0, rowX: 0, first: true,
-    hot: false, dotX: 0, dotY: 0, dotAlpha: 0, spotX: -1, spotY: 0, spotAlpha: 0, spotOut: "", ink: "",
-    phraseMask: null, maskZoom: 1,
+    reveal: 0,
+    dirty: true,
+    px: -1,
+    py: -1,
+    phraseW: 0,
+    pad: 0,
+    phraseX: 0,
+    phraseV: 0,
+    kick: 0,
+    rowX: 0,
+    first: true,
+    hot: false,
+    dotX: 0,
+    dotY: 0,
+    dotAlpha: 0,
+    spotX: -1,
+    spotY: 0,
+    spotAlpha: 0,
+    spotOut: "",
+    ink: "",
+    phraseMask: null,
+    maskZoom: 1,
   };
   const ac = new AbortController();
   const dirty = () => void (f.dirty = true);

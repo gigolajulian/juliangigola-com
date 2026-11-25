@@ -1,0 +1,24 @@
+Reporting a security problem on juliangigola.com
+
+I run this site myself. If you find a way to read someone else's booking,
+gallery, contract or message, to pay less than a session costs, to send
+mail as the site, or to change what the site shows, please tell me.
+
+How to report
+Email hello@juliangigola.com with "Security" in the subject. Say what you
+found, the steps to see it, and the page or address involved. A screenshot
+helps. Please leave out any client's personal details you came across.
+
+What happens next
+I reply within three days to say I have it. I fix real problems as fast as
+I can, usually within two weeks, and tell you when the fix is live. I credit
+you if you want, by the name you give.
+
+Please do not
+- read, change or delete data that is not yours beyond what shows the problem
+- book, pay, or send forms or mail at volume, or slow the site down
+- test on other people's accounts or galleries
+- share the problem before it is fixed
+
+If you act in good faith and keep to this, I will not take action against
+you for the research.

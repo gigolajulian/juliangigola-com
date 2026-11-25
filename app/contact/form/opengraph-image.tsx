@@ -8,5 +8,10 @@ export const alt = "Julian Gigola";
 /* The page's own card: its shareOg block replaces the layout's, image included. */
 export default function Image() {
   const pool = FEATURED.map((p) => p.images[0]);
-  return renderCard({ kicker: "Contact", title: "Commissions", byline: "Campaigns, editorial,\ncover art", frames: [...pool.slice(4), ...pool.slice(0, 4)] });
+  return renderCard({
+    kicker: "Contact",
+    title: "Commissions",
+    byline: "Campaigns, editorial,\ncover art",
+    frames: [...pool.slice(4), ...pool.slice(0, 4)],
+  });
 }

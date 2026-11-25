@@ -1,0 +1,13 @@
+diff --git a/next.config.ts b/next.config.ts
+index 3f5694e6..9d2fd061 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -325,7 +325,7 @@ const nextConfig: NextConfig = {
+   // The build stamp `/api/build` reports (Workers Builds sets the sha), and the one version line (REL-9).
+   env: {
+     BUILD_SHA: process.env.WORKERS_CI_COMMIT_SHA ?? "local",
+-    BUILD_VERSION: SITE_VERSION,
++    BUILD_VERSION: "3.0.0",
+     NEXT_PUBLIC_IMAGE_CDN_ORIGIN: IMAGE_CDN_ORIGIN,
+   },
+   // Hides the floating dev badge that sits over the bottom-left corner of

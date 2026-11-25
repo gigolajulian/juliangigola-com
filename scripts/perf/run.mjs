@@ -21,7 +21,7 @@
  */
 
 import { spawn, spawnSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { createServer } from "node:net";
 
 const argv = process.argv.slice(2);
@@ -49,20 +49,23 @@ const freePort = async () => {
       const s = createServer()
         .once("error", () => resolve(false))
         .once("listening", () => s.close(() => resolve(true)))
-        .listen(port, "127.0.0.1");
+        .listen(port); // every interface: next start listens on ::, which a 127.0.0.1 probe misses
     });
     if (ok) return port;
   }
   throw new Error("No free port between 3100 and 3199");
 };
 
-/** A build in `.next` made with JG_LOCAL=1 has the image proxy in its routes. */
+/* The Stripe key the build gets: CI's placeholder (.github/workflows/ci.yml) unless one is set. Without a key the paid
+   sessions show the fallback, no days (use-slots.ts). */
+const STRIPE_PK = process.env.NEXT_PUBLIC_STRIPE_PK || "pk_test_ci_placeholder";
+
+/** A build in `.next` made with JG_LOCAL=1 has the image proxy in its routes, and this key inlined in its client chunks. */
 const localBuild = () => {
   try {
-    return (
-      existsSync(".next/BUILD_ID") &&
-      readFileSync(".next/routes-manifest.json", "utf8").includes("/cdn-cgi/image/")
-    );
+    if (!existsSync(".next/BUILD_ID") || !readFileSync(".next/routes-manifest.json", "utf8").includes("/cdn-cgi/image/")) return false;
+    const dir = ".next/static/chunks";
+    return readdirSync(dir).some((f) => f.endsWith(".js") && readFileSync(`${dir}/${f}`, "utf8").includes(STRIPE_PK));
   } catch {
     return false;
   }
@@ -76,7 +79,7 @@ try {
   if (!base) {
     if (REBUILD || !localBuild()) {
       console.log("perf: building a local production build (JG_LOCAL=1)");
-      code = await run("npx", ["next", "build"], { JG_LOCAL: "1" });
+      code = await run("npx", ["next", "build"], { JG_LOCAL: "1", NEXT_PUBLIC_STRIPE_PK: STRIPE_PK });
       if (code) throw new Error("build failed");
     } else {
       console.log("perf: reusing the local build in .next (--rebuild to make a new one)");
@@ -93,7 +96,10 @@ try {
     });
     const t0 = Date.now();
     for (;;) {
-      const up = await fetch(`${base}/legal`).then((r) => r.ok, () => false);
+      const up = await fetch(`${base}/legal`).then(
+        (r) => r.ok,
+        () => false,
+      );
       if (up) break;
       if (Date.now() - t0 > 60_000) throw new Error(`server did not start on ${base}`);
       await new Promise((r) => setTimeout(r, 300));
@@ -113,16 +119,11 @@ try {
     );
     code = ui || layout;
   } else {
-    const motion = await run(
-      "npx",
-      ["playwright", "test", "--grep", "@motion", "--workers", "1", ...passThrough],
-      { ...env, PERF_PHASE: "motion" },
-    );
-    const rest = await run(
-      "npx",
-      ["playwright", "test", "--grep-invert", "@motion", ...passThrough],
-      { ...env, PERF_PHASE: "static" },
-    );
+    const motion = await run("npx", ["playwright", "test", "--grep", "@motion", "--workers", "1", ...passThrough], {
+      ...env,
+      PERF_PHASE: "motion",
+    });
+    const rest = await run("npx", ["playwright", "test", "--grep-invert", "@motion", ...passThrough], { ...env, PERF_PHASE: "static" });
     code = motion || rest;
   }
 } catch (err) {

@@ -6,10 +6,5 @@ import { ldJson } from "@/lib/og/seo";
 
 /** A JSON-LD graph, inlined (`ldJson` escapes it). */
 export function LdJson({ data }: { data: unknown }) {
-  return (
-    <script
-      type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: ldJson(data) }}
-    />
-  );
+  return <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ldJson(data) }} />;
 }

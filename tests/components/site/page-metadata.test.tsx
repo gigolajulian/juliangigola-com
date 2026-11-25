@@ -55,7 +55,10 @@ describe("/book/[slug]", () => {
   });
 
   it("has a consultation page of its own and nothing for an unknown slug", async () => {
-    expect(await book.generateMetadata(params({ slug: "consultation" }))).toMatchObject({ title: "Book a consultation", alternates: { canonical: "/book/consultation" } });
+    expect(await book.generateMetadata(params({ slug: "consultation" }))).toMatchObject({
+      title: "Book a consultation",
+      alternates: { canonical: "/book/consultation" },
+    });
     expect(await book.generateMetadata(params({ slug: "nope" }))).toEqual({});
   });
 });

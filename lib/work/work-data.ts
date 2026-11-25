@@ -8,8092 +8,8104 @@ import type { Project, Category } from "./work-types";
 
 export const CATEGORIES: Category[] = [
   {
-    "slug": "editorial",
-    "name": "EDITORIAL",
-    "section": "WORK"
+    slug: "editorial",
+    name: "EDITORIAL",
+    section: "WORK",
   },
   {
-    "slug": "campaigns",
-    "name": "CAMPAIGNS",
-    "section": "WORK"
+    slug: "campaigns",
+    name: "CAMPAIGNS",
+    section: "WORK",
   },
   {
-    "slug": "portraits",
-    "name": "PORTRAITS",
-    "section": "WORK"
+    slug: "portraits",
+    name: "PORTRAITS",
+    section: "WORK",
   },
   {
-    "slug": "mixed-media",
-    "name": "MIXED MEDIA",
-    "section": "WORK"
+    slug: "mixed-media",
+    name: "MIXED MEDIA",
+    section: "WORK",
   },
   {
-    "slug": "video",
-    "name": "VIDEO",
-    "section": "WORK"
+    slug: "video",
+    name: "VIDEO",
+    section: "WORK",
   },
   {
-    "slug": "studio-digitals",
-    "name": "STUDIO DIGITALS",
-    "section": "SESSIONS"
+    slug: "studio-digitals",
+    name: "STUDIO DIGITALS",
+    section: "SESSIONS",
   },
   {
-    "slug": "graduation",
-    "name": "GRADUATION",
-    "section": "SESSIONS"
+    slug: "graduation",
+    name: "GRADUATION",
+    section: "SESSIONS",
   },
   {
-    "slug": "headshots",
-    "name": "HEADSHOTS",
-    "section": "SESSIONS"
+    slug: "headshots",
+    name: "HEADSHOTS",
+    section: "SESSIONS",
   },
   {
-    "slug": "weddings",
-    "name": "WEDDINGS",
-    "section": "SESSIONS"
+    slug: "weddings",
+    name: "WEDDINGS",
+    section: "SESSIONS",
   },
   {
-    "slug": "artist-presskit",
-    "name": "ARTIST PRESSKIT",
-    "section": "WORK"
+    slug: "artist-presskit",
+    name: "ARTIST PRESSKIT",
+    section: "WORK",
   },
   {
-    "slug": "events",
-    "name": "EVENT COVERAGE",
-    "section": "WORK"
+    slug: "events",
+    name: "EVENT COVERAGE",
+    section: "WORK",
   },
   {
-    "slug": "coverart",
-    "name": "COVERART",
-    "section": "WORK"
-  }
+    slug: "coverart",
+    name: "COVERART",
+    section: "WORK",
+  },
 ];
 
 export const PROJECTS: Project[] = [
   {
-    "slug": "lost-relic",
-    "name": "LOST RELIC",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "lost-relic",
+    name: "LOST RELIC",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "In frame",
-        "name": "Leila",
-        "instagram": "0414lei"
+        role: "In frame",
+        name: "Leila",
+        instagram: "0414lei",
       },
       {
-        "role": "Photo",
-        "name": "@juliangigola"
-      }
+        role: "Photo",
+        name: "@juliangigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/lost-relic/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#B8B1B1",
-      "alt": ""
+    cover: {
+      src: "/work/lost-relic/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#B8B1B1",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/lost-relic/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#B8B1B1",
-        "alt": "Figure from behind with a sword, white tank, pink corset and leg warmers, on rocks above the surf"
+        src: "/work/lost-relic/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#B8B1B1",
+        alt: "Figure from behind with a sword, white tank, pink corset and leg warmers, on rocks above the surf",
       },
       {
-        "src": "/work/lost-relic/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#A8A19E",
-        "alt": "Kneeling figure holds a sword level across the face, white boots, breaking waves behind"
+        src: "/work/lost-relic/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#A8A19E",
+        alt: "Kneeling figure holds a sword level across the face, white boots, breaking waves behind",
       },
       {
-        "src": "/work/lost-relic/03.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#8C8178",
-        "alt": "Figure lies across a concrete ledge gripping the sword hilt, looking up into the lens"
+        src: "/work/lost-relic/03.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#8C8178",
+        alt: "Figure lies across a concrete ledge gripping the sword hilt, looking up into the lens",
       },
       {
-        "src": "/work/lost-relic/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#887D78",
-        "alt": "Crouched in a gap between rocks, leaning on a planted sword as surf sprays behind"
+        src: "/work/lost-relic/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#887D78",
+        alt: "Crouched in a gap between rocks, leaning on a planted sword as surf sprays behind",
       },
       {
-        "src": "/work/lost-relic/05.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#8F8585",
-        "alt": "Seated on rocks with the sword raised overhead, a metal eyepiece over one eye, green waves behind"
+        src: "/work/lost-relic/05.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#8F8585",
+        alt: "Seated on rocks with the sword raised overhead, a metal eyepiece over one eye, green waves behind",
       },
       {
-        "src": "/work/lost-relic/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#7E6F66",
-        "alt": "Shot from above, a figure lies upside down on a boulder with the sword across the chest"
+        src: "/work/lost-relic/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#7E6F66",
+        alt: "Shot from above, a figure lies upside down on a boulder with the sword across the chest",
       },
       {
-        "src": "/work/lost-relic/07.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#A29B99",
-        "alt": "Tight crop of a face behind the sword hilt, rings and bracelets, backlit by sea glare"
+        src: "/work/lost-relic/07.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#A29B99",
+        alt: "Tight crop of a face behind the sword hilt, rings and bracelets, backlit by sea glare",
       },
       {
-        "src": "/work/lost-relic/08.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#A19A9A",
-        "alt": "Sitting on a boulder with the sword planted upright, white boots, rocks and sea backlit behind"
+        src: "/work/lost-relic/08.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#A19A9A",
+        alt: "Sitting on a boulder with the sword planted upright, white boots, rocks and sea backlit behind",
       },
       {
-        "src": "/work/lost-relic/09.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#9F9A9B",
-        "alt": "Standing on one leg on a sea wall with the sword upright, mirrored in the still pool below"
-      }
-    ]
+        src: "/work/lost-relic/09.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#9F9A9B",
+        alt: "Standing on one leg on a sea wall with the sword upright, mirrored in the still pool below",
+      },
+    ],
   },
   {
-    "slug": "hua",
-    "name": "HUA",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "hua",
+    name: "HUA",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "In frame",
-        "name": "Leila",
-        "instagram": "0414lei"
+        role: "In frame",
+        name: "Leila",
+        instagram: "0414lei",
       },
       {
-        "role": "Styling",
-        "name": "Leena Kema",
-        "instagram": "leena_kema"
+        role: "Styling",
+        name: "Leena Kema",
+        instagram: "leena_kema",
       },
       {
-        "role": "Wardrobe",
-        "name": "Starcase Vintage",
-        "instagram": "starcasevintage"
+        role: "Wardrobe",
+        name: "Starcase Vintage",
+        instagram: "starcasevintage",
       },
       {
-        "role": "Photo",
-        "name": "@juliangigola"
-      }
+        role: "Photo",
+        name: "@juliangigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/hua/cover.jpg",
-      "width": 600,
-      "height": 375,
-      "color": "#33342D",
-      "alt": ""
+    cover: {
+      src: "/work/hua/cover.jpg",
+      width: 600,
+      height: 375,
+      color: "#33342D",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/hua/01.jpg",
-        "width": 2500,
-        "height": 1563,
-        "color": "#33342D",
-        "alt": "Figure in white bunny ears looks up into a ceiling vent's light inside a graffiti tunnel"
+        src: "/work/hua/01.jpg",
+        width: 2500,
+        height: 1563,
+        color: "#33342D",
+        alt: "Figure in white bunny ears looks up into a ceiling vent's light inside a graffiti tunnel",
       },
       {
-        "src": "/work/hua/02.jpg",
-        "width": 2500,
-        "height": 1563,
-        "color": "#20211E",
-        "alt": "Low angle on a figure in bunny ears under a lit vent, a hard shadow on the wall"
+        src: "/work/hua/02.jpg",
+        width: 2500,
+        height: 1563,
+        color: "#20211E",
+        alt: "Low angle on a figure in bunny ears under a lit vent, a hard shadow on the wall",
       },
       {
-        "src": "/work/hua/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#1B1A1B",
-        "alt": "Figure in a bunny-ear gas mask and black coat with fur trim, a ringed vent glowing overhead"
+        src: "/work/hua/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#1B1A1B",
+        alt: "Figure in a bunny-ear gas mask and black coat with fur trim, a ringed vent glowing overhead",
       },
       {
-        "src": "/work/hua/05.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#2D2C26",
-        "alt": "Shot from above, a crouched figure in a gas mask and bunny ears inside a hard spotlight circle"
+        src: "/work/hua/05.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#2D2C26",
+        alt: "Shot from above, a crouched figure in a gas mask and bunny ears inside a hard spotlight circle",
       },
       {
-        "src": "/work/hua/06.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#31342F",
-        "alt": "Figure in a gas mask and bunny ears crouches low under a ringed vent, graffiti on both walls"
+        src: "/work/hua/06.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#31342F",
+        alt: "Figure in a gas mask and bunny ears crouches low under a ringed vent, graffiti on both walls",
       },
       {
-        "src": "/work/hua/09.jpg",
-        "width": 2500,
-        "height": 1563,
-        "color": "#5C090C",
-        "alt": "Close silhouette in bunny ears against a tunnel washed in hard red light"
+        src: "/work/hua/09.jpg",
+        width: 2500,
+        height: 1563,
+        color: "#5C090C",
+        alt: "Close silhouette in bunny ears against a tunnel washed in hard red light",
       },
       {
-        "src": "/work/hua/11.jpg",
-        "width": 2500,
-        "height": 1562,
-        "color": "#2E050A",
-        "alt": "Figure in bunny ears stands mid-tunnel under a ringed vent, red light glowing off the graffiti"
+        src: "/work/hua/11.jpg",
+        width: 2500,
+        height: 1562,
+        color: "#2E050A",
+        alt: "Figure in bunny ears stands mid-tunnel under a ringed vent, red light glowing off the graffiti",
       },
       {
-        "src": "/work/hua/13.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#38070B",
-        "alt": "Figure from behind in bunny ears and fur boots, red light backlighting the legs, vent above"
+        src: "/work/hua/13.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#38070B",
+        alt: "Figure from behind in bunny ears and fur boots, red light backlighting the legs, vent above",
       },
       {
-        "src": "/work/hua/14.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#400507",
-        "alt": "Figure in bunny ears seen from behind, red flare light rimming fur boots, vent overhead"
+        src: "/work/hua/14.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#400507",
+        alt: "Figure in bunny ears seen from behind, red flare light rimming fur boots, vent overhead",
       },
       {
-        "src": "/work/hua/15.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#34080B",
-        "alt": "Side profile in bunny ears and a fur-trimmed coat, edged by red flare light"
+        src: "/work/hua/15.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#34080B",
+        alt: "Side profile in bunny ears and a fur-trimmed coat, edged by red flare light",
       },
       {
-        "src": "/work/hua/16.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#2D060D",
-        "alt": ""
-      }
-    ]
+        src: "/work/hua/16.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#2D060D",
+        alt: "",
+      },
+    ],
   },
   {
-    "slug": "abril",
-    "name": "ABRIL",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "abril",
+    name: "ABRIL",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "Abril Alvarez",
-        "instagram": "abril.alvz"
+        role: "Model",
+        name: "Abril Alvarez",
+        instagram: "abril.alvz",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "studio-digitals",
-        "name": "STUDIO DIGITALS",
-        "section": "SESSIONS"
-      }
+        slug: "studio-digitals",
+        name: "STUDIO DIGITALS",
+        section: "SESSIONS",
+      },
     ],
-    "cover": {
-      "src": "/work/abril/cover.jpg",
-      "width": 600,
-      "height": 801,
-      "color": "#CDC9C6",
-      "alt": ""
+    cover: {
+      src: "/work/abril/cover.jpg",
+      width: 600,
+      height: 801,
+      color: "#CDC9C6",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/abril/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#CDC9C6",
-        "alt": "Person with dark curls in a white ribbed henley, hands at the hem, soft light on grey"
+        src: "/work/abril/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#CDC9C6",
+        alt: "Person with dark curls in a white ribbed henley, hands at the hem, soft light on grey",
       },
       {
-        "src": "/work/abril/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#D2CFCE",
-        "alt": "Full length, barefoot in a white henley and briefs, stepping forward on a pale grey sweep"
+        src: "/work/abril/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#D2CFCE",
+        alt: "Full length, barefoot in a white henley and briefs, stepping forward on a pale grey sweep",
       },
       {
-        "src": "/work/abril/03.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#CECBCA",
-        "alt": ""
+        src: "/work/abril/03.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#CECBCA",
+        alt: "",
       },
       {
-        "src": "/work/abril/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#C7C3C1",
-        "alt": "Waist-up portrait in a white henley, curls loose, facing the camera straight on in soft light"
-      }
-    ]
+        src: "/work/abril/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#C7C3C1",
+        alt: "Waist-up portrait in a white henley, curls loose, facing the camera straight on in soft light",
+      },
+    ],
   },
   {
-    "slug": "iris",
-    "name": "IRIS",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "iris",
+    name: "IRIS",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "Iris Zhangy",
-        "instagram": "iriszhangy"
+        role: "Model",
+        name: "Iris Zhangy",
+        instagram: "iriszhangy",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "artist-presskit",
-        "name": "ARTIST PRESSKIT",
-        "section": "WORK"
-      }
+        slug: "artist-presskit",
+        name: "ARTIST PRESSKIT",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/iris/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#999E9D",
-      "alt": ""
+    cover: {
+      src: "/work/iris/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#999E9D",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/iris/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#999E9D",
-        "alt": "Figure in a black bandeau and lace-up platform boots sits astride an old CRT television"
+        src: "/work/iris/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#999E9D",
+        alt: "Figure in a black bandeau and lace-up platform boots sits astride an old CRT television",
       },
       {
-        "src": "/work/iris/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#A7ABA9",
-        "alt": "Seated on the floor, arm resting on a CRT showing a face on screen, platform boots forward"
+        src: "/work/iris/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#A7ABA9",
+        alt: "Seated on the floor, arm resting on a CRT showing a face on screen, platform boots forward",
       },
       {
-        "src": "/work/iris/03.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#AAADAB",
-        "alt": "Seated by the CRT with hair blown across a shoulder, hard side light on grey"
+        src: "/work/iris/03.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#AAADAB",
+        alt: "Seated by the CRT with hair blown across a shoulder, hard side light on grey",
       },
       {
-        "src": "/work/iris/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#656A6A",
-        "alt": "Full length in a black leather jacket, grommet skirt and tall boots beside a glowing CRT"
+        src: "/work/iris/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#656A6A",
+        alt: "Full length in a black leather jacket, grommet skirt and tall boots beside a glowing CRT",
       },
       {
-        "src": "/work/iris/05.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#3C3D3C",
-        "alt": "Three-quarter turn, eyes down, chain necklace and bandeau with an oval metal logo, side light"
+        src: "/work/iris/05.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#3C3D3C",
+        alt: "Three-quarter turn, eyes down, chain necklace and bandeau with an oval metal logo, side light",
       },
       {
-        "src": "/work/iris/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#6C6D6B",
-        "alt": "Facing the camera, hands behind the back, bandeau logo and grommet skirt in hard side light"
+        src: "/work/iris/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#6C6D6B",
+        alt: "Facing the camera, hands behind the back, bandeau logo and grommet skirt in hard side light",
       },
       {
-        "src": "/work/iris/07.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#717574",
-        "alt": ""
+        src: "/work/iris/07.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#717574",
+        alt: "",
       },
       {
-        "src": "/work/iris/08.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#474848",
-        "alt": "Waist-up with a leather jacket slipped off the shoulders, chain necklaces, flat grey backdrop"
+        src: "/work/iris/08.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#474848",
+        alt: "Waist-up with a leather jacket slipped off the shoulders, chain necklaces, flat grey backdrop",
       },
       {
-        "src": "/work/iris/09.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#747A79",
-        "alt": "Diptych: seated beside a CRT above, a distorted still from its screen below"
+        src: "/work/iris/09.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#747A79",
+        alt: "Diptych: seated beside a CRT above, a distorted still from its screen below",
       },
       {
-        "src": "/work/iris/10.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#AAA9A5",
-        "alt": "Standing, head bowed, chain belt and grommet skirt, light falling from the left"
+        src: "/work/iris/10.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#AAA9A5",
+        alt: "Standing, head bowed, chain belt and grommet skirt, light falling from the left",
       },
       {
-        "src": "/work/iris/11.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#6A635C",
-        "alt": "Tight crop of a face and chain necklaces above the bandeau's chrome oval logo"
-      }
-    ]
+        src: "/work/iris/11.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#6A635C",
+        alt: "Tight crop of a face and chain necklaces above the bandeau's chrome oval logo",
+      },
+    ],
   },
   {
-    "slug": "novocaine",
-    "name": "NOVOCAINE",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "novocaine",
+    name: "NOVOCAINE",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "@phoebe2phly"
+        role: "Model",
+        name: "@phoebe2phly",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/novocaine/cover.jpg",
-      "width": 600,
-      "height": 400,
-      "color": "#47423E",
-      "alt": ""
+    cover: {
+      src: "/work/novocaine/cover.jpg",
+      width: 600,
+      height: 400,
+      color: "#47423E",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/novocaine/01.jpg",
-        "width": 2500,
-        "height": 1668,
-        "color": "#47423E",
-        "alt": "Close crop of a figure with a glossy black bob, head tilted, eyes down, on grey"
+        src: "/work/novocaine/01.jpg",
+        width: 2500,
+        height: 1668,
+        color: "#47423E",
+        alt: "Close crop of a figure with a glossy black bob, head tilted, eyes down, on grey",
       },
       {
-        "src": "/work/novocaine/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#191C1B",
-        "alt": "Black bob flung out mid-swing over a sheer knit top, hair blurring in hard top light"
+        src: "/work/novocaine/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#191C1B",
+        alt: "Black bob flung out mid-swing over a sheer knit top, hair blurring in hard top light",
       },
       {
-        "src": "/work/novocaine/03.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#99968E",
-        "alt": "Full length in an open-knit black top, studded mini skirt and heels, hand at the cheek"
+        src: "/work/novocaine/03.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#99968E",
+        alt: "Full length in an open-knit black top, studded mini skirt and heels, hand at the cheek",
       },
       {
-        "src": "/work/novocaine/04.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#7D7974",
-        "alt": "Three-quarter length, chin resting on a hand, black knit top lifted at the hem"
+        src: "/work/novocaine/04.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#7D7974",
+        alt: "Three-quarter length, chin resting on a hand, black knit top lifted at the hem",
       },
       {
-        "src": "/work/novocaine/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#908B84",
-        "alt": "Deep squat with one hand on the floor, knit top slipping off a shoulder, hard light"
+        src: "/work/novocaine/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#908B84",
+        alt: "Deep squat with one hand on the floor, knit top slipping off a shoulder, hard light",
       },
       {
-        "src": "/work/novocaine/07.jpg",
-        "width": 2500,
-        "height": 1667,
-        "color": "#BDBBB6",
-        "alt": "Lying on the front on the studio floor, heels raised behind, looking at the camera"
+        src: "/work/novocaine/07.jpg",
+        width: 2500,
+        height: 1667,
+        color: "#BDBBB6",
+        alt: "Lying on the front on the studio floor, heels raised behind, looking at the camera",
       },
       {
-        "src": "/work/novocaine/08.jpg",
-        "width": 2500,
-        "height": 1668,
-        "color": "#817E79",
-        "alt": "Kneeling on one knee in a pool of light, gripping the knit top across the chest"
+        src: "/work/novocaine/08.jpg",
+        width: 2500,
+        height: 1668,
+        color: "#817E79",
+        alt: "Kneeling on one knee in a pool of light, gripping the knit top across the chest",
       },
       {
-        "src": "/work/novocaine/10.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#373029",
-        "alt": "Seated on a wooden chair, arms wrapped around a knee, eyes down, low side light"
+        src: "/work/novocaine/10.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#373029",
+        alt: "Seated on a wooden chair, arms wrapped around a knee, eyes down, low side light",
       },
       {
-        "src": "/work/novocaine/11.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#22221F",
-        "alt": "Black bob swinging across the face, top lit against a dark grey backdrop"
+        src: "/work/novocaine/11.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#22221F",
+        alt: "Black bob swinging across the face, top lit against a dark grey backdrop",
       },
       {
-        "src": "/work/novocaine/12.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#383836",
-        "alt": "Side-on on a wooden chair, hair blurred in motion, hand on a knee, dark backdrop"
+        src: "/work/novocaine/12.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#383836",
+        alt: "Side-on on a wooden chair, hair blurred in motion, hand on a knee, dark backdrop",
       },
       {
-        "src": "/work/novocaine/14.jpg",
-        "width": 2500,
-        "height": 1668,
-        "color": "#676764",
-        "alt": "Lying stretched along the floor on one side, heels crossed in the air, grey backdrop"
+        src: "/work/novocaine/14.jpg",
+        width: 2500,
+        height: 1668,
+        color: "#676764",
+        alt: "Lying stretched along the floor on one side, heels crossed in the air, grey backdrop",
       },
       {
-        "src": "/work/novocaine/17.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#5D5F5D",
-        "alt": "Standing in profile with head bowed, knit top off one shoulder, studded skirt"
-      }
-    ]
+        src: "/work/novocaine/17.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#5D5F5D",
+        alt: "Standing in profile with head bowed, knit top off one shoulder, studded skirt",
+      },
+    ],
   },
   {
-    "slug": "paradox",
-    "name": "PARADOX",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "paradox",
+    name: "PARADOX",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/paradox/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#716D6D",
-      "alt": ""
+    cover: {
+      src: "/work/paradox/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#716D6D",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/paradox/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#716D6D",
-        "alt": ""
+        src: "/work/paradox/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#716D6D",
+        alt: "",
       },
       {
-        "src": "/work/paradox/02.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#B2ADAC",
-        "alt": "Profile of a person with a choppy shag, a stylist's tattooed hand and comb in the hair"
+        src: "/work/paradox/02.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#B2ADAC",
+        alt: "Profile of a person with a choppy shag, a stylist's tattooed hand and comb in the hair",
       },
       {
-        "src": "/work/paradox/03.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#B4AEAA",
-        "alt": "Person with a textured shag in a knit sweater vest over a white tee, flat grey backdrop"
+        src: "/work/paradox/03.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#B4AEAA",
+        alt: "Person with a textured shag in a knit sweater vest over a white tee, flat grey backdrop",
       },
       {
-        "src": "/work/paradox/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#675F5E",
-        "alt": "Several hands shape and spray curly black hair, black jacket over white shirt"
+        src: "/work/paradox/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#675F5E",
+        alt: "Several hands shape and spray curly black hair, black jacket over white shirt",
       },
       {
-        "src": "/work/paradox/05.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#787E8A",
-        "alt": "Stylist in a beanie and blue hockey jersey sets a client's slicked black hair"
+        src: "/work/paradox/05.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#787E8A",
+        alt: "Stylist in a beanie and blue hockey jersey sets a client's slicked black hair",
       },
       {
-        "src": "/work/paradox/06.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#7B7979",
-        "alt": "Back of a head with a black textured crop and shaved nape design, denim jacket"
+        src: "/work/paradox/06.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#7B7979",
+        alt: "Back of a head with a black textured crop and shaved nape design, denim jacket",
       },
       {
-        "src": "/work/paradox/07.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#756F70",
-        "alt": "Stylist combs and sprays a lavender layered mullet, client in a black denim jacket"
+        src: "/work/paradox/07.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#756F70",
+        alt: "Stylist combs and sprays a lavender layered mullet, client in a black denim jacket",
       },
       {
-        "src": "/work/paradox/08.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#8E8C8C",
-        "alt": "Lavender shag mullet with a nose ring, black denim jacket, eyes to the side, grey backdrop"
+        src: "/work/paradox/08.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#8E8C8C",
+        alt: "Lavender shag mullet with a nose ring, black denim jacket, eyes to the side, grey backdrop",
       },
       {
-        "src": "/work/paradox/09.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#96939A",
-        "alt": "Back view of the lavender mullet, layers fanned over a black jacket collar"
+        src: "/work/paradox/09.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#96939A",
+        alt: "Back view of the lavender mullet, layers fanned over a black jacket collar",
       },
       {
-        "src": "/work/paradox/10.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#8D8D90",
-        "alt": "Platinum shaggy mullet with long braided tails, black work shirt, glancing up and away"
+        src: "/work/paradox/10.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#8D8D90",
+        alt: "Platinum shaggy mullet with long braided tails, black work shirt, glancing up and away",
       },
       {
-        "src": "/work/paradox/11.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#786F6F",
-        "alt": "Stylist in sunglasses adjusts a tapered brown crop on a person with a neck tattoo"
+        src: "/work/paradox/11.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#786F6F",
+        alt: "Stylist in sunglasses adjusts a tapered brown crop on a person with a neck tattoo",
       },
       {
-        "src": "/work/paradox/12.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#827F8B",
-        "alt": "Tight portrait as a tattooed hand sweeps back black wavy hair, blue jacket"
-      }
-    ]
+        src: "/work/paradox/12.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#827F8B",
+        alt: "Tight portrait as a tattooed hand sweeps back black wavy hair, blue jacket",
+      },
+    ],
   },
   {
-    "slug": "relay",
-    "name": "RELAY",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "relay",
+    name: "RELAY",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "Anisa Jadee",
-        "instagram": "anisajadee"
+        role: "Model",
+        name: "Anisa Jadee",
+        instagram: "anisajadee",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/relay/cover.jpg",
-      "width": 600,
-      "height": 801,
-      "color": "#CCC6C3",
-      "alt": ""
+    cover: {
+      src: "/work/relay/cover.jpg",
+      width: 600,
+      height: 801,
+      color: "#CCC6C3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/relay/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#CCC6C3",
-        "alt": "Figure with wet red hair in a striped white shirt and torn white tights, standing on grey"
+        src: "/work/relay/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#CCC6C3",
+        alt: "Figure with wet red hair in a striped white shirt and torn white tights, standing on grey",
       },
       {
-        "src": "/work/relay/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#C2BBB7",
-        "alt": "Standing with one hand at the shirt buttons, head tipped back, torn white tights"
+        src: "/work/relay/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#C2BBB7",
+        alt: "Standing with one hand at the shirt buttons, head tipped back, torn white tights",
       },
       {
-        "src": "/work/relay/04.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#CEC8C5",
-        "alt": "Kneeling three-quarter turn, looking away to the side, unbuttoned striped shirt"
+        src: "/work/relay/04.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#CEC8C5",
+        alt: "Kneeling three-quarter turn, looking away to the side, unbuttoned striped shirt",
       },
       {
-        "src": "/work/relay/05.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#BDB8B4",
-        "alt": "Seated on the floor leaning back on one arm, legs stretched out in torn white tights"
+        src: "/work/relay/05.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#BDB8B4",
+        alt: "Seated on the floor leaning back on one arm, legs stretched out in torn white tights",
       },
       {
-        "src": "/work/relay/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#BEB9B4",
-        "alt": "Perched on top of an old CRT television, hands on the knees, chin raised"
+        src: "/work/relay/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#BEB9B4",
+        alt: "Perched on top of an old CRT television, hands on the knees, chin raised",
       },
       {
-        "src": "/work/relay/07.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#616263",
-        "alt": "Sitting on the floor against a CRT that shows a face, dark grey backdrop, side light"
+        src: "/work/relay/07.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#616263",
+        alt: "Sitting on the floor against a CRT that shows a face, dark grey backdrop, side light",
       },
       {
-        "src": "/work/relay/08.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#53514F",
-        "alt": "On top of a CRT, holding a camcorder overhead, its cable trailing to the screen"
+        src: "/work/relay/08.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#53514F",
+        alt: "On top of a CRT, holding a camcorder overhead, its cable trailing to the screen",
       },
       {
-        "src": "/work/relay/09.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#B7B5B3",
-        "alt": "Lying on the front beside a CRT, chin in hand, pointing a camcorder at the screen"
+        src: "/work/relay/09.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#B7B5B3",
+        alt: "Lying on the front beside a CRT, chin in hand, pointing a camcorder at the screen",
       },
       {
-        "src": "/work/relay/10.jpg",
-        "width": 2400,
-        "height": 3200,
-        "color": "#6F7377",
-        "alt": "Poster collage of the set: CRT close-ups, a camcorder still and a RELAY title block"
-      }
-    ]
+        src: "/work/relay/10.jpg",
+        width: 2400,
+        height: 3200,
+        color: "#6F7377",
+        alt: "Poster collage of the set: CRT close-ups, a camcorder still and a RELAY title block",
+      },
+    ],
   },
   {
-    "slug": "diesel",
-    "name": "DIESEL: FOR SUCCESSFUL LIVING",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "diesel",
+    name: "DIESEL: FOR SUCCESSFUL LIVING",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/diesel/cover.jpg",
-      "width": 600,
-      "height": 400,
-      "color": "#747375",
-      "alt": ""
+    cover: {
+      src: "/work/diesel/cover.jpg",
+      width: 600,
+      height: 400,
+      color: "#747375",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/diesel/01.jpg",
-        "width": 2500,
-        "height": 1667,
-        "color": "#747375",
-        "alt": "Five people in denim and fur slumped on a tan couch in a paint-splattered warehouse, beer keg beside"
+        src: "/work/diesel/01.jpg",
+        width: 2500,
+        height: 1667,
+        color: "#747375",
+        alt: "Five people in denim and fur slumped on a tan couch in a paint-splattered warehouse, beer keg beside",
       },
       {
-        "src": "/work/diesel/02.jpg",
-        "width": 2500,
-        "height": 1667,
-        "color": "#6A5E5A",
-        "alt": "Low close angle on the couch group, a person with red hair and sunglasses lying across laps"
+        src: "/work/diesel/02.jpg",
+        width: 2500,
+        height: 1667,
+        color: "#6A5E5A",
+        alt: "Low close angle on the couch group, a person with red hair and sunglasses lying across laps",
       },
       {
-        "src": "/work/diesel/03.jpg",
-        "width": 2500,
-        "height": 1667,
-        "color": "#767577",
-        "alt": ""
+        src: "/work/diesel/03.jpg",
+        width: 2500,
+        height: 1667,
+        color: "#767577",
+        alt: "",
       },
       {
-        "src": "/work/diesel/04.jpg",
-        "width": 2500,
-        "height": 1668,
-        "color": "#6E6B6A",
-        "alt": "Figure in a fur coat and flared jeans sprawled on the warehouse floor, the group behind"
+        src: "/work/diesel/04.jpg",
+        width: 2500,
+        height: 1668,
+        color: "#6E6B6A",
+        alt: "Figure in a fur coat and flared jeans sprawled on the warehouse floor, the group behind",
       },
       {
-        "src": "/work/diesel/05.jpg",
-        "width": 2500,
-        "height": 1667,
-        "color": "#74706F",
-        "alt": "Figure in a fur coat strides past with a canvas holdall, crew lounging on the couch behind"
+        src: "/work/diesel/05.jpg",
+        width: 2500,
+        height: 1667,
+        color: "#74706F",
+        alt: "Figure in a fur coat strides past with a canvas holdall, crew lounging on the couch behind",
       },
       {
-        "src": "/work/diesel/06.jpg",
-        "width": 2500,
-        "height": 1667,
-        "color": "#65696C",
-        "alt": "Figure in a ribbed blue crop top with an oval cutout in the foreground, group behind"
+        src: "/work/diesel/06.jpg",
+        width: 2500,
+        height: 1667,
+        color: "#65696C",
+        alt: "Figure in a ribbed blue crop top with an oval cutout in the foreground, group behind",
       },
       {
-        "src": "/work/diesel/07.jpg",
-        "width": 2500,
-        "height": 1667,
-        "color": "#6A6D70",
-        "alt": "Low angle from the waist up, ribbed top and jeans, the couch group out of focus behind"
-      }
-    ]
+        src: "/work/diesel/07.jpg",
+        width: 2500,
+        height: 1667,
+        color: "#6A6D70",
+        alt: "Low angle from the waist up, ribbed top and jeans, the couch group out of focus behind",
+      },
+    ],
   },
   {
-    "slug": "undisputed",
-    "name": "UNDISPUTED",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "undisputed",
+    name: "UNDISPUTED",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "@iaiupo"
+        role: "Model",
+        name: "@iaiupo",
       },
       {
-        "role": "MUA & Styling",
-        "name": "Brie Amana",
-        "instagram": "amana_mana11"
+        role: "MUA & Styling",
+        name: "Brie Amana",
+        instagram: "amana_mana11",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/undisputed/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#7E7069",
-      "alt": ""
+    cover: {
+      src: "/work/undisputed/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#7E7069",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/undisputed/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#7E7069",
-        "alt": "Close crop in an olive bralette and gold chain, taped hands raised beside the face, grinning wide"
+        src: "/work/undisputed/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#7E7069",
+        alt: "Close crop in an olive bralette and gold chain, taped hands raised beside the face, grinning wide",
       },
       {
-        "src": "/work/undisputed/02.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#8B8782",
-        "alt": "Diptych: white boxing gloves held up to the chin above, taped hands at the jaw below"
+        src: "/work/undisputed/02.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#8B8782",
+        alt: "Diptych: white boxing gloves held up to the chin above, taped hands at the jaw below",
       },
       {
-        "src": "/work/undisputed/03.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#787472",
-        "alt": "Taped hand at the mouth, olive bralette over a black top, gaze drifting past the lens"
+        src: "/work/undisputed/03.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#787472",
+        alt: "Taped hand at the mouth, olive bralette over a black top, gaze drifting past the lens",
       },
       {
-        "src": "/work/undisputed/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#7D7A77",
-        "alt": "Both white boxing gloves raised to cover the lower face, braids back, direct stare"
+        src: "/work/undisputed/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#7D7A77",
+        alt: "Both white boxing gloves raised to cover the lower face, braids back, direct stare",
       },
       {
-        "src": "/work/undisputed/05.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#83817F",
-        "alt": "Low angle, standing with white gloves hanging at the sides, olive bralette and shorts"
+        src: "/work/undisputed/05.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#83817F",
+        alt: "Low angle, standing with white gloves hanging at the sides, olive bralette and shorts",
       },
       {
-        "src": "/work/undisputed/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#988F8B",
-        "alt": "Diptych: leaning on a ring rope with taped hands above, a gloved arm raised overhead below"
+        src: "/work/undisputed/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#988F8B",
+        alt: "Diptych: leaning on a ring rope with taped hands above, a gloved arm raised overhead below",
       },
       {
-        "src": "/work/undisputed/07.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#857F7D",
-        "alt": "Leaning forward over a ring rope, taped wrists hanging, braids falling, hard top light"
+        src: "/work/undisputed/07.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#857F7D",
+        alt: "Leaning forward over a ring rope, taped wrists hanging, braids falling, hard top light",
       },
       {
-        "src": "/work/undisputed/08.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#827E7C",
-        "alt": "Slumped over the ring rope with the cheek on a taped forearm, braids hanging"
+        src: "/work/undisputed/08.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#827E7C",
+        alt: "Slumped over the ring rope with the cheek on a taped forearm, braids hanging",
       },
       {
-        "src": "/work/undisputed/09.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#877F7B",
-        "alt": "Chin resting on taped forearms across the rope, eyes cut sideways, dark rope crossing the frame"
+        src: "/work/undisputed/09.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#877F7B",
+        alt: "Chin resting on taped forearms across the rope, eyes cut sideways, dark rope crossing the frame",
       },
       {
-        "src": "/work/undisputed/10.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#B0A9A6",
-        "alt": "Crouched low beside the ring rope, taped hands clasped at a knee, looking at the lens"
+        src: "/work/undisputed/10.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#B0A9A6",
+        alt: "Crouched low beside the ring rope, taped hands clasped at a knee, looking at the lens",
       },
       {
-        "src": "/work/undisputed/11.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#968B84",
-        "alt": "Biting the tape on one wrapped hand, braids over a shoulder, rope across the frame"
-      }
-    ]
+        src: "/work/undisputed/11.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#968B84",
+        alt: "Biting the tape on one wrapped hand, braids over a shoulder, rope across the frame",
+      },
+    ],
   },
   {
-    "slug": "decoy",
-    "name": "DECOY",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "decoy",
+    name: "DECOY",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "@symphonypascal"
+        role: "Model",
+        name: "@symphonypascal",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/decoy/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#C9BCB3",
-      "alt": ""
+    cover: {
+      src: "/work/decoy/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#C9BCB3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/decoy/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#C9BCB3",
-        "alt": "Seated twisted on the floor in a white crop top and leg warmers, hair swinging across the face"
+        src: "/work/decoy/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#C9BCB3",
+        alt: "Seated twisted on the floor in a white crop top and leg warmers, hair swinging across the face",
       },
       {
-        "src": "/work/decoy/02.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#DBD4D0",
-        "alt": "Profile walking in a white tank, grey shorts and open-toe leg warmers on a pale sweep"
+        src: "/work/decoy/02.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#DBD4D0",
+        alt: "Profile walking in a white tank, grey shorts and open-toe leg warmers on a pale sweep",
       },
       {
-        "src": "/work/decoy/03.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#E5DEDB",
-        "alt": "Bending forward with hands on a shin, wavy hair hanging, white tank and leg warmers"
+        src: "/work/decoy/03.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#E5DEDB",
+        alt: "Bending forward with hands on a shin, wavy hair hanging, white tank and leg warmers",
       },
       {
-        "src": "/work/decoy/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#E7DFDB",
-        "alt": "Lying back on one elbow with a leg raised in a white leg warmer, looking up"
+        src: "/work/decoy/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#E7DFDB",
+        alt: "Lying back on one elbow with a leg raised in a white leg warmer, looking up",
       },
       {
-        "src": "/work/decoy/05.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#DACDC6",
-        "alt": "Seated on the floor, one knee up, hand planted behind, looking off to the left"
+        src: "/work/decoy/05.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#DACDC6",
+        alt: "Seated on the floor, one knee up, hand planted behind, looking off to the left",
       },
       {
-        "src": "/work/decoy/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#C4B8B1",
-        "alt": "Head resting on folded arms on the floor, face in profile, gold hoop earring, on white"
-      }
-    ]
+        src: "/work/decoy/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#C4B8B1",
+        alt: "Head resting on folded arms on the floor, face in profile, gold hoop earring, on white",
+      },
+    ],
   },
   {
-    "slug": "nyx",
-    "name": "NYX",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "nyx",
+    name: "NYX",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "Anisa Jadee",
-        "instagram": "anisajadee"
+        role: "Model",
+        name: "Anisa Jadee",
+        instagram: "anisajadee",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/nyx/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#939494",
-      "alt": ""
+    cover: {
+      src: "/work/nyx/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#939494",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/nyx/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#939494",
-        "alt": "Black buttoned jacket, red hair, hand raised over the mouth, torn tights, soft grey backdrop"
+        src: "/work/nyx/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#939494",
+        alt: "Black buttoned jacket, red hair, hand raised over the mouth, torn tights, soft grey backdrop",
       },
       {
-        "src": "/work/nyx/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#6E6B68",
-        "alt": "Standing in an open black jacket and bralette, hands in pockets, red hair framing the face"
+        src: "/work/nyx/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#6E6B68",
+        alt: "Standing in an open black jacket and bralette, hands in pockets, red hair framing the face",
       },
       {
-        "src": "/work/nyx/03.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#828586",
-        "alt": "Full length in boots, torn black tights and an open black jacket, hands on the hips"
+        src: "/work/nyx/03.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#828586",
+        alt: "Full length in boots, torn black tights and an open black jacket, hands on the hips",
       },
       {
-        "src": "/work/nyx/04.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#696A6C",
-        "alt": "Motion-blurred in an open black jacket and torn tights, red hair swept across the face"
+        src: "/work/nyx/04.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#696A6C",
+        alt: "Motion-blurred in an open black jacket and torn tights, red hair swept across the face",
       },
       {
-        "src": "/work/nyx/05.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#898987",
-        "alt": "Turned side-on with a jacket slipping off one arm, red hair over one eye, hand at the hip"
+        src: "/work/nyx/05.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#898987",
+        alt: "Turned side-on with a jacket slipping off one arm, red hair over one eye, hand at the hip",
       },
       {
-        "src": "/work/nyx/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#3B3635",
-        "alt": "Head thrown to the side, red hair flying, black lace bralette, cool blue-grey backdrop"
+        src: "/work/nyx/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#3B3635",
+        alt: "Head thrown to the side, red hair flying, black lace bralette, cool blue-grey backdrop",
       },
       {
-        "src": "/work/nyx/07.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#7C7D7A",
-        "alt": "Crouched in lace-up boots, one hand in flying red hair, black jacket off the shoulders"
+        src: "/work/nyx/07.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#7C7D7A",
+        alt: "Crouched in lace-up boots, one hand in flying red hair, black jacket off the shoulders",
       },
       {
-        "src": "/work/nyx/08.jpg",
-        "width": 2294,
-        "height": 3059,
-        "color": "#332925",
-        "alt": "Tight crop of red hair falling across the face, nose ring, black lace trim, dark left edge"
+        src: "/work/nyx/08.jpg",
+        width: 2294,
+        height: 3059,
+        color: "#332925",
+        alt: "Tight crop of red hair falling across the face, nose ring, black lace trim, dark left edge",
       },
       {
-        "src": "/work/nyx/09.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#575A5A",
-        "alt": "Folded into a deep crouch in a black cap, lace-up heeled boots and torn tights"
+        src: "/work/nyx/09.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#575A5A",
+        alt: "Folded into a deep crouch in a black cap, lace-up heeled boots and torn tights",
       },
       {
-        "src": "/work/nyx/10.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#565959",
-        "alt": "Seated low with a jacket off one shoulder, red hair swinging, face turned down"
+        src: "/work/nyx/10.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#565959",
+        alt: "Seated low with a jacket off one shoulder, red hair swinging, face turned down",
       },
       {
-        "src": "/work/nyx/11.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#3B3E3F",
-        "alt": "Crouching in heeled boots and a buttoned black jacket, one hand on a knee, dark backdrop"
+        src: "/work/nyx/11.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#3B3E3F",
+        alt: "Crouching in heeled boots and a buttoned black jacket, one hand on a knee, dark backdrop",
       },
       {
-        "src": "/work/nyx/12.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#808181",
-        "alt": "Seated on the floor leaning on one arm, tall lace-up buckled boots, soft light"
-      }
-    ]
+        src: "/work/nyx/12.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#808181",
+        alt: "Seated on the floor leaning on one arm, tall lace-up buckled boots, soft light",
+      },
+    ],
   },
   {
-    "slug": "serif",
-    "name": "SERIF",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "serif",
+    name: "SERIF",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "@tamakgo"
+        role: "Model",
+        name: "@tamakgo",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "portraits",
-        "name": "PORTRAITS",
-        "section": "WORK"
-      }
+        slug: "portraits",
+        name: "PORTRAITS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/serif/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#B7B6B6",
-      "alt": ""
+    cover: {
+      src: "/work/serif/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#B7B6B6",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/serif/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#B7B6B6",
-        "alt": ""
+        src: "/work/serif/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#B7B6B6",
+        alt: "",
       },
       {
-        "src": "/work/serif/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#B7B1AE",
-        "alt": "Seated hugging a knee in a white lace-trim kimono-sleeve top and cream slingback flats"
+        src: "/work/serif/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#B7B1AE",
+        alt: "Seated hugging a knee in a white lace-trim kimono-sleeve top and cream slingback flats",
       },
       {
-        "src": "/work/serif/03.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#C2BCB9",
-        "alt": "Reclining on one hand with legs stretched out, white wide-sleeve top, cream slingbacks, grey sweep"
+        src: "/work/serif/03.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#C2BCB9",
+        alt: "Reclining on one hand with legs stretched out, white wide-sleeve top, cream slingbacks, grey sweep",
       },
       {
-        "src": "/work/serif/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#A69C96",
-        "alt": "Tight crop leaning on one hand, black hair loose, white lace-trim top with wide sleeves"
+        src: "/work/serif/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#A69C96",
+        alt: "Tight crop leaning on one hand, black hair loose, white lace-trim top with wide sleeves",
       },
       {
-        "src": "/work/serif/05.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#85807E",
-        "alt": "Motion-blurred standing portrait in a white satin slip and wide-sleeve top, head tilted back"
+        src: "/work/serif/05.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#85807E",
+        alt: "Motion-blurred standing portrait in a white satin slip and wide-sleeve top, head tilted back",
       },
       {
-        "src": "/work/serif/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#BBB8B7",
-        "alt": "From above, head bowed, seated with legs folded to one side, white wide-sleeve top, gold cuff"
+        src: "/work/serif/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#BBB8B7",
+        alt: "From above, head bowed, seated with legs folded to one side, white wide-sleeve top, gold cuff",
       },
       {
-        "src": "/work/serif/07.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#B5B2B0",
-        "alt": "Sitting on one hip with a hand planted on the floor, white top, cream flats, direct gaze"
-      }
-    ]
+        src: "/work/serif/07.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#B5B2B0",
+        alt: "Sitting on one hip with a hand planted on the floor, white top, cream flats, direct gaze",
+      },
+    ],
   },
   {
-    "slug": "void",
-    "name": "VOID",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "void",
+    name: "VOID",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "kniiivess",
-        "instagram": "kniiivess"
+        role: "Model",
+        name: "kniiivess",
+        instagram: "kniiivess",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/void/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#8B9193",
-      "alt": ""
+    cover: {
+      src: "/work/void/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#8B9193",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/void/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#8B9193",
-        "alt": "Full length in a white long-sleeve top, sheer tights and white fold-over boots, hands at the sleeves"
+        src: "/work/void/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#8B9193",
+        alt: "Full length in a white long-sleeve top, sheer tights and white fold-over boots, hands at the sleeves",
       },
       {
-        "src": "/work/void/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#8C9295",
-        "alt": "Leaning forward in profile, white top and fold-over boots, light falling off into a dark vignette"
+        src: "/work/void/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#8C9295",
+        alt: "Leaning forward in profile, white top and fold-over boots, light falling off into a dark vignette",
       },
       {
-        "src": "/work/void/03.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#969A9B",
-        "alt": "Pulling the hem of a white top aside, white boots, glancing at the camera, dark vignette above"
+        src: "/work/void/03.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#969A9B",
+        alt: "Pulling the hem of a white top aside, white boots, glancing at the camera, dark vignette above",
       },
       {
-        "src": "/work/void/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#8D9192",
-        "alt": "Black hair across the face, hands gathering the hem of a white long-sleeve top"
+        src: "/work/void/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#8D9192",
+        alt: "Black hair across the face, hands gathering the hem of a white long-sleeve top",
       },
       {
-        "src": "/work/void/05.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#A7ACAD",
-        "alt": "Looking down, holding the hem of a white top, white shorts and boots, pale sweep"
+        src: "/work/void/05.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#A7ACAD",
+        alt: "Looking down, holding the hem of a white top, white shorts and boots, pale sweep",
       },
       {
-        "src": "/work/void/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#AAAEB0",
-        "alt": "Seated on the floor leaning back on one arm, white tank, sheer tights, white boots, acrylic cuff"
+        src: "/work/void/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#AAAEB0",
+        alt: "Seated on the floor leaning back on one arm, white tank, sheer tights, white boots, acrylic cuff",
       },
       {
-        "src": "/work/void/07.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#ACAFB0",
-        "alt": "Seated, knees raised toward the camera, white tank and boots, a seam line in the backdrop"
+        src: "/work/void/07.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#ACAFB0",
+        alt: "Seated, knees raised toward the camera, white tank and boots, a seam line in the backdrop",
       },
       {
-        "src": "/work/void/09.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#303237",
-        "alt": "Standing in a white tank and boots against a black wall, one hand in the hair, white floor"
-      }
-    ]
+        src: "/work/void/09.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#303237",
+        alt: "Standing in a white tank and boots against a black wall, one hand in the hair, white floor",
+      },
+    ],
   },
   {
-    "slug": "aegis",
-    "name": "ÆGIS",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "aegis",
+    name: "ÆGIS",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "@phoebe2phly"
+        role: "Model",
+        name: "@phoebe2phly",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/aegis/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#534E48",
-      "alt": ""
+    cover: {
+      src: "/work/aegis/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#534E48",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/aegis/01.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#534E48",
-        "alt": "Low angle on a chainmail hood and collar, chin raised, eyes up, dark grey backdrop"
+        src: "/work/aegis/01.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#534E48",
+        alt: "Low angle on a chainmail hood and collar, chin raised, eyes up, dark grey backdrop",
       },
       {
-        "src": "/work/aegis/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#606364",
-        "alt": "Full length in a chainmail hood, black bandeau and long sheer skirt, hands on the head, pale spotlight"
+        src: "/work/aegis/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#606364",
+        alt: "Full length in a chainmail hood, black bandeau and long sheer skirt, hands on the head, pale spotlight",
       },
       {
-        "src": "/work/aegis/03.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#616567",
-        "alt": "Standing with hands behind, chainmail hood, sheer skirt trailing across the floor, face turned aside"
+        src: "/work/aegis/03.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#616567",
+        alt: "Standing with hands behind, chainmail hood, sheer skirt trailing across the floor, face turned aside",
       },
       {
-        "src": "/work/aegis/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#878C8E",
-        "alt": "Seen from above, kneeling with hands on a knee, sheer skirt spread around, chainmail hood"
+        src: "/work/aegis/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#878C8E",
+        alt: "Seen from above, kneeling with hands on a knee, sheer skirt spread around, chainmail hood",
       },
       {
-        "src": "/work/aegis/05.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#646361",
-        "alt": "One hand on the head and the other across the chest, chainmail hood, belt with large rings"
+        src: "/work/aegis/05.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#646361",
+        alt: "One hand on the head and the other across the chest, chainmail hood, belt with large rings",
       },
       {
-        "src": "/work/aegis/06.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#696A6A",
-        "alt": "Turned three-quarters in a chainmail hood and black bandeau, one hand on the hip, eyes closed"
-      }
-    ]
+        src: "/work/aegis/06.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#696A6A",
+        alt: "Turned three-quarters in a chainmail hood and black bandeau, one hand on the hip, eyes closed",
+      },
+    ],
   },
   {
-    "slug": "vigil",
-    "name": "VIGIL",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "vigil",
+    name: "VIGIL",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Model",
-        "name": "Constance",
-        "instagram": "kissedbyconstance"
+        role: "Model",
+        name: "Constance",
+        instagram: "kissedbyconstance",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/vigil/cover.jpg",
-      "width": 600,
-      "height": 801,
-      "color": "#15130E",
-      "alt": ""
+    cover: {
+      src: "/work/vigil/cover.jpg",
+      width: 600,
+      height: 801,
+      color: "#15130E",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/vigil/01.jpg",
-        "width": 2500,
-        "height": 3338,
-        "color": "#15130E",
-        "alt": "Kneeling in a black top and lace skirt, a long jagged sword held upright, eyes on the lens"
+        src: "/work/vigil/01.jpg",
+        width: 2500,
+        height: 3338,
+        color: "#15130E",
+        alt: "Kneeling in a black top and lace skirt, a long jagged sword held upright, eyes on the lens",
       },
       {
-        "src": "/work/vigil/02.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#26211B",
-        "alt": "Both hands raised on the hilt of a long sword, studded black top, rim light from the right"
+        src: "/work/vigil/02.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#26211B",
+        alt: "Both hands raised on the hilt of a long sword, studded black top, rim light from the right",
       },
       {
-        "src": "/work/vigil/03.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#1C1712",
-        "alt": "Seated at an angle, gripping an ornate sword upright, studded black top, looking at the lens"
+        src: "/work/vigil/03.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#1C1712",
+        alt: "Seated at an angle, gripping an ornate sword upright, studded black top, looking at the lens",
       },
       {
-        "src": "/work/vigil/04.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#171717",
-        "alt": "Motion-blurred, near-monochrome, the sword's blade streaking diagonally across the frame"
+        src: "/work/vigil/04.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#171717",
+        alt: "Motion-blurred, near-monochrome, the sword's blade streaking diagonally across the frame",
       },
       {
-        "src": "/work/vigil/05.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#2E2923",
-        "alt": "Hair across the face, a spiked steel gauntlet raised in front, studded black top"
+        src: "/work/vigil/05.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#2E2923",
+        alt: "Hair across the face, a spiked steel gauntlet raised in front, studded black top",
       },
       {
-        "src": "/work/vigil/06.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#24201B",
-        "alt": "Side-on with a spiked metal gauntlet held up, hair falling, rim light on the metal"
+        src: "/work/vigil/06.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#24201B",
+        alt: "Side-on with a spiked metal gauntlet held up, hair falling, rim light on the metal",
       },
       {
-        "src": "/work/vigil/07.jpg",
-        "width": 2500,
-        "height": 3334,
-        "color": "#41342B",
-        "alt": "Seen from behind, one arm raised gripping a sword hilt, blade down the back, dark backdrop"
+        src: "/work/vigil/07.jpg",
+        width: 2500,
+        height: 3334,
+        color: "#41342B",
+        alt: "Seen from behind, one arm raised gripping a sword hilt, blade down the back, dark backdrop",
       },
       {
-        "src": "/work/vigil/08.jpg",
-        "width": 2500,
-        "height": 3333,
-        "color": "#18130F",
-        "alt": "From behind, seated in black lace on a dark floor, sword upright, looking over a shoulder"
-      }
-    ]
+        src: "/work/vigil/08.jpg",
+        width: 2500,
+        height: 3333,
+        color: "#18130F",
+        alt: "From behind, seated in black lace on a dark floor, sword upright, looking over a shoulder",
+      },
+    ],
   },
   {
-    "slug": "aera-wraith",
-    "name": "ÆRA:WRAITH",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "aera-wraith",
+    name: "ÆRA:WRAITH",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "mixed-media",
-        "name": "MIXED MEDIA",
-        "section": "WORK"
-      }
+        slug: "mixed-media",
+        name: "MIXED MEDIA",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/aera-wraith/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#131B20",
-      "alt": ""
+    cover: {
+      src: "/work/aera-wraith/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#131B20",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/aera-wraith/01.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#131B20",
-        "alt": ""
+        src: "/work/aera-wraith/01.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#131B20",
+        alt: "",
       },
       {
-        "src": "/work/aera-wraith/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#110A12",
-        "alt": "Standing with a broadsword across the shoulders, chainmail hood, black bandeau, hard blue light"
+        src: "/work/aera-wraith/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#110A12",
+        alt: "Standing with a broadsword across the shoulders, chainmail hood, black bandeau, hard blue light",
       },
       {
-        "src": "/work/aera-wraith/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#080D12",
-        "alt": "Hands clasped at the face in a chainmail hood and dark lipstick, rocky dark teal backdrop"
+        src: "/work/aera-wraith/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#080D12",
+        alt: "Hands clasped at the face in a chainmail hood and dark lipstick, rocky dark teal backdrop",
       },
       {
-        "src": "/work/aera-wraith/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#000005",
-        "alt": "Hand on a planted sword hilt, chainmail hood, lens flare streaking in from the left, blue backdrop"
+        src: "/work/aera-wraith/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#000005",
+        alt: "Hand on a planted sword hilt, chainmail hood, lens flare streaking in from the left, blue backdrop",
       },
       {
-        "src": "/work/aera-wraith/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#223E57",
-        "alt": "Seated on a blue floor in black thigh-high boots and chainmail hood, sword lying alongside"
+        src: "/work/aera-wraith/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#223E57",
+        alt: "Seated on a blue floor in black thigh-high boots and chainmail hood, sword lying alongside",
       },
       {
-        "src": "/work/aera-wraith/06.jpg",
-        "width": 2499,
-        "height": 3114,
-        "color": "#121518",
-        "alt": "Standing among cave rocks in smoke, hand on the hip, chainmail hood, sword planted alongside"
+        src: "/work/aera-wraith/06.jpg",
+        width: 2499,
+        height: 3114,
+        color: "#121518",
+        alt: "Standing among cave rocks in smoke, hand on the hip, chainmail hood, sword planted alongside",
       },
       {
-        "src": "/work/aera-wraith/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0D080F",
-        "alt": "Close crop, arm across the sword hilt, hand on the head, chainmail hood, deep blue backdrop"
-      }
-    ]
+        src: "/work/aera-wraith/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0D080F",
+        alt: "Close crop, arm across the sword hilt, hand on the head, chainmail hood, deep blue backdrop",
+      },
+    ],
   },
   {
-    "slug": "aether",
-    "name": "AETHER",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "aether",
+    name: "AETHER",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "portraits",
-        "name": "PORTRAITS",
-        "section": "WORK"
-      }
+        slug: "portraits",
+        name: "PORTRAITS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/aether/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#8C8CA6",
-      "alt": ""
+    cover: {
+      src: "/work/aether/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#8C8CA6",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/aether/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8CA6",
-        "alt": ""
+        src: "/work/aether/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8CA6",
+        alt: "",
       },
       {
-        "src": "/work/aether/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404059",
-        "alt": "Tight crop leaning in from the left, braids hanging, sheer camisole, cool light from above"
+        src: "/work/aether/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404059",
+        alt: "Tight crop leaning in from the left, braids hanging, sheer camisole, cool light from above",
       },
       {
-        "src": "/work/aether/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0D9",
-        "alt": "Seated on the floor leaning back on one arm, braids falling, sheer camisole and denim shorts"
+        src: "/work/aether/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0D9",
+        alt: "Seated on the floor leaning back on one arm, braids falling, sheer camisole and denim shorts",
       },
       {
-        "src": "/work/aether/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Propped on one arm with the head tilted, long braids, sheer camisole, denim shorts"
+        src: "/work/aether/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Propped on one arm with the head tilted, long braids, sheer camisole, denim shorts",
       },
       {
-        "src": "/work/aether/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Full length standing with ankles crossed, small in a dark room, a pool of light below"
+        src: "/work/aether/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Full length standing with ankles crossed, small in a dark room, a pool of light below",
       },
       {
-        "src": "/work/aether/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated on a stool, hands clasped between the knees, braids forward, dark grey backdrop"
+        src: "/work/aether/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated on a stool, hands clasped between the knees, braids forward, dark grey backdrop",
       },
       {
-        "src": "/work/aether/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262640",
-        "alt": "One hand lifted to an ear, braids falling forward, seated, sheer camisole and denim shorts"
-      }
-    ]
+        src: "/work/aether/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262640",
+        alt: "One hand lifted to an ear, braids falling forward, seated, sheer camisole and denim shorts",
+      },
+    ],
   },
   {
-    "slug": "analogue-dreams",
-    "name": "ANALOGUE DREAMS",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "analogue-dreams",
+    name: "ANALOGUE DREAMS",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/analogue-dreams/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#260C0C",
-      "alt": ""
+    cover: {
+      src: "/work/analogue-dreams/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#260C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/analogue-dreams/01.jpg",
-        "width": 1837,
-        "height": 2296,
-        "color": "#260C0C",
-        "alt": "White wraparound sunglasses, a pistol raised near the face, a lit CRT behind, teal and orange light"
+        src: "/work/analogue-dreams/01.jpg",
+        width: 1837,
+        height: 2296,
+        color: "#260C0C",
+        alt: "White wraparound sunglasses, a pistol raised near the face, a lit CRT behind, teal and orange light",
       },
       {
-        "src": "/work/analogue-dreams/02.jpg",
-        "width": 2074,
-        "height": 2593,
-        "color": "#F3F3F3",
-        "alt": "White sunglasses and a black mesh top in front of a glowing CRT, near-black teal surround"
+        src: "/work/analogue-dreams/02.jpg",
+        width: 2074,
+        height: 2593,
+        color: "#F3F3F3",
+        alt: "White sunglasses and a black mesh top in front of a glowing CRT, near-black teal surround",
       },
       {
-        "src": "/work/analogue-dreams/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Close in on white sunglasses, two pistols held up, a CRT glowing behind, orange light on the face"
+        src: "/work/analogue-dreams/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Close in on white sunglasses, two pistols held up, a CRT glowing behind, orange light on the face",
       },
       {
-        "src": "/work/analogue-dreams/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Kneeling by a CRT showing a red-lit frame, reaching for pistols laid on dark fabric, orange side light"
+        src: "/work/analogue-dreams/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Kneeling by a CRT showing a red-lit frame, reaching for pistols laid on dark fabric, orange side light",
       },
       {
-        "src": "/work/analogue-dreams/05.jpg",
-        "width": 2311,
-        "height": 2889,
-        "color": "#260C0C",
-        "alt": "A hand holds a pistol toward a CRT screen that shows the same scene, orange and teal"
+        src: "/work/analogue-dreams/05.jpg",
+        width: 2311,
+        height: 2889,
+        color: "#260C0C",
+        alt: "A hand holds a pistol toward a CRT screen that shows the same scene, orange and teal",
       },
       {
-        "src": "/work/analogue-dreams/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated beside a CRT in sunglasses and a striped top, pistol in hand, looking back at the lens"
+        src: "/work/analogue-dreams/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated beside a CRT in sunglasses and a striped top, pistol in hand, looking back at the lens",
       },
       {
-        "src": "/work/analogue-dreams/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seen from behind, seated beside a CRT, plant leaves behind, orange light on the hair"
+        src: "/work/analogue-dreams/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seen from behind, seated beside a CRT, plant leaves behind, orange light on the hair",
       },
       {
-        "src": "/work/analogue-dreams/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Lying back on dark fabric, one arm raised with a camcorder, CRT glowing nearby, teal and pink light"
+        src: "/work/analogue-dreams/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Lying back on dark fabric, one arm raised with a camcorder, CRT glowing nearby, teal and pink light",
       },
       {
-        "src": "/work/analogue-dreams/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Tight crop on a CRT screen showing a face, arm over the head, cyan glow"
+        src: "/work/analogue-dreams/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Tight crop on a CRT screen showing a face, arm over the head, cyan glow",
       },
       {
-        "src": "/work/analogue-dreams/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated before an orange backdrop biting a chain, sunglasses, printed top, a CRT behind"
-      }
-    ]
+        src: "/work/analogue-dreams/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated before an orange backdrop biting a chain, sunglasses, printed top, a CRT behind",
+      },
+    ],
   },
   {
-    "slug": "astral-allure",
-    "name": "ASTRAL ALLURE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "astral-allure",
+    name: "ASTRAL ALLURE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/astral-allure/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/astral-allure/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/astral-allure/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Looking up and away in a white printed bodysuit, wet black hair over the shoulders, dark backdrop"
+        src: "/work/astral-allure/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Looking up and away in a white printed bodysuit, wet black hair over the shoulders, dark backdrop",
       },
       {
-        "src": "/work/astral-allure/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Tilted head over a latex-gloved knee in the foreground, white bodysuit, pale light on a dark ground"
+        src: "/work/astral-allure/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Tilted head over a latex-gloved knee in the foreground, white bodysuit, pale light on a dark ground",
       },
       {
-        "src": "/work/astral-allure/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Reclining with one leg raised in black glossy thigh-high boots and gloves, white bodysuit, wide frame"
+        src: "/work/astral-allure/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Reclining with one leg raised in black glossy thigh-high boots and gloves, white bodysuit, wide frame",
       },
       {
-        "src": "/work/astral-allure/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Chin on the knees wrapped in glossy black latex, wet hair, direct stare, dark vignette"
+        src: "/work/astral-allure/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Chin on the knees wrapped in glossy black latex, wet hair, direct stare, dark vignette",
       },
       {
-        "src": "/work/astral-allure/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Motion-blurred close-up leaning toward the lens, a glossy boot above, white bodysuit"
+        src: "/work/astral-allure/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Motion-blurred close-up leaning toward the lens, a glossy boot above, white bodysuit",
       },
       {
-        "src": "/work/astral-allure/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Resting on a gloved forearm, wet hair across the face, white bodysuit, grey-blue floor"
+        src: "/work/astral-allure/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Resting on a gloved forearm, wet hair across the face, white bodysuit, grey-blue floor",
       },
       {
-        "src": "/work/astral-allure/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595973",
-        "alt": "Pressing a long black glove to the head, other hand reaching toward the camera on the floor"
+        src: "/work/astral-allure/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#595973",
+        alt: "Pressing a long black glove to the head, other hand reaching toward the camera on the floor",
       },
       {
-        "src": "/work/astral-allure/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#73738C",
-        "alt": "On all fours, a glossy black glove pressed to the floor toward the lens, hair hanging"
+        src: "/work/astral-allure/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#73738C",
+        alt: "On all fours, a glossy black glove pressed to the floor toward the lens, hair hanging",
       },
       {
-        "src": "/work/astral-allure/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Crawling low toward the camera, gloved hand stretched forward, wet hair, white bodysuit"
-      }
-    ]
+        src: "/work/astral-allure/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Crawling low toward the camera, gloved hand stretched forward, wet hair, white bodysuit",
+      },
+    ],
   },
   {
-    "slug": "automotive",
-    "name": "AUTOMOTIVE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/automotive/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#E5F8FD",
-      "alt": ""
+    slug: "automotive",
+    name: "AUTOMOTIVE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/automotive/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#E5F8FD",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/automotive/01.jpg",
-        "width": 2499,
-        "height": 3123,
-        "color": "#E5F8FD",
-        "alt": "Three coupes drive in line on a hill road at low sun, golden grass on both sides"
+        src: "/work/automotive/01.jpg",
+        width: 2499,
+        height: 3123,
+        color: "#E5F8FD",
+        alt: "Three coupes drive in line on a hill road at low sun, golden grass on both sides",
       },
       {
-        "src": "/work/automotive/02.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#FEFEFE",
-        "alt": "Rear view of a grey coupe with round red taillights and a wing, low sun glowing behind it"
+        src: "/work/automotive/02.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#FEFEFE",
+        alt: "Rear view of a grey coupe with round red taillights and a wing, low sun glowing behind it",
       },
       {
-        "src": "/work/automotive/04.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#B2C5C6",
-        "alt": "Three coupes on a curving hill road under a pink dusk sky, headlights on"
+        src: "/work/automotive/04.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#B2C5C6",
+        alt: "Three coupes on a curving hill road under a pink dusk sky, headlights on",
       },
       {
-        "src": "/work/automotive/05.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#1B1B1D",
-        "alt": "Tight crop on a matte grey hood vent and headlight, gravel pavement below"
+        src: "/work/automotive/05.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#1B1B1D",
+        alt: "Tight crop on a matte grey hood vent and headlight, gravel pavement below",
       },
       {
-        "src": "/work/automotive/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#232828",
-        "alt": "White supercar seen from behind in a concrete parking garage, hard window light and shadow"
+        src: "/work/automotive/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#232828",
+        alt: "White supercar seen from behind in a concrete parking garage, hard window light and shadow",
       },
       {
-        "src": "/work/automotive/08.jpg",
-        "width": 2499,
-        "height": 3123,
-        "color": "#1D2122",
-        "alt": "White supercar facing the camera in a garage, headlights on, long shadows across the floor"
+        src: "/work/automotive/08.jpg",
+        width: 2499,
+        height: 3123,
+        color: "#1D2122",
+        alt: "White supercar facing the camera in a garage, headlights on, long shadows across the floor",
       },
       {
-        "src": "/work/automotive/11.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#192C33",
-        "alt": "White sedan driving on a highway at dusk, motion-blurred road, pale sky above"
+        src: "/work/automotive/11.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#192C33",
+        alt: "White sedan driving on a highway at dusk, motion-blurred road, pale sky above",
       },
       {
-        "src": "/work/automotive/12.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#273C41",
-        "alt": "White sedan in side profile in a parking lot, tree line silhouetted against a dusk sky"
+        src: "/work/automotive/12.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#273C41",
+        alt: "White sedan in side profile in a parking lot, tree line silhouetted against a dusk sky",
       },
       {
-        "src": "/work/automotive/14.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#323A36",
-        "alt": "Close on the rear of a white sedan, red LED taillight glowing, dusk sky"
+        src: "/work/automotive/14.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#323A36",
+        alt: "Close on the rear of a white sedan, red LED taillight glowing, dusk sky",
       },
       {
-        "src": "/work/automotive/15.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#070606",
-        "alt": "Black sedan at night under a tree, headlights glowing, pavement reflecting light"
+        src: "/work/automotive/15.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#070606",
+        alt: "Black sedan at night under a tree, headlights glowing, pavement reflecting light",
       },
       {
-        "src": "/work/automotive/16.jpg",
-        "width": 2499,
-        "height": 1406,
-        "color": "#84B3CA",
-        "alt": "Gold wide-body coupe with a rear wing parked in a lot under a cloudy dusk sky"
+        src: "/work/automotive/16.jpg",
+        width: 2499,
+        height: 1406,
+        color: "#84B3CA",
+        alt: "Gold wide-body coupe with a rear wing parked in a lot under a cloudy dusk sky",
       },
       {
-        "src": "/work/automotive/17.jpg",
-        "width": 2499,
-        "height": 1406,
-        "color": "#787061",
-        "alt": "Long-exposure light trail beside a dark coupe on a road at night, streaked clouds above"
+        src: "/work/automotive/17.jpg",
+        width: 2499,
+        height: 1406,
+        color: "#787061",
+        alt: "Long-exposure light trail beside a dark coupe on a road at night, streaked clouds above",
       },
       {
-        "src": "/work/automotive/18.jpg",
-        "width": 2499,
-        "height": 3332,
-        "color": "#20263E",
-        "alt": "Matte blue car front corner, a bright headlight, painted concrete floor, shot from above"
+        src: "/work/automotive/18.jpg",
+        width: 2499,
+        height: 3332,
+        color: "#20263E",
+        alt: "Matte blue car front corner, a bright headlight, painted concrete floor, shot from above",
       },
       {
-        "src": "/work/automotive/19.jpg",
-        "width": 2499,
-        "height": 1636,
-        "color": "#0C0401",
-        "alt": "Dark coupe at night with a headlight flaring, red light trails on the road behind"
-      }
-    ]
+        src: "/work/automotive/19.jpg",
+        width: 2499,
+        height: 1636,
+        color: "#0C0401",
+        alt: "Dark coupe at night with a headlight flaring, red light trails on the road behind",
+      },
+    ],
   },
   {
-    "slug": "byte-me",
-    "name": "BYTE ME",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/byte-me/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#A6A6A6",
-      "alt": ""
+    slug: "byte-me",
+    name: "BYTE ME",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/byte-me/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#A6A6A6",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/byte-me/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "Seated on the floor leaning back on one arm, open-knit top, black tie, black shorts"
+        src: "/work/byte-me/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6A6A6",
+        alt: "Seated on the floor leaning back on one arm, open-knit top, black tie, black shorts",
       },
       {
-        "src": "/work/byte-me/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "Seated sideways in black shorts and sneakers, white socks, hands clasped at a shin, looking back"
+        src: "/work/byte-me/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6A6A6",
+        alt: "Seated sideways in black shorts and sneakers, white socks, hands clasped at a shin, looking back",
       },
       {
-        "src": "/work/byte-me/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Twisted away from the camera, looking back over a shoulder, open-knit top, black tie, pleated skirt"
+        src: "/work/byte-me/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "Twisted away from the camera, looking back over a shoulder, open-knit top, black tie, pleated skirt",
       },
       {
-        "src": "/work/byte-me/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737373",
-        "alt": "Seated on one hip, long knit sleeve reaching to a sneaker, black tie draped over the top"
+        src: "/work/byte-me/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#737373",
+        alt: "Seated on one hip, long knit sleeve reaching to a sneaker, black tie draped over the top",
       },
       {
-        "src": "/work/byte-me/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Bent forward in a wide stance, sneakers and white socks, black tie hanging against the knit top"
+        src: "/work/byte-me/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "Bent forward in a wide stance, sneakers and white socks, black tie hanging against the knit top",
       },
       {
-        "src": "/work/byte-me/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Kneeling on one knee with a hand on the other, off-shoulder knit over a black bralette"
+        src: "/work/byte-me/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "Kneeling on one knee with a hand on the other, off-shoulder knit over a black bralette",
       },
       {
-        "src": "/work/byte-me/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737373",
-        "alt": "Close crop, one arm raised in a long open-knit sleeve, black tie falling across the chest"
+        src: "/work/byte-me/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#737373",
+        alt: "Close crop, one arm raised in a long open-knit sleeve, black tie falling across the chest",
       },
       {
-        "src": "/work/byte-me/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737373",
-        "alt": "Seen from above, standing with feet together in sneakers and white socks, knit top, black tie"
+        src: "/work/byte-me/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#737373",
+        alt: "Seen from above, standing with feet together in sneakers and white socks, knit top, black tie",
       },
       {
-        "src": "/work/byte-me/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737373",
-        "alt": "One hand to the forehead, tie loose around the neck, open-knit top, pleated skirt, wide stance"
+        src: "/work/byte-me/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#737373",
+        alt: "One hand to the forehead, tie loose around the neck, open-knit top, pleated skirt, wide stance",
       },
       {
-        "src": "/work/byte-me/17.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Holding a white corded phone out behind, thick black-framed glasses, knit top, black tie, grey backdrop"
-      }
-    ]
+        src: "/work/byte-me/17.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "Holding a white corded phone out behind, thick black-framed glasses, knit top, black tie, grey backdrop",
+      },
+    ],
   },
   {
-    "slug": "coral-synthmorph",
-    "name": "CORAL SYNTHMORPH",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "coral-synthmorph",
+    name: "CORAL SYNTHMORPH",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/coral-synthmorph/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#260C26",
-      "alt": ""
+    cover: {
+      src: "/work/coral-synthmorph/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#260C26",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/coral-synthmorph/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C26",
-        "alt": "Crouched low in black latex gloves and boots, one hand on the floor, a pink glowing backdrop"
+        src: "/work/coral-synthmorph/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C26",
+        alt: "Crouched low in black latex gloves and boots, one hand on the floor, a pink glowing backdrop",
       },
       {
-        "src": "/work/coral-synthmorph/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F38CC0",
-        "alt": "Heavily motion-blurred portrait in pink light, dark hair across the face, white top"
+        src: "/work/coral-synthmorph/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F38CC0",
+        alt: "Heavily motion-blurred portrait in pink light, dark hair across the face, white top",
       },
       {
-        "src": "/work/coral-synthmorph/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9738C",
-        "alt": "Standing in a sheer grey bodysuit, wet hair long, wrapped in hazy pink light"
+        src: "/work/coral-synthmorph/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9738C",
+        alt: "Standing in a sheer grey bodysuit, wet hair long, wrapped in hazy pink light",
       },
       {
-        "src": "/work/coral-synthmorph/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#734040",
-        "alt": "Profile with a black glove at the cheek, star sticker by the eye, clear-framed glasses, pink backdrop"
+        src: "/work/coral-synthmorph/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#734040",
+        alt: "Profile with a black glove at the cheek, star sticker by the eye, clear-framed glasses, pink backdrop",
       },
       {
-        "src": "/work/coral-synthmorph/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#594040",
-        "alt": "Head tipped down, wet hair in loose braids, star sticker over one eye, black glove at the edge"
+        src: "/work/coral-synthmorph/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#594040",
+        alt: "Head tipped down, wet hair in loose braids, star sticker over one eye, black glove at the edge",
       },
       {
-        "src": "/work/coral-synthmorph/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C08C8C",
-        "alt": "Both gloved hands raised to the head, tinted glasses, grey WET bodysuit, rose backdrop"
-      }
-    ]
+        src: "/work/coral-synthmorph/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C08C8C",
+        alt: "Both gloved hands raised to the head, tinted glasses, grey WET bodysuit, rose backdrop",
+      },
+    ],
   },
   {
-    "slug": "coverart",
-    "name": "COVERART",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "coverart",
+    name: "COVERART",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "coverart",
-        "name": "COVERART",
-        "section": "WORK"
-      }
+        slug: "coverart",
+        name: "COVERART",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/coverart/cover.jpg",
-      "width": 600,
-      "height": 600,
-      "color": "#264026",
-      "alt": "​THE RIVER - TMEUPTEDDY"
+    cover: {
+      src: "/work/coverart/cover.jpg",
+      width: 600,
+      height: 600,
+      color: "#264026",
+      alt: "​THE RIVER - TMEUPTEDDY",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/coverart/01.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#264026",
-        "alt": "​THE RIVER - TMEUPTEDDY"
+        src: "/work/coverart/01.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#264026",
+        alt: "​THE RIVER - TMEUPTEDDY",
       },
       {
-        "src": "/work/coverart/02.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#111F26",
-        "alt": "Problem Child - BANX"
+        src: "/work/coverart/02.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#111F26",
+        alt: "Problem Child - BANX",
       },
       {
-        "src": "/work/coverart/03.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#161616",
-        "alt": "​THE DESCRIPTION - SAMMY SHIBLAQ"
+        src: "/work/coverart/03.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#161616",
+        alt: "​THE DESCRIPTION - SAMMY SHIBLAQ",
       },
       {
-        "src": "/work/coverart/04.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#404059",
-        "alt": "​YOUR WAY - THE SZNS FT. SWAVIE"
+        src: "/work/coverart/04.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#404059",
+        alt: "​YOUR WAY - THE SZNS FT. SWAVIE",
       },
       {
-        "src": "/work/coverart/05.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#404040",
-        "alt": "TOOK TIME - BANX"
+        src: "/work/coverart/05.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#404040",
+        alt: "TOOK TIME - BANX",
       },
       {
-        "src": "/work/coverart/06.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#A6A6A6",
-        "alt": "EST MODVS IN REBVS - NAMEERA "
+        src: "/work/coverart/06.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#A6A6A6",
+        alt: "EST MODVS IN REBVS - NAMEERA ",
       },
       {
-        "src": "/work/coverart/07.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#C0C0D9",
-        "alt": "EST MODVS IN REBVS - NAMEERA BACK COVER"
+        src: "/work/coverart/07.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#C0C0D9",
+        alt: "EST MODVS IN REBVS - NAMEERA BACK COVER",
       },
       {
-        "src": "/work/coverart/08.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#402626",
-        "alt": "​JAHANNAM NAMEERA - FRONT"
+        src: "/work/coverart/08.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#402626",
+        alt: "​JAHANNAM NAMEERA - FRONT",
       },
       {
-        "src": "/work/coverart/09.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#260C0C",
-        "alt": "​JAHANNAM NAMEERA - BACK"
+        src: "/work/coverart/09.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#260C0C",
+        alt: "​JAHANNAM NAMEERA - BACK",
       },
       {
-        "src": "/work/coverart/10.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#1a1a1a",
-        "alt": "TOP TIER - BANX"
+        src: "/work/coverart/10.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#1a1a1a",
+        alt: "TOP TIER - BANX",
       },
       {
-        "src": "/work/coverart/11.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#1a1a1a",
-        "alt": "​Do What I Want - BANX"
+        src: "/work/coverart/11.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#1a1a1a",
+        alt: "​Do What I Want - BANX",
       },
       {
-        "src": "/work/coverart/12.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#F3F3F3",
-        "alt": "POP OUT - BANX​"
+        src: "/work/coverart/12.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#F3F3F3",
+        alt: "POP OUT - BANX​",
       },
       {
-        "src": "/work/coverart/13.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#0C260C",
-        "alt": "​10 SHOTS - SAMMY SHIBLAQ"
+        src: "/work/coverart/13.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#0C260C",
+        alt: "​10 SHOTS - SAMMY SHIBLAQ",
       },
       {
-        "src": "/work/coverart/14.jpg",
-        "width": 1599,
-        "height": 1599,
-        "color": "#0C260C",
-        "alt": "​Tomorrow Aint Promised - Sammy Shiblaq"
+        src: "/work/coverart/14.jpg",
+        width: 1599,
+        height: 1599,
+        color: "#0C260C",
+        alt: "​Tomorrow Aint Promised - Sammy Shiblaq",
       },
       {
-        "src": "/work/coverart/15.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#597373",
-        "alt": "SAVAGE - BANX"
+        src: "/work/coverart/15.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#597373",
+        alt: "SAVAGE - BANX",
       },
       {
-        "src": "/work/coverart/16.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#262626",
-        "alt": "WHOLE SUMMER - BANX"
+        src: "/work/coverart/16.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#262626",
+        alt: "WHOLE SUMMER - BANX",
       },
       {
-        "src": "/work/coverart/17.jpg",
-        "width": 1599,
-        "height": 1599,
-        "color": "#D9D9D9",
-        "alt": "​Rockstar - BANX"
+        src: "/work/coverart/17.jpg",
+        width: 1599,
+        height: 1599,
+        color: "#D9D9D9",
+        alt: "​Rockstar - BANX",
       },
       {
-        "src": "/work/coverart/18.jpg",
-        "width": 999,
-        "height": 999,
-        "color": "#C3D7D8",
-        "alt": "Beamin - Karson"
+        src: "/work/coverart/18.jpg",
+        width: 999,
+        height: 999,
+        color: "#C3D7D8",
+        alt: "Beamin - Karson",
       },
       {
-        "src": "/work/coverart/19.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#B5B7C0",
-        "alt": "Hi-Fi - Parsia"
+        src: "/work/coverart/19.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#B5B7C0",
+        alt: "Hi-Fi - Parsia",
       },
       {
-        "src": "/work/coverart/20.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#7DE1E8",
-        "alt": "Faith and Hustle​ - Sammy Shiblaq"
+        src: "/work/coverart/20.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#7DE1E8",
+        alt: "Faith and Hustle​ - Sammy Shiblaq",
       },
       {
-        "src": "/work/coverart/21.jpg",
-        "width": 779,
-        "height": 779,
-        "color": "#1A1624",
-        "alt": "Area 51 - KXP"
+        src: "/work/coverart/21.jpg",
+        width: 779,
+        height: 779,
+        color: "#1A1624",
+        alt: "Area 51 - KXP",
       },
       {
-        "src": "/work/coverart/22.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#D95940",
-        "alt": "​IN THE HOODIE ON YOUR SLEEVE - ERICALISA"
+        src: "/work/coverart/22.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#D95940",
+        alt: "​IN THE HOODIE ON YOUR SLEEVE - ERICALISA",
       },
       {
-        "src": "/work/coverart/23.jpg",
-        "width": 999,
-        "height": 999,
-        "color": "#142228",
-        "alt": "​Wasted Years Remix - Parsia"
+        src: "/work/coverart/23.jpg",
+        width: 999,
+        height: 999,
+        color: "#142228",
+        alt: "​Wasted Years Remix - Parsia",
       },
       {
-        "src": "/work/coverart/24.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#0C260C",
-        "alt": "​NEW HOME - RECHI"
+        src: "/work/coverart/24.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#0C260C",
+        alt: "​NEW HOME - RECHI",
       },
       {
-        "src": "/work/coverart/25.jpg",
-        "width": 1600,
-        "height": 1600,
-        "color": "#060606",
-        "alt": "HADAF - IMANEMUN X POOYAN ARDALAN"
-      }
-    ]
+        src: "/work/coverart/25.jpg",
+        width: 1600,
+        height: 1600,
+        color: "#060606",
+        alt: "HADAF - IMANEMUN X POOYAN ARDALAN",
+      },
+    ],
   },
   {
-    "slug": "crave",
-    "name": "CRAVE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "crave",
+    name: "CRAVE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "mixed-media",
-        "name": "MIXED MEDIA",
-        "section": "WORK"
-      }
+        slug: "mixed-media",
+        name: "MIXED MEDIA",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/crave/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#D9D9D9",
-      "alt": ""
+    cover: {
+      src: "/work/crave/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#D9D9D9",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/crave/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Seated on a spread of black cloth in a corset and fishnets, looking at the lens"
+        src: "/work/crave/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Seated on a spread of black cloth in a corset and fishnets, looking at the lens",
       },
       {
-        "src": "/work/crave/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Kneeling on all fours with the head bowed, long braid hanging, black corset, fishnets"
+        src: "/work/crave/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Kneeling on all fours with the head bowed, long braid hanging, black corset, fishnets",
       },
       {
-        "src": "/work/crave/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Screaming with hands at the head, fake fangs, large cross necklace, black corset"
+        src: "/work/crave/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Screaming with hands at the head, fake fangs, large cross necklace, black corset",
       },
       {
-        "src": "/work/crave/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Standing hunched forward, hair swept across the face, cross choker, black corset, fishnets"
+        src: "/work/crave/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Standing hunched forward, hair swept across the face, cross choker, black corset, fishnets",
       },
       {
-        "src": "/work/crave/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Close profile, chin on a hand, pearl choker with a cross, hair blowing across the face"
+        src: "/work/crave/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Close profile, chin on a hand, pearl choker with a cross, hair blowing across the face",
       },
       {
-        "src": "/work/crave/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Kneeling, hand at the chin and mouth open, braids hanging forward, corset and fishnets"
-      }
-    ]
+        src: "/work/crave/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Kneeling, hand at the chin and mouth open, braids hanging forward, corset and fishnets",
+      },
+    ],
   },
   {
-    "slug": "cyber1a",
-    "name": "CYBER1A",
-    "headline": "CYBER1A",
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "cyber1a",
+    name: "CYBER1A",
+    headline: "CYBER1A",
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "artist-presskit",
-        "name": "ARTIST PRESSKIT",
-        "section": "WORK"
-      }
+        slug: "artist-presskit",
+        name: "ARTIST PRESSKIT",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/cyber1a/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#0C260C",
-      "alt": ""
+    cover: {
+      src: "/work/cyber1a/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#0C260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/cyber1a/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": ""
+        src: "/work/cyber1a/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "",
       },
       {
-        "src": "/work/cyber1a/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Leaning on a CRT in a cyan triangle of light, dark blue room, looking at the lens"
+        src: "/work/cyber1a/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Leaning on a CRT in a cyan triangle of light, dark blue room, looking at the lens",
       },
       {
-        "src": "/work/cyber1a/03.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#D9D9D9",
-        "alt": "Two people posing around stacked CRTs showing CYBERIA, one arched back, wood floor, pale wall"
+        src: "/work/cyber1a/03.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#D9D9D9",
+        alt: "Two people posing around stacked CRTs showing CYBERIA, one arched back, wood floor, pale wall",
       },
       {
-        "src": "/work/cyber1a/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9F3",
-        "alt": "Two seated people among stacked CRTs showing glitch images, green light on the floor"
+        src: "/work/cyber1a/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9F3",
+        alt: "Two seated people among stacked CRTs showing glitch images, green light on the floor",
       },
       {
-        "src": "/work/cyber1a/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Two people leaning on a CRT showing CYBERIA, a stack of screens behind, cool light"
+        src: "/work/cyber1a/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Two people leaning on a CRT showing CYBERIA, a stack of screens behind, cool light",
       },
       {
-        "src": "/work/cyber1a/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Two people close to the lens in sunglasses and black tops, one reaching a hand toward it"
+        src: "/work/cyber1a/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Two people close to the lens in sunglasses and black tops, one reaching a hand toward it",
       },
       {
-        "src": "/work/cyber1a/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "In a black studded jacket beside a stack of glitching CRTs, teal light"
+        src: "/work/cyber1a/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "In a black studded jacket beside a stack of glitching CRTs, teal light",
       },
       {
-        "src": "/work/cyber1a/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated in a black jacket with a glittering chain, smoke and teal beam, CRT stack behind"
+        src: "/work/cyber1a/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated in a black jacket with a glittering chain, smoke and teal beam, CRT stack behind",
       },
       {
-        "src": "/work/cyber1a/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Standing small in a black jacket beside a tall stack of CRTs, smoke in a teal beam"
+        src: "/work/cyber1a/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Standing small in a black jacket beside a tall stack of CRTs, smoke in a teal beam",
       },
       {
-        "src": "/work/cyber1a/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Fractured mirror-like reflection of a face in dark teal, CRT scan lines across the frame"
+        src: "/work/cyber1a/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Fractured mirror-like reflection of a face in dark teal, CRT scan lines across the frame",
       },
       {
-        "src": "/work/cyber1a/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C02659",
-        "alt": "Motion-blurred seated figure in a fur coat against a red wall and blue-lit CRTs"
+        src: "/work/cyber1a/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C02659",
+        alt: "Motion-blurred seated figure in a fur coat against a red wall and blue-lit CRTs",
       },
       {
-        "src": "/work/cyber1a/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C26",
-        "alt": "Seated on a CRT in a mesh-sleeved top and platform shoes, red wall, glowing screens"
-      }
-    ]
+        src: "/work/cyber1a/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C26",
+        alt: "Seated on a CRT in a mesh-sleeved top and platform shoes, red wall, glowing screens",
+      },
+    ],
   },
   {
-    "slug": "cyberscape",
-    "name": "CYBERSCAPE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "cyberscape",
+    name: "CYBERSCAPE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/cyberscape/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#0C260C",
-      "alt": ""
+    cover: {
+      src: "/work/cyberscape/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#0C260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/cyberscape/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated on a CRT in a black leather bodysuit and fringed chaps, revolver, face harness, repeating text behind"
+        src: "/work/cyberscape/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated on a CRT in a black leather bodysuit and fringed chaps, revolver, face harness, repeating text behind",
       },
       {
-        "src": "/work/cyberscape/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated on a CRT with a hand on the knee, chrome sunglasses, fringed chaps, leather top, blue backdrop"
+        src: "/work/cyberscape/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated on a CRT with a hand on the knee, chrome sunglasses, fringed chaps, leather top, blue backdrop",
       },
       {
-        "src": "/work/cyberscape/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Pointing a revolver at the lens in chrome sunglasses and a face harness, leather bodysuit, red rim light"
+        src: "/work/cyberscape/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Pointing a revolver at the lens in chrome sunglasses and a face harness, leather bodysuit, red rim light",
       },
       {
-        "src": "/work/cyberscape/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Close angle on a pointed revolver, chrome sunglasses, mouth harness, black leather top, blue light"
+        src: "/work/cyberscape/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Close angle on a pointed revolver, chrome sunglasses, mouth harness, black leather top, blue light",
       },
       {
-        "src": "/work/cyberscape/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Arm extended with a revolver, chrome sunglasses and a face harness, black leather bodysuit, red light"
+        src: "/work/cyberscape/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Arm extended with a revolver, chrome sunglasses and a face harness, black leather bodysuit, red light",
       },
       {
-        "src": "/work/cyberscape/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated holding a revolver upright, black leather bodysuit, chaps with red stitching, face harness, blue backdrop"
+        src: "/work/cyberscape/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated holding a revolver upright, black leather bodysuit, chaps with red stitching, face harness, blue backdrop",
       },
       {
-        "src": "/work/cyberscape/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C400C",
-        "alt": "Camcorder screen in the foreground showing a seated figure, a blurred blue silhouette behind"
+        src: "/work/cyberscape/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C400C",
+        alt: "Camcorder screen in the foreground showing a seated figure, a blurred blue silhouette behind",
       },
       {
-        "src": "/work/cyberscape/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D90C0C",
-        "alt": "Hand at the cheek, face tilted up, star stickers by the eye, black top, teal and red light"
+        src: "/work/cyberscape/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D90C0C",
+        alt: "Hand at the cheek, face tilted up, star stickers by the eye, black top, teal and red light",
       },
       {
-        "src": "/work/cyberscape/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Hand in the hair, star stickers on the cheek, black strappy top, plaid skirt, red and cyan light"
-      }
-    ]
+        src: "/work/cyberscape/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Hand in the hair, star stickers on the cheek, black strappy top, plaid skirt, red and cyan light",
+      },
+    ],
   },
   {
-    "slug": "dark-matter",
-    "name": "DARK MATTER",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/dark-matter/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#737373",
-      "alt": ""
+    slug: "dark-matter",
+    name: "DARK MATTER",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/dark-matter/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#737373",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/dark-matter/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737373",
-        "alt": "Figure crouched in a pool of glossy black liquid, hair streaked pink, black gloves, grey backdrop"
+        src: "/work/dark-matter/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#737373",
+        alt: "Figure crouched in a pool of glossy black liquid, hair streaked pink, black gloves, grey backdrop",
       },
       {
-        "src": "/work/dark-matter/02.jpg",
-        "width": 1707,
-        "height": 2133,
-        "color": "#0C260C",
-        "alt": "Figure rising from black liquid in drifting smoke, one clawed black glove raised, head tipped back"
+        src: "/work/dark-matter/02.jpg",
+        width: 1707,
+        height: 2133,
+        color: "#0C260C",
+        alt: "Figure rising from black liquid in drifting smoke, one clawed black glove raised, head tipped back",
       },
       {
-        "src": "/work/dark-matter/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595959",
-        "alt": "Low angle at the surface of black liquid, a clawed glove lifted, smoke and grey backdrop"
+        src: "/work/dark-matter/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#595959",
+        alt: "Low angle at the surface of black liquid, a clawed glove lifted, smoke and grey backdrop",
       },
       {
-        "src": "/work/dark-matter/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Figure seated on glossy black liquid, black gloves and boots, head thrown back, pink hair streaks"
+        src: "/work/dark-matter/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "Figure seated on glossy black liquid, black gloves and boots, head thrown back, pink hair streaks",
       },
       {
-        "src": "/work/dark-matter/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "Two black-gloved hands with long claws, liquid dripping in strings, plain grey backdrop"
+        src: "/work/dark-matter/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6A6A6",
+        alt: "Two black-gloved hands with long claws, liquid dripping in strings, plain grey backdrop",
       },
       {
-        "src": "/work/dark-matter/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Seated with one clawed glove raised, black liquid splashed over the figure and the floor"
+        src: "/work/dark-matter/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "Seated with one clawed glove raised, black liquid splashed over the figure and the floor",
       },
       {
-        "src": "/work/dark-matter/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Figure on hands and knees in a spill of black liquid, one hand reaching forward, white floor"
+        src: "/work/dark-matter/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Figure on hands and knees in a spill of black liquid, one hand reaching forward, white floor",
       },
       {
-        "src": "/work/dark-matter/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Motion-blurred figure with an arm raised overhead, black liquid streaks, pink-streaked hair, grey backdrop"
+        src: "/work/dark-matter/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "Motion-blurred figure with an arm raised overhead, black liquid streaks, pink-streaked hair, grey backdrop",
       },
       {
-        "src": "/work/dark-matter/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Kneeling in a spill of black liquid, one hand planted, the other arm raised, hair hanging"
-      }
-    ]
+        src: "/work/dark-matter/15.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Kneeling in a spill of black liquid, one hand planted, the other arm raised, hair hanging",
+      },
+    ],
   },
   {
-    "slug": "dystopia",
-    "name": "DYSTOPIA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/dystopia/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#0C260C",
-      "alt": ""
+    slug: "dystopia",
+    name: "DYSTOPIA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/dystopia/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#0C260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/dystopia/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Figure lying down in a white VR headset, tangled in black cables, red grid projected over the floor"
+        src: "/work/dystopia/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Figure lying down in a white VR headset, tangled in black cables, red grid projected over the floor",
       },
       {
-        "src": "/work/dystopia/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#59C0D9",
-        "alt": "Figure in a VR headset seen from behind, wrapped in black cables, cyan grid on the wall"
+        src: "/work/dystopia/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#59C0D9",
+        alt: "Figure in a VR headset seen from behind, wrapped in black cables, cyan grid on the wall",
       },
       {
-        "src": "/work/dystopia/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#73C0D9",
-        "alt": "Propped on one hand in a VR headset, other hand lifted, cables looped around, red grid light"
+        src: "/work/dystopia/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#73C0D9",
+        alt: "Propped on one hand in a VR headset, other hand lifted, cables looped around, red grid light",
       },
       {
-        "src": "/work/dystopia/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#73C0D9",
-        "alt": "Close angle, face down in a VR headset, cables across the back, grid light on the floor"
+        src: "/work/dystopia/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#73C0D9",
+        alt: "Close angle, face down in a VR headset, cables across the back, grid light on the floor",
       },
       {
-        "src": "/work/dystopia/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Standing in a VR headset with cables hanging overhead, white tubing at the waist, cyan haze"
+        src: "/work/dystopia/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Standing in a VR headset with cables hanging overhead, white tubing at the waist, cyan haze",
       },
       {
-        "src": "/work/dystopia/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#73C0D9",
-        "alt": "Crouched in a VR headset, cables wound around the torso, white tubing at the hip, grid behind"
+        src: "/work/dystopia/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#73C0D9",
+        alt: "Crouched in a VR headset, cables wound around the torso, white tubing at the hip, grid behind",
       },
       {
-        "src": "/work/dystopia/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated on the floor seen from behind, VR headset on, cables across the back, blue grid light"
+        src: "/work/dystopia/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated on the floor seen from behind, VR headset on, cables across the back, blue grid light",
       },
       {
-        "src": "/work/dystopia/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "One arm raised holding a controller to a VR headset, cables wrapped around, teal light"
+        src: "/work/dystopia/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "One arm raised holding a controller to a VR headset, cables wrapped around, teal light",
       },
       {
-        "src": "/work/dystopia/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Kneeling and leaning back in a VR headset, green and cyan stripes projected, cables trailing"
-      }
-    ]
+        src: "/work/dystopia/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Kneeling and leaning back in a VR headset, green and cyan stripes projected, cables trailing",
+      },
+    ],
   },
   {
-    "slug": "entangled",
-    "name": "ENTANGLED",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/entangled/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#A60C0C",
-      "alt": ""
+    slug: "entangled",
+    name: "ENTANGLED",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/entangled/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#A60C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/entangled/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A60C0C",
-        "alt": "Seated on a red floor in a dark red lace dress, red cords strung across, red backdrop"
+        src: "/work/entangled/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A60C0C",
+        alt: "Seated on a red floor in a dark red lace dress, red cords strung across, red backdrop",
       },
       {
-        "src": "/work/entangled/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A60C0C",
-        "alt": "Kneeling in a red lace dress wrapped in red cord, head tipped back, hard top light, red backdrop"
+        src: "/work/entangled/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A60C0C",
+        alt: "Kneeling in a red lace dress wrapped in red cord, head tipped back, hard top light, red backdrop",
       },
       {
-        "src": "/work/entangled/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C0C0C",
-        "alt": "Kneeling with one hand raised through red cords, dark red ruffled dress, a spotlight on the floor"
+        src: "/work/entangled/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C0C0C",
+        alt: "Kneeling with one hand raised through red cords, dark red ruffled dress, a spotlight on the floor",
       },
       {
-        "src": "/work/entangled/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A60C0C",
-        "alt": "Seated leaning on one hand, red cords crossing a dark red dress, head tilted up, red backdrop"
+        src: "/work/entangled/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A60C0C",
+        alt: "Seated leaning on one hand, red cords crossing a dark red dress, head tilted up, red backdrop",
       },
       {
-        "src": "/work/entangled/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Kneeling on a white floor, one arm reaching along thick red rope, red lace dress"
+        src: "/work/entangled/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Kneeling on a white floor, one arm reaching along thick red rope, red lace dress",
       },
       {
-        "src": "/work/entangled/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Arms crossed over the chest, red lace dress with halter straps, thick red rope, pale backdrop"
+        src: "/work/entangled/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Arms crossed over the chest, red lace dress with halter straps, thick red rope, pale backdrop",
       },
       {
-        "src": "/work/entangled/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Kneeling side-on, hands in thick red rope, red lace dress, white backdrop"
+        src: "/work/entangled/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Kneeling side-on, hands in thick red rope, red lace dress, white backdrop",
       },
       {
-        "src": "/work/entangled/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Seated with boots tucked under, red rope looped around the legs, red lace dress, pale backdrop"
+        src: "/work/entangled/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Seated with boots tucked under, red rope looped around the legs, red lace dress, pale backdrop",
       },
       {
-        "src": "/work/entangled/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Leaning on a black rope in a sheer black dress with flared sleeves, head tipped back, pale backdrop"
+        src: "/work/entangled/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Leaning on a black rope in a sheer black dress with flared sleeves, head tipped back, pale backdrop",
       },
       {
-        "src": "/work/entangled/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Standing in a long sheer black dress with a slit, both hands on black ropes overhead"
+        src: "/work/entangled/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Standing in a long sheer black dress with a slit, both hands on black ropes overhead",
       },
       {
-        "src": "/work/entangled/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Motion-blurred in a black corset dress, arms draped over black rope, pale backdrop"
+        src: "/work/entangled/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Motion-blurred in a black corset dress, arms draped over black rope, pale backdrop",
       },
       {
-        "src": "/work/entangled/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Heavily blurred, translucent double image behind black ropes, black corset dress, pale backdrop"
+        src: "/work/entangled/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Heavily blurred, translucent double image behind black ropes, black corset dress, pale backdrop",
       },
       {
-        "src": "/work/entangled/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seen from above, posed in a sheer black dress, hands at the shoulders, black ropes across the frame"
-      }
-    ]
+        src: "/work/entangled/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seen from above, posed in a sheer black dress, hands at the shoulders, black ropes across the frame",
+      },
+    ],
   },
   {
-    "slug": "events",
-    "name": "EVENT COVERAGE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "events",
+    name: "EVENT COVERAGE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "events",
-        "name": "EVENT COVERAGE",
-        "section": "WORK"
-      }
+        slug: "events",
+        name: "EVENT COVERAGE",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/events/cover.jpg",
-      "width": 600,
-      "height": 686,
-      "color": "#26260C",
-      "alt": ""
+    cover: {
+      src: "/work/events/cover.jpg",
+      width: 600,
+      height: 686,
+      color: "#26260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/events/01.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#26260C",
-        "alt": "Crowd with raised hands at the front of a stage, warm orange light, speaker stack ahead"
+        src: "/work/events/01.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#26260C",
+        alt: "Crowd with raised hands at the front of a stage, warm orange light, speaker stack ahead",
       },
       {
-        "src": "/work/events/02.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#262626",
-        "alt": "Black and white performer in a patterned jacket leaning forward on stage, haze and a spotlight"
+        src: "/work/events/02.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#262626",
+        alt: "Black and white performer in a patterned jacket leaning forward on stage, haze and a spotlight",
       },
       {
-        "src": "/work/events/03.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#264040",
-        "alt": "Performer in profile on stage in a graphic jacket, teal haze, a stage monitor and blurred foot above"
+        src: "/work/events/03.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#264040",
+        alt: "Performer in profile on stage in a graphic jacket, teal haze, a stage monitor and blurred foot above",
       },
       {
-        "src": "/work/events/04.jpg",
-        "width": 1707,
-        "height": 2390,
-        "color": "#262626",
-        "alt": "White laser beams fanning over a dark crowd, a DJ in a patterned shirt at the booth"
+        src: "/work/events/04.jpg",
+        width: 1707,
+        height: 2390,
+        color: "#262626",
+        alt: "White laser beams fanning over a dark crowd, a DJ in a patterned shirt at the booth",
       },
       {
-        "src": "/work/events/05.jpg",
-        "width": 1693,
-        "height": 2371,
-        "color": "#0C260C",
-        "alt": "High angle on a DJ booth under blue and purple laser lines, crowd below, a sign overhead"
+        src: "/work/events/05.jpg",
+        width: 1693,
+        height: 2371,
+        color: "#0C260C",
+        alt: "High angle on a DJ booth under blue and purple laser lines, crowd below, a sign overhead",
       },
       {
-        "src": "/work/events/07.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#262626",
-        "alt": "DJ in a patterned sweater mixing at the decks, laser beam across the frame, projections on the wall"
+        src: "/work/events/07.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#262626",
+        alt: "DJ in a patterned sweater mixing at the decks, laser beam across the frame, projections on the wall",
       },
       {
-        "src": "/work/events/08.jpg",
-        "width": 2390,
-        "height": 1707,
-        "color": "#262626",
-        "alt": "Black and white crowd shot, a phone held up toward a burst of laser light"
+        src: "/work/events/08.jpg",
+        width: 2390,
+        height: 1707,
+        color: "#262626",
+        alt: "Black and white crowd shot, a phone held up toward a burst of laser light",
       },
       {
-        "src": "/work/events/09.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#262626",
-        "alt": "Black and white performer in a patterned jacket on stage, a DJ at the decks, video wall behind"
+        src: "/work/events/09.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#262626",
+        alt: "Black and white performer in a patterned jacket on stage, a DJ at the decks, video wall behind",
       },
       {
-        "src": "/work/events/11.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#262626",
-        "alt": "Performer pointing a microphone arm out over the crowd in an orange-lit haze, glowing jacket pattern"
+        src: "/work/events/11.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#262626",
+        alt: "Performer pointing a microphone arm out over the crowd in an orange-lit haze, glowing jacket pattern",
       },
       {
-        "src": "/work/events/12.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#262626",
-        "alt": "Performer with a microphone in a black jacket with glowing orange lines, a DJ and screens behind"
+        src: "/work/events/12.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#262626",
+        alt: "Performer with a microphone in a black jacket with glowing orange lines, a DJ and screens behind",
       },
       {
-        "src": "/work/events/13.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#262626",
-        "alt": "Black and white performer with a microphone in a patterned jacket, DJ beside, big timer numbers behind"
+        src: "/work/events/13.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#262626",
+        alt: "Black and white performer with a microphone in a patterned jacket, DJ beside, big timer numbers behind",
       },
       {
-        "src": "/work/events/14.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#262626",
-        "alt": "Person at the decks in headphones lit purple, projected graphics on the wall behind"
+        src: "/work/events/14.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#262626",
+        alt: "Person at the decks in headphones lit purple, projected graphics on the wall behind",
       },
       {
-        "src": "/work/events/15.jpg",
-        "width": 2499,
-        "height": 1405,
-        "color": "#262626",
-        "alt": "Blurred red neon sign in the foreground, a DJ at the booth in the dark"
+        src: "/work/events/15.jpg",
+        width: 2499,
+        height: 1405,
+        color: "#262626",
+        alt: "Blurred red neon sign in the foreground, a DJ at the booth in the dark",
       },
       {
-        "src": "/work/events/16.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#260C0C",
-        "alt": "Disco ball sending light across a dark crowd, raised hands"
+        src: "/work/events/16.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#260C0C",
+        alt: "Disco ball sending light across a dark crowd, raised hands",
       },
       {
-        "src": "/work/events/17.jpg",
-        "width": 2499,
-        "height": 1405,
-        "color": "#0C260C",
-        "alt": "Dark club crowd in teal light, bright blue hair above the heads"
+        src: "/work/events/17.jpg",
+        width: 2499,
+        height: 1405,
+        color: "#0C260C",
+        alt: "Dark club crowd in teal light, bright blue hair above the heads",
       },
       {
-        "src": "/work/events/19.jpg",
-        "width": 2499,
-        "height": 1406,
-        "color": "#260C0C",
-        "alt": "Crowd in dark red light with a bright stage glow in the distance"
+        src: "/work/events/19.jpg",
+        width: 2499,
+        height: 1406,
+        color: "#260C0C",
+        alt: "Crowd in dark red light with a bright stage glow in the distance",
       },
       {
-        "src": "/work/events/20.jpg",
-        "width": 2499,
-        "height": 1405,
-        "color": "#0C260C",
-        "alt": "Wide dark crowd under green projections, silhouettes in motion"
+        src: "/work/events/20.jpg",
+        width: 2499,
+        height: 1405,
+        color: "#0C260C",
+        alt: "Wide dark crowd under green projections, silhouettes in motion",
       },
       {
-        "src": "/work/events/22.jpg",
-        "width": 2499,
-        "height": 1406,
-        "color": "#260C26",
-        "alt": "Dark club crowd under teal and red projections, a glow near the stage"
-      }
-    ]
+        src: "/work/events/22.jpg",
+        width: 2499,
+        height: 1406,
+        color: "#260C26",
+        alt: "Dark club crowd under teal and red projections, a glow near the stage",
+      },
+    ],
   },
   {
-    "slug": "frostbite",
-    "name": "FROSTBITE",
-    "headline": "FROSTBITE",
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/frostbite/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#264059",
-      "alt": ""
+    slug: "frostbite",
+    name: "FROSTBITE",
+    headline: "FROSTBITE",
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/frostbite/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#264059",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/frostbite/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262640",
-        "alt": "Lying on the floor propped on elbows, platform boots raised behind, long silver hair, white spotlight circle"
+        src: "/work/frostbite/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262640",
+        alt: "Lying on the floor propped on elbows, platform boots raised behind, long silver hair, white spotlight circle",
       },
       {
-        "src": "/work/frostbite/04.jpg",
-        "width": 2256,
-        "height": 2820,
-        "color": "#D9D9D9",
-        "alt": "Kneeling on both hands, long silver hair falling forward, rhinestone chains, looking up into the light"
+        src: "/work/frostbite/04.jpg",
+        width: 2256,
+        height: 2820,
+        color: "#D9D9D9",
+        alt: "Kneeling on both hands, long silver hair falling forward, rhinestone chains, looking up into the light",
       },
       {
-        "src": "/work/frostbite/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#40A6D9",
-        "alt": "Close crop, head tilted back, rhinestone chain top, long silver hair, deep blue backdrop"
+        src: "/work/frostbite/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#40A6D9",
+        alt: "Close crop, head tilted back, rhinestone chain top, long silver hair, deep blue backdrop",
       },
       {
-        "src": "/work/frostbite/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26A6C0",
-        "alt": "Seated with head tilted and eyes closed, draped rhinestone chains, long silver hair, hand on knee"
+        src: "/work/frostbite/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26A6C0",
+        alt: "Seated with head tilted and eyes closed, draped rhinestone chains, long silver hair, hand on knee",
       },
       {
-        "src": "/work/frostbite/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0A6",
-        "alt": "One arm raised over the head, rhinestone chain top, silver hair swept to the side, blue backdrop"
+        src: "/work/frostbite/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9C0A6",
+        alt: "One arm raised over the head, rhinestone chain top, silver hair swept to the side, blue backdrop",
       },
       {
-        "src": "/work/frostbite/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Head tilted with a raised forearm in shadow, glossy lips, long silver hair, cyan light"
+        src: "/work/frostbite/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Head tilted with a raised forearm in shadow, glossy lips, long silver hair, cyan light",
       },
       {
-        "src": "/work/frostbite/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#265973",
-        "alt": "Seen from behind, looking back over a shoulder, black fringed skirt, long silver hair, blue backdrop"
-      }
-    ]
+        src: "/work/frostbite/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#265973",
+        alt: "Seen from behind, looking back over a shoulder, black fringed skirt, long silver hair, blue backdrop",
+      },
+    ],
   },
   {
-    "slug": "fun-xyz",
-    "name": "FUN.XYZ",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/fun-xyz/cover.jpg",
-      "width": 600,
-      "height": 900,
-      "color": "#262626",
-      "alt": ""
+    slug: "fun-xyz",
+    name: "FUN.XYZ",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/fun-xyz/cover.jpg",
+      width: 600,
+      height: 900,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/fun-xyz/01.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": "Smiling headshot with wavy dark hair in a black tee against a black backdrop"
+        src: "/work/fun-xyz/01.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "Smiling headshot with wavy dark hair in a black tee against a black backdrop",
       },
       {
-        "src": "/work/fun-xyz/02.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": "Headshot with short curly hair, steady gaze, black tee, black backdrop"
+        src: "/work/fun-xyz/02.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "Headshot with short curly hair, steady gaze, black tee, black backdrop",
       },
       {
-        "src": "/work/fun-xyz/03.jpg",
-        "width": 2428,
-        "height": 3641,
-        "color": "#26260C",
-        "alt": "Smiling headshot, closed eyes, black V-neck tee, black backdrop, short dark hair"
+        src: "/work/fun-xyz/03.jpg",
+        width: 2428,
+        height: 3641,
+        color: "#26260C",
+        alt: "Smiling headshot, closed eyes, black V-neck tee, black backdrop, short dark hair",
       },
       {
-        "src": "/work/fun-xyz/04.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": "Smiling headshot, short dark hair, black crew neck tee, black backdrop"
+        src: "/work/fun-xyz/04.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "Smiling headshot, short dark hair, black crew neck tee, black backdrop",
       },
       {
-        "src": "/work/fun-xyz/05.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#260C0C",
-        "alt": "Headshot in a black henley with a neutral expression, short dark hair, black backdrop"
+        src: "/work/fun-xyz/05.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#260C0C",
+        alt: "Headshot in a black henley with a neutral expression, short dark hair, black backdrop",
       },
       {
-        "src": "/work/fun-xyz/06.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#C08C73",
-        "alt": "Headshot with swept blond hair and a pendant chain over a black tee, black backdrop"
+        src: "/work/fun-xyz/06.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#C08C73",
+        alt: "Headshot with swept blond hair and a pendant chain over a black tee, black backdrop",
       },
       {
-        "src": "/work/fun-xyz/07.jpg",
-        "width": 2427,
-        "height": 3642,
-        "color": "#260C0C",
-        "alt": "Headshot with side-parted brown hair, black tee, soft front light, black backdrop"
+        src: "/work/fun-xyz/07.jpg",
+        width: 2427,
+        height: 3642,
+        color: "#260C0C",
+        alt: "Headshot with side-parted brown hair, black tee, soft front light, black backdrop",
       },
       {
-        "src": "/work/fun-xyz/08.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": "Smiling headshot in a thin chain necklace and black tee, short dark hair, black backdrop"
+        src: "/work/fun-xyz/08.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "Smiling headshot in a thin chain necklace and black tee, short dark hair, black backdrop",
       },
       {
-        "src": "/work/fun-xyz/09.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": "Headshot, short dark hair, black tee, slight smile, black backdrop"
+        src: "/work/fun-xyz/09.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "Headshot, short dark hair, black tee, slight smile, black backdrop",
       },
       {
-        "src": "/work/fun-xyz/10.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#C08C73",
-        "alt": "Smiling headshot with tousled blond hair, black V-neck tee, black backdrop"
+        src: "/work/fun-xyz/10.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#C08C73",
+        alt: "Smiling headshot with tousled blond hair, black V-neck tee, black backdrop",
       },
       {
-        "src": "/work/fun-xyz/11.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#D9A673",
-        "alt": "Smiling headshot in round wire glasses and a black tee, short dark hair, black backdrop"
-      }
-    ]
+        src: "/work/fun-xyz/11.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#D9A673",
+        alt: "Smiling headshot in round wire glasses and a black tee, short dark hair, black backdrop",
+      },
+    ],
   },
   {
-    "slug": "giselle",
-    "name": "GISELLE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "giselle",
+    name: "GISELLE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "studio-digitals",
-        "name": "STUDIO DIGITALS",
-        "section": "SESSIONS"
-      }
+        slug: "studio-digitals",
+        name: "STUDIO DIGITALS",
+        section: "SESSIONS",
+      },
     ],
-    "cover": {
-      "src": "/work/giselle-studio-digitals/cover.jpg",
-      "width": 600,
-      "height": 840,
-      "color": "#F3F3F3",
-      "alt": ""
+    cover: {
+      src: "/work/giselle-studio-digitals/cover.jpg",
+      width: 600,
+      height: 840,
+      color: "#F3F3F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/giselle-studio-digitals/01.jpg",
-        "width": 2499,
-        "height": 3498,
-        "color": "#F3F3F3",
-        "alt": "Standing with hands on the hips in a black scoop-neck bodysuit, short blond bob, white seamless backdrop"
+        src: "/work/giselle-studio-digitals/01.jpg",
+        width: 2499,
+        height: 3498,
+        color: "#F3F3F3",
+        alt: "Standing with hands on the hips in a black scoop-neck bodysuit, short blond bob, white seamless backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/02.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#F3F3F3",
-        "alt": "Kneeling on a tan leather chair in a black bodysuit, one hand on the backrest, white backdrop"
+        src: "/work/giselle-studio-digitals/02.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#F3F3F3",
+        alt: "Kneeling on a tan leather chair in a black bodysuit, one hand on the backrest, white backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/03.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#F3F3F3",
-        "alt": "Reclining across a tan leather chair in a black bodysuit, head turned away, white backdrop"
+        src: "/work/giselle-studio-digitals/03.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#F3F3F3",
+        alt: "Reclining across a tan leather chair in a black bodysuit, head turned away, white backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/04.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#F3F3F3",
-        "alt": "Seated on the floor leaning on one hand in a black bodysuit, glancing back over a shoulder"
+        src: "/work/giselle-studio-digitals/04.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#F3F3F3",
+        alt: "Seated on the floor leaning on one hand in a black bodysuit, glancing back over a shoulder",
       },
       {
-        "src": "/work/giselle-studio-digitals/05.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#F3F3F3",
-        "alt": "Leaning back with the head resting on a metal chair seat, black bodysuit, white backdrop"
+        src: "/work/giselle-studio-digitals/05.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#F3F3F3",
+        alt: "Leaning back with the head resting on a metal chair seat, black bodysuit, white backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated in a tan leather chair with the legs stretched out, black bodysuit, looking at the lens"
+        src: "/work/giselle-studio-digitals/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated in a tan leather chair with the legs stretched out, black bodysuit, looking at the lens",
       },
       {
-        "src": "/work/giselle-studio-digitals/07.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#F3F3F3",
-        "alt": "Seated sideways in a tan leather chair in a black bodysuit, profile, pearl bracelet, white backdrop"
+        src: "/work/giselle-studio-digitals/07.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#F3F3F3",
+        alt: "Seated sideways in a tan leather chair in a black bodysuit, profile, pearl bracelet, white backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/08.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#D9D9D9",
-        "alt": "Extreme close crop of an eye behind a raised forearm, pearl bracelet, ear cuff, white backdrop"
+        src: "/work/giselle-studio-digitals/08.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#D9D9D9",
+        alt: "Extreme close crop of an eye behind a raised forearm, pearl bracelet, ear cuff, white backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/09.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#F3F3F3",
-        "alt": "Lying on the floor with arms overhead in a black bikini top, white seamless backdrop"
+        src: "/work/giselle-studio-digitals/09.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#F3F3F3",
+        alt: "Lying on the floor with arms overhead in a black bikini top, white seamless backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Lying in a bridge pose on a white floor in a black bikini set, looking at the lens"
+        src: "/work/giselle-studio-digitals/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Lying in a bridge pose on a white floor in a black bikini set, looking at the lens",
       },
       {
-        "src": "/work/giselle-studio-digitals/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Reclining on one arm in a black bikini set, knees up, pearl bracelet, white backdrop"
+        src: "/work/giselle-studio-digitals/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Reclining on one arm in a black bikini set, knees up, pearl bracelet, white backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated leaning on one hand in a black triangle top and briefs, hair tucked back, white backdrop"
+        src: "/work/giselle-studio-digitals/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated leaning on one hand in a black triangle top and briefs, hair tucked back, white backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated on the floor leaning on an arm in a black bikini set, head tilted, white backdrop"
+        src: "/work/giselle-studio-digitals/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated on the floor leaning on an arm in a black bikini set, head tilted, white backdrop",
       },
       {
-        "src": "/work/giselle-studio-digitals/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/giselle-studio-digitals/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/giselle-studio-digitals/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Standing with a hand on the hip in a black bikini set, direct gaze, white backdrop"
-      }
-    ]
+        src: "/work/giselle-studio-digitals/15.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Standing with a hand on the hip in a black bikini set, direct gaze, white backdrop",
+      },
+    ],
   },
   {
-    "slug": "goodcult",
-    "name": "GOODCULT",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/goodcult/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#375358",
-      "alt": ""
+    slug: "goodcult",
+    name: "GOODCULT",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/goodcult/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#375358",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/goodcult/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#375358",
-        "alt": ""
+        src: "/work/goodcult/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#375358",
+        alt: "",
       },
       {
-        "src": "/work/goodcult/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#000001",
-        "alt": "Standing in a printed black hoodie and light jeans seen through a hood opening, holding a sunflower"
+        src: "/work/goodcult/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#000001",
+        alt: "Standing in a printed black hoodie and light jeans seen through a hood opening, holding a sunflower",
       },
       {
-        "src": "/work/goodcult/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#5C828D",
-        "alt": "Standing with hands in the pockets of baggy jeans, printed black hoodie, curly dark hair, pale blue backdrop"
+        src: "/work/goodcult/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#5C828D",
+        alt: "Standing with hands in the pockets of baggy jeans, printed black hoodie, curly dark hair, pale blue backdrop",
       },
       {
-        "src": "/work/goodcult/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#4C7279",
-        "alt": "Hood up in a printed black hoodie, grinning, hand in a peace sign, cap, blue-green backdrop"
+        src: "/work/goodcult/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#4C7279",
+        alt: "Hood up in a printed black hoodie, grinning, hand in a peace sign, cap, blue-green backdrop",
       },
       {
-        "src": "/work/goodcult/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#436770",
-        "alt": "Two people in printed hoodies, one holding a sunflower, one in red track pants, blue backdrop"
+        src: "/work/goodcult/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#436770",
+        alt: "Two people in printed hoodies, one holding a sunflower, one in red track pants, blue backdrop",
       },
       {
-        "src": "/work/goodcult/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#3A5E67",
-        "alt": "Sunflower held over one eye, printed black hoodie, curly dark hair, blue-grey backdrop"
+        src: "/work/goodcult/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#3A5E67",
+        alt: "Sunflower held over one eye, printed black hoodie, curly dark hair, blue-grey backdrop",
       },
       {
-        "src": "/work/goodcult/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#3F626B",
-        "alt": "Seated on a yellow block in a printed hoodie and red track pants, glasses, hand at the head"
+        src: "/work/goodcult/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#3F626B",
+        alt: "Seated on a yellow block in a printed hoodie and red track pants, glasses, hand at the head",
       },
       {
-        "src": "/work/goodcult/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#205F5C",
-        "alt": "Hands on the head in a white graphic tee and beanie, gritted teeth, small backpack, teal backdrop"
+        src: "/work/goodcult/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#205F5C",
+        alt: "Hands on the head in a white graphic tee and beanie, gritted teeth, small backpack, teal backdrop",
       },
       {
-        "src": "/work/goodcult/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#20706C",
-        "alt": "Hands raised to a patched cap in a black graphic tee and baggy jeans, eyes closed, teal backdrop"
+        src: "/work/goodcult/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#20706C",
+        alt: "Hands raised to a patched cap in a black graphic tee and baggy jeans, eyes closed, teal backdrop",
       },
       {
-        "src": "/work/goodcult/10.jpg",
-        "width": 2499,
-        "height": 2000,
-        "color": "#1B504E",
-        "alt": "Group in black and white graphic tees posing together, hands forming a heart, teal backdrop"
+        src: "/work/goodcult/10.jpg",
+        width: 2499,
+        height: 2000,
+        color: "#1B504E",
+        alt: "Group in black and white graphic tees posing together, hands forming a heart, teal backdrop",
       },
       {
-        "src": "/work/goodcult/11.jpg",
-        "width": 1199,
-        "height": 1499,
-        "color": "#2D6C68",
-        "alt": "One person carried across the arms of another, a child standing beside, black graphic tees, teal backdrop"
+        src: "/work/goodcult/11.jpg",
+        width: 1199,
+        height: 1499,
+        color: "#2D6C68",
+        alt: "One person carried across the arms of another, a child standing beside, black graphic tees, teal backdrop",
       },
       {
-        "src": "/work/goodcult/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#25746F",
-        "alt": "Peace signs raised in a black graphic tee and patched cap, scrunched face, teal backdrop"
+        src: "/work/goodcult/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#25746F",
+        alt: "Peace signs raised in a black graphic tee and patched cap, scrunched face, teal backdrop",
       },
       {
-        "src": "/work/goodcult/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#277773",
-        "alt": "Hands in pockets in a black graphic tee and white cargo pants, curly hair, black glasses, teal backdrop"
+        src: "/work/goodcult/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#277773",
+        alt: "Hands in pockets in a black graphic tee and white cargo pants, curly hair, black glasses, teal backdrop",
       },
       {
-        "src": "/work/goodcult/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#2B706C",
-        "alt": "Two people embracing in graphic tees, holding a bouquet of flowers, teal backdrop"
+        src: "/work/goodcult/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#2B706C",
+        alt: "Two people embracing in graphic tees, holding a bouquet of flowers, teal backdrop",
       },
       {
-        "src": "/work/goodcult/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6671C",
-        "alt": "Seated on a yellow block in a printed hoodie and jeans, disco ball on the carpet, mustard walls"
+        src: "/work/goodcult/15.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6671C",
+        alt: "Seated on a yellow block in a printed hoodie and jeans, disco ball on the carpet, mustard walls",
       },
       {
-        "src": "/work/goodcult/17.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C08025",
-        "alt": "Standing in a black graphic tee, white cargo pants and sneakers, glasses, mustard corner, red carpet"
-      }
-    ]
+        src: "/work/goodcult/17.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C08025",
+        alt: "Standing in a black graphic tee, white cargo pants and sneakers, glasses, mustard corner, red carpet",
+      },
+    ],
   },
   {
-    "slug": "graduation",
-    "name": "GRADUATION",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "graduation",
+    name: "GRADUATION",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "graduation",
-        "name": "GRADUATION",
-        "section": "SESSIONS"
-      }
+        slug: "graduation",
+        name: "GRADUATION",
+        section: "SESSIONS",
+      },
     ],
-    "cover": {
-      "src": "/work/graduation/cover.jpg",
-      "width": 600,
-      "height": 840,
-      "color": "#717a86",
-      "alt": ""
+    cover: {
+      src: "/work/graduation/cover.jpg",
+      width: 600,
+      height: 840,
+      color: "#717a86",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/graduation/01.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#262640",
-        "alt": ""
+        src: "/work/graduation/01.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#262640",
+        alt: "",
       },
       {
-        "src": "/work/graduation/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": ""
+        src: "/work/graduation/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "",
       },
       {
-        "src": "/work/graduation/03.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#A6C0D9",
-        "alt": ""
+        src: "/work/graduation/03.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#A6C0D9",
+        alt: "",
       },
       {
-        "src": "/work/graduation/04.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#0C260C",
-        "alt": ""
+        src: "/work/graduation/04.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#0C260C",
+        alt: "",
       },
       {
-        "src": "/work/graduation/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A6A6",
-        "alt": ""
+        src: "/work/graduation/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A6A6",
+        alt: "",
       },
       {
-        "src": "/work/graduation/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A6A6",
-        "alt": ""
+        src: "/work/graduation/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A6A6",
+        alt: "",
       },
       {
-        "src": "/work/graduation/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/graduation/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/graduation/08.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#262626",
-        "alt": ""
+        src: "/work/graduation/08.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#262626",
+        alt: "",
       },
       {
-        "src": "/work/graduation/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A68C40",
-        "alt": ""
+        src: "/work/graduation/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A68C40",
+        alt: "",
       },
       {
-        "src": "/work/graduation/10.jpg",
-        "width": 863,
-        "height": 1079,
-        "color": "#F0EFF1",
-        "alt": ""
+        src: "/work/graduation/10.jpg",
+        width: 863,
+        height: 1079,
+        color: "#F0EFF1",
+        alt: "",
       },
       {
-        "src": "/work/graduation/11.jpg",
-        "width": 719,
-        "height": 1079,
-        "color": "#5C6B68",
-        "alt": "From behind on concrete steps in a white dress and woven sash, holding a decorated cap, black heels"
+        src: "/work/graduation/11.jpg",
+        width: 719,
+        height: 1079,
+        color: "#5C6B68",
+        alt: "From behind on concrete steps in a white dress and woven sash, holding a decorated cap, black heels",
       },
       {
-        "src": "/work/graduation/13.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#A6C0C0",
-        "alt": "Hand on the hip in a blue graduation sash over a black dress, glass wall behind, looking away"
+        src: "/work/graduation/13.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#A6C0C0",
+        alt: "Hand on the hip in a blue graduation sash over a black dress, glass wall behind, looking away",
       },
       {
-        "src": "/work/graduation/14.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#F3F3F3",
-        "alt": "Throwing a graduation cap in a gown and blue sash, a stone tower and blue sky behind"
+        src: "/work/graduation/14.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#F3F3F3",
+        alt: "Throwing a graduation cap in a gown and blue sash, a stone tower and blue sky behind",
       },
       {
-        "src": "/work/graduation/15.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#C0C0C0",
-        "alt": "Throwing a graduation cap overhead on a palm-lined walkway, black dress, blue sash, heeled sandals"
-      }
-    ]
+        src: "/work/graduation/15.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#C0C0C0",
+        alt: "Throwing a graduation cap overhead on a palm-lined walkway, black dress, blue sash, heeled sandals",
+      },
+    ],
   },
   {
-    "slug": "headshots",
-    "name": "HEADSHOTS",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "headshots",
+    name: "HEADSHOTS",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "headshots",
-        "name": "HEADSHOTS",
-        "section": "SESSIONS"
-      }
+        slug: "headshots",
+        name: "HEADSHOTS",
+        section: "SESSIONS",
+      },
     ],
-    "cover": {
-      "src": "/work/headshots/cover.jpg",
-      "width": 600,
-      "height": 590,
-      "color": "#F3F3F3",
-      "alt": ""
+    cover: {
+      src: "/work/headshots/cover.jpg",
+      width: 600,
+      height: 590,
+      color: "#F3F3F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/headshots/01.jpg",
-        "width": 2499,
-        "height": 2459,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/headshots/01.jpg",
+        width: 2499,
+        height: 2459,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/headshots/02.jpg",
-        "width": 2499,
-        "height": 2499,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/headshots/02.jpg",
+        width: 2499,
+        height: 2499,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/headshots/03.jpg",
-        "width": 2499,
-        "height": 2499,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/headshots/03.jpg",
+        width: 2499,
+        height: 2499,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/headshots/04.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": ""
+        src: "/work/headshots/04.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "",
       },
       {
-        "src": "/work/headshots/05.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": ""
+        src: "/work/headshots/05.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "",
       },
       {
-        "src": "/work/headshots/06.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#C08C73",
-        "alt": ""
+        src: "/work/headshots/06.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#C08C73",
+        alt: "",
       },
       {
-        "src": "/work/headshots/07.jpg",
-        "width": 2428,
-        "height": 3641,
-        "color": "#26260C",
-        "alt": ""
+        src: "/work/headshots/07.jpg",
+        width: 2428,
+        height: 3641,
+        color: "#26260C",
+        alt: "",
       },
       {
-        "src": "/work/headshots/08.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#260C0C",
-        "alt": ""
+        src: "/work/headshots/08.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#260C0C",
+        alt: "",
       },
       {
-        "src": "/work/headshots/10.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#C08C73",
-        "alt": ""
+        src: "/work/headshots/10.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#C08C73",
+        alt: "",
       },
       {
-        "src": "/work/headshots/11.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": ""
+        src: "/work/headshots/11.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "",
       },
       {
-        "src": "/work/headshots/12.jpg",
-        "width": 2427,
-        "height": 3642,
-        "color": "#260C0C",
-        "alt": "Headshot of a person with wavy brown hair, black tee, soft front light on a black backdrop"
+        src: "/work/headshots/12.jpg",
+        width: 2427,
+        height: 3642,
+        color: "#260C0C",
+        alt: "Headshot of a person with wavy brown hair, black tee, soft front light on a black backdrop",
       },
       {
-        "src": "/work/headshots/13.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#262626",
-        "alt": "Smiling headshot, short dark hair, black long-sleeve tee, black backdrop, crossed arms"
-      }
-    ]
+        src: "/work/headshots/13.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#262626",
+        alt: "Smiling headshot, short dark hair, black long-sleeve tee, black backdrop, crossed arms",
+      },
+    ],
   },
   {
-    "slug": "hellamack",
-    "name": "HELLAMACK",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/hellamack/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#F3D9D9",
-      "alt": ""
+    slug: "hellamack",
+    name: "HELLAMACK",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/hellamack/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#F3D9D9",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/hellamack/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3D9D9",
-        "alt": "Tan snapback cap with a black brim and an orange script logo, front view on a cream backdrop"
+        src: "/work/hellamack/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3D9D9",
+        alt: "Tan snapback cap with a black brim and an orange script logo, front view on a cream backdrop",
       },
       {
-        "src": "/work/hellamack/02.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#A68C73",
-        "alt": "Close crop of black graffiti-style embroidery on the back of a tan cap, snap strap below"
+        src: "/work/hellamack/02.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#A68C73",
+        alt: "Close crop of black graffiti-style embroidery on the back of a tan cap, snap strap below",
       },
       {
-        "src": "/work/hellamack/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Tan cap with a black brim, orange logo on the front, World Series patch on the side"
+        src: "/work/hellamack/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Tan cap with a black brim, orange logo on the front, World Series patch on the side",
       },
       {
-        "src": "/work/hellamack/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A68C73",
-        "alt": "Side crop of a tan cap showing a colorful World Series Mackin patch, black brim edge at left"
+        src: "/work/hellamack/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A68C73",
+        alt: "Side crop of a tan cap showing a colorful World Series Mackin patch, black brim edge at left",
       },
       {
-        "src": "/work/hellamack/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3D9D9",
-        "alt": "Tan cap with black brim from a low side angle, orange logo and patch, soft cream backdrop"
-      }
-    ]
+        src: "/work/hellamack/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3D9D9",
+        alt: "Tan cap with black brim from a low side angle, orange logo and patch, soft cream backdrop",
+      },
+    ],
   },
   {
-    "slug": "i-wanna-be-a-human",
-    "name": "I WANNA BE A HUMAN",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "i-wanna-be-a-human",
+    name: "I WANNA BE A HUMAN",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "model",
-        "name": "@apricotsss3"
-      }
+        role: "model",
+        name: "@apricotsss3",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/i-wanna-be-a-human/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#A6A6A6",
-      "alt": "i wanna be a human vol. 1"
+    cover: {
+      src: "/work/i-wanna-be-a-human/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#A6A6A6",
+      alt: "i wanna be a human vol. 1",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/i-wanna-be-a-human/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "i wanna be a human vol. 1"
+        src: "/work/i-wanna-be-a-human/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6A6A6",
+        alt: "i wanna be a human vol. 1",
       },
       {
-        "src": "/work/i-wanna-be-a-human/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "i wanna be a human vol. 1"
+        src: "/work/i-wanna-be-a-human/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "i wanna be a human vol. 1",
       },
       {
-        "src": "/work/i-wanna-be-a-human/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "i wanna be a human vol. 1"
+        src: "/work/i-wanna-be-a-human/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "i wanna be a human vol. 1",
       },
       {
-        "src": "/work/i-wanna-be-a-human/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737373",
-        "alt": "i wanna be a human vol. 2"
+        src: "/work/i-wanna-be-a-human/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#737373",
+        alt: "i wanna be a human vol. 2",
       },
       {
-        "src": "/work/i-wanna-be-a-human/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "i wanna be a human vol. 3"
+        src: "/work/i-wanna-be-a-human/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "i wanna be a human vol. 3",
       },
       {
-        "src": "/work/i-wanna-be-a-human/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595959",
-        "alt": "i wanna be a human vol. 3"
+        src: "/work/i-wanna-be-a-human/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#595959",
+        alt: "i wanna be a human vol. 3",
       },
       {
-        "src": "/work/i-wanna-be-a-human/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "i wanna be a human vol. 3"
+        src: "/work/i-wanna-be-a-human/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "i wanna be a human vol. 3",
       },
       {
-        "src": "/work/i-wanna-be-a-human/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "i wanna be a human vol. 3"
+        src: "/work/i-wanna-be-a-human/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "i wanna be a human vol. 3",
       },
       {
-        "src": "/work/i-wanna-be-a-human/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "i wanna be a human vol. 3"
+        src: "/work/i-wanna-be-a-human/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "i wanna be a human vol. 3",
       },
       {
-        "src": "/work/i-wanna-be-a-human/11.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#C0C0C0",
-        "alt": "i wanna be a human vol. 4"
+        src: "/work/i-wanna-be-a-human/11.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#C0C0C0",
+        alt: "i wanna be a human vol. 4",
       },
       {
-        "src": "/work/i-wanna-be-a-human/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "i wanna be a human vol. 4"
+        src: "/work/i-wanna-be-a-human/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6A6A6",
+        alt: "i wanna be a human vol. 4",
       },
       {
-        "src": "/work/i-wanna-be-a-human/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "i wanna be a human vol. 4"
+        src: "/work/i-wanna-be-a-human/15.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "i wanna be a human vol. 4",
       },
       {
-        "src": "/work/i-wanna-be-a-human/22.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "i wanna be a human vol. 3"
-      }
-    ]
+        src: "/work/i-wanna-be-a-human/22.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "i wanna be a human vol. 3",
+      },
+    ],
   },
   {
-    "slug": "info-overload",
-    "name": "INFO OVERLOAD",
-    "headline": "INFO OVERLOAD",
-    "intent": "model: Caroline Thuyle @carolinethuyle\nphotographer: Julian Gigola @juliangigola\ndesigner: @by_vicious x @vile.honey\nhair: Cassie Sanidad @cassieofalltrades \nmakeup: Lilia Mercedes @lilia.mercedes\nassist/second photographer: @euphotic_photography",
-    "credits": [],
-    "categories": [
+    slug: "info-overload",
+    name: "INFO OVERLOAD",
+    headline: "INFO OVERLOAD",
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/info-overload/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#260C0C",
-      "alt": ""
+    cover: {
+      src: "/work/info-overload/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#260C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/info-overload/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Head resting on arms over a CRT screen, newspaper-covered walls, red light, hair clips"
+        src: "/work/info-overload/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Head resting on arms over a CRT screen, newspaper-covered walls, red light, hair clips",
       },
       {
-        "src": "/work/info-overload/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Leaning back against newspaper walls in a black top and fishnets, chains at the hips, red light"
+        src: "/work/info-overload/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Leaning back against newspaper walls in a black top and fishnets, chains at the hips, red light",
       },
       {
-        "src": "/work/info-overload/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Hand raised to the jaw, head tilted back, dark lipstick, red light, blurred foreground"
+        src: "/work/info-overload/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Hand raised to the jaw, head tilted back, dark lipstick, red light, blurred foreground",
       },
       {
-        "src": "/work/info-overload/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Perched on a CRT in a strappy black top and studded trousers, hand at the cheek, red light"
+        src: "/work/info-overload/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Perched on a CRT in a strappy black top and studded trousers, hand at the cheek, red light",
       },
       {
-        "src": "/work/info-overload/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Hands raised to the head, hair in buns, dark eyeshadow, newspaper wall, red light"
+        src: "/work/info-overload/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Hands raised to the head, hair in buns, dark eyeshadow, newspaper wall, red light",
       },
       {
-        "src": "/work/info-overload/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Head tipped back with eyes closed, hair in chains, dark lipstick, red light"
+        src: "/work/info-overload/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Head tipped back with eyes closed, hair in chains, dark lipstick, red light",
       },
       {
-        "src": "/work/info-overload/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Reaching toward a CRT screen showing a face, black top, rings, deep blue light"
+        src: "/work/info-overload/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Reaching toward a CRT screen showing a face, black top, rings, deep blue light",
       },
       {
-        "src": "/work/info-overload/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Profile beside a CRT showing a mouth in close-up, chain earrings, cyan and blue light"
+        src: "/work/info-overload/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Profile beside a CRT showing a mouth in close-up, chain earrings, cyan and blue light",
       },
       {
-        "src": "/work/info-overload/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Arm raised, holding a camcorder cable in the mouth, black crop top with chains, blue light"
+        src: "/work/info-overload/16.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Arm raised, holding a camcorder cable in the mouth, black crop top with chains, blue light",
       },
       {
-        "src": "/work/info-overload/17.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Upside-down view of a blue newspaper-covered room corner, a figure at the center, a CRT at left"
-      }
-    ]
+        src: "/work/info-overload/17.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Upside-down view of a blue newspaper-covered room corner, a figure at the center, a CRT at left",
+      },
+    ],
   },
   {
-    "slug": "isabela",
-    "name": "ISABELA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/isabela/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#26260C",
-      "alt": ""
+    slug: "isabela",
+    name: "ISABELA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/isabela/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#26260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/isabela/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26260C",
-        "alt": "Seated cross-legged on a brick pool edge, hands at the head, black swimsuit, reflection in dark water"
+        src: "/work/isabela/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26260C",
+        alt: "Seated cross-legged on a brick pool edge, hands at the head, black swimsuit, reflection in dark water",
       },
       {
-        "src": "/work/isabela/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26260C",
-        "alt": "Seated on the pool edge with feet in the water, arms raised, black swimsuit, dark foliage behind"
+        src: "/work/isabela/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26260C",
+        alt: "Seated on the pool edge with feet in the water, arms raised, black swimsuit, dark foliage behind",
       },
       {
-        "src": "/work/isabela/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26260C",
-        "alt": "Seated on the pool edge with head resting on the knees, reflected in dark water"
+        src: "/work/isabela/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26260C",
+        alt: "Seated on the pool edge with head resting on the knees, reflected in dark water",
       },
       {
-        "src": "/work/isabela/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#594026",
-        "alt": "Standing at a bright blue pool in a black swimsuit, holding sandals, looking to the side"
+        src: "/work/isabela/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#594026",
+        alt: "Standing at a bright blue pool in a black swimsuit, holding sandals, looking to the side",
       },
       {
-        "src": "/work/isabela/05.jpg",
-        "width": 1125,
-        "height": 1407,
-        "color": "#E3E0DD",
-        "alt": "Seated on a wood-slat outdoor counter under a louvered pergola, teal hair, dark swimsuit"
+        src: "/work/isabela/05.jpg",
+        width: 1125,
+        height: 1407,
+        color: "#E3E0DD",
+        alt: "Seated on a wood-slat outdoor counter under a louvered pergola, teal hair, dark swimsuit",
       },
       {
-        "src": "/work/isabela/06.jpg",
-        "width": 1131,
-        "height": 1414,
-        "color": "#FAF7F4",
-        "alt": "Teal hair and a patterned black headband, black top, open denim shorts, seated, white wall behind"
+        src: "/work/isabela/06.jpg",
+        width: 1131,
+        height: 1414,
+        color: "#FAF7F4",
+        alt: "Teal hair and a patterned black headband, black top, open denim shorts, seated, white wall behind",
       },
       {
-        "src": "/work/isabela/07.jpg",
-        "width": 1133,
-        "height": 1417,
-        "color": "#EFE8E5",
-        "alt": "Seated on a wooden counter under a louvered pergola, teal hair, navy swimsuit, ankle bracelet"
-      }
-    ]
+        src: "/work/isabela/07.jpg",
+        width: 1133,
+        height: 1417,
+        color: "#EFE8E5",
+        alt: "Seated on a wooden counter under a louvered pergola, teal hair, navy swimsuit, ankle bracelet",
+      },
+    ],
   },
   {
-    "slug": "jubo",
-    "name": "JUBO",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "jubo",
+    name: "JUBO",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/jubo/cover.jpg",
-      "width": 600,
-      "height": 840,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/jubo/cover.jpg",
+      width: 600,
+      height: 840,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/jubo/01.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#262626",
-        "alt": "Mid-jump in a green graphic tee, denim shorts and olive high-top sneakers, orange beanie, on a fenced footbridge"
+        src: "/work/jubo/01.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#262626",
+        alt: "Mid-jump in a green graphic tee, denim shorts and olive high-top sneakers, orange beanie, on a fenced footbridge",
       },
       {
-        "src": "/work/jubo/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Jumping off the ground on a chain-link footbridge, green tee, denim shorts, olive sneakers, trees behind"
+        src: "/work/jubo/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Jumping off the ground on a chain-link footbridge, green tee, denim shorts, olive sneakers, trees behind",
       },
       {
-        "src": "/work/jubo/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0D9D9",
-        "alt": ""
+        src: "/work/jubo/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0D9D9",
+        alt: "",
       },
       {
-        "src": "/work/jubo/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Both hands pulling an orange beanie over the eyes, green graphic tee, crossbody bag, chain-link fence"
-      }
-    ]
+        src: "/work/jubo/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Both hands pulling an orange beanie over the eyes, green graphic tee, crossbody bag, chain-link fence",
+      },
+    ],
   },
   {
-    "slug": "l3na",
-    "name": "L3NA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "l3na",
+    name: "L3NA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "artist-presskit",
-        "name": "ARTIST PRESSKIT",
-        "section": "WORK"
-      }
+        slug: "artist-presskit",
+        name: "ARTIST PRESSKIT",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/l3na/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#C0D9F3",
-      "alt": ""
+    cover: {
+      src: "/work/l3na/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#C0D9F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/l3na/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0D9F3",
-        "alt": ""
+        src: "/work/l3na/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0D9F3",
+        alt: "",
       },
       {
-        "src": "/work/l3na/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0D9F3",
-        "alt": "Seated in a white mesh-sleeve top and white cargo pants, sunglasses, long dark hair, deep blue light"
+        src: "/work/l3na/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0D9F3",
+        alt: "Seated in a white mesh-sleeve top and white cargo pants, sunglasses, long dark hair, deep blue light",
       },
       {
-        "src": "/work/l3na/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated leaning on one hand in a white mesh top and cargo pants, sunglasses, blue light"
+        src: "/work/l3na/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated leaning on one hand in a white mesh top and cargo pants, sunglasses, blue light",
       },
       {
-        "src": "/work/l3na/06.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#C0C0C0",
-        "alt": "One arm raised in a sparkling mesh sleeve, peace sign, white spotlight disc behind, teal backdrop"
+        src: "/work/l3na/06.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#C0C0C0",
+        alt: "One arm raised in a sparkling mesh sleeve, peace sign, white spotlight disc behind, teal backdrop",
       },
       {
-        "src": "/work/l3na/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C26",
-        "alt": "Arm raised overhead in a black top and skirt, a green light bar across the face, purple backdrop"
+        src: "/work/l3na/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C26",
+        alt: "Arm raised overhead in a black top and skirt, a green light bar across the face, purple backdrop",
       },
       {
-        "src": "/work/l3na/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#592673",
-        "alt": "Crouched in platform boots and a black dress, a pale spotlight circle behind, purple backdrop"
+        src: "/work/l3na/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#592673",
+        alt: "Crouched in platform boots and a black dress, a pale spotlight circle behind, purple backdrop",
       },
       {
-        "src": "/work/l3na/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated on the floor facing the camera by a glowing CRT, black leather trousers, balloons, blue room"
+        src: "/work/l3na/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated on the floor facing the camera by a glowing CRT, black leather trousers, balloons, blue room",
       },
       {
-        "src": "/work/l3na/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Leaning on one arm, head resting on a hand, black leather outfit, CRT and clear balloon, blue room"
+        src: "/work/l3na/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Leaning on one arm, head resting on a hand, black leather outfit, CRT and clear balloon, blue room",
       },
       {
-        "src": "/work/l3na/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#265973",
-        "alt": "Holding a camera on a tripod beside a CRT showing a face, balloons, teal light"
+        src: "/work/l3na/16.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#265973",
+        alt: "Holding a camera on a tripod beside a CRT showing a face, balloons, teal light",
       },
       {
-        "src": "/work/l3na/19.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#590C0C",
-        "alt": "Wide red room, a figure seated on a couch in black leather, a CRT showing a face, balloons"
+        src: "/work/l3na/19.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#590C0C",
+        alt: "Wide red room, a figure seated on a couch in black leather, a CRT showing a face, balloons",
       },
       {
-        "src": "/work/l3na/22.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Reclining with an arm behind the head, patterned white top, black leather pants, keyboard, red light"
+        src: "/work/l3na/22.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Reclining with an arm behind the head, patterned white top, black leather pants, keyboard, red light",
       },
       {
-        "src": "/work/l3na/25.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Seated at a keyboard against framed art, balloons and a spotlight on the wall, red light"
-      }
-    ]
+        src: "/work/l3na/25.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Seated at a keyboard against framed art, balloons and a spotlight on the wall, red light",
+      },
+    ],
   },
   {
-    "slug": "light-play",
-    "name": "LIGHT PLAY",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/light-play/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#A67359",
-      "alt": ""
+    slug: "light-play",
+    name: "LIGHT PLAY",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/light-play/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#A67359",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/light-play/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A67359",
-        "alt": "Standing in profile in a dark bralette and briefs, a large projected portrait behind, warm tones"
+        src: "/work/light-play/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A67359",
+        alt: "Standing in profile in a dark bralette and briefs, a large projected portrait behind, warm tones",
       },
       {
-        "src": "/work/light-play/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing, hand on the hip, in a dark bralette and briefs, shadow and projection on the wall"
+        src: "/work/light-play/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing, hand on the hip, in a dark bralette and briefs, shadow and projection on the wall",
       },
       {
-        "src": "/work/light-play/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A68C73",
-        "alt": "Reclining on one elbow on the floor in a dark bralette and briefs, a projected portrait behind"
+        src: "/work/light-play/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A68C73",
+        alt: "Reclining on one elbow on the floor in a dark bralette and briefs, a projected portrait behind",
       },
       {
-        "src": "/work/light-play/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#735940",
-        "alt": "Motion-blurred walking figure in front of a projected portrait and a disco ball, warm tones"
+        src: "/work/light-play/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#735940",
+        alt: "Motion-blurred walking figure in front of a projected portrait and a disco ball, warm tones",
       },
       {
-        "src": "/work/light-play/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595959",
-        "alt": "Leaning on one gloved hand on the floor, a disco ball held aloft in a long black glove"
-      }
-    ]
+        src: "/work/light-play/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#595959",
+        alt: "Leaning on one gloved hand on the floor, a disco ball held aloft in a long black glove",
+      },
+    ],
   },
   {
-    "slug": "lightbeam",
-    "name": "LIGHTBEAM",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "lightbeam",
+    name: "LIGHTBEAM",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/lightbeam/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/lightbeam/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/lightbeam/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated in a red bodysuit and lace-up boots, hand over the face, a white beam from the right"
+        src: "/work/lightbeam/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated in a red bodysuit and lace-up boots, hand over the face, a white beam from the right",
       },
       {
-        "src": "/work/lightbeam/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated with knees drawn up, lace-up boots, red bodysuit, sunglasses, a beam of light from behind"
+        src: "/work/lightbeam/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated with knees drawn up, lace-up boots, red bodysuit, sunglasses, a beam of light from behind",
       },
       {
-        "src": "/work/lightbeam/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Crawling across a pool of white light on a teal floor, red bodysuit, sunglasses"
+        src: "/work/lightbeam/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264040",
+        alt: "Crawling across a pool of white light on a teal floor, red bodysuit, sunglasses",
       },
       {
-        "src": "/work/lightbeam/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Seated leaning back on one hand, buckled platform boots, red bodysuit, sunglasses with a star flare"
+        src: "/work/lightbeam/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264040",
+        alt: "Seated leaning back on one hand, buckled platform boots, red bodysuit, sunglasses with a star flare",
       },
       {
-        "src": "/work/lightbeam/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Hands at the cheeks in mirrored visor sunglasses, red mesh-sleeve bodysuit, teal haze"
+        src: "/work/lightbeam/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264040",
+        alt: "Hands at the cheeks in mirrored visor sunglasses, red mesh-sleeve bodysuit, teal haze",
       },
       {
-        "src": "/work/lightbeam/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Both arms raised overhead, red bodysuit, sunglasses with a star flare, teal haze"
+        src: "/work/lightbeam/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Both arms raised overhead, red bodysuit, sunglasses with a star flare, teal haze",
       },
       {
-        "src": "/work/lightbeam/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Close angle, head tilted, hands at the face, visor sunglasses with a flare, red mesh sleeves"
+        src: "/work/lightbeam/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264040",
+        alt: "Close angle, head tilted, hands at the face, visor sunglasses with a flare, red mesh sleeves",
       },
       {
-        "src": "/work/lightbeam/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Profile with a finger to the lips, red bodysuit, pale haze lit from the left, dark teal backdrop"
-      }
-    ]
+        src: "/work/lightbeam/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264040",
+        alt: "Profile with a finger to the lips, red bodysuit, pale haze lit from the left, dark teal backdrop",
+      },
+    ],
   },
   {
-    "slug": "liminal",
-    "name": "LIMINAL",
-    "headline": null,
-    "intent": "Liminal",
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/liminal/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#734026",
-      "alt": ""
+    slug: "liminal",
+    name: "LIMINAL",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/liminal/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#734026",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/liminal/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#734026",
-        "alt": ""
+        src: "/work/liminal/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#734026",
+        alt: "",
       },
       {
-        "src": "/work/liminal/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#592626",
-        "alt": "Head tilted, hair in a bun, teal ruffled oversized shirt, deep orange backdrop"
+        src: "/work/liminal/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#592626",
+        alt: "Head tilted, hair in a bun, teal ruffled oversized shirt, deep orange backdrop",
       },
       {
-        "src": "/work/liminal/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C4026",
-        "alt": "Head tilted forward over a pale ruffled shirt lit teal, bun and fringe, orange backdrop"
+        src: "/work/liminal/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C4026",
+        alt: "Head tilted forward over a pale ruffled shirt lit teal, bun and fringe, orange backdrop",
       },
       {
-        "src": "/work/liminal/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C4026",
-        "alt": "Full length in an oversized ruffled shirt, ankle boots and tights, crossed legs, light beam from the right"
+        src: "/work/liminal/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C4026",
+        alt: "Full length in an oversized ruffled shirt, ankle boots and tights, crossed legs, light beam from the right",
       },
       {
-        "src": "/work/liminal/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A64026",
-        "alt": "Backlit in a sheer ruffled shirt, face in shadow, bun and fringe, white beam from the right"
+        src: "/work/liminal/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A64026",
+        alt: "Backlit in a sheer ruffled shirt, face in shadow, bun and fringe, white beam from the right",
       },
       {
-        "src": "/work/liminal/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Double-exposure blur in a ruffled teal shirt, bun and fringe, orange backdrop"
+        src: "/work/liminal/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Double-exposure blur in a ruffled teal shirt, bun and fringe, orange backdrop",
       },
       {
-        "src": "/work/liminal/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Portrait in a ruffled collar shirt, light striping the face, bun and fringe, orange backdrop"
-      }
-    ]
+        src: "/work/liminal/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Portrait in a ruffled collar shirt, light striping the face, bun and fringe, orange backdrop",
+      },
+    ],
   },
   {
-    "slug": "liquid-metal-dreams",
-    "name": "LIQUID METAL DREAMS",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "liquid-metal-dreams",
+    name: "LIQUID METAL DREAMS",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/liquid-metal-dreams/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#C08C73",
-      "alt": ""
+    cover: {
+      src: "/work/liquid-metal-dreams/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#C08C73",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/liquid-metal-dreams/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Hands framing the face, blue eyeshadow, wet curls and a blue foil dress, teal and orange light"
+        src: "/work/liquid-metal-dreams/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "Hands framing the face, blue eyeshadow, wet curls and a blue foil dress, teal and orange light",
       },
       {
-        "src": "/work/liquid-metal-dreams/05.jpg",
-        "width": 2499,
-        "height": 3126,
-        "color": "#408C8C",
-        "alt": "Close crop, fingers pressed to the cheek, blue eyeshadow, face gems, wet curls, teal backdrop"
+        src: "/work/liquid-metal-dreams/05.jpg",
+        width: 2499,
+        height: 3126,
+        color: "#408C8C",
+        alt: "Close crop, fingers pressed to the cheek, blue eyeshadow, face gems, wet curls, teal backdrop",
       },
       {
-        "src": "/work/liquid-metal-dreams/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0F3F3",
-        "alt": "Seated on crinkled silver foil in a blue foil dress, one arm over the head, pale teal backdrop"
+        src: "/work/liquid-metal-dreams/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0F3F3",
+        alt: "Seated on crinkled silver foil in a blue foil dress, one arm over the head, pale teal backdrop",
       },
       {
-        "src": "/work/liquid-metal-dreams/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Leaning on one arm on a white floor, hair in buns with long braids, silver eyeliner, smoke behind"
+        src: "/work/liquid-metal-dreams/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Leaning on one arm on a white floor, hair in buns with long braids, silver eyeliner, smoke behind",
       },
       {
-        "src": "/work/liquid-metal-dreams/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "Chin on one hand, eyes closed, silver wire eyeliner, hair in buns, smoky grey backdrop"
+        src: "/work/liquid-metal-dreams/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6A6A6",
+        alt: "Chin on one hand, eyes closed, silver wire eyeliner, hair in buns, smoky grey backdrop",
       },
       {
-        "src": "/work/liquid-metal-dreams/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9F3",
-        "alt": "Seated leaning on both hands, hair in buns and braids, silver strapless top, soft white light"
-      }
-    ]
+        src: "/work/liquid-metal-dreams/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9F3",
+        alt: "Seated leaning on both hands, hair in buns and braids, silver strapless top, soft white light",
+      },
+    ],
   },
   {
-    "slug": "luna",
-    "name": "LUNA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "luna",
+    name: "LUNA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "portraits",
-        "name": "PORTRAITS",
-        "section": "WORK"
-      }
+        slug: "portraits",
+        name: "PORTRAITS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/luna/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/luna/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/luna/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Kneeling in a black leather jacket and fishnets, head tilted, a full moon projected behind"
+        src: "/work/luna/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Kneeling in a black leather jacket and fishnets, head tilted, a full moon projected behind",
       },
       {
-        "src": "/work/luna/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Kneeling with a hand on the floor, leather jacket and fishnet tights, white-blonde bob, large moon behind"
+        src: "/work/luna/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Kneeling with a hand on the floor, leather jacket and fishnet tights, white-blonde bob, large moon behind",
       },
       {
-        "src": "/work/luna/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated on the knees in a leather jacket over a fishnet top, moon light across the face"
+        src: "/work/luna/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated on the knees in a leather jacket over a fishnet top, moon light across the face",
       },
       {
-        "src": "/work/luna/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated upright in a leather jacket and fishnets, face striped by moon light, dark floor"
+        src: "/work/luna/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated upright in a leather jacket and fishnets, face striped by moon light, dark floor",
       },
       {
-        "src": "/work/luna/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Profile in a black leather jacket, chin raised, blonde bob lit by a huge projected moon"
+        src: "/work/luna/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Profile in a black leather jacket, chin raised, blonde bob lit by a huge projected moon",
       },
       {
-        "src": "/work/luna/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Close on a face in profile beside a moon projection, black leather jacket, a dark shadow behind"
-      }
-    ]
+        src: "/work/luna/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Close on a face in profile beside a moon projection, black leather jacket, a dark shadow behind",
+      },
+    ],
   },
   {
-    "slug": "lustro",
-    "name": "LŪSTRŌ",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "lustro",
+    name: "LŪSTRŌ",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "portraits",
-        "name": "PORTRAITS",
-        "section": "WORK"
-      }
+        slug: "portraits",
+        name: "PORTRAITS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/lustro/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#0C260C",
-      "alt": ""
+    cover: {
+      src: "/work/lustro/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#0C260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/lustro/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated with arms wrapped around the knees, head tilted back, dark underwear set, blue and pink light"
+        src: "/work/lustro/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated with arms wrapped around the knees, head tilted back, dark underwear set, blue and pink light",
       },
       {
-        "src": "/work/lustro/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated sideways on the floor looking away, dark bralette, pink light stripe on a teal wall"
+        src: "/work/lustro/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated sideways on the floor looking away, dark bralette, pink light stripe on a teal wall",
       },
       {
-        "src": "/work/lustro/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Close crop, hand at the cheek, face lit red, short bob, teal backdrop"
+        src: "/work/lustro/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Close crop, hand at the cheek, face lit red, short bob, teal backdrop",
       },
       {
-        "src": "/work/lustro/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated with crossed legs, one hand at the head, bob, pink and blue light across the wall"
+        src: "/work/lustro/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated with crossed legs, one hand at the head, bob, pink and blue light across the wall",
       },
       {
-        "src": "/work/lustro/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Kneeling with arms crossed over the shoulders, dark underwear set, a pink beam across the wall"
+        src: "/work/lustro/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Kneeling with arms crossed over the shoulders, dark underwear set, a pink beam across the wall",
       },
       {
-        "src": "/work/lustro/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Close crop, hand on a shoulder, bob lit pink, thin chain necklace, blue backdrop with a pink beam"
+        src: "/work/lustro/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Close crop, hand on a shoulder, bob lit pink, thin chain necklace, blue backdrop with a pink beam",
       },
       {
-        "src": "/work/lustro/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Close crop, head turned, hand on a shoulder, bob, pink light on the face, blue haze"
+        src: "/work/lustro/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Close crop, head turned, hand on a shoulder, bob, pink light on the face, blue haze",
       },
       {
-        "src": "/work/lustro/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Kneeling with hands on the knees, face lit white by a beam, dark underwear set, blue wall"
+        src: "/work/lustro/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Kneeling with hands on the knees, face lit white by a beam, dark underwear set, blue wall",
       },
       {
-        "src": "/work/lustro/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Face half-lit in pink and cyan, head tilted down, dark lace set, blue backdrop"
+        src: "/work/lustro/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Face half-lit in pink and cyan, head tilted down, dark lace set, blue backdrop",
       },
       {
-        "src": "/work/lustro/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Dark silhouette with a cyan beam across the eyes, black lace top, deep blue and magenta backdrop"
-      }
-    ]
+        src: "/work/lustro/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Dark silhouette with a cyan beam across the eyes, black lace top, deep blue and magenta backdrop",
+      },
+    ],
   },
   {
-    "slug": "luxe-meets-future",
-    "name": "LUXE MEETS FUTURE",
-    "headline": "LUXE MEETS FUTURE",
-    "intent": "​Creative Director & HMUA: @lilia.mercedes",
-    "credits": [
+    slug: "luxe-meets-future",
+    name: "LUXE MEETS FUTURE",
+    headline: "LUXE MEETS FUTURE",
+    intent: null,
+    credits: [
+      {
+        role: "Stylist",
+        name: "Lydia Mikulka",
+        instagram: "stylingbylydia",
+      },
+      {
+        role: "Model",
+        name: "@rice666s",
+      },
       {
-        "role": "Stylist",
-        "name": "Lydia Mikulka",
-        "instagram": "stylingbylydia"
+        role: "Lighting",
+        name: "Seydina Seck",
+        instagram: "thisguysdope_disguise",
       },
       {
-        "role": "Model",
-        "name": "@rice666s"
+        role: "BTS",
+        name: "@lightbender_mark",
       },
       {
-        "role": "Lighting",
-        "name": "Seydina Seck",
-        "instagram": "thisguysdope_disguise"
+        role: "Creative direction",
+        name: "@lilia.mercedes",
       },
       {
-        "role": "BTS",
-        "name": "@lightbender_mark"
+        role: "Hair & makeup",
+        name: "@lilia.mercedes",
       },
       {
-        "role": "Photographer",
-        "name": "@juliangigola"
-      }
+        role: "Photographer",
+        name: "@juliangigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/luxe-meets-future/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#A6A6A6",
-      "alt": ""
+    cover: {
+      src: "/work/luxe-meets-future/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#A6A6A6",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/luxe-meets-future/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6A6A6",
-        "alt": "A hand with long chrome nails reaching toward the lens, silver ruffled foil top, pale teal backdrop"
+        src: "/work/luxe-meets-future/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6A6A6",
+        alt: "A hand with long chrome nails reaching toward the lens, silver ruffled foil top, pale teal backdrop",
       },
       {
-        "src": "/work/luxe-meets-future/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8CA6A6",
-        "alt": "Hands pressed to the face, chrome nails and rings, silver foil ruffles, pale teal backdrop"
+        src: "/work/luxe-meets-future/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8CA6A6",
+        alt: "Hands pressed to the face, chrome nails and rings, silver foil ruffles, pale teal backdrop",
       },
       {
-        "src": "/work/luxe-meets-future/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8CC0C0",
-        "alt": "Head tilted with both hands raised at the headpiece, silver foil ruffled top, pale backdrop"
+        src: "/work/luxe-meets-future/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8CC0C0",
+        alt: "Head tilted with both hands raised at the headpiece, silver foil ruffled top, pale backdrop",
       },
       {
-        "src": "/work/luxe-meets-future/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Seated with a knee up, silver foil ruffles, fishnet tights and clear heels, a pink glow behind"
+        src: "/work/luxe-meets-future/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Seated with a knee up, silver foil ruffles, fishnet tights and clear heels, a pink glow behind",
       },
       {
-        "src": "/work/luxe-meets-future/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#738C8C",
-        "alt": "Reclining on one arm in a silver foil ruffled dress and fishnets, pale teal backdrop"
+        src: "/work/luxe-meets-future/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#738C8C",
+        alt: "Reclining on one arm in a silver foil ruffled dress and fishnets, pale teal backdrop",
       },
       {
-        "src": "/work/luxe-meets-future/12.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#0C260C",
-        "alt": "Head tipped back in black glossy sleeves and gloves, blue backdrop, a white floor circle"
+        src: "/work/luxe-meets-future/12.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#0C260C",
+        alt: "Head tipped back in black glossy sleeves and gloves, blue backdrop, a white floor circle",
       },
       {
-        "src": "/work/luxe-meets-future/14.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#0C260C",
-        "alt": "Black glove pressed against a misted surface, face faint behind smoke, dark blue light"
+        src: "/work/luxe-meets-future/14.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#0C260C",
+        alt: "Black glove pressed against a misted surface, face faint behind smoke, dark blue light",
       },
       {
-        "src": "/work/luxe-meets-future/18.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595973",
-        "alt": "Crouched in black gloves and tights, a white spotlight circle on the floor, pink and blue haze"
+        src: "/work/luxe-meets-future/18.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#595973",
+        alt: "Crouched in black gloves and tights, a white spotlight circle on the floor, pink and blue haze",
       },
       {
-        "src": "/work/luxe-meets-future/19.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#0C260C",
-        "alt": "Seated with one leg out in black stiletto heels, glossy puff sleeves, white floor circle, smoke"
+        src: "/work/luxe-meets-future/19.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#0C260C",
+        alt: "Seated with one leg out in black stiletto heels, glossy puff sleeves, white floor circle, smoke",
       },
       {
-        "src": "/work/luxe-meets-future/20.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#0C260C",
-        "alt": "Lying back in a bridge pose in black, a white floor circle, deep blue backdrop"
+        src: "/work/luxe-meets-future/20.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#0C260C",
+        alt: "Lying back in a bridge pose in black, a white floor circle, deep blue backdrop",
       },
       {
-        "src": "/work/luxe-meets-future/21.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#73A6D9",
-        "alt": "Crouched low with black gloves, hair swept forward, smoke over a blue backdrop"
-      }
-    ]
+        src: "/work/luxe-meets-future/21.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#73A6D9",
+        alt: "Crouched low with black gloves, hair swept forward, smoke over a blue backdrop",
+      },
+    ],
   },
   {
-    "slug": "metamorphosis",
-    "name": "METAMORPHOSIS",
-    "headline": "METAMORPHOSIS •  Rice666s",
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "metamorphosis",
+    name: "METAMORPHOSIS",
+    headline: "METAMORPHOSIS •  Rice666s",
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
       },
       {
-        "slug": "mixed-media",
-        "name": "MIXED MEDIA",
-        "section": "WORK"
-      }
+        slug: "mixed-media",
+        name: "MIXED MEDIA",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/metamorphosis/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#264059",
-      "alt": ""
+    cover: {
+      src: "/work/metamorphosis/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#264059",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/metamorphosis/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264059",
-        "alt": "Crouched in chunky black boots and a fringed skirt, branching silver mask, blue-lit backdrop"
+        src: "/work/metamorphosis/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264059",
+        alt: "Crouched in chunky black boots and a fringed skirt, branching silver mask, blue-lit backdrop",
       },
       {
-        "src": "/work/metamorphosis/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated on top of a CRT showing a silhouette, branching mask, black top and fringe, teal light"
+        src: "/work/metamorphosis/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated on top of a CRT showing a silhouette, branching mask, black top and fringe, teal light",
       },
       {
-        "src": "/work/metamorphosis/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Kneeling and leaning to one side, branching mask, black top, fringed skirt and boots, grey backdrop"
+        src: "/work/metamorphosis/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264040",
+        alt: "Kneeling and leaning to one side, branching mask, black top, fringed skirt and boots, grey backdrop",
       },
       {
-        "src": "/work/metamorphosis/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#405973",
-        "alt": "Seated on the floor with one hand on the face, chunky boots, branching mask, white light"
+        src: "/work/metamorphosis/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#405973",
+        alt: "Seated on the floor with one hand on the face, chunky boots, branching mask, white light",
       },
       {
-        "src": "/work/metamorphosis/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264059",
-        "alt": "Seated on a CRT with arms raised overhead, branching mask, black top, a glowing screen below"
+        src: "/work/metamorphosis/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264059",
+        alt: "Seated on a CRT with arms raised overhead, branching mask, black top, a glowing screen below",
       },
       {
-        "src": "/work/metamorphosis/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Close crop of a CRT showing a silhouette with a raised boot, a smaller CRT inside the frame"
+        src: "/work/metamorphosis/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Close crop of a CRT showing a silhouette with a raised boot, a smaller CRT inside the frame",
       },
       {
-        "src": "/work/metamorphosis/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264059",
-        "alt": "Seen from behind, seated on a CRT, branching mask, black top and fringe, a screen glowing violet"
+        src: "/work/metamorphosis/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264059",
+        alt: "Seen from behind, seated on a CRT, branching mask, black top and fringe, a screen glowing violet",
       },
       {
-        "src": "/work/metamorphosis/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264059",
-        "alt": "Head tilted over a shoulder, branching silver mask wrapped around the face, black strapless top"
+        src: "/work/metamorphosis/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264059",
+        alt: "Head tilted over a shoulder, branching silver mask wrapped around the face, black strapless top",
       },
       {
-        "src": "/work/metamorphosis/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Standing with arms overhead inside a ring of twisting clear spikes, branching mask, black outfit"
+        src: "/work/metamorphosis/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264040",
+        alt: "Standing with arms overhead inside a ring of twisting clear spikes, branching mask, black outfit",
       },
       {
-        "src": "/work/metamorphosis/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262640",
-        "alt": "Hands pulled to the face in black gloves, branching silver mask, black crop top, dark teal backdrop"
-      }
-    ]
+        src: "/work/metamorphosis/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262640",
+        alt: "Hands pulled to the face in black gloves, branching silver mask, black crop top, dark teal backdrop",
+      },
+    ],
   },
   {
-    "slug": "mirage",
-    "name": "MIRAGE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "mirage",
+    name: "MIRAGE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "portraits",
-        "name": "PORTRAITS",
-        "section": "WORK"
-      }
+        slug: "portraits",
+        name: "PORTRAITS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/mirage/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#A60C0C",
-      "alt": ""
+    cover: {
+      src: "/work/mirage/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#A60C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/mirage/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A60C0C",
-        "alt": "Full length in profile, black slip dress and heels, a pale spotlight on the floor, red backdrop"
+        src: "/work/mirage/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A60C0C",
+        alt: "Full length in profile, black slip dress and heels, a pale spotlight on the floor, red backdrop",
       },
       {
-        "src": "/work/mirage/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#400C0C",
-        "alt": "Backlit by a white halo, head tilted, hands behind the back, black camisole dress, red backdrop"
+        src: "/work/mirage/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#400C0C",
+        alt: "Backlit by a white halo, head tilted, hands behind the back, black camisole dress, red backdrop",
       },
       {
-        "src": "/work/mirage/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Hair swinging in motion, black camisole dress, light streaking across, deep red backdrop"
+        src: "/work/mirage/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Hair swinging in motion, black camisole dress, light streaking across, deep red backdrop",
       },
       {
-        "src": "/work/mirage/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C0C0C",
-        "alt": "Head tilted down, hands behind the back, black dress, warm light on the hair, red backdrop"
+        src: "/work/mirage/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C0C0C",
+        alt: "Head tilted down, hands behind the back, black dress, warm light on the hair, red backdrop",
       },
       {
-        "src": "/work/mirage/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C0C0C",
-        "alt": "Standing straight, head bowed, arms at the sides, black camisole dress, red backdrop"
+        src: "/work/mirage/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C0C0C",
+        alt: "Standing straight, head bowed, arms at the sides, black camisole dress, red backdrop",
       },
       {
-        "src": "/work/mirage/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A60C0C",
-        "alt": "Close crop, head tilted, hands at the hips, black camisole top, gold chain, red light"
+        src: "/work/mirage/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A60C0C",
+        alt: "Close crop, head tilted, hands at the hips, black camisole top, gold chain, red light",
       },
       {
-        "src": "/work/mirage/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Head bowed, light glowing on the collarbone, black camisole, red backdrop"
+        src: "/work/mirage/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Head bowed, light glowing on the collarbone, black camisole, red backdrop",
       },
       {
-        "src": "/work/mirage/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "One arm raised behind the head, hair across the face, light across the chest, red backdrop"
+        src: "/work/mirage/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "One arm raised behind the head, hair across the face, light across the chest, red backdrop",
       },
       {
-        "src": "/work/mirage/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#400C0C",
-        "alt": "Tight crop, face in profile, hair falling forward, a chain necklace flaring with light, red backdrop"
-      }
-    ]
+        src: "/work/mirage/16.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#400C0C",
+        alt: "Tight crop, face in profile, hair falling forward, a chain necklace flaring with light, red backdrop",
+      },
+    ],
   },
   {
-    "slug": "mya",
-    "name": "MYA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "mya",
+    name: "MYA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "studio-digitals",
-        "name": "STUDIO DIGITALS",
-        "section": "SESSIONS"
-      }
+        slug: "studio-digitals",
+        name: "STUDIO DIGITALS",
+        section: "SESSIONS",
+      },
     ],
-    "cover": {
-      "src": "/work/mya/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#F3F3F3",
-      "alt": ""
+    cover: {
+      src: "/work/mya/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#F3F3F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/mya/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/mya/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/mya/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated on a white floor in a black bodysuit and suede ankle boots, fingers at the lips"
+        src: "/work/mya/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated on a white floor in a black bodysuit and suede ankle boots, fingers at the lips",
       },
       {
-        "src": "/work/mya/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Close crop, head tilted, long wavy hair, black scoop-neck bodysuit, pendant necklace, white backdrop"
+        src: "/work/mya/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Close crop, head tilted, long wavy hair, black scoop-neck bodysuit, pendant necklace, white backdrop",
       },
       {
-        "src": "/work/mya/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Standing, one hand at the collarbone, black high-cut bodysuit, pendant necklace, white backdrop"
+        src: "/work/mya/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Standing, one hand at the collarbone, black high-cut bodysuit, pendant necklace, white backdrop",
       },
       {
-        "src": "/work/mya/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Reclining on one arm in a black bodysuit and yellow-lensed sunglasses, white backdrop"
+        src: "/work/mya/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Reclining on one arm in a black bodysuit and yellow-lensed sunglasses, white backdrop",
       },
       {
-        "src": "/work/mya/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated leaning back on one hand, oversized black sunglasses, black bodysuit, white backdrop"
+        src: "/work/mya/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated leaning back on one hand, oversized black sunglasses, black bodysuit, white backdrop",
       },
       {
-        "src": "/work/mya/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#59A6C0",
-        "alt": "Head tilted, fingers at the cheek, pink bikini, tattoo on the forearm, teal backdrop"
-      }
-    ]
+        src: "/work/mya/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#59A6C0",
+        alt: "Head tilted, fingers at the cheek, pink bikini, tattoo on the forearm, teal backdrop",
+      },
+    ],
   },
   {
-    "slug": "nabu",
-    "name": "NABU",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/nabu/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#18191D",
-      "alt": ""
+    slug: "nabu",
+    name: "NABU",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/nabu/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#18191D",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/nabu/01.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#18191D",
-        "alt": "Person in an open black short-sleeve shirt with large white lettering, jeans, concrete garage, a figure behind"
+        src: "/work/nabu/01.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#18191D",
+        alt: "Person in an open black short-sleeve shirt with large white lettering, jeans, concrete garage, a figure behind",
       },
       {
-        "src": "/work/nabu/02.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#0B0D10",
-        "alt": "Two people walk away through a dark parking garage, black shirts, white star emblem on the back"
+        src: "/work/nabu/02.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#0B0D10",
+        alt: "Two people walk away through a dark parking garage, black shirts, white star emblem on the back",
       },
       {
-        "src": "/work/nabu/11.jpg",
-        "width": 2499,
-        "height": 1562,
-        "color": "#11151F",
-        "alt": "Two people in the front seats of a dark car, black shirts, one with hands on the wheel"
+        src: "/work/nabu/11.jpg",
+        width: 2499,
+        height: 1562,
+        color: "#11151F",
+        alt: "Two people in the front seats of a dark car, black shirts, one with hands on the wheel",
       },
       {
-        "src": "/work/nabu/17.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#A0ADCC",
-        "alt": "Low angle, seated on a rooftop in a black shirt and grey trousers, sun flaring behind"
+        src: "/work/nabu/17.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#A0ADCC",
+        alt: "Low angle, seated on a rooftop in a black shirt and grey trousers, sun flaring behind",
       },
       {
-        "src": "/work/nabu/29.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#0F1310",
-        "alt": "Low angle, seated wide in a tan shirt and baggy jeans, stone wall and trees behind"
+        src: "/work/nabu/29.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#0F1310",
+        alt: "Low angle, seated wide in a tan shirt and baggy jeans, stone wall and trees behind",
       },
       {
-        "src": "/work/nabu/32.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#59493B",
-        "alt": "Seated on rocks in a tan shirt over a white top, loose jeans, yellow sleeve patch, direct gaze"
+        src: "/work/nabu/32.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#59493B",
+        alt: "Seated on rocks in a tan shirt over a white top, loose jeans, yellow sleeve patch, direct gaze",
       },
       {
-        "src": "/work/nabu/43.jpg",
-        "width": 2499,
-        "height": 1562,
-        "color": "#262626",
-        "alt": "Tight crop of two people in black shirts with white lettering, stark overhead light"
+        src: "/work/nabu/43.jpg",
+        width: 2499,
+        height: 1562,
+        color: "#262626",
+        alt: "Tight crop of two people in black shirts with white lettering, stark overhead light",
       },
       {
-        "src": "/work/nabu/57.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#0C260C",
-        "alt": "Low angle, two people on a rooftop, black shirts, paisley shorts, loose jeans, blue evening sky"
+        src: "/work/nabu/57.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#0C260C",
+        alt: "Low angle, two people on a rooftop, black shirts, paisley shorts, loose jeans, blue evening sky",
       },
       {
-        "src": "/work/nabu/59.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#A6A6C0",
-        "alt": ""
+        src: "/work/nabu/59.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#A6A6C0",
+        alt: "",
       },
       {
-        "src": "/work/nabu/67.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#262626",
-        "alt": "Two people among rocks, one seated in a tan shirt and shorts, one standing in jeans"
+        src: "/work/nabu/67.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#262626",
+        alt: "Two people among rocks, one seated in a tan shirt and shorts, one standing in jeans",
       },
       {
-        "src": "/work/nabu/79.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#262626",
-        "alt": "Seated on mossy rocks in a tan shirt and loose jeans, one hand raised against the rock"
+        src: "/work/nabu/79.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#262626",
+        alt: "Seated on mossy rocks in a tan shirt and loose jeans, one hand raised against the rock",
       },
       {
-        "src": "/work/nabu/83.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#D9C0A6",
-        "alt": "Seen from behind in a stone archway, tan shirt with a white star emblem, long dark hair"
-      }
-    ]
+        src: "/work/nabu/83.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#D9C0A6",
+        alt: "Seen from behind in a stone archway, tan shirt with a white star emblem, long dark hair",
+      },
+    ],
   },
   {
-    "slug": "oakley-x-nike",
-    "name": "OAKLEY X NIKE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "oakley-x-nike",
+    name: "OAKLEY X NIKE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/oakley-x-nike/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/oakley-x-nike/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/oakley-x-nike/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Head bowed in black shield sunglasses and a black zip hoodie, deep teal backdrop"
+        src: "/work/oakley-x-nike/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Head bowed in black shield sunglasses and a black zip hoodie, deep teal backdrop",
       },
       {
-        "src": "/work/oakley-x-nike/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Standing in a black tech hoodie and shield sunglasses, hands at the waist, teal light"
+        src: "/work/oakley-x-nike/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Standing in a black tech hoodie and shield sunglasses, hands at the waist, teal light",
       },
       {
-        "src": "/work/oakley-x-nike/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Crop below the chin on a white ribbed tank, rings on the fingers, bracelet, dark teal backdrop"
+        src: "/work/oakley-x-nike/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Crop below the chin on a white ribbed tank, rings on the fingers, bracelet, dark teal backdrop",
       },
       {
-        "src": "/work/oakley-x-nike/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Profile in black shield sunglasses, white tank and a silver chain necklace, dark backdrop"
+        src: "/work/oakley-x-nike/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Profile in black shield sunglasses, white tank and a silver chain necklace, dark backdrop",
       },
       {
-        "src": "/work/oakley-x-nike/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26D9F3",
-        "alt": "Black sport sunglasses with a blue mirrored lens across a white band of light, bright cyan backdrop"
+        src: "/work/oakley-x-nike/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26D9F3",
+        alt: "Black sport sunglasses with a blue mirrored lens across a white band of light, bright cyan backdrop",
       },
       {
-        "src": "/work/oakley-x-nike/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26A6D9",
-        "alt": "Black sport sunglasses suspended at an angle, blue mirrored lens, gradient blue backdrop"
-      }
-    ]
+        src: "/work/oakley-x-nike/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26A6D9",
+        alt: "Black sport sunglasses suspended at an angle, blue mirrored lens, gradient blue backdrop",
+      },
+    ],
   },
   {
-    "slug": "obscura",
-    "name": "OBSCURA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "obscura",
+    name: "OBSCURA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/obscura/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#0C260C",
-      "alt": ""
+    cover: {
+      src: "/work/obscura/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#0C260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/obscura/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Silhouette standing behind clear plastic sheeting, orange glow at left, blue light from the right"
+        src: "/work/obscura/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Silhouette standing behind clear plastic sheeting, orange glow at left, blue light from the right",
       },
       {
-        "src": "/work/obscura/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Profile behind plastic sheeting, hand pressed flat against it, red and cyan light, white lace top"
+        src: "/work/obscura/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Profile behind plastic sheeting, hand pressed flat against it, red and cyan light, white lace top",
       },
       {
-        "src": "/work/obscura/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Head turned away behind plastic, a hand raised to the sheet, cyan light, lace top"
+        src: "/work/obscura/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Head turned away behind plastic, a hand raised to the sheet, cyan light, lace top",
       },
       {
-        "src": "/work/obscura/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Plastic draped over the head and shoulders, one hand pressed to the sheet, red and blue light"
-      }
-    ]
+        src: "/work/obscura/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Plastic draped over the head and shoulders, one hand pressed to the sheet, red and blue light",
+      },
+    ],
   },
   {
-    "slug": "places",
-    "name": "PLACES",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/places/cover.jpg",
-      "width": 600,
-      "height": 400,
-      "color": "#264059",
-      "alt": ""
+    slug: "places",
+    name: "PLACES",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/places/cover.jpg",
+      width: 600,
+      height: 400,
+      color: "#264059",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/places/01.jpg",
-        "width": 2493,
-        "height": 1662,
-        "color": "#264059",
-        "alt": "Looking along a dark highway underpass at dusk, bridge piers and lit road reflected in still water"
+        src: "/work/places/01.jpg",
+        width: 2493,
+        height: 1662,
+        color: "#264059",
+        alt: "Looking along a dark highway underpass at dusk, bridge piers and lit road reflected in still water",
       },
       {
-        "src": "/work/places/02.jpg",
-        "width": 2499,
-        "height": 1404,
-        "color": "#262626",
-        "alt": "Low sun flaring over a downtown skyline at sunrise, a pointed tower silhouetted, long shadows"
+        src: "/work/places/02.jpg",
+        width: 2499,
+        height: 1404,
+        color: "#262626",
+        alt: "Low sun flaring over a downtown skyline at sunrise, a pointed tower silhouetted, long shadows",
       },
       {
-        "src": "/work/places/03.jpg",
-        "width": 2499,
-        "height": 1403,
-        "color": "#172917",
-        "alt": "Aerial view straight down on dense dark evergreen treetops"
+        src: "/work/places/03.jpg",
+        width: 2499,
+        height: 1403,
+        color: "#172917",
+        alt: "Aerial view straight down on dense dark evergreen treetops",
       },
       {
-        "src": "/work/places/04.jpg",
-        "width": 2499,
-        "height": 1406,
-        "color": "#B5C7D1",
-        "alt": "Waterfront piers and downtown towers beside a calm bay, a bridge far off, hazy sky"
+        src: "/work/places/04.jpg",
+        width: 2499,
+        height: 1406,
+        color: "#B5C7D1",
+        alt: "Waterfront piers and downtown towers beside a calm bay, a bridge far off, hazy sky",
       },
       {
-        "src": "/work/places/05.jpg",
-        "width": 2047,
-        "height": 1535,
-        "color": "#8C7552",
-        "alt": "Aerial view of a freeway crossing a causeway between teal salt ponds"
+        src: "/work/places/05.jpg",
+        width: 2047,
+        height: 1535,
+        color: "#8C7552",
+        alt: "Aerial view of a freeway crossing a causeway between teal salt ponds",
       },
       {
-        "src": "/work/places/06.jpg",
-        "width": 2499,
-        "height": 1403,
-        "color": "#79C5E1",
-        "alt": "Downtown skyline of tall towers and a bay bridge under a clear blue sky, seen from above"
+        src: "/work/places/06.jpg",
+        width: 2499,
+        height: 1403,
+        color: "#79C5E1",
+        alt: "Downtown skyline of tall towers and a bay bridge under a clear blue sky, seen from above",
       },
       {
-        "src": "/work/places/07.jpg",
-        "width": 2499,
-        "height": 1311,
-        "color": "#C6D9E1",
-        "alt": "City skyline looking toward a bay and hills, a pointed tower among glass buildings, pale sky"
+        src: "/work/places/07.jpg",
+        width: 2499,
+        height: 1311,
+        color: "#C6D9E1",
+        alt: "City skyline looking toward a bay and hills, a pointed tower among glass buildings, pale sky",
       },
       {
-        "src": "/work/places/08.jpg",
-        "width": 2499,
-        "height": 1403,
-        "color": "#02242F",
-        "alt": "Aerial view of freeway interchanges curving through a green park, cars in motion"
+        src: "/work/places/08.jpg",
+        width: 2499,
+        height: 1403,
+        color: "#02242F",
+        alt: "Aerial view of freeway interchanges curving through a green park, cars in motion",
       },
       {
-        "src": "/work/places/09.jpg",
-        "width": 2046,
-        "height": 1151,
-        "color": "#1F3237",
-        "alt": "Aerial view of a wide avenue cutting through dense residential blocks, autumn trees"
+        src: "/work/places/09.jpg",
+        width: 2046,
+        height: 1151,
+        color: "#1F3237",
+        alt: "Aerial view of a wide avenue cutting through dense residential blocks, autumn trees",
       },
       {
-        "src": "/work/places/10.jpg",
-        "width": 1848,
-        "height": 1040,
-        "color": "#01242E",
-        "alt": "Straight-down aerial on a pyramid-topped tower among rooftops and streets"
+        src: "/work/places/10.jpg",
+        width: 1848,
+        height: 1040,
+        color: "#01242E",
+        alt: "Straight-down aerial on a pyramid-topped tower among rooftops and streets",
       },
       {
-        "src": "/work/places/11.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#D9F3F3",
-        "alt": "Dry golden hills under a clear teal sky, a single star faint above, a farmhouse in the valley"
+        src: "/work/places/11.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#D9F3F3",
+        alt: "Dry golden hills under a clear teal sky, a single star faint above, a farmhouse in the valley",
       },
       {
-        "src": "/work/places/12.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#1D353D",
-        "alt": "Milky Way arching over dark sea stacks and a rocky coastline at night"
+        src: "/work/places/12.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#1D353D",
+        alt: "Milky Way arching over dark sea stacks and a rocky coastline at night",
       },
       {
-        "src": "/work/places/13.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#93959D",
-        "alt": "A radio tower rising out of fog over a green hill and houses, grey overcast sky"
+        src: "/work/places/13.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#93959D",
+        alt: "A radio tower rising out of fog over a green hill and houses, grey overcast sky",
       },
       {
-        "src": "/work/places/14.jpg",
-        "width": 2499,
-        "height": 1405,
-        "color": "#0C260C",
-        "alt": "A lit suspension bridge over dark water at night, reflections on the surface"
+        src: "/work/places/14.jpg",
+        width: 2499,
+        height: 1405,
+        color: "#0C260C",
+        alt: "A lit suspension bridge over dark water at night, reflections on the surface",
       },
       {
-        "src": "/work/places/18.jpg",
-        "width": 2499,
-        "height": 3123,
-        "color": "#23221F",
-        "alt": "Close view of a steep brown ridge dropping into churning surf, teal water"
+        src: "/work/places/18.jpg",
+        width: 2499,
+        height: 3123,
+        color: "#23221F",
+        alt: "Close view of a steep brown ridge dropping into churning surf, teal water",
       },
       {
-        "src": "/work/places/20.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Red neon HOTEL sign on a narrow dark tower, lit window bays glowing orange"
-      }
-    ]
+        src: "/work/places/20.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Red neon HOTEL sign on a narrow dark tower, lit window bays glowing orange",
+      },
+    ],
   },
   {
-    "slug": "poise",
-    "name": "POISE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "poise",
+    name: "POISE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/poise/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#8C8C73",
-      "alt": ""
+    cover: {
+      src: "/work/poise/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#8C8C73",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/poise/01.jpg",
-        "width": 1659,
-        "height": 2074,
-        "color": "#8C8C73",
-        "alt": "Black wraparound sunglasses, an oversized leather jacket over a black lace top, olive wall, hard light"
+        src: "/work/poise/01.jpg",
+        width: 1659,
+        height: 2074,
+        color: "#8C8C73",
+        alt: "Black wraparound sunglasses, an oversized leather jacket over a black lace top, olive wall, hard light",
       },
       {
-        "src": "/work/poise/02.jpg",
-        "width": 2385,
-        "height": 2982,
-        "color": "#404026",
-        "alt": "Standing in a leather jacket, wraparound sunglasses and tights, olive wall, shadows thrown behind"
+        src: "/work/poise/02.jpg",
+        width: 2385,
+        height: 2982,
+        color: "#404026",
+        alt: "Standing in a leather jacket, wraparound sunglasses and tights, olive wall, shadows thrown behind",
       },
       {
-        "src": "/work/poise/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C7359",
-        "alt": "Seen from above, standing in a black leather jacket and sunglasses, tights and boots, tan floor"
+        src: "/work/poise/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C7359",
+        alt: "Seen from above, standing in a black leather jacket and sunglasses, tights and boots, tan floor",
       },
       {
-        "src": "/work/poise/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C7359",
-        "alt": "Close crop, head tipped forward, long dark hair, a gloved hand on the collar of a leather jacket"
+        src: "/work/poise/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C7359",
+        alt: "Close crop, head tipped forward, long dark hair, a gloved hand on the collar of a leather jacket",
       },
       {
-        "src": "/work/poise/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C7359",
-        "alt": "Full length in an off-shoulder leather jacket, tights and platform boots, a white shape on the tan wall"
+        src: "/work/poise/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C7359",
+        alt: "Full length in an off-shoulder leather jacket, tights and platform boots, a white shape on the tan wall",
       },
       {
-        "src": "/work/poise/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C7373",
-        "alt": "Close crop, head tilted, a gloved hand at the forehead, black leather bralette, sheer cape"
+        src: "/work/poise/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C7373",
+        alt: "Close crop, head tilted, a gloved hand at the forehead, black leather bralette, sheer cape",
       },
       {
-        "src": "/work/poise/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A68C",
-        "alt": "Head tilted, a defined wing of black eyeliner, black leather bralette, sheer gloves, tan backdrop"
+        src: "/work/poise/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A68C",
+        alt: "Head tilted, a defined wing of black eyeliner, black leather bralette, sheer gloves, tan backdrop",
       },
       {
-        "src": "/work/poise/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A68C",
-        "alt": "Seated on the floor with one knee up, sheer black cape, gloves, leather bralette, tights and boots"
+        src: "/work/poise/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A68C",
+        alt: "Seated on the floor with one knee up, sheer black cape, gloves, leather bralette, tights and boots",
       },
       {
-        "src": "/work/poise/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A68C",
-        "alt": "Crouched with a platform boot extended behind, sheer black wrap, gloves and tights, tan wall"
+        src: "/work/poise/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A68C",
+        alt: "Crouched with a platform boot extended behind, sheer black wrap, gloves and tights, tan wall",
       },
       {
-        "src": "/work/poise/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Both gloved hands raised to the head, a black veil across the mouth, bright side light"
+        src: "/work/poise/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Both gloved hands raised to the head, a black veil across the mouth, bright side light",
       },
       {
-        "src": "/work/poise/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A68C73",
-        "alt": "Standing under a black sheer veil, hands holding its edges, leather bralette, hazy tan backdrop"
+        src: "/work/poise/15.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A68C73",
+        alt: "Standing under a black sheer veil, hands holding its edges, leather bralette, hazy tan backdrop",
       },
       {
-        "src": "/work/poise/16.jpg",
-        "width": 1983,
-        "height": 2558,
-        "color": "#A68C73",
-        "alt": "Head tipped, lips parted, a black veil over the hair, gloved hands at the edges, hazy backdrop"
-      }
-    ]
+        src: "/work/poise/16.jpg",
+        width: 1983,
+        height: 2558,
+        color: "#A68C73",
+        alt: "Head tipped, lips parted, a black veil over the hair, gloved hands at the edges, hazy backdrop",
+      },
+    ],
   },
   {
-    "slug": "purgatory",
-    "name": "PURGATORY",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/purgatory/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#595940",
-      "alt": ""
+    slug: "purgatory",
+    name: "PURGATORY",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/purgatory/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#595940",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/purgatory/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595940",
-        "alt": "Dark long hair, tattooed arm resting on a mantel, blurred beer steins and glassware in the foreground"
+        src: "/work/purgatory/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#595940",
+        alt: "Dark long hair, tattooed arm resting on a mantel, blurred beer steins and glassware in the foreground",
       },
       {
-        "src": "/work/purgatory/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737359",
-        "alt": "Leaning across a wooden table in a white camisole and black skirt, grandfather clock behind"
+        src: "/work/purgatory/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#737359",
+        alt: "Leaning across a wooden table in a white camisole and black skirt, grandfather clock behind",
       },
       {
-        "src": "/work/purgatory/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A68C",
-        "alt": "Seated at the end of a long wooden table, white camisole, white stockings, clock behind"
+        src: "/work/purgatory/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A68C",
+        alt: "Seated at the end of a long wooden table, white camisole, white stockings, clock behind",
       },
       {
-        "src": "/work/purgatory/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated at a wooden table, white satin camisole, long black hair, a tall clock and curtains behind"
+        src: "/work/purgatory/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated at a wooden table, white satin camisole, long black hair, a tall clock and curtains behind",
       },
       {
-        "src": "/work/purgatory/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated at a dark table, hand resting on the wood, white satin camisole, low side light"
+        src: "/work/purgatory/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated at a dark table, hand resting on the wood, white satin camisole, low side light",
       },
       {
-        "src": "/work/purgatory/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26260C",
-        "alt": "Seated at a table, one arm raised behind the head, white lace-trim camisole, clock and curtains behind"
+        src: "/work/purgatory/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26260C",
+        alt: "Seated at a table, one arm raised behind the head, white lace-trim camisole, clock and curtains behind",
       },
       {
-        "src": "/work/purgatory/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C7359",
-        "alt": "Standing at a sideboard in a white camisole and black skirt, one hand on the hip, mirror behind"
+        src: "/work/purgatory/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C7359",
+        alt: "Standing at a sideboard in a white camisole and black skirt, one hand on the hip, mirror behind",
       },
       {
-        "src": "/work/purgatory/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#40260C",
-        "alt": "Seated on a wooden chair in a parlor, white stockings, black heels, a striped armchair behind"
-      }
-    ]
+        src: "/work/purgatory/15.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#40260C",
+        alt: "Seated on a wooden chair in a parlor, white stockings, black heels, a striped armchair behind",
+      },
+    ],
   },
   {
-    "slug": "realestate",
-    "name": "Real Estate",
-    "headline": null,
-    "intent": "REAL ESTATE",
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/realestate/cover.jpg",
-      "width": 600,
-      "height": 343,
-      "color": "#BAC4CA",
-      "alt": ""
+    slug: "realestate",
+    name: "Real Estate",
+    headline: null,
+    intent: "REAL ESTATE",
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/realestate/cover.jpg",
+      width: 600,
+      height: 343,
+      color: "#BAC4CA",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/realestate/01.jpg",
-        "width": 2142,
-        "height": 1225,
-        "color": "#BAC4CA",
-        "alt": "Aerial view of suburban rooftops with solar panels, backyard pools and tree-lined lots"
+        src: "/work/realestate/01.jpg",
+        width: 2142,
+        height: 1225,
+        color: "#BAC4CA",
+        alt: "Aerial view of suburban rooftops with solar panels, backyard pools and tree-lined lots",
       },
       {
-        "src": "/work/realestate/02.jpg",
-        "width": 2499,
-        "height": 1386,
-        "color": "#BACBCB",
-        "alt": "Straight-down aerial of a single-story house, a kidney-shaped pool, solar panels on the garage roof"
+        src: "/work/realestate/02.jpg",
+        width: 2499,
+        height: 1386,
+        color: "#BACBCB",
+        alt: "Straight-down aerial of a single-story house, a kidney-shaped pool, solar panels on the garage roof",
       },
       {
-        "src": "/work/realestate/03.jpg",
-        "width": 2499,
-        "height": 1666,
-        "color": "#C5D3E8",
-        "alt": "Street view of a single-story house behind a lawn and trees, utility wires and a clear blue sky"
+        src: "/work/realestate/03.jpg",
+        width: 2499,
+        height: 1666,
+        color: "#C5D3E8",
+        alt: "Street view of a single-story house behind a lawn and trees, utility wires and a clear blue sky",
       },
       {
-        "src": "/work/realestate/04.jpg",
-        "width": 2499,
-        "height": 1666,
-        "color": "#BACDE8",
-        "alt": "Backyard pool and spa in front of a yellow single-story house, palms and loungers, afternoon sun"
+        src: "/work/realestate/04.jpg",
+        width: 2499,
+        height: 1666,
+        color: "#BACDE8",
+        alt: "Backyard pool and spa in front of a yellow single-story house, palms and loungers, afternoon sun",
       },
       {
-        "src": "/work/realestate/05.jpg",
-        "width": 2499,
-        "height": 1666,
-        "color": "#836F52",
-        "alt": "Bedroom with a wooden bed frame, ceiling fan, sliding glass door and drawn curtains, beige walls"
+        src: "/work/realestate/05.jpg",
+        width: 2499,
+        height: 1666,
+        color: "#836F52",
+        alt: "Bedroom with a wooden bed frame, ceiling fan, sliding glass door and drawn curtains, beige walls",
       },
       {
-        "src": "/work/realestate/06.jpg",
-        "width": 2499,
-        "height": 1712,
-        "color": "#E3DBD3",
-        "alt": "Two-story house with a stone walkway and front lawn, shaded by tall trees, a sale sign at right"
+        src: "/work/realestate/06.jpg",
+        width: 2499,
+        height: 1712,
+        color: "#E3DBD3",
+        alt: "Two-story house with a stone walkway and front lawn, shaded by tall trees, a sale sign at right",
       },
       {
-        "src": "/work/realestate/07.jpg",
-        "width": 2499,
-        "height": 1666,
-        "color": "#ECEBEB",
-        "alt": "Black ring pendant light hanging from a white ceiling, recessed spotlights beside it"
+        src: "/work/realestate/07.jpg",
+        width: 2499,
+        height: 1666,
+        color: "#ECEBEB",
+        alt: "Black ring pendant light hanging from a white ceiling, recessed spotlights beside it",
       },
       {
-        "src": "/work/realestate/08.jpg",
-        "width": 2499,
-        "height": 1761,
-        "color": "#312E2C",
-        "alt": "Freestanding white oval bathtub under a window, dark tiled wall, trees outside"
+        src: "/work/realestate/08.jpg",
+        width: 2499,
+        height: 1761,
+        color: "#312E2C",
+        alt: "Freestanding white oval bathtub under a window, dark tiled wall, trees outside",
       },
       {
-        "src": "/work/realestate/09.jpg",
-        "width": 2367,
-        "height": 3737,
-        "color": "#D4D2D0",
-        "alt": "White staircase with a black horizontal-bar railing, window below, bright light on the walls"
+        src: "/work/realestate/09.jpg",
+        width: 2367,
+        height: 3737,
+        color: "#D4D2D0",
+        alt: "White staircase with a black horizontal-bar railing, window below, bright light on the walls",
       },
       {
-        "src": "/work/realestate/10.jpg",
-        "width": 2428,
-        "height": 3642,
-        "color": "#2A2928",
-        "alt": "Looking down a white stair run with a black railing, window and sunlit wall beside it"
-      }
-    ]
+        src: "/work/realestate/10.jpg",
+        width: 2428,
+        height: 3642,
+        color: "#2A2928",
+        alt: "Looking down a white stair run with a black railing, window and sunlit wall beside it",
+      },
+    ],
   },
   {
-    "slug": "retro-reverie-vol-01",
-    "name": "RETRO REVERIE VOL. 01",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/retro-reverie-vol-01/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#8C5926",
-      "alt": ""
+    slug: "retro-reverie-vol-01",
+    name: "RETRO REVERIE VOL. 01",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/retro-reverie-vol-01/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#8C5926",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/retro-reverie-vol-01/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C5926",
-        "alt": "Seated on a round leather bench in a pale dress and red scarf, plants and a tree behind"
+        src: "/work/retro-reverie-vol-01/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C5926",
+        alt: "Seated on a round leather bench in a pale dress and red scarf, plants and a tree behind",
       },
       {
-        "src": "/work/retro-reverie-vol-01/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Close crop, hand at the cheek, winged eyeliner, red scarf, long dark wavy hair, orange wall"
+        src: "/work/retro-reverie-vol-01/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Close crop, hand at the cheek, winged eyeliner, red scarf, long dark wavy hair, orange wall",
       },
       {
-        "src": "/work/retro-reverie-vol-01/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A68C",
-        "alt": "Standing at a curved wall under a skylight in a pale dress, red scarf and tan heels"
+        src: "/work/retro-reverie-vol-01/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A68C",
+        alt: "Standing at a curved wall under a skylight in a pale dress, red scarf and tan heels",
       },
       {
-        "src": "/work/retro-reverie-vol-01/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated on a leather bench in a pale full-skirted dress and tan boots, a tree and skylight above"
+        src: "/work/retro-reverie-vol-01/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated on a leather bench in a pale full-skirted dress and tan boots, a tree and skylight above",
       },
       {
-        "src": "/work/retro-reverie-vol-01/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated on a leather bench, looking up toward the skylight, pale dress, red scarf, tan boots"
+        src: "/work/retro-reverie-vol-01/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated on a leather bench, looking up toward the skylight, pale dress, red scarf, tan boots",
       },
       {
-        "src": "/work/retro-reverie-vol-01/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3D9C0",
-        "alt": "Leaning on a corridor railing in a pale dress and red scarf, sunlight along a long hallway"
+        src: "/work/retro-reverie-vol-01/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3D9C0",
+        alt: "Leaning on a corridor railing in a pale dress and red scarf, sunlight along a long hallway",
       },
       {
-        "src": "/work/retro-reverie-vol-01/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3D9D9",
-        "alt": "Walking along a sunlit corridor, one hand on the railing, pale dress, red scarf, framed art"
+        src: "/work/retro-reverie-vol-01/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3D9D9",
+        alt: "Walking along a sunlit corridor, one hand on the railing, pale dress, red scarf, framed art",
       },
       {
-        "src": "/work/retro-reverie-vol-01/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Looking back from a corridor railing, pale dress and red scarf, long sunlit hallway ahead"
-      }
-    ]
+        src: "/work/retro-reverie-vol-01/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Looking back from a corridor railing, pale dress and red scarf, long sunlit hallway ahead",
+      },
+    ],
   },
   {
-    "slug": "retro-reverie-vol-02",
-    "name": "RETRO REVERIE VOL. 02",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/retro-reverie-vol-02/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#D9D9F3",
-      "alt": ""
+    slug: "retro-reverie-vol-02",
+    name: "RETRO REVERIE VOL. 02",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/retro-reverie-vol-02/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#D9D9F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/retro-reverie-vol-02/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9F3",
-        "alt": "Seated by a pool in a green cardigan and striped skirt, curved building and bright sky behind"
+        src: "/work/retro-reverie-vol-02/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9F3",
+        alt: "Seated by a pool in a green cardigan and striped skirt, curved building and bright sky behind",
       },
       {
-        "src": "/work/retro-reverie-vol-02/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#732626",
-        "alt": "Leaning in a red-walled stairwell, wavy hair across the face, green cardigan, striped skirt"
+        src: "/work/retro-reverie-vol-02/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#732626",
+        alt: "Leaning in a red-walled stairwell, wavy hair across the face, green cardigan, striped skirt",
       },
       {
-        "src": "/work/retro-reverie-vol-02/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Close crop, red and white bead necklace, green collar, winged eyeliner, red wall"
+        src: "/work/retro-reverie-vol-02/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Close crop, red and white bead necklace, green collar, winged eyeliner, red wall",
       },
       {
-        "src": "/work/retro-reverie-vol-02/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Leaning back against a gold lattice screen, one hand raised, green cardigan, striped skirt"
+        src: "/work/retro-reverie-vol-02/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Leaning back against a gold lattice screen, one hand raised, green cardigan, striped skirt",
       },
       {
-        "src": "/work/retro-reverie-vol-02/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3C0A6",
-        "alt": "Seated at a curved wall by a gold screen, hands on the knee, green cardigan, striped skirt"
+        src: "/work/retro-reverie-vol-02/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3C0A6",
+        alt: "Seated at a curved wall by a gold screen, hands on the knee, green cardigan, striped skirt",
       },
       {
-        "src": "/work/retro-reverie-vol-02/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated by a pool edge, a hand in the hair, green cardigan, striped skirt, bright sky"
+        src: "/work/retro-reverie-vol-02/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated by a pool edge, a hand in the hair, green cardigan, striped skirt, bright sky",
       },
       {
-        "src": "/work/retro-reverie-vol-02/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#734026",
-        "alt": "Low angle against wood paneling, one arm along a rail, green cardigan, striped skirt"
+        src: "/work/retro-reverie-vol-02/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#734026",
+        alt: "Low angle against wood paneling, one arm along a rail, green cardigan, striped skirt",
       },
       {
-        "src": "/work/retro-reverie-vol-02/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A65926",
-        "alt": "Leaning between a yellow door frame and wood paneling, one leg raised, green cardigan, striped skirt"
-      }
-    ]
+        src: "/work/retro-reverie-vol-02/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A65926",
+        alt: "Leaning between a yellow door frame and wood paneling, one leg raised, green cardigan, striped skirt",
+      },
+    ],
   },
   {
-    "slug": "revelo",
-    "name": "REVELO",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "revelo",
+    name: "REVELO",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/revelo/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/revelo/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/revelo/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated against a giant projected eye, arms around the knees, fishnet bodysuit, blue light"
+        src: "/work/revelo/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated against a giant projected eye, arms around the knees, fishnet bodysuit, blue light",
       },
       {
-        "src": "/work/revelo/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264040",
-        "alt": "Seated sideways before a projected eye, knees drawn up, fishnet tights, dark jacket, blue-white light"
+        src: "/work/revelo/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264040",
+        alt: "Seated sideways before a projected eye, knees drawn up, fishnet tights, dark jacket, blue-white light",
       },
       {
-        "src": "/work/revelo/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9F3",
-        "alt": "Curled up inside a projected eye, hugging the knees, fishnets, a shadow behind, cool light"
+        src: "/work/revelo/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9F3",
+        alt: "Curled up inside a projected eye, hugging the knees, fishnets, a shadow behind, cool light",
       },
       {
-        "src": "/work/revelo/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Projected X-ray images across the face and shoulders, fishnet skirt, dark jacket, a shadow behind"
+        src: "/work/revelo/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Projected X-ray images across the face and shoulders, fishnet skirt, dark jacket, a shadow behind",
       },
       {
-        "src": "/work/revelo/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Lying on the floor under projected chest X-rays, head thrown back, fishnets, pale hair spread"
+        src: "/work/revelo/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Lying on the floor under projected chest X-rays, head thrown back, fishnets, pale hair spread",
       },
       {
-        "src": "/work/revelo/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Lying on the side on a floor covered in projected X-rays, fishnets, pale hair, cool light"
+        src: "/work/revelo/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Lying on the side on a floor covered in projected X-rays, fishnets, pale hair, cool light",
       },
       {
-        "src": "/work/revelo/07.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#F3F3F3",
-        "alt": "Lying with the head turned toward the lens, X-ray projections on the floor, fishnets, one hand forward"
+        src: "/work/revelo/07.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#F3F3F3",
+        alt: "Lying with the head turned toward the lens, X-ray projections on the floor, fishnets, one hand forward",
       },
       {
-        "src": "/work/revelo/08.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#F3F3F3",
-        "alt": "Upside-down view, knees raised among projected X-rays of feet and legs, fishnets, dark jacket"
+        src: "/work/revelo/08.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#F3F3F3",
+        alt: "Upside-down view, knees raised among projected X-rays of feet and legs, fishnets, dark jacket",
       },
       {
-        "src": "/work/revelo/09.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#F3F3F3",
-        "alt": "Seated with a hand at the lips among projected hand and chest X-rays, dark jacket, fishnets"
+        src: "/work/revelo/09.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#F3F3F3",
+        alt: "Seated with a hand at the lips among projected hand and chest X-rays, dark jacket, fishnets",
       },
       {
-        "src": "/work/revelo/10.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#F3F3F3",
-        "alt": "Seated hugging the knees between two projected chest X-rays, dark jacket, fishnets, dark room"
-      }
-    ]
+        src: "/work/revelo/10.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#F3F3F3",
+        alt: "Seated hugging the knees between two projected chest X-rays, dark jacket, fishnets, dark room",
+      },
+    ],
   },
   {
-    "slug": "rouge",
-    "name": "ROUGE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "rouge",
+    name: "ROUGE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "portraits",
-        "name": "PORTRAITS",
-        "section": "WORK"
-      }
+        slug: "portraits",
+        name: "PORTRAITS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/rouge/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#730C0C",
-      "alt": ""
+    cover: {
+      src: "/work/rouge/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#730C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/rouge/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Lying on a red floor with the head on an arm, black lace bralette and briefs, arm tattoos"
+        src: "/work/rouge/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Lying on a red floor with the head on an arm, black lace bralette and briefs, arm tattoos",
       },
       {
-        "src": "/work/rouge/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Reclining on one hand in a black lace bralette and briefs, head tipped back, red backdrop"
+        src: "/work/rouge/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Reclining on one hand in a black lace bralette and briefs, head tipped back, red backdrop",
       },
       {
-        "src": "/work/rouge/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C0C0C",
-        "alt": "Lying back with the head near the lens, black lace bodysuit, tattooed arms, red backdrop"
+        src: "/work/rouge/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C0C0C",
+        alt: "Lying back with the head near the lens, black lace bodysuit, tattooed arms, red backdrop",
       },
       {
-        "src": "/work/rouge/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "On hands and knees in a black lace bralette, long wavy hair, head turned, red backdrop"
+        src: "/work/rouge/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "On hands and knees in a black lace bralette, long wavy hair, head turned, red backdrop",
       },
       {
-        "src": "/work/rouge/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Profile with a hand at the chin, arm across the chest, black lace bralette, red backdrop"
+        src: "/work/rouge/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Profile with a hand at the chin, arm across the chest, black lace bralette, red backdrop",
       },
       {
-        "src": "/work/rouge/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Kneeling in profile with a hand at the chin, black bralette, leg tattoos, red backdrop"
+        src: "/work/rouge/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Kneeling in profile with a hand at the chin, black bralette, leg tattoos, red backdrop",
       },
       {
-        "src": "/work/rouge/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Kneeling with both hands in the hair, black lace bralette and briefs, red backdrop"
+        src: "/work/rouge/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Kneeling with both hands in the hair, black lace bralette and briefs, red backdrop",
       },
       {
-        "src": "/work/rouge/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C0C0C",
-        "alt": "Hand at the neck, face tilted up, black lace bralette, long wavy hair, red backdrop"
+        src: "/work/rouge/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C0C0C",
+        alt: "Hand at the neck, face tilted up, black lace bralette, long wavy hair, red backdrop",
       },
       {
-        "src": "/work/rouge/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Leaning on one hand on the floor, other hand in the hair, black lace set, red backdrop"
+        src: "/work/rouge/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Leaning on one hand on the floor, other hand in the hair, black lace set, red backdrop",
       },
       {
-        "src": "/work/rouge/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Reclining with a hand on the chest, face turned down, black lace set, red backdrop"
-      }
-    ]
+        src: "/work/rouge/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Reclining with a hand on the chest, face turned down, black lace set, red backdrop",
+      },
+    ],
   },
   {
-    "slug": "sage",
-    "name": "SAGE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "sage",
+    name: "SAGE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "artist-presskit",
-        "name": "ARTIST PRESSKIT",
-        "section": "WORK"
-      }
+        slug: "artist-presskit",
+        name: "ARTIST PRESSKIT",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/sage/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#260C0C",
-      "alt": ""
+    cover: {
+      src: "/work/sage/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#260C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/sage/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Seated in a black cutout bodysuit and headphones on a pink spotlight circle, dark backdrop"
+        src: "/work/sage/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Seated in a black cutout bodysuit and headphones on a pink spotlight circle, dark backdrop",
       },
       {
-        "src": "/work/sage/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F30CC0",
-        "alt": "Reclining on one arm in a black cutout bodysuit, headphones at the neck, pink light on the floor"
+        src: "/work/sage/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F30CC0",
+        alt: "Reclining on one arm in a black cutout bodysuit, headphones at the neck, pink light on the floor",
       },
       {
-        "src": "/work/sage/03.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#260C0C",
-        "alt": "Lying with the head tilted in a black cutout bodysuit and headphones, large pink spotlight circle"
+        src: "/work/sage/03.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#260C0C",
+        alt: "Lying with the head tilted in a black cutout bodysuit and headphones, large pink spotlight circle",
       },
       {
-        "src": "/work/sage/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Lying on one side in a black fishnet-sleeve bodysuit, pink spotlight on the floor, dark backdrop"
+        src: "/work/sage/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Lying on one side in a black fishnet-sleeve bodysuit, pink spotlight on the floor, dark backdrop",
       },
       {
-        "src": "/work/sage/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Kneeling in a black cutout bodysuit with one arm raised overhead, pink spotlight circle, dark backdrop"
+        src: "/work/sage/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Kneeling in a black cutout bodysuit with one arm raised overhead, pink spotlight circle, dark backdrop",
       },
       {
-        "src": "/work/sage/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Seated with an arm across the knee, white lace-up boots, blue shiny top, grey backdrop"
+        src: "/work/sage/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "Seated with an arm across the knee, white lace-up boots, blue shiny top, grey backdrop",
       },
       {
-        "src": "/work/sage/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Seated with knees up in white lace-up boots and a blue top, disco ball at left, grey backdrop"
+        src: "/work/sage/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "Seated with knees up in white lace-up boots and a blue top, disco ball at left, grey backdrop",
       },
       {
-        "src": "/work/sage/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Seated with a hand at the head, white boots, blue top, disco ball beside the foot"
+        src: "/work/sage/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "Seated with a hand at the head, white boots, blue top, disco ball beside the foot",
       },
       {
-        "src": "/work/sage/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8CA6A6",
-        "alt": "Lying on the forearms beside a CRT showing a face, blue top, grey-blue backdrop"
+        src: "/work/sage/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8CA6A6",
+        alt: "Lying on the forearms beside a CRT showing a face, blue top, grey-blue backdrop",
       },
       {
-        "src": "/work/sage/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8CA6A6",
-        "alt": ""
+        src: "/work/sage/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8CA6A6",
+        alt: "",
       },
       {
-        "src": "/work/sage/13.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#C08C8C",
-        "alt": "Crouched with a hand at the headphones, black and red printed dress, pink backdrop"
+        src: "/work/sage/13.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#C08C8C",
+        alt: "Crouched with a hand at the headphones, black and red printed dress, pink backdrop",
       },
       {
-        "src": "/work/sage/14.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#C08C8C",
-        "alt": "Seated leaning back on a hand, headphones, printed dress, red drum machine at the feet, pink backdrop"
-      }
-    ]
+        src: "/work/sage/14.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#C08C8C",
+        alt: "Seated leaning back on a hand, headphones, printed dress, red drum machine at the feet, pink backdrop",
+      },
+    ],
   },
   {
-    "slug": "sago",
-    "name": "SAGO",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "sago",
+    name: "SAGO",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/sago/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#F3F3F3",
-      "alt": ""
+    cover: {
+      src: "/work/sago/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#F3F3F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/sago/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/sago/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/sago/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "From behind in a cream and black leather jacket with SG lettering, tall grass, warm backlight"
+        src: "/work/sago/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "From behind in a cream and black leather jacket with SG lettering, tall grass, warm backlight",
       },
       {
-        "src": "/work/sago/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3D9",
-        "alt": "Multiple exposure of a figure from behind in a cream and black leather jacket with SG lettering"
+        src: "/work/sago/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3D9",
+        alt: "Multiple exposure of a figure from behind in a cream and black leather jacket with SG lettering",
       },
       {
-        "src": "/work/sago/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "From behind in a cream and black leather jacket with SG lettering, wide stance, dark trees"
+        src: "/work/sago/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "From behind in a cream and black leather jacket with SG lettering, wide stance, dark trees",
       },
       {
-        "src": "/work/sago/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Portrait in a cream and black leather bomber with SAGO lettering, sunglasses on the head, face tattoos"
+        src: "/work/sago/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Portrait in a cream and black leather bomber with SAGO lettering, sunglasses on the head, face tattoos",
       },
       {
-        "src": "/work/sago/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Seated on a white stool in a graphic tee, patterned shorts and a tan cap, pale seamless backdrop"
+        src: "/work/sago/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Seated on a white stool in a graphic tee, patterned shorts and a tan cap, pale seamless backdrop",
       },
       {
-        "src": "/work/sago/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Two people on white stools in graphic tees and patterned shorts, caps, white sneakers, pale backdrop"
+        src: "/work/sago/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Two people on white stools in graphic tees and patterned shorts, caps, white sneakers, pale backdrop",
       },
       {
-        "src": "/work/sago/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Standing in a grey zip jacket and black flared trousers, sunglasses, wooden rack and teal painting behind"
+        src: "/work/sago/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Standing in a grey zip jacket and black flared trousers, sunglasses, wooden rack and teal painting behind",
       },
       {
-        "src": "/work/sago/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Turned to the side in a grey fleece jacket, black trousers and sunglasses, teal painting behind"
+        src: "/work/sago/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Turned to the side in a grey fleece jacket, black trousers and sunglasses, teal painting behind",
       },
       {
-        "src": "/work/sago/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Two people in an olive hoodie and a black work jacket, denim shorts, white room, teal painting"
+        src: "/work/sago/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Two people in an olive hoodie and a black work jacket, denim shorts, white room, teal painting",
       },
       {
-        "src": "/work/sago/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "One person from behind in an olive hoodie beside another in a black jacket, bandana and white sunglasses"
+        src: "/work/sago/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "One person from behind in an olive hoodie beside another in a black jacket, bandana and white sunglasses",
       },
       {
-        "src": "/work/sago/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Striped knit polo with SAGO across the chest, round purple sunglasses, hair in a top bun"
-      }
-    ]
+        src: "/work/sago/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Striped knit polo with SAGO across the chest, round purple sunglasses, hair in a top bun",
+      },
+    ],
   },
   {
-    "slug": "sara",
-    "name": "SARA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "sara",
+    name: "SARA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "artist-presskit",
-        "name": "ARTIST PRESSKIT",
-        "section": "WORK"
-      }
+        slug: "artist-presskit",
+        name: "ARTIST PRESSKIT",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/sara/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#0C260C",
-      "alt": ""
+    cover: {
+      src: "/work/sara/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#0C260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/sara/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Seated in a black strapless top and long gloves, arms crossed, chain necklace, teal backdrop and white chair"
+        src: "/work/sara/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Seated in a black strapless top and long gloves, arms crossed, chain necklace, teal backdrop and white chair",
       },
       {
-        "src": "/work/sara/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A6F3F3",
-        "alt": "Hand on the hip in a black lace long-sleeve crop top, hair in a bun, teal haze"
+        src: "/work/sara/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A6F3F3",
+        alt: "Hand on the hip in a black lace long-sleeve crop top, hair in a bun, teal haze",
       },
       {
-        "src": "/work/sara/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A673D9",
-        "alt": ""
+        src: "/work/sara/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A673D9",
+        alt: "",
       },
       {
-        "src": "/work/sara/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C40",
-        "alt": "Seated on a white chair hugging the knees, black boots and dark layers, purple haze"
+        src: "/work/sara/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C40",
+        alt: "Seated on a white chair hugging the knees, black boots and dark layers, purple haze",
       },
       {
-        "src": "/work/sara/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C26",
-        "alt": "Seated sideways on a white chair looking back, black strapless top and boots, purple smoke"
+        src: "/work/sara/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C26",
+        alt: "Seated sideways on a white chair looking back, black strapless top and boots, purple smoke",
       },
       {
-        "src": "/work/sara/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404059",
-        "alt": "Seated hugging a knee in chunky black boots, red light on one side and blue on the other"
+        src: "/work/sara/15.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404059",
+        alt: "Seated hugging a knee in chunky black boots, red light on one side and blue on the other",
       },
       {
-        "src": "/work/sara/19.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Close portrait in sunglasses and a black zip top with orange piping, a white spotlight circle, orange backdrop"
+        src: "/work/sara/19.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Close portrait in sunglasses and a black zip top with orange piping, a white spotlight circle, orange backdrop",
       },
       {
-        "src": "/work/sara/27.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F30C59",
-        "alt": "Kneeling in a pale spotlight in sunglasses and a black sleeved top, hot pink and red backdrop"
-      }
-    ]
+        src: "/work/sara/27.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F30C59",
+        alt: "Kneeling in a pale spotlight in sunglasses and a black sleeved top, hot pink and red backdrop",
+      },
+    ],
   },
   {
-    "slug": "solace",
-    "name": "SOLACE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/solace/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#260C0C",
-      "alt": ""
+    slug: "solace",
+    name: "SOLACE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/solace/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#260C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/solace/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Profile silhouette with a hand at the chest, a hard orange light flaring behind the head, dark backdrop"
+        src: "/work/solace/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Profile silhouette with a hand at the chest, a hard orange light flaring behind the head, dark backdrop",
       },
       {
-        "src": "/work/solace/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Lying on the floor with a hand raised, a red and orange light glowing behind, dark room"
+        src: "/work/solace/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Lying on the floor with a hand raised, a red and orange light glowing behind, dark room",
       },
       {
-        "src": "/work/solace/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#590C0C",
-        "alt": "Seated leaning on one hand, an arm raised, black lace bustier and long black skirt, orange backlight"
+        src: "/work/solace/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#590C0C",
+        alt: "Seated leaning on one hand, an arm raised, black lace bustier and long black skirt, orange backlight",
       },
       {
-        "src": "/work/solace/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Head tipped back with a hand at the throat, hoop earring, a bright orange haze behind"
-      }
-    ]
+        src: "/work/solace/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Head tipped back with a hand at the throat, hoop earring, a bright orange haze behind",
+      },
+    ],
   },
   {
-    "slug": "solitude",
-    "name": "SOLITUDE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "solitude",
+    name: "SOLITUDE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "portraits",
-        "name": "PORTRAITS",
-        "section": "WORK"
-      }
+        slug: "portraits",
+        name: "PORTRAITS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/solitude/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#C0C0C0",
-      "alt": ""
+    cover: {
+      src: "/work/solitude/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#C0C0C0",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/solitude/01.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#C0C0C0",
-        "alt": ""
+        src: "/work/solitude/01.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#C0C0C0",
+        alt: "",
       },
       {
-        "src": "/work/solitude/02.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#C0C0C0",
-        "alt": "Crouched in a white ruffled sheer shirt, black tights and heels, hair in a bun"
+        src: "/work/solitude/02.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#C0C0C0",
+        alt: "Crouched in a white ruffled sheer shirt, black tights and heels, hair in a bun",
       },
       {
-        "src": "/work/solitude/03.jpg",
-        "width": 2499,
-        "height": 3125,
-        "color": "#C0C0C0",
-        "alt": "Crouched with the head bowed in a white ruffled sheer shirt, black tights and heels, pale backdrop"
+        src: "/work/solitude/03.jpg",
+        width: 2499,
+        height: 3125,
+        color: "#C0C0C0",
+        alt: "Crouched with the head bowed in a white ruffled sheer shirt, black tights and heels, pale backdrop",
       },
       {
-        "src": "/work/solitude/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Seen from above, crouched with arms wrapped around the knees, white ruffled shirt, black heels, pale floor"
-      }
-    ]
+        src: "/work/solitude/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Seen from above, crouched with arms wrapped around the knees, white ruffled shirt, black heels, pale floor",
+      },
+    ],
   },
   {
-    "slug": "sols",
-    "name": "SOLSWEAR",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "sols",
+    name: "SOLSWEAR",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/sols/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#D9D9D9",
-      "alt": ""
+    cover: {
+      src: "/work/sols/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#D9D9D9",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/sols/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": ""
+        src: "/work/sols/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "",
       },
       {
-        "src": "/work/sols/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Close portrait in a patterned bandana headband and black halter top, green hair, bright sky"
+        src: "/work/sols/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Close portrait in a patterned bandana headband and black halter top, green hair, bright sky",
       },
       {
-        "src": "/work/sols/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C8C8C",
-        "alt": "Crouching against a white wall in an oversized black graphic tee, green hair, bandana at the wrist"
+        src: "/work/sols/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C8C8C",
+        alt: "Crouching against a white wall in an oversized black graphic tee, green hair, bandana at the wrist",
       },
       {
-        "src": "/work/sols/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated on a rooftop rail in a black cap and striped graphic tee, green hair, blue sky"
+        src: "/work/sols/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated on a rooftop rail in a black cap and striped graphic tee, green hair, blue sky",
       },
       {
-        "src": "/work/sols/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Leaning forward on a rooftop rail in a black cap and striped tee, wrist bandana, green hair"
+        src: "/work/sols/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Leaning forward on a rooftop rail in a black cap and striped tee, wrist bandana, green hair",
       },
       {
-        "src": "/work/sols/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated on a rooftop rail in a black cap and striped oversized tee, clouds behind"
+        src: "/work/sols/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated on a rooftop rail in a black cap and striped oversized tee, clouds behind",
       },
       {
-        "src": "/work/sols/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Head down under a black cap, striped oversized tee, green hair, white rooftop and trees behind"
-      }
-    ]
+        src: "/work/sols/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Head down under a black cap, striped oversized tee, green hair, white rooftop and trees behind",
+      },
+    ],
   },
   {
-    "slug": "sonder",
-    "name": "SONDER",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "sonder",
+    name: "SONDER",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "portraits",
-        "name": "PORTRAITS",
-        "section": "WORK"
-      }
+        slug: "portraits",
+        name: "PORTRAITS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/sonder/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/sonder/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/sonder/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": ""
+        src: "/work/sonder/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "",
       },
       {
-        "src": "/work/sonder/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated on a lit floor leaning on one arm, white lace top, black tie, shorts, sneakers"
+        src: "/work/sonder/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated on a lit floor leaning on one arm, white lace top, black tie, shorts, sneakers",
       },
       {
-        "src": "/work/sonder/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated on a pool of hard light looking at the lens, lace top, black tie, shorts, striped sneakers"
+        src: "/work/sonder/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated on a pool of hard light looking at the lens, lace top, black tie, shorts, striped sneakers",
       },
       {
-        "src": "/work/sonder/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated with the head tilted back, lace top, long black tie, white socks and striped sneakers, dark backdrop"
+        src: "/work/sonder/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated with the head tilted back, lace top, long black tie, white socks and striped sneakers, dark backdrop",
       },
       {
-        "src": "/work/sonder/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated on a pool of hard white light, lace top, black tie, shorts, striped sneakers, dark backdrop"
-      }
-    ]
+        src: "/work/sonder/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated on a pool of hard white light, lace top, black tie, shorts, striped sneakers, dark backdrop",
+      },
+    ],
   },
   {
-    "slug": "steampunk-files-001",
-    "name": "STEAMPUNK FILES 001",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "steampunk-files-001",
+    name: "STEAMPUNK FILES 001",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/steampunk-files-001/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/steampunk-files-001/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/steampunk-files-001/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Low angle on two people in a mossy forest, one in black overalls, fur hat and face mask"
+        src: "/work/steampunk-files-001/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Low angle on two people in a mossy forest, one in black overalls, fur hat and face mask",
       },
       {
-        "src": "/work/steampunk-files-001/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Low wide angle, a gloved hand reaching toward the lens, black overalls, fur hat and face mask"
+        src: "/work/steampunk-files-001/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Low wide angle, a gloved hand reaching toward the lens, black overalls, fur hat and face mask",
       },
       {
-        "src": "/work/steampunk-files-001/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Grey puffer jacket, brown headscarf and tall black boots beside a person in overalls, graffiti tunnel"
+        src: "/work/steampunk-files-001/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Grey puffer jacket, brown headscarf and tall black boots beside a person in overalls, graffiti tunnel",
       },
       {
-        "src": "/work/steampunk-files-001/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Crouching with the head down in a fur hat beside a person in a scarf and boots, tunnel"
+        src: "/work/steampunk-files-001/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Crouching with the head down in a fur hat beside a person in a scarf and boots, tunnel",
       },
       {
-        "src": "/work/steampunk-files-001/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Holding a black parasol over a grey puffer jacket and tall boots, a second person seated, forest"
+        src: "/work/steampunk-files-001/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Holding a black parasol over a grey puffer jacket and tall boots, a second person seated, forest",
       },
       {
-        "src": "/work/steampunk-files-001/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Two people in a forest clearing, one with a boot raised, one in overalls and a face mask"
+        src: "/work/steampunk-files-001/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Two people in a forest clearing, one with a boot raised, one in overalls and a face mask",
       },
       {
-        "src": "/work/steampunk-files-001/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Close angle on two people in a bare-branch clearing, a hand raised to the brow, puffer jacket, gloves"
+        src: "/work/steampunk-files-001/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Close angle on two people in a bare-branch clearing, a hand raised to the brow, puffer jacket, gloves",
       },
       {
-        "src": "/work/steampunk-files-001/20.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Low angle on a closed black umbrella, a person crouching in black with gloves, another seated in overalls"
+        src: "/work/steampunk-files-001/20.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Low angle on a closed black umbrella, a person crouching in black with gloves, another seated in overalls",
       },
       {
-        "src": "/work/steampunk-files-001/21.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing in a striped beanie and leather gloves, a brown scarf pulled over another person's face, forest behind"
+        src: "/work/steampunk-files-001/21.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing in a striped beanie and leather gloves, a brown scarf pulled over another person's face, forest behind",
       },
       {
-        "src": "/work/steampunk-files-001/29.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Grinning under a black umbrella in a cream sweater and overalls, goggles on the head, forest green behind"
+        src: "/work/steampunk-files-001/29.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Grinning under a black umbrella in a cream sweater and overalls, goggles on the head, forest green behind",
       },
       {
-        "src": "/work/steampunk-files-001/30.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Holding an umbrella with a brown scarf over the mouth, cream sweater, overalls, gravel and ivy behind"
+        src: "/work/steampunk-files-001/30.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Holding an umbrella with a brown scarf over the mouth, cream sweater, overalls, gravel and ivy behind",
       },
       {
-        "src": "/work/steampunk-files-001/31.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Holding a wide black umbrella overhead, brown scarf pulled over the face, goggles on the head, cream sweater"
-      }
-    ]
+        src: "/work/steampunk-files-001/31.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Holding a wide black umbrella overhead, brown scarf pulled over the face, goggles on the head, cream sweater",
+      },
+    ],
   },
   {
-    "slug": "stratus-lookbook-vol-1",
-    "name": "STRATUS LOOKBOOK VOL. 1",
-    "headline": "STRATUS LOOKBOOK VOL. 1",
-    "intent": "Preston (@preston.xyz)",
-    "credits": [
+    slug: "stratus-lookbook-vol-1",
+    name: "STRATUS LOOKBOOK VOL. 1",
+    headline: "STRATUS LOOKBOOK VOL. 1",
+    intent: null,
+    credits: [
+      {
+        role: "Model",
+        name: "Ryan Ohaya (@carti.kun)",
+      },
       {
-        "role": "Model",
-        "name": "​Ryan Ohaya (@carti.kun)"
-      }
+        role: "Model",
+        name: "Preston (@preston.xyz)",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/stratus-lookbook-vol-1/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#26260C",
-      "alt": ""
+    cover: {
+      src: "/work/stratus-lookbook-vol-1/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#26260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/stratus-lookbook-vol-1/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26260C",
-        "alt": "Standing in a green quilted jacket and khaki trousers, face wrapped in a scarf, dry grass at night"
+        src: "/work/stratus-lookbook-vol-1/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26260C",
+        alt: "Standing in a green quilted jacket and khaki trousers, face wrapped in a scarf, dry grass at night",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Looking down in a green quilted jacket, a camouflage bucket hat and light trousers, dark night sky"
+        src: "/work/stratus-lookbook-vol-1/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Looking down in a green quilted jacket, a camouflage bucket hat and light trousers, dark night sky",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#408C8C",
-        "alt": "Standing in a quilted jacket, sunglasses and cargo trousers under a teal dusk sky with a moon"
+        src: "/work/stratus-lookbook-vol-1/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#408C8C",
+        alt: "Standing in a quilted jacket, sunglasses and cargo trousers under a teal dusk sky with a moon",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Two people at night under a tree, one in a denim jacket and mask, one with a bag"
+        src: "/work/stratus-lookbook-vol-1/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Two people at night under a tree, one in a denim jacket and mask, one with a bag",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8C7340",
-        "alt": "Two people in dry grass, one in a denim jacket and mask, one bent over a duffel bag"
+        src: "/work/stratus-lookbook-vol-1/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8C7340",
+        alt: "Two people in dry grass, one in a denim jacket and mask, one bent over a duffel bag",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#594026",
-        "alt": "Walking in a green quilted jacket and cargo trousers, carrying a black bag, patterned scarf over the face"
+        src: "/work/stratus-lookbook-vol-1/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#594026",
+        alt: "Walking in a green quilted jacket and cargo trousers, carrying a black bag, patterned scarf over the face",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#40738C",
-        "alt": "Leaning into a stride in a green quilted jacket, sunglasses and wide cargo trousers, dusk sky"
+        src: "/work/stratus-lookbook-vol-1/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#40738C",
+        alt: "Leaning into a stride in a green quilted jacket, sunglasses and wide cargo trousers, dusk sky",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Turned away with the head down in a green quilted jacket, hands together, cargo trousers, dark hills"
+        src: "/work/stratus-lookbook-vol-1/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Turned away with the head down in a green quilted jacket, hands together, cargo trousers, dark hills",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Walking away in a green quilted jacket and cargo trousers, one arm out, pale dusk sky"
+        src: "/work/stratus-lookbook-vol-1/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Walking away in a green quilted jacket and cargo trousers, one arm out, pale dusk sky",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing with arms loose in a green quilted jacket and sunglasses, cargo trousers, hills at dusk"
+        src: "/work/stratus-lookbook-vol-1/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing with arms loose in a green quilted jacket and sunglasses, cargo trousers, hills at dusk",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0D9D9",
-        "alt": "Looking down in a green quilted jacket and sunglasses, one hand in a pocket, grass and dark hills"
+        src: "/work/stratus-lookbook-vol-1/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0D9D9",
+        alt: "Looking down in a green quilted jacket and sunglasses, one hand in a pocket, grass and dark hills",
       },
       {
-        "src": "/work/stratus-lookbook-vol-1/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#8CC0D9",
-        "alt": "Turning away in a green quilted jacket, sunglasses and cargo trousers, dark hills, pale sky"
-      }
-    ]
+        src: "/work/stratus-lookbook-vol-1/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#8CC0D9",
+        alt: "Turning away in a green quilted jacket, sunglasses and cargo trousers, dark hills, pale sky",
+      },
+    ],
   },
   {
-    "slug": "taneka",
-    "name": "TANEKA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "taneka",
+    name: "TANEKA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "studio-digitals",
-        "name": "STUDIO DIGITALS",
-        "section": "SESSIONS"
-      }
+        slug: "studio-digitals",
+        name: "STUDIO DIGITALS",
+        section: "SESSIONS",
+      },
     ],
-    "cover": {
-      "src": "/work/taneka/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#F3F3F3",
-      "alt": ""
+    cover: {
+      src: "/work/taneka/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#F3F3F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/taneka/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/taneka/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/taneka/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Kneeling with a hand at the head in a black bodysuit, streaked hair, white backdrop"
+        src: "/work/taneka/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Kneeling with a hand at the head in a black bodysuit, streaked hair, white backdrop",
       },
       {
-        "src": "/work/taneka/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated with an arm over the head in a black bodysuit and white socks, white backdrop"
+        src: "/work/taneka/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated with an arm over the head in a black bodysuit and white socks, white backdrop",
       },
       {
-        "src": "/work/taneka/07.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#8C8C8C",
-        "alt": "Lying on the front on a grey floor, head on an arm, black bodysuit, streaked hair"
+        src: "/work/taneka/07.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#8C8C8C",
+        alt: "Lying on the front on a grey floor, head on an arm, black bodysuit, streaked hair",
       },
       {
-        "src": "/work/taneka/09.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#737373",
-        "alt": "Lying on one side, head on a bent arm, black bodysuit, soft light, grey backdrop"
+        src: "/work/taneka/09.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#737373",
+        alt: "Lying on one side, head on a bent arm, black bodysuit, soft light, grey backdrop",
       },
       {
-        "src": "/work/taneka/10.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#8C8C8C",
-        "alt": "Propped on both arms over a grey floor, head tilted, black bodysuit, soft side light"
+        src: "/work/taneka/10.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#8C8C8C",
+        alt: "Propped on both arms over a grey floor, head tilted, black bodysuit, soft side light",
       },
       {
-        "src": "/work/taneka/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3D9D9",
-        "alt": "Seated leaning on one arm in a black bodysuit and thin necklace, pink glow, white floor"
+        src: "/work/taneka/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3D9D9",
+        alt: "Seated leaning on one arm in a black bodysuit and thin necklace, pink glow, white floor",
       },
       {
-        "src": "/work/taneka/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Head tilted over a shoulder in a black bodysuit, one hand planted, pale pink backdrop"
+        src: "/work/taneka/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Head tilted over a shoulder in a black bodysuit, one hand planted, pale pink backdrop",
       },
       {
-        "src": "/work/taneka/17.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Seated leaning back on one arm, a hand at the hip, black bodysuit, pink backlight"
-      }
-    ]
+        src: "/work/taneka/17.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Seated leaning back on one arm, a hand at the hip, black bodysuit, pink backlight",
+      },
+    ],
   },
   {
-    "slug": "the-den-talkshow",
-    "name": "THE DEN TALKSHOW",
-    "headline": "THE DEN TALKSHOW",
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "the-den-talkshow",
+    name: "THE DEN TALKSHOW",
+    headline: "THE DEN TALKSHOW",
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/the-den-talkshow/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/the-den-talkshow/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/the-den-talkshow/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing in a black blazer and wide jeans beside a band, an orange limousine and an overpass behind"
+        src: "/work/the-den-talkshow/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing in a black blazer and wide jeans beside a band, an orange limousine and an overpass behind",
       },
       {
-        "src": "/work/the-den-talkshow/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Mid-jump in flared jeans beside a guitarist, orange limousine behind, a keyboard stand nearby"
+        src: "/work/the-den-talkshow/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Mid-jump in flared jeans beside a guitarist, orange limousine behind, a keyboard stand nearby",
       },
       {
-        "src": "/work/the-den-talkshow/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Singing into a microphone in a tan blazer, one hand reaching toward the lens, orange limousine behind"
+        src: "/work/the-den-talkshow/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Singing into a microphone in a tan blazer, one hand reaching toward the lens, orange limousine behind",
       },
       {
-        "src": "/work/the-den-talkshow/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Four people leaning on an orange limousine, one with a guitar, sunglasses, black coats, low angle"
+        src: "/work/the-den-talkshow/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Four people leaning on an orange limousine, one with a guitar, sunglasses, black coats, low angle",
       },
       {
-        "src": "/work/the-den-talkshow/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Wide angle into the open trunk of a limousine packed with bandmates laughing, a red beret, a guitar"
+        src: "/work/the-den-talkshow/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Wide angle into the open trunk of a limousine packed with bandmates laughing, a red beret, a guitar",
       },
       {
-        "src": "/work/the-den-talkshow/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing in sunglasses and a puffer vest with a sunburst guitar on the shoulder, orange limousine behind"
+        src: "/work/the-den-talkshow/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing in sunglasses and a puffer vest with a sunburst guitar on the shoulder, orange limousine behind",
       },
       {
-        "src": "/work/the-den-talkshow/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Seated in a limousine interior holding a red guitar, tan blazer, three bandmates behind, purple light"
-      }
-    ]
+        src: "/work/the-den-talkshow/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Seated in a limousine interior holding a red guitar, tan blazer, three bandmates behind, purple light",
+      },
+    ],
   },
   {
-    "slug": "torteline",
-    "name": "TORTELINE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "torteline",
+    name: "TORTELINE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "artist-presskit",
-        "name": "ARTIST PRESSKIT",
-        "section": "WORK"
-      }
+        slug: "artist-presskit",
+        name: "ARTIST PRESSKIT",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/torteline/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#0C260C",
-      "alt": ""
+    cover: {
+      src: "/work/torteline/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#0C260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/torteline/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Head bowed in a dark blazer and white tee, a bright beam behind in teal smoke"
+        src: "/work/torteline/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Head bowed in a dark blazer and white tee, a bright beam behind in teal smoke",
       },
       {
-        "src": "/work/torteline/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": "Standing with hands in the pockets of an open dark blazer, teal smoke, pendant necklace"
+        src: "/work/torteline/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "Standing with hands in the pockets of an open dark blazer, teal smoke, pendant necklace",
       },
       {
-        "src": "/work/torteline/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#408CA6",
-        "alt": "Profile over the shoulder in a dark blazer and white tee, backlit by pale blue light"
+        src: "/work/torteline/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#408CA6",
+        alt: "Profile over the shoulder in a dark blazer and white tee, backlit by pale blue light",
       },
       {
-        "src": "/work/torteline/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#0C260C",
-        "alt": ""
+        src: "/work/torteline/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#0C260C",
+        alt: "",
       },
       {
-        "src": "/work/torteline/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Small dark silhouette standing in a red room with a bright magenta glow at left"
+        src: "/work/torteline/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Small dark silhouette standing in a red room with a bright magenta glow at left",
       },
       {
-        "src": "/work/torteline/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Head tilted back in a dark silhouette on red, a strip of light across the eyes"
+        src: "/work/torteline/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Head tilted back in a dark silhouette on red, a strip of light across the eyes",
       },
       {
-        "src": "/work/torteline/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Standing in silhouette with hands behind the back holding drumsticks, magenta glow, red room"
+        src: "/work/torteline/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Standing in silhouette with hands behind the back holding drumsticks, magenta glow, red room",
       },
       {
-        "src": "/work/torteline/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#40260C",
-        "alt": "Standing in a red-lit printed tee and black trousers, hands together, dark red backdrop"
+        src: "/work/torteline/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#40260C",
+        alt: "Standing in a red-lit printed tee and black trousers, hands together, dark red backdrop",
       },
       {
-        "src": "/work/torteline/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#735940",
-        "alt": "Seated on a stool in a lime cardigan over a white tee, one foot up, hazy warm light"
+        src: "/work/torteline/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#735940",
+        alt: "Seated on a stool in a lime cardigan over a white tee, one foot up, hazy warm light",
       },
       {
-        "src": "/work/torteline/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#594026",
-        "alt": "Seated on a stool in a lime cardigan, legs apart, sneakers, soft smoke and warm light"
+        src: "/work/torteline/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#594026",
+        alt: "Seated on a stool in a lime cardigan, legs apart, sneakers, soft smoke and warm light",
       },
       {
-        "src": "/work/torteline/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C07326",
-        "alt": "Standing in a dark apron and white tee with a wooden spoon between the teeth, amber backdrop"
-      }
-    ]
+        src: "/work/torteline/16.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C07326",
+        alt: "Standing in a dark apron and white tee with a wooden spoon between the teeth, amber backdrop",
+      },
+    ],
   },
   {
-    "slug": "totem",
-    "name": "TOTEM",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "totem",
+    name: "TOTEM",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/totem/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#260C0C",
-      "alt": ""
+    cover: {
+      src: "/work/totem/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#260C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/totem/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Close portrait in white face paint, a black disc over one eye, dots on the cheek, plywood behind"
+        src: "/work/totem/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Close portrait in white face paint, a black disc over one eye, dots on the cheek, plywood behind",
       },
       {
-        "src": "/work/totem/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated at a tree base in a black leather coat and heels, white face paint, one knee up"
+        src: "/work/totem/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated at a tree base in a black leather coat and heels, white face paint, one knee up",
       },
       {
-        "src": "/work/totem/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Reclining against a tree trunk, one leg raised in a black heel, black coat, white face paint"
+        src: "/work/totem/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Reclining against a tree trunk, one leg raised in a black heel, black coat, white face paint",
       },
       {
-        "src": "/work/totem/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing against a fallen trunk in an open black coat with a fur sleeve, white face paint"
+        src: "/work/totem/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing against a fallen trunk in an open black coat with a fur sleeve, white face paint",
       },
       {
-        "src": "/work/totem/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seen from above in an open black leather coat with a fur sleeve, white face paint, fallen branches"
+        src: "/work/totem/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seen from above in an open black leather coat with a fur sleeve, white face paint, fallen branches",
       },
       {
-        "src": "/work/totem/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Crouched on a fallen log in a black coat and heels, white face paint, trees behind"
+        src: "/work/totem/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Crouched on a fallen log in a black coat and heels, white face paint, trees behind",
       },
       {
-        "src": "/work/totem/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#A67359",
-        "alt": "Head tilted in a tight portrait, white face paint with a black disc over one eye, plywood backdrop"
-      }
-    ]
+        src: "/work/totem/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#A67359",
+        alt: "Head tilted in a tight portrait, white face paint with a black disc over one eye, plywood backdrop",
+      },
+    ],
   },
   {
-    "slug": "transmutate",
-    "name": "TRANSMUTATE",
-    "headline": "TRANSMUTATE",
-    "intent": "@rice666s",
-    "credits": [],
-    "categories": [
+    slug: "transmutate",
+    name: "TRANSMUTATE",
+    headline: "TRANSMUTATE",
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/transmutate/cover.jpg",
-      "width": 600,
-      "height": 686,
-      "color": "#40738C",
-      "alt": ""
+    cover: {
+      src: "/work/transmutate/cover.jpg",
+      width: 600,
+      height: 686,
+      color: "#40738C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/transmutate/01.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#40738C",
-        "alt": "Crouched on a round plate with hands on the floor, silver body paint, long dark hair, blue backdrop"
+        src: "/work/transmutate/01.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#40738C",
+        alt: "Crouched on a round plate with hands on the floor, silver body paint, long dark hair, blue backdrop",
       },
       {
-        "src": "/work/transmutate/02.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#4073A6",
-        "alt": "Standing with arms crossed over the chest, silver body paint, a pale disc behind, blue light"
+        src: "/work/transmutate/02.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#4073A6",
+        alt: "Standing with arms crossed over the chest, silver body paint, a pale disc behind, blue light",
       },
       {
-        "src": "/work/transmutate/03.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#73C0F3",
-        "alt": "Crawling toward the lens on a silver-painted floor circle, long hair across the face, blue light"
+        src: "/work/transmutate/03.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#73C0F3",
+        alt: "Crawling toward the lens on a silver-painted floor circle, long hair across the face, blue light",
       },
       {
-        "src": "/work/transmutate/04.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#4073A6",
-        "alt": "Standing with hands over the chest and head tilted back, silver body paint, pale disc behind, blue light"
+        src: "/work/transmutate/04.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#4073A6",
+        alt: "Standing with hands over the chest and head tilted back, silver body paint, pale disc behind, blue light",
       },
       {
-        "src": "/work/transmutate/05.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#264059",
-        "alt": "Lying on the floor with one arm stretched out, silver body paint, long dark hair across the face"
+        src: "/work/transmutate/05.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#264059",
+        alt: "Lying on the floor with one arm stretched out, silver body paint, long dark hair across the face",
       },
       {
-        "src": "/work/transmutate/06.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#4073A6",
-        "alt": "Crouched on the toes, looking up, silver body paint, long dark hair, cold blue light"
+        src: "/work/transmutate/06.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#4073A6",
+        alt: "Crouched on the toes, looking up, silver body paint, long dark hair, cold blue light",
       },
       {
-        "src": "/work/transmutate/07.jpg",
-        "width": 2499,
-        "height": 2856,
-        "color": "#5973A6",
-        "alt": "Curled forward on a paint-splattered floor in front of a pale disc, silver body paint, blue light"
-      }
-    ]
+        src: "/work/transmutate/07.jpg",
+        width: 2499,
+        height: 2856,
+        color: "#5973A6",
+        alt: "Curled forward on a paint-splattered floor in front of a pale disc, silver body paint, blue light",
+      },
+    ],
   },
   {
-    "slug": "true-grit",
-    "name": "TRUE GRIT",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "true-grit",
+    name: "TRUE GRIT",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/true-grit/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#26260C",
-      "alt": ""
+    cover: {
+      src: "/work/true-grit/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#26260C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/true-grit/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26260C",
-        "alt": "Kneeling in a tank top with hand wraps trailing on the floor, head tipped back, teal light"
+        src: "/work/true-grit/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26260C",
+        alt: "Kneeling in a tank top with hand wraps trailing on the floor, head tipped back, teal light",
       },
       {
-        "src": "/work/true-grit/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26C0C0",
-        "alt": "Blurred hand reaching toward the lens, a shaved head and cigarette behind, amber rim on the tank top"
+        src: "/work/true-grit/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26C0C0",
+        alt: "Blurred hand reaching toward the lens, a shaved head and cigarette behind, amber rim on the tank top",
       },
       {
-        "src": "/work/true-grit/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Profile with a cigarette in the mouth, taped fist at the hip, tank top, amber and teal light"
+        src: "/work/true-grit/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Profile with a cigarette in the mouth, taped fist at the hip, tank top, amber and teal light",
       },
       {
-        "src": "/work/true-grit/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26260C",
-        "alt": "Tight low angle on a wrapped hand holding a cigarette at the chin, amber highlight on the fingers"
+        src: "/work/true-grit/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26260C",
+        alt: "Tight low angle on a wrapped hand holding a cigarette at the chin, amber highlight on the fingers",
       },
       {
-        "src": "/work/true-grit/05.jpg",
-        "width": 2428,
-        "height": 3641,
-        "color": "#26C0C0",
-        "alt": "Head tipped back with smoke rising, wrapped hand at the chest, ribbed tank top, teal light"
+        src: "/work/true-grit/05.jpg",
+        width: 2428,
+        height: 3641,
+        color: "#26C0C0",
+        alt: "Head tipped back with smoke rising, wrapped hand at the chest, ribbed tank top, teal light",
       },
       {
-        "src": "/work/true-grit/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Standing in a tank top with hand wraps, a cigarette raised to the mouth, dark teal room"
+        src: "/work/true-grit/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Standing in a tank top with hand wraps, a cigarette raised to the mouth, dark teal room",
       },
       {
-        "src": "/work/true-grit/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26C0C0",
-        "alt": "Hand wrap pressed to the temple, smoke over a shaved head, tank top, deep teal shadow"
+        src: "/work/true-grit/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26C0C0",
+        alt: "Hand wrap pressed to the temple, smoke over a shaved head, tank top, deep teal shadow",
       },
       {
-        "src": "/work/true-grit/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#40C0C0",
-        "alt": "Seated on the floor wrapping both hands, head bowed, tank top, teal floor, amber edge light"
+        src: "/work/true-grit/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#40C0C0",
+        alt: "Seated on the floor wrapping both hands, head bowed, tank top, teal floor, amber edge light",
       },
       {
-        "src": "/work/true-grit/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Close crop of a raised wrapped fist beside a face, tank top, amber light on the shoulder"
+        src: "/work/true-grit/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Close crop of a raised wrapped fist beside a face, tank top, amber light on the shoulder",
       },
       {
-        "src": "/work/true-grit/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#73D9D9",
-        "alt": "Seen from above, standing in a tank top clasping wrapped hands at the waist, teal floor"
-      }
-    ]
+        src: "/work/true-grit/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#73D9D9",
+        alt: "Seen from above, standing in a tank top clasping wrapped hands at the waist, teal floor",
+      },
+    ],
   },
   {
-    "slug": "ukiyosunknown",
-    "name": "UKIYOSUNKNOWN",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "ukiyosunknown",
+    name: "UKIYOSUNKNOWN",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/ukiyosunknown/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#F2EDEA",
-      "alt": ""
+    cover: {
+      src: "/work/ukiyosunknown/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#F2EDEA",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/ukiyosunknown/01.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#F2EDEA",
-        "alt": ""
+        src: "/work/ukiyosunknown/01.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#F2EDEA",
+        alt: "",
       },
       {
-        "src": "/work/ukiyosunknown/02.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#939388",
-        "alt": "Stepping onto a vintage CRT in a black leather jacket and trousers, grey seamless backdrop"
+        src: "/work/ukiyosunknown/02.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#939388",
+        alt: "Stepping onto a vintage CRT in a black leather jacket and trousers, grey seamless backdrop",
       },
       {
-        "src": "/work/ukiyosunknown/03.jpg",
-        "width": 1628,
-        "height": 2171,
-        "color": "#3B4A4F",
-        "alt": "Green-tinted video static with the faint outline of a figure in a jacket"
+        src: "/work/ukiyosunknown/03.jpg",
+        width: 1628,
+        height: 2171,
+        color: "#3B4A4F",
+        alt: "Green-tinted video static with the faint outline of a figure in a jacket",
       },
       {
-        "src": "/work/ukiyosunknown/06.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#A4A19A",
-        "alt": "Holding a CRT television out in a black jacket with gathered shoulders, grey backdrop"
+        src: "/work/ukiyosunknown/06.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#A4A19A",
+        alt: "Holding a CRT television out in a black jacket with gathered shoulders, grey backdrop",
       },
       {
-        "src": "/work/ukiyosunknown/08.jpg",
-        "width": 2047,
-        "height": 2559,
-        "color": "#C0C0C0",
-        "alt": "Walking past a concrete wall in a worn grey leather jacket and rust zip pants, motion blur"
+        src: "/work/ukiyosunknown/08.jpg",
+        width: 2047,
+        height: 2559,
+        color: "#C0C0C0",
+        alt: "Walking past a concrete wall in a worn grey leather jacket and rust zip pants, motion blur",
       },
       {
-        "src": "/work/ukiyosunknown/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0C0",
-        "alt": "Hand in the hair in a worn leather jacket over a white tank, long pendant, rust zip pants"
+        src: "/work/ukiyosunknown/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9C0C0",
+        alt: "Hand in the hair in a worn leather jacket over a white tank, long pendant, rust zip pants",
       },
       {
-        "src": "/work/ukiyosunknown/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0C0",
-        "alt": "Looking down in a worn leather jacket over a white tank, pendant, rust zip pants, concrete wall"
+        src: "/work/ukiyosunknown/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9C0C0",
+        alt: "Looking down in a worn leather jacket over a white tank, pendant, rust zip pants, concrete wall",
       },
       {
-        "src": "/work/ukiyosunknown/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0C0",
-        "alt": "Walking in motion blur in an ivory leather jacket and black flared trousers, concrete wall"
+        src: "/work/ukiyosunknown/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9C0C0",
+        alt: "Walking in motion blur in an ivory leather jacket and black flared trousers, concrete wall",
       },
       {
-        "src": "/work/ukiyosunknown/16.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": "Hunched forward in an ivory leather jacket with hands crossed, black flared trousers, concrete wall"
+        src: "/work/ukiyosunknown/16.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "Hunched forward in an ivory leather jacket with hands crossed, black flared trousers, concrete wall",
       },
       {
-        "src": "/work/ukiyosunknown/18.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0C0",
-        "alt": "Seen from behind in an ivory leather jacket with a large back logo, black trousers, concrete wall"
+        src: "/work/ukiyosunknown/18.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9C0C0",
+        alt: "Seen from behind in an ivory leather jacket with a large back logo, black trousers, concrete wall",
       },
       {
-        "src": "/work/ukiyosunknown/19.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0C0",
-        "alt": "Back view in an ivory leather jacket and black flared trousers, concrete wall, soft shade"
+        src: "/work/ukiyosunknown/19.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9C0C0",
+        alt: "Back view in an ivory leather jacket and black flared trousers, concrete wall, soft shade",
       },
       {
-        "src": "/work/ukiyosunknown/20.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Looking away in a lilac mohair sweater with red marks on the sleeves, pendant, green ivy wall"
+        src: "/work/ukiyosunknown/20.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Looking away in a lilac mohair sweater with red marks on the sleeves, pendant, green ivy wall",
       },
       {
-        "src": "/work/ukiyosunknown/21.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing with a boot raised in a lilac mohair sweater and black trousers, ivy wall, low sun"
+        src: "/work/ukiyosunknown/21.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing with a boot raised in a lilac mohair sweater and black trousers, ivy wall, low sun",
       },
       {
-        "src": "/work/ukiyosunknown/23.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A6A6",
-        "alt": "Wide stance on a concrete ledge in a lilac mohair sweater, black wide trousers, ivy wall"
-      }
-    ]
+        src: "/work/ukiyosunknown/23.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A6A6",
+        alt: "Wide stance on a concrete ledge in a lilac mohair sweater, black wide trousers, ivy wall",
+      },
+    ],
   },
   {
-    "slug": "urban-reverie",
-    "name": "URBAN REVERIE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [],
-    "cover": {
-      "src": "/work/urban-reverie/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#F3F3F3",
-      "alt": ""
+    slug: "urban-reverie",
+    name: "URBAN REVERIE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [],
+    cover: {
+      src: "/work/urban-reverie/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#F3F3F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/urban-reverie/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Striding across a downtown street in a long tan trench coat, black dress, white heels, glass towers"
+        src: "/work/urban-reverie/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Striding across a downtown street in a long tan trench coat, black dress, white heels, glass towers",
       },
       {
-        "src": "/work/urban-reverie/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Crossing a street in a tan trench coat and black dress, one hand at the head, steam rising"
+        src: "/work/urban-reverie/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Crossing a street in a tan trench coat and black dress, one hand at the head, steam rising",
       },
       {
-        "src": "/work/urban-reverie/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Walking toward the lens through street steam in a tan trench coat and black dress, white heels"
+        src: "/work/urban-reverie/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Walking toward the lens through street steam in a tan trench coat and black dress, white heels",
       },
       {
-        "src": "/work/urban-reverie/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Portrait in a tan trench coat slipping off the shoulders, black pinstripe dress, long wavy hair"
+        src: "/work/urban-reverie/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Portrait in a tan trench coat slipping off the shoulders, black pinstripe dress, long wavy hair",
       },
       {
-        "src": "/work/urban-reverie/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing on a moving escalator in a tan trench and black dress, one hand on the glass rail"
+        src: "/work/urban-reverie/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing on a moving escalator in a tan trench and black dress, one hand on the glass rail",
       },
       {
-        "src": "/work/urban-reverie/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Small figure in a tan trench coat at the top of an escalator under a station sign"
+        src: "/work/urban-reverie/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Small figure in a tan trench coat at the top of an escalator under a station sign",
       },
       {
-        "src": "/work/urban-reverie/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing in a tan trench at the top of an escalator, a dark rail running through the foreground"
-      }
-    ]
+        src: "/work/urban-reverie/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing in a tan trench at the top of an escalator, a dark rail running through the foreground",
+      },
+    ],
   },
   {
-    "slug": "valgur",
-    "name": "VALGUR",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "valgur",
+    name: "VALGUR",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "artist-presskit",
-        "name": "ARTIST PRESSKIT",
-        "section": "WORK"
-      }
+        slug: "artist-presskit",
+        name: "ARTIST PRESSKIT",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/valgur/cover.jpg",
-      "width": 600,
-      "height": 800,
-      "color": "#050605",
-      "alt": ""
+    cover: {
+      src: "/work/valgur/cover.jpg",
+      width: 600,
+      height: 800,
+      color: "#050605",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/valgur/01.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#050605",
-        "alt": "Kneeling in black plate armor resting on a sword planted in the ground, a lightning bolt, stormy sky"
+        src: "/work/valgur/01.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#050605",
+        alt: "Kneeling in black plate armor resting on a sword planted in the ground, a lightning bolt, stormy sky",
       },
       {
-        "src": "/work/valgur/02.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#050505",
-        "alt": ""
+        src: "/work/valgur/02.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#050505",
+        alt: "",
       },
       {
-        "src": "/work/valgur/03.jpg",
-        "width": 1302,
-        "height": 1737,
-        "color": "#060B0E",
-        "alt": "Close crop of plate gauntlets crossed over a sword hilt, a blade rising, soft teal backdrop"
+        src: "/work/valgur/03.jpg",
+        width: 1302,
+        height: 1737,
+        color: "#060B0E",
+        alt: "Close crop of plate gauntlets crossed over a sword hilt, a blade rising, soft teal backdrop",
       },
       {
-        "src": "/work/valgur/04.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#020303",
-        "alt": "Standing in a black hooded robe and plate armor, sword raised, a shaft of light through storm clouds"
+        src: "/work/valgur/04.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#020303",
+        alt: "Standing in a black hooded robe and plate armor, sword raised, a shaft of light through storm clouds",
       },
       {
-        "src": "/work/valgur/06.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#050505",
-        "alt": "Two small armored figures facing each other across a lightning bolt on a dark hill"
+        src: "/work/valgur/06.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#050505",
+        alt: "Two small armored figures facing each other across a lightning bolt on a dark hill",
       },
       {
-        "src": "/work/valgur/07.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#18303D",
-        "alt": "Gauntleted hand gripping a sword hilt, long pale blades of light in the dark behind"
+        src: "/work/valgur/07.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#18303D",
+        alt: "Gauntleted hand gripping a sword hilt, long pale blades of light in the dark behind",
       },
       {
-        "src": "/work/valgur/08.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#080C0D",
-        "alt": "Two people in black plate armor and robes, one holding a stuffed toy, shaft of light, storm clouds"
+        src: "/work/valgur/08.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#080C0D",
+        alt: "Two people in black plate armor and robes, one holding a stuffed toy, shaft of light, storm clouds",
       },
       {
-        "src": "/work/valgur/09.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#040505",
-        "alt": "Kneeling with a sword blade held upright before the face, long dark hair, black robe, pauldron"
+        src: "/work/valgur/09.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#040505",
+        alt: "Kneeling with a sword blade held upright before the face, long dark hair, black robe, pauldron",
       },
       {
-        "src": "/work/valgur/10.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#090D0E",
-        "alt": "Two people in black plate armor and robes standing side by side, swords planted, stormy sky"
+        src: "/work/valgur/10.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#090D0E",
+        alt: "Two people in black plate armor and robes standing side by side, swords planted, stormy sky",
       },
       {
-        "src": "/work/valgur/11.jpg",
-        "width": 2499,
-        "height": 3270,
-        "color": "#1B3C47",
-        "alt": "Armored figure reading from a book above a seated person in a long dark skirt"
+        src: "/work/valgur/11.jpg",
+        width: 2499,
+        height: 3270,
+        color: "#1B3C47",
+        alt: "Armored figure reading from a book above a seated person in a long dark skirt",
       },
       {
-        "src": "/work/valgur/13.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#030405",
-        "alt": "Standing in plate armor and a long black robe, hand on a sword, storm clouds, shaft of light"
+        src: "/work/valgur/13.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#030405",
+        alt: "Standing in plate armor and a long black robe, hand on a sword, storm clouds, shaft of light",
       },
       {
-        "src": "/work/valgur/15.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#040505",
-        "alt": "Reaching one arm toward a shaft of light in a long black robe, storm clouds, dark hill"
+        src: "/work/valgur/15.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#040505",
+        alt: "Reaching one arm toward a shaft of light in a long black robe, storm clouds, dark hill",
       },
       {
-        "src": "/work/valgur/16.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#FFFFFF",
-        "alt": "Armored silhouette in profile against a blown-out white light, sword held low"
-      }
-    ]
+        src: "/work/valgur/16.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#FFFFFF",
+        alt: "Armored silhouette in profile against a blown-out white light, sword held low",
+      },
+    ],
   },
   {
-    "slug": "vendetta",
-    "name": "VENDETTA",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "vendetta",
+    name: "VENDETTA",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/vendetta/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#260C0C",
-      "alt": ""
+    cover: {
+      src: "/work/vendetta/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#260C0C",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/vendetta/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Kneeling on a white light circle with one arm raised, white slip dress, braided hair, deep red backdrop"
+        src: "/work/vendetta/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Kneeling on a white light circle with one arm raised, white slip dress, braided hair, deep red backdrop",
       },
       {
-        "src": "/work/vendetta/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#400C0C",
-        "alt": "Seated on a white circle holding a glass sphere, white slip dress, braids, gold bracelets, red backdrop"
+        src: "/work/vendetta/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#400C0C",
+        alt: "Seated on a white circle holding a glass sphere, white slip dress, braids, gold bracelets, red backdrop",
       },
       {
-        "src": "/work/vendetta/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Glass sphere held over one eye, braided hair, red light on the face, dark red backdrop"
+        src: "/work/vendetta/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Glass sphere held over one eye, braided hair, red light on the face, dark red backdrop",
       },
       {
-        "src": "/work/vendetta/04.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#8C0C0C",
-        "alt": "Three glass spheres held up in both hands, blurred slip dress behind, deep red light"
+        src: "/work/vendetta/04.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#8C0C0C",
+        alt: "Three glass spheres held up in both hands, blurred slip dress behind, deep red light",
       },
       {
-        "src": "/work/vendetta/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#400C0C",
-        "alt": "Eyes closed with a bundle of dried lavender over the mouth, braids, white camisole, red backdrop"
+        src: "/work/vendetta/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#400C0C",
+        alt: "Eyes closed with a bundle of dried lavender over the mouth, braids, white camisole, red backdrop",
       },
       {
-        "src": "/work/vendetta/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#400C0C",
-        "alt": "Standing with hands pressed together at the waist, dried lavender at the chin, white camisole, red backdrop"
+        src: "/work/vendetta/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#400C0C",
+        alt: "Standing with hands pressed together at the waist, dried lavender at the chin, white camisole, red backdrop",
       },
       {
-        "src": "/work/vendetta/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Crouched on a white circle of light with the head bowed, dried lavender in the hair, white shorts"
+        src: "/work/vendetta/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Crouched on a white circle of light with the head bowed, dried lavender in the hair, white shorts",
       },
       {
-        "src": "/work/vendetta/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#590C0C",
-        "alt": "Crouched in profile on a white circle, looking up, braided hair, white shorts, deep red backdrop"
+        src: "/work/vendetta/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#590C0C",
+        alt: "Crouched in profile on a white circle, looking up, braided hair, white shorts, deep red backdrop",
       },
       {
-        "src": "/work/vendetta/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Crouched looking up with dried lavender in one hand, braids, white top and shorts, red backdrop"
+        src: "/work/vendetta/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Crouched looking up with dried lavender in one hand, braids, white top and shorts, red backdrop",
       },
       {
-        "src": "/work/vendetta/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Kneeling on a white circle holding a sword upright, white slip dress, braids, red and black backdrop"
+        src: "/work/vendetta/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Kneeling on a white circle holding a sword upright, white slip dress, braids, red and black backdrop",
       },
       {
-        "src": "/work/vendetta/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#730C0C",
-        "alt": "Kneeling with one arm raised high holding a sword, white slip dress, braids, red backdrop"
+        src: "/work/vendetta/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#730C0C",
+        alt: "Kneeling with one arm raised high holding a sword, white slip dress, braids, red backdrop",
       },
       {
-        "src": "/work/vendetta/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F30C0C",
-        "alt": "Glass sphere held close to the lens showing an inverted face, red and orange blur"
-      }
-    ]
+        src: "/work/vendetta/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F30C0C",
+        alt: "Glass sphere held close to the lens showing an inverted face, red and orange blur",
+      },
+    ],
   },
   {
-    "slug": "vines-roses",
-    "name": "VINES & ROSES",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "vines-roses",
+    name: "VINES & ROSES",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "editorial",
-        "name": "EDITORIAL",
-        "section": "WORK"
-      }
+        slug: "editorial",
+        name: "EDITORIAL",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/vines-roses/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/vines-roses/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/vines-roses/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Lying on dark soil with the legs raised, ivy vines and red roses wrapped around, grey backdrop"
+        src: "/work/vines-roses/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Lying on dark soil with the legs raised, ivy vines and red roses wrapped around, grey backdrop",
       },
       {
-        "src": "/work/vines-roses/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Close crop lying down, red roses and ivy vines laid across, blond hair spread on the soil"
+        src: "/work/vines-roses/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Close crop lying down, red roses and ivy vines laid across, blond hair spread on the soil",
       },
       {
-        "src": "/work/vines-roses/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Lying on one side with a hand under the head, red roses and ivy vines, direct gaze"
+        src: "/work/vines-roses/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Lying on one side with a hand under the head, red roses and ivy vines, direct gaze",
       },
       {
-        "src": "/work/vines-roses/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#260C0C",
-        "alt": "Lying on a mound of soil holding a red rose against the chest, ivy vines, soft grey light"
+        src: "/work/vines-roses/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#260C0C",
+        alt: "Lying on a mound of soil holding a red rose against the chest, ivy vines, soft grey light",
       },
       {
-        "src": "/work/vines-roses/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#737373",
-        "alt": "Seen from above on a soil mound, a rose held to the face, ivy vines and scattered petals"
+        src: "/work/vines-roses/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#737373",
+        alt: "Seen from above on a soil mound, a rose held to the face, ivy vines and scattered petals",
       },
       {
-        "src": "/work/vines-roses/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Lying back with one leg raised, red roses and ivy vines, blond hair on the soil"
+        src: "/work/vines-roses/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Lying back with one leg raised, red roses and ivy vines, blond hair on the soil",
       },
       {
-        "src": "/work/vines-roses/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#595959",
-        "alt": "Leaning on one hand over the soil, head tilted, red roses and ivy vines, wet-look hair"
+        src: "/work/vines-roses/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#595959",
+        alt: "Leaning on one hand over the soil, head tilted, red roses and ivy vines, wet-look hair",
       },
       {
-        "src": "/work/vines-roses/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Crawling forward on soil with ivy vines and red roses, wet-look hair, direct gaze"
+        src: "/work/vines-roses/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Crawling forward on soil with ivy vines and red roses, wet-look hair, direct gaze",
       },
       {
-        "src": "/work/vines-roses/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Standing and bending forward with ivy vines and red roses, looking at the lens, grey backdrop"
+        src: "/work/vines-roses/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Standing and bending forward with ivy vines and red roses, looking at the lens, grey backdrop",
       },
       {
-        "src": "/work/vines-roses/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Leaning back on one arm, the other arm over the head, red roses and ivy vines, soil beneath"
+        src: "/work/vines-roses/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Leaning back on one arm, the other arm over the head, red roses and ivy vines, soil beneath",
       },
       {
-        "src": "/work/vines-roses/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Seated on soil looking up and away, red roses and ivy vines, one hand planted, grey backdrop"
-      }
-    ]
+        src: "/work/vines-roses/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Seated on soil looking up and away, red roses and ivy vines, one hand planted, grey backdrop",
+      },
+    ],
   },
   {
-    "slug": "weddings",
-    "name": "WEDDINGS",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "weddings",
+    name: "WEDDINGS",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "weddings",
-        "name": "WEDDINGS",
-        "section": "SESSIONS"
-      }
+        slug: "weddings",
+        name: "WEDDINGS",
+        section: "SESSIONS",
+      },
     ],
-    "cover": {
-      "src": "/work/weddings/cover.jpg",
-      "width": 600,
-      "height": 400,
-      "color": "#AFAAAD",
-      "alt": ""
+    cover: {
+      src: "/work/weddings/cover.jpg",
+      width: 600,
+      height: 400,
+      color: "#AFAAAD",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/weddings/01.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#AFAAAD",
-        "alt": ""
+        src: "/work/weddings/01.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#AFAAAD",
+        alt: "",
       },
       {
-        "src": "/work/weddings/02.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#BCB2B2",
-        "alt": ""
+        src: "/work/weddings/02.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#BCB2B2",
+        alt: "",
       },
       {
-        "src": "/work/weddings/03.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#C9C7C9",
-        "alt": ""
+        src: "/work/weddings/03.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#C9C7C9",
+        alt: "",
       },
       {
-        "src": "/work/weddings/04.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#746757",
-        "alt": ""
+        src: "/work/weddings/04.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#746757",
+        alt: "",
       },
       {
-        "src": "/work/weddings/05.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#766D68",
-        "alt": ""
+        src: "/work/weddings/05.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#766D68",
+        alt: "",
       },
       {
-        "src": "/work/weddings/06.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#9E9998",
-        "alt": ""
+        src: "/work/weddings/06.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#9E9998",
+        alt: "",
       },
       {
-        "src": "/work/weddings/07.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#8B837E",
-        "alt": ""
+        src: "/work/weddings/07.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#8B837E",
+        alt: "",
       },
       {
-        "src": "/work/weddings/08.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#9F9A98",
-        "alt": ""
+        src: "/work/weddings/08.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#9F9A98",
+        alt: "",
       },
       {
-        "src": "/work/weddings/09.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#635E59",
-        "alt": ""
+        src: "/work/weddings/09.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#635E59",
+        alt: "",
       },
       {
-        "src": "/work/weddings/10.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#806E67",
-        "alt": ""
+        src: "/work/weddings/10.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#806E67",
+        alt: "",
       },
       {
-        "src": "/work/weddings/11.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#9D816F",
-        "alt": "Couple at the foot of a grand marble staircase, one dipping the other for a kiss"
+        src: "/work/weddings/11.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#9D816F",
+        alt: "Couple at the foot of a grand marble staircase, one dipping the other for a kiss",
       },
       {
-        "src": "/work/weddings/12.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#846958",
-        "alt": "Couple holding hands on a marble staircase in a white jumpsuit and tan suit, looking back"
+        src: "/work/weddings/12.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#846958",
+        alt: "Couple holding hands on a marble staircase in a white jumpsuit and tan suit, looking back",
       },
       {
-        "src": "/work/weddings/13.jpg",
-        "width": 2428,
-        "height": 3641,
-        "color": "#8E8380",
-        "alt": "Couple kissing at a gold ironwork balcony railing under a coffered ceiling, red bouquet"
+        src: "/work/weddings/13.jpg",
+        width: 2428,
+        height: 3641,
+        color: "#8E8380",
+        alt: "Couple kissing at a gold ironwork balcony railing under a coffered ceiling, red bouquet",
       },
       {
-        "src": "/work/weddings/14.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#B0ACAD",
-        "alt": "Couple kissing on a balcony under tall arched windows, white dress, tan suit, red bouquet"
+        src: "/work/weddings/14.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#B0ACAD",
+        alt: "Couple kissing on a balcony under tall arched windows, white dress, tan suit, red bouquet",
       },
       {
-        "src": "/work/weddings/17.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#413C36",
-        "alt": "Close on two people smiling in front of an officiant, white dress, tan jacket with a pink flower"
+        src: "/work/weddings/17.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#413C36",
+        alt: "Close on two people smiling in front of an officiant, white dress, tan jacket with a pink flower",
       },
       {
-        "src": "/work/weddings/18.jpg",
-        "width": 2499,
-        "height": 3331,
-        "color": "#76665D",
-        "alt": "Hands holding a small bouquet of purple and white mums, a tan jacket and a patterned tie blurred"
+        src: "/work/weddings/18.jpg",
+        width: 2499,
+        height: 3331,
+        color: "#76665D",
+        alt: "Hands holding a small bouquet of purple and white mums, a tan jacket and a patterned tie blurred",
       },
       {
-        "src": "/work/weddings/20.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#574439",
-        "alt": "Couple hugging on a balcony, officiant in a black robe applauding, arched windows behind"
+        src: "/work/weddings/20.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#574439",
+        alt: "Couple hugging on a balcony, officiant in a black robe applauding, arched windows behind",
       },
       {
-        "src": "/work/weddings/25.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#544A46",
-        "alt": "Couple holding hands facing each other in front of an officiant, white dress, tan jacket, arched windows"
+        src: "/work/weddings/25.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#544A46",
+        alt: "Couple holding hands facing each other in front of an officiant, white dress, tan jacket, arched windows",
       },
       {
-        "src": "/work/weddings/29.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#B78A5D",
-        "alt": "Seen from above, a couple climbing a marble staircase with a brass handrail, holding hands"
+        src: "/work/weddings/29.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#B78A5D",
+        alt: "Seen from above, a couple climbing a marble staircase with a brass handrail, holding hands",
       },
       {
-        "src": "/work/weddings/30.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#B5A9AB",
-        "alt": "Looking down a marble stairwell at a couple descending, white dress, tan jacket, red bouquet"
+        src: "/work/weddings/30.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#B5A9AB",
+        alt: "Looking down a marble stairwell at a couple descending, white dress, tan jacket, red bouquet",
       },
       {
-        "src": "/work/weddings/31.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#463C35",
-        "alt": "Couple at a marble stair landing, one holding a red bouquet, a brass handrail across the frame"
+        src: "/work/weddings/31.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#463C35",
+        alt: "Couple at a marble stair landing, one holding a red bouquet, a brass handrail across the frame",
       },
       {
-        "src": "/work/weddings/32.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#EFE5E8",
-        "alt": "Champagne bottles chilling in an ice bucket with frozen pink roses, cocktails on a table"
+        src: "/work/weddings/32.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#EFE5E8",
+        alt: "Champagne bottles chilling in an ice bucket with frozen pink roses, cocktails on a table",
       },
       {
-        "src": "/work/weddings/34.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#837464",
-        "alt": "Guests mingling in a modern lobby, a gold hanging light overhead, dark suits and cocktail dresses"
+        src: "/work/weddings/34.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#837464",
+        alt: "Guests mingling in a modern lobby, a gold hanging light overhead, dark suits and cocktail dresses",
       },
       {
-        "src": "/work/weddings/38.jpg",
-        "width": 2499,
-        "height": 3333,
-        "color": "#D9BDA3",
-        "alt": "Pink tulle gown at a gold ring floral arch, hand at the head, mirrored glass behind"
+        src: "/work/weddings/38.jpg",
+        width: 2499,
+        height: 3333,
+        color: "#D9BDA3",
+        alt: "Pink tulle gown at a gold ring floral arch, hand at the head, mirrored glass behind",
       },
       {
-        "src": "/work/weddings/40.jpg",
-        "width": 2499,
-        "height": 1667,
-        "color": "#998062",
-        "alt": "Group of guests posing in sparkly and printed dresses and tuxedos in front of a floral arch"
-      }
-    ]
+        src: "/work/weddings/40.jpg",
+        width: 2499,
+        height: 1667,
+        color: "#998062",
+        alt: "Group of guests posing in sparkly and printed dresses and tuxedos in front of a floral arch",
+      },
+    ],
   },
   {
-    "slug": "wired-magazine",
-    "name": "WIRED MAGAZINE",
-    "headline": null,
-    "intent": null,
-    "credits": [
+    slug: "wired-magazine",
+    name: "WIRED MAGAZINE",
+    headline: null,
+    intent: null,
+    credits: [
       {
-        "role": "Light Assist",
-        "name": "Mark Tsui"
+        role: "Light Assist",
+        name: "Mark Tsui",
       },
       {
-        "role": "Client",
-        "name": "Wired",
-        "instagram": "wired"
+        role: "Client",
+        name: "Wired",
+        instagram: "wired",
       },
       {
-        "role": "Photographer",
-        "name": "Julian Gigola"
-      }
+        role: "Photographer",
+        name: "Julian Gigola",
+      },
     ],
-    "categories": [
+    categories: [
       {
-        "slug": "campaigns",
-        "name": "CAMPAIGNS",
-        "section": "WORK"
-      }
+        slug: "campaigns",
+        name: "CAMPAIGNS",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/wired-magazine/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/wired-magazine/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/wired-magazine/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": ""
+        src: "/work/wired-magazine/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "",
       },
       {
-        "src": "/work/wired-magazine/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9C0",
-        "alt": "Grinning in a dark cap and black WIRED tee, both hands raised, on a sunlit sidewalk"
+        src: "/work/wired-magazine/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9C0",
+        alt: "Grinning in a dark cap and black WIRED tee, both hands raised, on a sunlit sidewalk",
       },
       {
-        "src": "/work/wired-magazine/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9F3",
-        "alt": "Mid-air on a skateboard above a bike rack, black long-sleeve top, jeans, tree and city behind"
+        src: "/work/wired-magazine/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9F3",
+        alt: "Mid-air on a skateboard above a bike rack, black long-sleeve top, jeans, tree and city behind",
       },
       {
-        "src": "/work/wired-magazine/04.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0A6",
-        "alt": "Seated dog wearing a blue and white printed tote bag, grey wall, yellow road paint"
+        src: "/work/wired-magazine/04.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0A6",
+        alt: "Seated dog wearing a blue and white printed tote bag, grey wall, yellow road paint",
       },
       {
-        "src": "/work/wired-magazine/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0D9F3",
-        "alt": "Three people walking by glass buildings in white tees, one carrying a green tote bag, low wide angle"
+        src: "/work/wired-magazine/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0D9F3",
+        alt: "Three people walking by glass buildings in white tees, one carrying a green tote bag, low wide angle",
       },
       {
-        "src": "/work/wired-magazine/06.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Two people in white WIRED tees, one with a printed back, holding a laptop sleeve, building behind"
+        src: "/work/wired-magazine/06.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Two people in white WIRED tees, one with a printed back, holding a laptop sleeve, building behind",
       },
       {
-        "src": "/work/wired-magazine/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Passing a bright green tote bag and a yellow water bottle, patterned laptop sleeve, white WIRED tee"
+        src: "/work/wired-magazine/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Passing a bright green tote bag and a yellow water bottle, patterned laptop sleeve, white WIRED tee",
       },
       {
-        "src": "/work/wired-magazine/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Blue and white printed tote bag seen from above against a dark background"
+        src: "/work/wired-magazine/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Blue and white printed tote bag seen from above against a dark background",
       },
       {
-        "src": "/work/wired-magazine/09.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#26598C",
-        "alt": "Hand holding an orange mug printed TIRED, a ring on one finger, desk and city skyline behind"
+        src: "/work/wired-magazine/09.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#26598C",
+        alt: "Hand holding an orange mug printed TIRED, a ring on one finger, desk and city skyline behind",
       },
       {
-        "src": "/work/wired-magazine/10.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#40598C",
-        "alt": "Juggling pencils and a roll of tape above a desk, black pullover, orange sunglasses, skyline behind"
+        src: "/work/wired-magazine/10.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#40598C",
+        alt: "Juggling pencils and a roll of tape above a desk, black pullover, orange sunglasses, skyline behind",
       },
       {
-        "src": "/work/wired-magazine/11.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Pencil in the mouth at a rooftop desk, paper garland and keyboard, black cap and orange sunglasses"
+        src: "/work/wired-magazine/11.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Pencil in the mouth at a rooftop desk, paper garland and keyboard, black cap and orange sunglasses",
       },
       {
-        "src": "/work/wired-magazine/12.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#264073",
-        "alt": "Seated at a rooftop desk in a white WIRED tee and cap, blue mug in the foreground, skyline"
+        src: "/work/wired-magazine/12.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#264073",
+        alt: "Seated at a rooftop desk in a white WIRED tee and cap, blue mug in the foreground, skyline",
       },
       {
-        "src": "/work/wired-magazine/13.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#404040",
-        "alt": "Leaning over a rooftop wall in a white WIRED tee, a black flag blowing beside, skyline behind"
+        src: "/work/wired-magazine/13.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#404040",
+        alt: "Leaning over a rooftop wall in a white WIRED tee, a black flag blowing beside, skyline behind",
       },
       {
-        "src": "/work/wired-magazine/14.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0A6A6",
-        "alt": "Seen from above, seated at a laptop on a rooftop with a desk chair and a monitor"
+        src: "/work/wired-magazine/14.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0A6A6",
+        alt: "Seen from above, seated at a laptop on a rooftop with a desk chair and a monitor",
       },
       {
-        "src": "/work/wired-magazine/15.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#5973A6",
-        "alt": "Standing at a rooftop wall in a white WIRED tee holding a blue mug, looking aside, skyline"
+        src: "/work/wired-magazine/15.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#5973A6",
+        alt: "Standing at a rooftop wall in a white WIRED tee holding a blue mug, looking aside, skyline",
       },
       {
-        "src": "/work/wired-magazine/17.jpg",
-        "width": 2499,
-        "height": 3499,
-        "color": "#40598C",
-        "alt": "Pencil held to the mouth behind a blue mug, black cap reading ANGRY NERD, orange sunglasses"
+        src: "/work/wired-magazine/17.jpg",
+        width: 2499,
+        height: 3499,
+        color: "#40598C",
+        alt: "Pencil held to the mouth behind a blue mug, black cap reading ANGRY NERD, orange sunglasses",
       },
       {
-        "src": "/work/wired-magazine/18.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Doing a one-arm side plank on a rooftop in a white tee, drinking from an orange mug"
-      }
-    ]
+        src: "/work/wired-magazine/18.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Doing a one-arm side plank on a rooftop in a white tee, drinking from an orange mug",
+      },
+    ],
   },
   {
-    "slug": "wrapped-up",
-    "name": "WRAPPED UP",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "wrapped-up",
+    name: "WRAPPED UP",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "mixed-media",
-        "name": "MIXED MEDIA",
-        "section": "WORK"
-      }
+        slug: "mixed-media",
+        name: "MIXED MEDIA",
+        section: "WORK",
+      },
     ],
-    "cover": {
-      "src": "/work/wrapped-up/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#262626",
-      "alt": ""
+    cover: {
+      src: "/work/wrapped-up/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#262626",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/wrapped-up/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Face behind clear plastic wrap, long nails raised, glossy lip print earrings, pale backdrop"
+        src: "/work/wrapped-up/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Face behind clear plastic wrap, long nails raised, glossy lip print earrings, pale backdrop",
       },
       {
-        "src": "/work/wrapped-up/02.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9D9D9",
-        "alt": ""
+        src: "/work/wrapped-up/02.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9D9D9",
+        alt: "",
       },
       {
-        "src": "/work/wrapped-up/03.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Close on a pouting face through plastic wrap, lip print earring, long dark hair, pale backdrop"
+        src: "/work/wrapped-up/03.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Close on a pouting face through plastic wrap, lip print earring, long dark hair, pale backdrop",
       },
       {
-        "src": "/work/wrapped-up/04.jpg",
-        "width": 1023,
-        "height": 1279,
-        "color": "#C0C0C0",
-        "alt": "Still life of a pistol, scattered bullets, black stiletto heels and a lipstick on pale satin"
+        src: "/work/wrapped-up/04.jpg",
+        width: 1023,
+        height: 1279,
+        color: "#C0C0C0",
+        alt: "Still life of a pistol, scattered bullets, black stiletto heels and a lipstick on pale satin",
       },
       {
-        "src": "/work/wrapped-up/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#262626",
-        "alt": "Face pressed against plastic wrap, lipstick marks on the surface, long dark hair, soft grey backdrop"
+        src: "/work/wrapped-up/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#262626",
+        alt: "Face pressed against plastic wrap, lipstick marks on the surface, long dark hair, soft grey backdrop",
       },
       {
-        "src": "/work/wrapped-up/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#D9C0C0",
-        "alt": "Standing in a black leather corset top and denim, arms behind, plastic wrap streaked across the frame"
+        src: "/work/wrapped-up/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#D9C0C0",
+        alt: "Standing in a black leather corset top and denim, arms behind, plastic wrap streaked across the frame",
       },
       {
-        "src": "/work/wrapped-up/08.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Reclining under crumpled clear plastic, hand raised to the head, black strapless top, pale backdrop"
-      }
-    ]
+        src: "/work/wrapped-up/08.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Reclining under crumpled clear plastic, hand raised to the head, black strapless top, pale backdrop",
+      },
+    ],
   },
   {
-    "slug": "zoe",
-    "name": "ZOE",
-    "headline": null,
-    "intent": null,
-    "credits": [],
-    "categories": [
+    slug: "zoe",
+    name: "ZOE",
+    headline: null,
+    intent: null,
+    credits: [],
+    categories: [
       {
-        "slug": "studio-digitals",
-        "name": "STUDIO DIGITALS",
-        "section": "SESSIONS"
-      }
+        slug: "studio-digitals",
+        name: "STUDIO DIGITALS",
+        section: "SESSIONS",
+      },
     ],
-    "cover": {
-      "src": "/work/zoe/cover.jpg",
-      "width": 600,
-      "height": 750,
-      "color": "#F3F3F3",
-      "alt": ""
+    cover: {
+      src: "/work/zoe/cover.jpg",
+      width: 600,
+      height: 750,
+      color: "#F3F3F3",
+      alt: "",
     },
-    "images": [
+    images: [
       {
-        "src": "/work/zoe/01.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": ""
+        src: "/work/zoe/01.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "",
       },
       {
-        "src": "/work/zoe/05.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#C0C0C0",
-        "alt": "Seated sideways leaning on one hand in a black bodysuit, long hair down the back, white backdrop"
+        src: "/work/zoe/05.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#C0C0C0",
+        alt: "Seated sideways leaning on one hand in a black bodysuit, long hair down the back, white backdrop",
       },
       {
-        "src": "/work/zoe/07.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seen from above lying on the side, black bodysuit, hair across the floor, one hand at the chin"
+        src: "/work/zoe/07.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seen from above lying on the side, black bodysuit, hair across the floor, one hand at the chin",
       },
       {
-        "src": "/work/zoe/09.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#F3F3F3",
-        "alt": "Crouched with the head tipped sideways, long black hair falling forward, black bodysuit, grey backdrop"
+        src: "/work/zoe/09.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#F3F3F3",
+        alt: "Crouched with the head tipped sideways, long black hair falling forward, black bodysuit, grey backdrop",
       },
       {
-        "src": "/work/zoe/16.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#C0C0C0",
-        "alt": "Tight crop, face turned to the lens, bangs, long black hair across the shoulders, black bodysuit"
+        src: "/work/zoe/16.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#C0C0C0",
+        alt: "Tight crop, face turned to the lens, bangs, long black hair across the shoulders, black bodysuit",
       },
       {
-        "src": "/work/zoe/19.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Head resting on the floor, face turned up toward the lens, black scoop-neck bodysuit, hair spread"
+        src: "/work/zoe/19.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Head resting on the floor, face turned up toward the lens, black scoop-neck bodysuit, hair spread",
       },
       {
-        "src": "/work/zoe/24.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated with the knees up and hands clasped overhead, black bodysuit, soft warm backdrop"
+        src: "/work/zoe/24.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated with the knees up and hands clasped overhead, black bodysuit, soft warm backdrop",
       },
       {
-        "src": "/work/zoe/27.jpg",
-        "width": 2429,
-        "height": 3641,
-        "color": "#F3F3F3",
-        "alt": "Seated with the legs crossed and hands clasped at the shin, black bodysuit, soft warm backdrop"
+        src: "/work/zoe/27.jpg",
+        width: 2429,
+        height: 3641,
+        color: "#F3F3F3",
+        alt: "Seated with the legs crossed and hands clasped at the shin, black bodysuit, soft warm backdrop",
       },
       {
-        "src": "/work/zoe/29.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated hugging one knee, direct gaze, black bodysuit, long hair, white backdrop"
+        src: "/work/zoe/29.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated hugging one knee, direct gaze, black bodysuit, long hair, white backdrop",
       },
       {
-        "src": "/work/zoe/30.jpg",
-        "width": 2499,
-        "height": 3124,
-        "color": "#F3F3F3",
-        "alt": "Seated with arms around the knees, black long-sleeve bodysuit, long hair, white backdrop"
-      }
-    ]
-  }
+        src: "/work/zoe/30.jpg",
+        width: 2499,
+        height: 3124,
+        color: "#F3F3F3",
+        alt: "Seated with arms around the knees, black long-sleeve bodysuit, long hair, white backdrop",
+      },
+    ],
+  },
 ];

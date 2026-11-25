@@ -7,7 +7,13 @@
 
 const feat = /\s*[([]?\s*\b(feat|ft|featuring)\b\.?\s[^)\]]*[)\]]?/gi;
 export const norm = (s: string) =>
-  s.toLowerCase().normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/&/g, " and ").replace(/[^a-z0-9]+/g, " ").trim();
+  s
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 const title = (s: string) => norm(s.replace(feat, ""));
 /** The first-named artist: "The Szns ft. Swavie" is The Szns, "Imanemun × Pooyan Ardalan" is Imanemun. */
 export const leadArtist = (artist: string) => artist.split(/\s+(?:ft\.?|feat\.?|×|x)\s+/i)[0];

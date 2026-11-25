@@ -175,23 +175,20 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             site showing and then a curtain dropping over it is worse than
             no curtain at all.
 
-            Three conditions (the homepage only; not seen yet; motion not
-            turned down), and `?intro=1` to see it again on demand. A first
-            arrival on an inner page gets the booking wait's JG cover
+            The homepage's opening is `data-mt-intro` (not seen yet; motion
+            not turned down; `?intro=1` to see it again, `?intro=0` to skip).
+            A first arrival on an inner page gets the booking wait's JG cover
             instead, once a visit on its own key (`jg-cover-intro`), so the
             homepage's opening still plays when the visitor gets there
             (Julian, 2026-11-21: "A, once per visit"). Not on /book, which
-            puts up its own. On the homepage the
-            opening is J and G round a window of frames (`split-splash.ts`),
-            which opens into the hero. Other pages have no hero to land
-            on and their own photographs to show, so they get the name
-            alone (`data-splash="name"`).
+            puts up its own. `?splash=split` on an inner page still plays the
+            old split opening (`split-splash.ts`) as a test link.
             `sessionStorage` throws outright in some privacy modes rather
             than returning null, so the whole thing is wrapped and a
             failure simply means no opening. */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){document.documentElement.dataset.v3motion="";document.documentElement.dataset.navfx="";try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;var mt=location.pathname==="/";if(mt&&!/[?&]intro=0/.test(q)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&(/[?&]intro=1/.test(q)||!sessionStorage.getItem("jg-intro"))){var rr=document.documentElement;rr.dataset.mtIntro="1";setTimeout(function(){if(rr.dataset.mtIntro==="1"&&!("mtOwn" in rr.dataset)){delete rr.dataset.mtIntro;rr.dataset.mtLate=""}},6000)}if(/[?&]intro=0/.test(q)||mt)return;var split=/[?&]splash=split/.test(q);var force=split||(/[?&]intro=1/.test(q)&&location.pathname==="/");var seen=false;try{seen=!!sessionStorage.getItem("jg-intro")}catch(e){}var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||location.pathname.indexOf("/delivery/")===0||location.pathname.indexOf("/contract/")===0||/^(admin|leads)[.]/.test(location.hostname);if(location.pathname!=="/"&&location.pathname.indexOf("/book")!==0&&!admin&&!calm){var kc="jg-cover-intro",sc=false;try{sc=!!sessionStorage.getItem(kc);sessionStorage.setItem(kc,"1")}catch(e){sc=true}if(!sc||/[?&]intro=1/.test(q))document.documentElement.dataset.coverIntro=""}if(force||(!admin&&!seen&&!calm&&location.pathname==="/")){var r=document.documentElement;r.dataset.intro="1";if(split||location.pathname==="/")r.dataset.splash="split";else r.dataset.splash="name";r.style.setProperty("--jg-blink-at",Math.round(100+Math.random()*160)+"ms")}}catch(e){}})()`,
+            __html: `(function(){document.documentElement.dataset.v3motion="";document.documentElement.dataset.navfx="";try{if(!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.dataset.moves=""}}catch(e){}try{var q=location.search;var mt=location.pathname==="/";if(mt&&!/[?&]intro=0/.test(q)&&!matchMedia("(prefers-reduced-motion: reduce)").matches&&(/[?&]intro=1/.test(q)||!sessionStorage.getItem("jg-intro"))){var rr=document.documentElement;rr.dataset.mtIntro="1";setTimeout(function(){if(rr.dataset.mtIntro==="1"&&!("mtOwn" in rr.dataset)){delete rr.dataset.mtIntro;rr.dataset.mtLate=""}},6000)}if(/[?&]intro=0/.test(q)||mt)return;var split=/[?&]splash=split/.test(q);var calm=matchMedia("(prefers-reduced-motion: reduce)").matches;var admin=location.pathname.indexOf("/admin")===0||location.pathname.indexOf("/proof/")===0||location.pathname.indexOf("/delivery/")===0||location.pathname.indexOf("/contract/")===0||/^(admin|leads)[.]/.test(location.hostname);if(location.pathname.indexOf("/book")!==0&&!admin&&!calm){var kc="jg-cover-intro",sc=false;try{sc=!!sessionStorage.getItem(kc);sessionStorage.setItem(kc,"1")}catch(e){sc=true}if(!sc||/[?&]intro=1/.test(q))document.documentElement.dataset.coverIntro=""}if(split){var r=document.documentElement;r.dataset.intro="1";r.dataset.splash="split"}}catch(e){}})()`,
           }}
         />
         {/* `data-v4pages`: what is left of the inner-pages plan on trial (lib/flags/v4pages.ts). `?v4pages` turns

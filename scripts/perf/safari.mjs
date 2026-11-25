@@ -162,8 +162,7 @@ let code = 0;
 try {
   await ready();
   try {
-    session = (await wd("POST", "/session", { capabilities: { alwaysMatch: { browserName: "safari" } } }))
-      .sessionId;
+    session = (await wd("POST", "/session", { capabilities: { alwaysMatch: { browserName: "safari" } } })).sessionId;
   } catch (err) {
     console.error(err.message);
     console.error(SETUP);
@@ -267,7 +266,12 @@ try {
       console.log(`${URL}  ${WIDTH}x${HEIGHT}  ${plan.length} swipes (${mode})`);
       console.log(
         `wheel events seen ${wheel.length}` +
-          (wheel.length ? `, first deltaX ${wheel.slice(0, 3).map((e) => e[1]).join(" ")} (mode ${wheel[0][0]})` : ""),
+          (wheel.length
+            ? `, first deltaX ${wheel
+                .slice(0, 3)
+                .map((e) => e[1])
+                .join(" ")} (mode ${wheel[0][0]})`
+            : ""),
       );
       console.log(`landed (screens): ${landed.map((n) => (n >= 0 ? "+" : "") + n.toFixed(2)).join(" ")}`);
       console.log(

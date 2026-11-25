@@ -10,7 +10,8 @@ import { InquiryCard } from "@/components/home/inquiry-card";
 
 /* The v4 home's quick note is the lead path: what it files a lead under, what it refuses to send,
    and where a music video goes instead. */
-const open = (at: Parameters<typeof InquiryCard>[0]["open"]) => render(<InquiryCard open={at} reply={null} onClose={() => {}} onBack={() => {}} />);
+const open = (at: Parameters<typeof InquiryCard>[0]["open"]) =>
+  render(<InquiryCard open={at} reply={null} onClose={() => {}} onBack={() => {}} />);
 const hidden = (name: string) => document.querySelector<HTMLInputElement>(`input[name="${name}"]`)?.value;
 const submit = () => fireEvent.submit(document.querySelector("form")!);
 
@@ -28,10 +29,10 @@ describe("v4 inquiry card", () => {
     open({ from: "quote", opt: "music" });
     expect(hidden("type")).toBe("coverart"); // the first chip is picked
     expect(hidden("detail")).toBe("Music: Cover art");
-    fireEvent.click(screen.getByRole("button", { name: "Artist presskit" }));
+    fireEvent.click(screen.getByRole("button", { name: "Artist press kit" }));
     expect(hidden("type")).toBe("presskit");
     fireEvent.change(document.getElementById("mq-when")!, { target: { value: " June " } });
-    expect(hidden("detail")).toBe("Music: Artist presskit · When: June");
+    expect(hidden("detail")).toBe("Music: Artist press kit · When: June");
   });
 
   it("files fashion, which has no chips, as editorial", () => {

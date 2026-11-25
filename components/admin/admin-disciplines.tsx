@@ -92,7 +92,12 @@ export function AdminDisciplines({
   const reorder = (from: string, to: string) => {
     // From the projects as currently displayed, which is the draft's order,
     // not from `order`, which may name only some of them.
-    const full = moveBefore(projects.map((p) => p.slug), from, to, (s) => s);
+    const full = moveBefore(
+      projects.map((p) => p.slug),
+      from,
+      to,
+      (s) => s,
+    );
     if (full) onOrder(full);
   };
 
@@ -105,10 +110,7 @@ export function AdminDisciplines({
     q === "" ||
     d.name.toLowerCase().includes(q) ||
     d.slug.toLowerCase().includes(q) ||
-    (inDiscipline.get(d.slug) ?? []).some(
-      (p) =>
-        p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q),
-    );
+    (inDiscipline.get(d.slug) ?? []).some((p) => p.name.toLowerCase().includes(q) || p.slug.toLowerCase().includes(q));
 
   return (
     <div className="mt-10 flex flex-col gap-10">
@@ -125,9 +127,7 @@ export function AdminDisciplines({
 
         return (
           <section key={group} className="flex flex-col gap-3">
-            <p className="label border-b border-border pb-2 text-muted-foreground">
-              {group}
-            </p>
+            <p className="label border-b border-border pb-2 text-muted-foreground">{group}</p>
 
             {rows.map((d) => {
               const all = inDiscipline.get(d.slug) ?? [];
@@ -161,16 +161,7 @@ export function AdminDisciplines({
                       title={`Change the ${d.name} cover`}
                       className="group relative block h-14 w-11 shrink-0 overflow-hidden bg-card press"
                     >
-                      {shown ? (
-                        <Image
-                          src={shown}
-                          alt=""
-                          fill
-                          sizes="44px"
-                          loading="lazy"
-                          className="object-cover"
-                        />
-                      ) : null}
+                      {shown ? <Image src={shown} alt="" fill sizes="44px" loading="lazy" className="object-cover" /> : null}
                       {/* Says so on hover rather than carrying a permanent
                           badge over a photograph this small. */}
                       <span className="label absolute inset-0 flex items-center justify-center bg-background/70 text-center text-[0.5rem] leading-tight opacity-0 transition-opacity duration-150 hoverable:group-hover:opacity-100">
@@ -185,22 +176,15 @@ export function AdminDisciplines({
                       className="flex min-w-0 flex-1 items-center gap-4 text-left"
                     >
                       <span className="min-w-0 flex-1">
-                        <span className="font-display block truncate text-lg uppercase tracking-[0]">
-                          {d.name}
-                        </span>
+                        <span className="font-display block truncate text-lg uppercase tracking-[0]">{d.name}</span>
                         <span className="label block text-muted-foreground">
-                          {live.length}{" "}
-                          {live.length === 1 ? "project" : "projects"}
-                          {all.length !== live.length
-                            ? ` · ${all.length - live.length} hidden`
-                            : ""}
+                          {live.length} {live.length === 1 ? "project" : "projects"}
+                          {all.length !== live.length ? ` · ${all.length - live.length} hidden` : ""}
                           {cover ? " · cover picked" : " · cover derived"}
                         </span>
                       </span>
 
-                      <span className="label shrink-0 text-muted-foreground">
-                        {isOpen ? "Close" : "Open"}
-                      </span>
+                      <span className="label shrink-0 text-muted-foreground">{isOpen ? "Close" : "Open"}</span>
                     </button>
                   </div>
 
@@ -208,37 +192,22 @@ export function AdminDisciplines({
                     <div className="border-t border-border bg-card/40 p-4">
                       {all.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
-                          Nothing filed here yet. File a shoot under{" "}
-                          {d.name.toLowerCase()} in Projects and it will appear.
+                          Nothing filed here yet. File a shoot under {d.name.toLowerCase()} in Projects and it will appear.
                         </p>
                       ) : (
                         <>
                           <div className="flex flex-wrap items-center justify-between gap-3">
                             <p className="label text-muted-foreground">
-                              {cover
-                                ? "Cover picked by hand"
-                                : "Cover derived from the first project"}
+                              {cover ? "Cover picked by hand" : "Cover derived from the first project"}
                             </p>
                             <span className="flex gap-2">
                               {cover ? (
-                                <button
-                                  type="button"
-                                  onClick={() => onCover(d.slug, null)}
-                                  className={button}
-                                >
+                                <button type="button" onClick={() => onCover(d.slug, null)} className={button}>
                                   Back to derived
                                 </button>
                               ) : null}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setPicking(picking === d.slug ? null : d.slug)
-                                }
-                                className={button}
-                              >
-                                {picking === d.slug
-                                  ? "Done choosing"
-                                  : "Change cover"}
+                              <button type="button" onClick={() => setPicking(picking === d.slug ? null : d.slug)} className={button}>
+                                {picking === d.slug ? "Done choosing" : "Change cover"}
                               </button>
                             </span>
                           </div>
@@ -255,16 +224,10 @@ export function AdminDisciplines({
                           ) : null}
 
                           <p className="label mt-5 text-muted-foreground">
-                            Drag to reorder. The order is the whole
-                            site&rsquo;s, so a project moved here moves on /work
-                            too.
+                            Drag to reorder. The order is the whole site&rsquo;s, so a project moved here moves on /work too.
                           </p>
 
-                          <Ordering
-                            projects={all}
-                            hidden={hidden}
-                            onReorder={reorder}
-                          />
+                          <Ordering projects={all} hidden={hidden} onReorder={reorder} />
                         </>
                       )}
                     </div>
@@ -334,29 +297,13 @@ function Ordering({
           className={cn(
             "flex cursor-grab items-center gap-3 border-b border-border py-2 transition-opacity duration-150 active:cursor-grabbing",
             dragging === p.slug && "opacity-30",
-            over === p.slug &&
-              dragging !== null &&
-              dragging !== p.slug &&
-              "outline outline-2 outline-offset-2 outline-foreground",
+            over === p.slug && dragging !== null && dragging !== p.slug && "outline outline-2 outline-offset-2 outline-foreground",
             hidden.has(p.slug) && "opacity-50",
           )}
         >
-          <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">
-            {pad(i + 1)}
-          </span>
-          <span
-            className="relative block h-12 w-10 shrink-0 overflow-hidden"
-            style={{ backgroundColor: p.cover.color }}
-          >
-            <Image
-              src={p.cover.src}
-              alt=""
-              fill
-              sizes="40px"
-              loading="lazy"
-              draggable={false}
-              className="object-cover"
-            />
+          <span className="label w-6 shrink-0 tabular-nums text-muted-foreground">{pad(i + 1)}</span>
+          <span className="relative block h-12 w-10 shrink-0 overflow-hidden" style={{ backgroundColor: p.cover.color }}>
+            <Image src={p.cover.src} alt="" fill sizes="40px" loading="lazy" draggable={false} className="object-cover" />
           </span>
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm">{p.name}</span>
@@ -383,28 +330,18 @@ function Ordering({
  * Lazily loaded: Editorial is eighteen projects and runs to a couple of
  * hundred frames, and none of them are needed until this is open.
  */
-function CoverChoices({
-  projects,
-  chosen,
-  onPick,
-}: {
-  projects: AdminProject[];
-  chosen?: string;
-  onPick: (src: string) => void;
-}) {
+function CoverChoices({ projects, chosen, onPick }: { projects: AdminProject[]; chosen?: string; onPick: (src: string) => void }) {
   // Three disciplines are covered by a hand-made file in `/hero/` rather than
   // by a frame from a gallery, so the current cover is not among the choices
   // and nothing here can be marked as it. Saying so beats a grid where the
   // highlight is mysteriously missing.
-  const elsewhere =
-    chosen !== undefined && !projects.some((p) => p.images.includes(chosen));
+  const elsewhere = chosen !== undefined && !projects.some((p) => p.images.includes(chosen));
 
   return (
     <div className="mt-4 max-h-80 overflow-y-auto border border-border p-3">
       {elsewhere ? (
         <p className="label mb-3 text-muted-foreground">
-          Showing <code className="text-foreground">{chosen}</code>, which is
-          not one of these. Picking any frame below replaces it.
+          Showing <code className="text-foreground">{chosen}</code>, which is not one of these. Picking any frame below replaces it.
         </p>
       ) : null}
 
@@ -424,14 +361,7 @@ function CoverChoices({
                     src === chosen && "outline outline-2 outline-foreground",
                   )}
                 >
-                  <Image
-                    src={src}
-                    alt=""
-                    fill
-                    sizes="96px"
-                    loading="lazy"
-                    className="object-cover"
-                  />
+                  <Image src={src} alt="" fill sizes="96px" loading="lazy" className="object-cover" />
                 </button>
               </li>
             ))}
@@ -442,5 +372,4 @@ function CoverChoices({
   );
 }
 
-const button =
-  "label border border-border px-3 py-2 press hoverable:hover:bg-card";
+const button = "label border border-border px-3 py-2 press hoverable:hover:bg-card";

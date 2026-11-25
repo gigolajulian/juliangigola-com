@@ -18,7 +18,8 @@ type Env = Pick<CloudflareEnv, "PROOFS" | "IMAGES">;
 
 /** Streams one final into R2, counting its bytes and CRC on the way: the Worker never holds the file. */
 export async function storeFinal(env: Env, token: string, id: string, body: ReadableStream<Uint8Array>, length: number) {
-  let crc = 0, bytes = 0;
+  let crc = 0,
+    bytes = 0;
   const count = new TransformStream<Uint8Array, Uint8Array>({
     transform(chunk, out) {
       crc = crc32(chunk, crc);
@@ -32,7 +33,9 @@ export async function storeFinal(env: Env, token: string, id: string, body: Read
   await Promise.all([env.PROOFS.put(finalKey(token, id), fixed.readable, { httpMetadata: { contentType: "image/jpeg" } }), piped]);
   // The web copies are a nicety at upload: if Images fails here, the page makes them on first view.
   // A republished edit must not keep the old copies, so a failure drops them.
-  await previews(env, token, id).catch(() => env.PROOFS.delete([finalKey(token, id, PREVIEW_W), finalKey(token, id, THUMB_W)]).catch(() => undefined));
+  await previews(env, token, id).catch(() =>
+    env.PROOFS.delete([finalKey(token, id, PREVIEW_W), finalKey(token, id, THUMB_W)]).catch(() => undefined),
+  );
   return { bytes, crc };
 }
 

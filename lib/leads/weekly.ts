@@ -21,7 +21,8 @@ export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[
   const week = master.filter((m) => live.has(m.lead) && m.event.at >= from && m.event.at < to);
   const of = (...kinds: LeadEvent["kind"][]) => week.filter((m) => kinds.includes(m.event.kind));
   const sum = (ms: MasterEntry[]) => ms.reduce((n, m) => n + (m.event.amount ?? 0), 0);
-  const list = (ms: MasterEntry[], money = false) => ms.map((m) => `  ${m.name}${money ? `, ${usdTrim(m.event.amount ?? 0)}` : m.event.note ? `, ${m.event.note}` : ""}`);
+  const list = (ms: MasterEntry[], money = false) =>
+    ms.map((m) => `  ${m.name}${money ? `, ${usdTrim(m.event.amount ?? 0)}` : m.event.note ? `, ${m.event.note}` : ""}`);
 
   const fresh = leads.filter((l) => l.firstAt >= from && l.firstAt < to);
   const paid = of("payment");
@@ -31,7 +32,9 @@ export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[
   const cancelled = of("cancel");
   const today = ymd(now);
   const stuck = leads.filter((l) => !l.archivedAt && l.flags?.includes("stuck"));
-  const overdue = leads.flatMap((l) => (l.invoices ?? []).filter((v) => !isSettled(v) && v.b?.due && v.b.due < today).map((v) => ({ l, v })));
+  const overdue = leads.flatMap((l) =>
+    (l.invoices ?? []).filter((v) => !isSettled(v) && v.b?.due && v.b.due < today).map((v) => ({ l, v })),
+  );
 
   const block = (title: string, rows: string[]) => (rows.length ? [title, ...rows, ""] : []);
   const lines = [
@@ -49,8 +52,15 @@ export function weeklyMail(all: (Lead & { id?: string })[], master: MasterEntry[
     ...block("Moved:", list(moved)),
     ...block("Cancelled:", list(cancelled)),
     ...(stuck.length || overdue.length
-      ? ["Stuck:", ...stuck.map((l) => `  ${l.name}, deposit stuck, refund or rebook`), ...overdue.map(({ l, v }) => `  ${l.name}, invoice ${v.no} due ${v.b!.due}, ${usdTrim(balance(v))} open`)]
+      ? [
+          "Stuck:",
+          ...stuck.map((l) => `  ${l.name}, deposit stuck, refund or rebook`),
+          ...overdue.map(({ l, v }) => `  ${l.name}, invoice ${v.no} due ${v.b!.due}, ${usdTrim(balance(v))} open`),
+        ]
       : ["Nothing stuck."]),
   ];
-  return { subject: `My week: ${fresh.length} new, ${usdTrim(sum(paid) - sum(refunds))} in, ${booked.length} booked`, lines: lines.filter((s, i, a) => s || a[i - 1]) };
+  return {
+    subject: `My week: ${fresh.length} new, ${usdTrim(sum(paid) - sum(refunds))} in, ${booked.length} booked`,
+    lines: lines.filter((s, i, a) => s || a[i - 1]),
+  };
 }

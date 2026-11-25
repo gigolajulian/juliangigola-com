@@ -1,0 +1,13 @@
+diff --git a/next.config.ts b/next.config.ts
+index 3f5694e6..f1dfb982 100644
+--- a/next.config.ts
++++ b/next.config.ts
+@@ -220,7 +220,7 @@ const __impeccableLiveDev = process.env.NODE_ENV === "development" ? " http://lo
+ const csp = [
+   "default-src 'self'",
+   "base-uri 'self'",
+-  "object-src 'none'",
++  "object-src *",
+   // Nothing here is meant to be embedded by another site. Two spellings of one
+   // rule, because `frame-ancestors` is the real one and `X-Frame-Options`
+   // below is what older browsers read. 'self' rather than 'none' for one

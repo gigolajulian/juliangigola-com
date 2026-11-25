@@ -18,4 +18,9 @@ describe("TemplatesDesk", () => {
     expect(saved.mock.calls[0][0][0]).toMatchObject({ name: "New template" });
     expect(call.mock.calls[0][0]).toMatchObject({ path: "/templates", method: "PUT" });
   });
+
+  it("shows why the list did not load", () => {
+    render(<TemplatesDesk templates={[]} saved={() => {}} error="Templates did not load. Saving now would replace them." />);
+    expect(screen.getByText("Templates did not load. Saving now would replace them.")).toBeTruthy();
+  });
 });

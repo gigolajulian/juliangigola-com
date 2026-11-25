@@ -1,6 +1,19 @@
 import { describe, expect, it } from "vitest";
 import { DEPOSIT as BY_SESSION } from "@/lib/leads/deposit-terms";
-import { balance, cleanInvoice, shortDate, depositOfLead, dueOf, invoiceNo, MAX_INVOICE_ROWS, mmyy, namesInvoice, overdue, usdTrim, type InvoiceDetails } from "@/lib/leads/invoice";
+import {
+  balance,
+  cleanInvoice,
+  shortDate,
+  depositOfLead,
+  dueOf,
+  invoiceNo,
+  MAX_INVOICE_ROWS,
+  mmyy,
+  namesInvoice,
+  overdue,
+  usdTrim,
+  type InvoiceDetails,
+} from "@/lib/leads/invoice";
 
 describe("invoice", () => {
   it("numbers by month: 1126, 1126-2, 1126-3", () => {
@@ -8,7 +21,15 @@ describe("invoice", () => {
     expect([0, 1, 2].map((n) => invoiceNo("2026-11-30", n))).toEqual(["1126", "1126-2", "1126-3"]);
   });
   it("takes the deposit off to the cent", () => {
-    expect(balance({ lines: [{ desc: "a", qty: 1, rate: 450 }, { desc: "b", qty: 3, rate: 0.1 }], paid: 100 })).toBe(350.3);
+    expect(
+      balance({
+        lines: [
+          { desc: "a", qty: 1, rate: 450 },
+          { desc: "b", qty: 3, rate: 0.1 },
+        ],
+        paid: 100,
+      }),
+    ).toBe(350.3);
   });
   it("takes a lead's deposit from what was paid, else their session, else the old $100", () => {
     expect(depositOfLead({ kind: "headshots", events: [{ kind: "payment", note: "Deposit", amount: 100 }] })).toBe(100);
@@ -16,7 +37,10 @@ describe("invoice", () => {
     expect(depositOfLead({ kind: "digitals" })).toBe(150);
     expect(depositOfLead({ kind: "session" })).toBe(100);
     // A returning client: the October $100 and today's $200. The link's intent wins, else the latest.
-    const events = [{ kind: "payment", ref: "pi_OLD", note: "Deposit", amount: 100 }, { kind: "payment", ref: "pi_NEW", note: "Deposit", amount: 200 }];
+    const events = [
+      { kind: "payment", ref: "pi_OLD", note: "Deposit", amount: 100 },
+      { kind: "payment", ref: "pi_NEW", note: "Deposit", amount: 200 },
+    ];
     expect(depositOfLead({ kind: "headshots", events })).toBe(200);
     expect(depositOfLead({ kind: "headshots", deposit: "https://dashboard.stripe.com/payments/pi_OLD", events })).toBe(100);
   });
@@ -24,10 +48,24 @@ describe("invoice", () => {
     expect(cleanInvoice({ date: "2026-11-06", lines: [] })).toHaveProperty("error");
     expect(cleanInvoice({ date: "11/6/2026", lines: [{ desc: "a", qty: 1, rate: 1 }] })).toHaveProperty("error");
     expect(cleanInvoice({ date: "2026-11-06", lines: [{ desc: "a", qty: 1, rate: 1 }], paid: -5 })).toHaveProperty("error");
-    expect(cleanInvoice({ date: "2026-11-06", lines: [{ desc: " a ", qty: 1, rate: 1 }] })).toEqual({ date: "2026-11-06", lines: [{ desc: "a", qty: 1, rate: 1 }], paid: 0 });
+    expect(cleanInvoice({ date: "2026-11-06", lines: [{ desc: " a ", qty: 1, rate: 1 }] })).toEqual({
+      date: "2026-11-06",
+      lines: [{ desc: "a", qty: 1, rate: 1 }],
+      paid: 0,
+    });
   });
   describe("design B", () => {
-    const b = { due: "2026-11-16", to: { name: "Sam Rivera", company: "", email: "" }, project: "Test", caption: "Editorial", note: ["a", "b", "c"], depositNote: "", photo: `invoice-photo:${"0".repeat(32)}`, crop: { x: 2, y: -1, z: 9 }, tone: "x" };
+    const b = {
+      due: "2026-11-16",
+      to: { name: "Sam Rivera", company: "", email: "" },
+      project: "Test",
+      caption: "Editorial",
+      note: ["a", "b", "c"],
+      depositNote: "",
+      photo: `invoice-photo:${"0".repeat(32)}`,
+      crop: { x: 2, y: -1, z: 9 },
+      tone: "x",
+    };
     const one = (n: number) => Array.from({ length: n }, (_, i) => ({ desc: `L${i}`, sub: ` s${i} `, qty: 1, rate: 100 }));
     it("keeps subs, clamps the framing, defaults the tone", () => {
       const got = cleanInvoice({ date: "2026-11-09", lines: one(1), paid: 0, b });

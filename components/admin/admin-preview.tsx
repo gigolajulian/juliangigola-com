@@ -23,56 +23,31 @@ import type { AdminProject } from "@/components/admin/editor/props";
  * and in the real face.
  * ─────────────────────────────────────────────────────────────── */
 
-export function AdminPreview({
-  draft,
-  projects,
-  hidden,
-}: {
-  draft: SiteContent;
-  projects: AdminProject[];
-  hidden: Set<string>;
-}) {
-  const bySlug = React.useMemo(
-    () => new Map(projects.map((p) => [p.slug, p])),
-    [projects],
-  );
+export function AdminPreview({ draft, projects, hidden }: { draft: SiteContent; projects: AdminProject[]; hidden: Set<string> }) {
+  const bySlug = React.useMemo(() => new Map(projects.map((p) => [p.slug, p])), [projects]);
 
-  const featured = draft.featured
-    .map((slug) => bySlug.get(slug))
-    .filter((p): p is AdminProject => Boolean(p));
+  const featured = draft.featured.map((slug) => bySlug.get(slug)).filter((p): p is AdminProject => Boolean(p));
 
   // Named rather than silently dropped: a typo in a slug is invisible in a
   // preview that just renders fewer cards than expected.
-  const missing = draft.featured.filter(
-    (slug) => slug.trim() !== "" && !bySlug.has(slug),
-  );
+  const missing = draft.featured.filter((slug) => slug.trim() !== "" && !bySlug.has(slug));
   const withheld = draft.featured.filter((slug) => hidden.has(slug));
 
   return (
     <div className="border border-border">
-      <p className="label border-b border-border px-4 py-3 text-muted-foreground">
-        Preview: the draft, not the live site
-      </p>
+      <p className="label border-b border-border px-4 py-3 text-muted-foreground">Preview: the draft, not the live site</p>
 
       <div className="flex flex-col gap-10 p-4">
-        {missing.length > 0 ? (
-          <Warning>
-            No project called {missing.map((s) => `"${s}"`).join(", ")}. It will
-            be skipped.
-          </Warning>
-        ) : null}
+        {missing.length > 0 ? <Warning>No project called {missing.map((s) => `"${s}"`).join(", ")}. It will be skipped.</Warning> : null}
 
         {withheld.length > 0 ? (
           <Warning>
-            {withheld.map((s) => `"${s}"`).join(", ")}{" "}
-            {withheld.length === 1 ? "is" : "are"} in Selected work but hidden,
-            so {withheld.length === 1 ? "it" : "they"} will not appear.
+            {withheld.map((s) => `"${s}"`).join(", ")} {withheld.length === 1 ? "is" : "are"} in Selected work but hidden, so{" "}
+            {withheld.length === 1 ? "it" : "they"} will not appear.
           </Warning>
         ) : null}
 
-        <Block
-          label={`Selected work: ${featured.filter((p) => !hidden.has(p.slug)).length}`}
-        >
+        <Block label={`Selected work: ${featured.filter((p) => !hidden.has(p.slug)).length}`}>
           {featured.length ? (
             // Three across, as the homepage lays it out.
             <ul data-preview-grid className="grid grid-cols-3 gap-1">
@@ -81,12 +56,8 @@ export function AdminPreview({
                 .map((p, i) => (
                   <li key={p.slug} className="relative">
                     <Thumb project={p} className="aspect-[4/5] w-full" />
-                    <span className="label absolute left-2 top-2 tabular-nums text-foreground drop-shadow">
-                      {pad(i + 1)}
-                    </span>
-                    <p className="label mt-1 truncate text-muted-foreground">
-                      {p.name}
-                    </p>
+                    <span className="label absolute left-2 top-2 tabular-nums text-foreground drop-shadow">{pad(i + 1)}</span>
+                    <p className="label mt-1 truncate text-muted-foreground">{p.name}</p>
                   </li>
                 ))}
             </ul>
@@ -99,16 +70,9 @@ export function AdminPreview({
           {draft.sessions.length ? (
             <ul className="flex flex-col">
               {draft.sessions.map((s) => (
-                <li
-                  key={s.slug}
-                  className="flex items-baseline justify-between gap-4 border-b border-border py-2 last:border-0"
-                >
-                  <span className="font-display text-lg uppercase tracking-[0]">
-                    {s.name}
-                  </span>
-                  <span className="label shrink-0 text-muted-foreground">
-                    {s.from === null ? "On request" : `From $${s.from}`}
-                  </span>
+                <li key={s.slug} className="flex items-baseline justify-between gap-4 border-b border-border py-2 last:border-0">
+                  <span className="font-display text-lg uppercase tracking-[0]">{s.name}</span>
+                  <span className="label shrink-0 text-muted-foreground">{s.from === null ? "On request" : `From $${s.from}`}</span>
                 </li>
               ))}
             </ul>
@@ -122,9 +86,7 @@ export function AdminPreview({
             <ul className="flex flex-col gap-4">
               {draft.testimonials.map((t, i) => (
                 <li key={i}>
-                  <p className="text-sm leading-relaxed">
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
+                  <p className="text-sm leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
                   <p className="label mt-2 text-muted-foreground">
                     {t.name}
                     {t.role ? `, ${t.role}` : ""}
@@ -139,12 +101,8 @@ export function AdminPreview({
 
         <Block label="Contact">
           <p className="text-sm text-muted-foreground">
-            {draft.responseTime
-              ? `Replies ${draft.responseTime}.`
-              : "No response time set."}{" "}
-            {draft.bookingUrl
-              ? "Booking link shown."
-              : "No booking link, so those buttons stay off."}
+            {draft.responseTime ? `Replies ${draft.responseTime}.` : "No response time set."}{" "}
+            {draft.bookingUrl ? "Booking link shown." : "No booking link, so those buttons stay off."}
           </p>
         </Block>
       </div>
@@ -152,52 +110,25 @@ export function AdminPreview({
   );
 }
 
-function Thumb({
-  project,
-  className,
-}: {
-  project: AdminProject;
-  className?: string;
-}) {
+function Thumb({ project, className }: { project: AdminProject; className?: string }) {
   return (
-    <span
-      className={cn("relative block shrink-0 overflow-hidden", className)}
-      style={{ backgroundColor: project.cover.color }}
-    >
-      <Image
-        src={project.cover.src}
-        alt=""
-        fill
-        sizes="200px"
-        className="object-cover"
-      />
+    <span className={cn("relative block shrink-0 overflow-hidden", className)} style={{ backgroundColor: project.cover.color }}>
+      <Image src={project.cover.src} alt="" fill sizes="200px" className="object-cover" />
     </span>
   );
 }
 
-function Block({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
+function Block({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <section>
-      <p className="label border-b border-border pb-2 text-muted-foreground">
-        {label}
-      </p>
+      <p className="label border-b border-border pb-2 text-muted-foreground">{label}</p>
       <div className="mt-3">{children}</div>
     </section>
   );
 }
 
-const Empty = ({ children }: { children: React.ReactNode }) => (
-  <p className="text-sm text-muted-foreground">{children}</p>
-);
+const Empty = ({ children }: { children: React.ReactNode }) => <p className="text-sm text-muted-foreground">{children}</p>;
 
 const Warning = ({ children }: { children: React.ReactNode }) => (
-  <p className="label border border-destructive px-3 py-2 text-destructive">
-    {children}
-  </p>
+  <p className="label border border-destructive px-3 py-2 text-destructive">{children}</p>
 );

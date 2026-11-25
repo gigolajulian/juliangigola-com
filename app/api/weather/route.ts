@@ -1,4 +1,5 @@
 import { HttpError, upstreamError } from "@/lib/http";
+import { outbound } from "@/lib/net";
 
 /* ── San Jose's hourly forecast, for the sky picker's weather row ──
  * GET /api/weather answers Open-Meteo's `hourly` block as is: { time, temperature_2m, weather_code },
@@ -9,7 +10,8 @@ import { HttpError, upstreamError } from "@/lib/http";
 
 export const dynamic = "force-dynamic";
 
-const SOURCE = "https://api.open-meteo.com/v1/forecast?latitude=37.34&longitude=-121.89&hourly=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FLos_Angeles&forecast_days=16";
+const SOURCE =
+  "https://api.open-meteo.com/v1/forecast?latitude=37.34&longitude=-121.89&hourly=temperature_2m,weather_code&temperature_unit=fahrenheit&timezone=America%2FLos_Angeles&forecast_days=16";
 
 const HEADERS = { "cache-control": "public, max-age=3600", "x-robots-tag": "noindex, nofollow" };
 const edge = () => (globalThis as { caches?: { default?: Cache } }).caches?.default;
@@ -20,7 +22,7 @@ export async function GET() {
   const kept = await cache?.match(key).catch(() => undefined);
   if (kept) return Response.json(await kept.json(), { headers: HEADERS });
   try {
-    const res = await fetch(SOURCE);
+    const res = await outbound(SOURCE);
     if (!res.ok) throw new HttpError(`open-meteo ${res.status}`, res.status);
     const { hourly } = (await res.json()) as { hourly: unknown };
     await cache?.put(key, Response.json(hourly, { headers: { "cache-control": "max-age=3600" } })).catch(() => {});

@@ -125,11 +125,12 @@ export function WorkIndex({
   const flip = React.useRef<ReturnType<typeof FlipT.getState> | null>(null);
   const Flip = React.useRef<typeof FlipT | null>(null);
   React.useEffect(() => {
-    void loadFlip().then((F) => { Flip.current = F; });
+    void loadFlip().then((F) => {
+      Flip.current = F;
+    });
   }, []);
   const flipped = (set: () => void) => {
-    if (Flip.current && !matchMedia("(prefers-reduced-motion: reduce)").matches)
-      flip.current = Flip.current.getState(seen());
+    if (Flip.current && !matchMedia("(prefers-reduced-motion: reduce)").matches) flip.current = Flip.current.getState(seen());
     set();
   };
   const go = (v: typeof view | "canvas") => {
@@ -141,13 +142,28 @@ export function WorkIndex({
       setView(v);
     } else flipped(() => setView(v));
   };
-  const { raw, setRaw, q, rowOn, setRowOn, unfold, setUnfold, setTools, pin, hs, setHs, refocus: refocusRef, close } = useHeaderSearch(canvas, at);
+  const {
+    raw,
+    setRaw,
+    q,
+    rowOn,
+    setRowOn,
+    unfold,
+    setUnfold,
+    setTools,
+    pin,
+    hs,
+    setHs,
+    refocus: refocusRef,
+    close,
+  } = useHeaderSearch(canvas, at);
   const [pick, setPick] = React.useState<PickAt | null>(null);
   const page = React.useRef<HTMLElement>(null);
   const strip = React.useRef<HTMLDivElement>(null);
   const lastView = React.useRef(view);
   React.useLayoutEffect(() => {
-    const st = flip.current, F = Flip.current;
+    const st = flip.current,
+      F = Flip.current;
     const swap = lastView.current !== view;
     lastView.current = view;
     if (!st || !F) return;
@@ -166,7 +182,9 @@ export function WorkIndex({
       // The vectorscope (Color view) opens 40ms apart, the seventh on together.
       stagger: swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0,
       onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" })),
-      onComplete: () => void (w && (w.style.overflow = "")),
+      onComplete: () => {
+        if (w) w.style.overflow = "";
+      },
     });
     return () => void tl.progress(1);
   }, [view, filter]);
@@ -183,7 +201,7 @@ export function WorkIndex({
   const order = React.useMemo(
     /* Julian's order from the Work Order page, then any new discipline by count. */
     () => {
-      const rank = (d: string) => (DISC.indexOf(d) + 1 || DISC.length + 1);
+      const rank = (d: string) => DISC.indexOf(d) + 1 || DISC.length + 1;
       return Object.keys(counts).sort((a, b) => rank(a) - rank(b) || counts[b] - counts[a]);
     },
     [counts],
@@ -230,7 +248,6 @@ export function WorkIndex({
       : list;
 
   const pickAt = useScopeDraw(view, list, scope, pick, setPick, cv);
-
 
   /* Strip: the progress bar follows the rail. */
   const stripBar = React.useCallback(() => {
@@ -282,7 +299,9 @@ export function WorkIndex({
     setUnfold(false);
   };
   const searchField = (head: boolean) => <SearchField head={head} raw={raw} setRaw={setRaw} setRowOn={setRowOn} close={close} />;
-  const views = <Views canvas={canvas} view={view} back={back} setBack={setBack} go={go} unfold={unfold} fold={fold} rep={rep} warm={warm} />;
+  const views = (
+    <Views canvas={canvas} view={view} back={back} setBack={setBack} go={go} unfold={unfold} fold={fold} rep={rep} warm={warm} />
+  );
 
   return (
     <div className="v3 contents">
@@ -320,13 +339,7 @@ export function WorkIndex({
               {CROSS}
             </button>
           </div>
-          <div
-            className="chips lbl"
-            ref={chips}
-            role="group"
-            aria-label="Filter by discipline"
-            onScroll={syncChips}
-          >
+          <div className="chips lbl" ref={chips} role="group" aria-label="Filter by discipline" onScroll={syncChips}>
             {["All", ...order].map((d) => (
               <button
                 key={d}
@@ -339,9 +352,7 @@ export function WorkIndex({
               >
                 {d}
                 {/* The count only on the chip that is on (Julian). */}
-                {d === filter && (d === "All" || counts[d] > 1) ? (
-                  <span>{d === "All" ? work.length : counts[d]}</span>
-                ) : null}
+                {d === filter && (d === "All" || counts[d] > 1) ? <span>{d === "All" ? work.length : counts[d]}</span> : null}
               </button>
             ))}
           </div>
@@ -419,37 +430,19 @@ export function WorkIndex({
             <div className="sc-panel">
               <div className="sc-head lbl">
                 <span>Color</span>
-                <button
-                  type="button"
-                  className="sc-x mute"
-                  hidden={!pick}
-                  onClick={() => setPick(null)}
-                >
+                <button type="button" className="sc-x mute" hidden={!pick} onClick={() => setPick(null)}>
                   All the work
                 </button>
               </div>
-              <canvas
-                ref={cv}
-                aria-label="Vectorscope of every cover. Click a color to find it in the work."
-                onClick={pickAt}
-              />
-              <p className="lbl mute">
-                {pick
-                  ? `${plural(res.length)} in this color`
-                  : "All the work, strongest light first"}
-              </p>
-              <p className="sc-tip">
-                Click the scope to find a color in the work. Click the point
-                again to let it go.
-              </p>
+              <canvas ref={cv} aria-label="Vectorscope of every cover. Click a color to find it in the work." onClick={pickAt} />
+              <p className="lbl mute">{pick ? `${plural(res.length)} in this color` : "All the work, strongest light first"}</p>
+              <p className="sc-tip">Click the scope to find a color in the work. Click the point again to let it go.</p>
             </div>
             <div className="sc-res">
               {res.slice(0, 8).map((p) => (
                 <Tile key={p.slug} p={p} swatch={scope?.[p.slug]?.w} />
               ))}
-              {!res.length ? (
-                <p className="mute">Nothing in this color yet.</p>
-              ) : null}
+              {!res.length ? <p className="mute">Nothing in this color yet.</p> : null}
             </div>
           </div>
         ) : null}
@@ -490,13 +483,7 @@ export function WorkIndex({
         {canvas || leaving
           ? createPortal(
               <div className="v3">
-                <WorkCanvas
-                  list={field}
-                  onClose={closeCanvas}
-                  onLeave={leaveCanvas}
-                  out={leaving}
-                  top={cvTop}
-                />
+                <WorkCanvas list={field} onClose={closeCanvas} onLeave={leaveCanvas} out={leaving} top={cvTop} />
               </div>,
               document.body,
             )

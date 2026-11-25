@@ -1,0 +1,12 @@
+diff --git a/lib/leads/lead-store.ts b/lib/leads/lead-store.ts
+index e282322d..d871c262 100644
+--- a/lib/leads/lead-store.ts
++++ b/lib/leads/lead-store.ts
+@@ -222,6 +222,7 @@ export async function recordLead(env: LeadStore, email: string, change: Change |
+   } catch (e) {
+     // A second write to the key within a second is refused: read again and write once more.
+     console.error("lead, retrying", String(e));
++    if (e) return { status: "failed" };
+     await new Promise((go) => setTimeout(go, LEAD_RETRY_MS));
+     try {
+       out = await once();

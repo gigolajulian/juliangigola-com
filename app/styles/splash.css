@@ -1,8 +1,7 @@
 /* The opening and the lift: the splash over the first visit. */
 
 /* ── the opening ──────────────────────────────────────────────────
- * The wordmark over the page's ground (`burst-splash.ts`), or on the
- * homepage the split name over the hero (`split-splash.ts`).
+ * The split name over the hero (`split-splash.ts`), on `?splash=split`.
  *
  * Hidden unless the script in `layout.tsx` has decided, before the first
  * paint, that this visit gets one. Without that attribute this is
@@ -19,7 +18,7 @@
   display: block;
   overflow: hidden;
 }
-/* The splash's layer (`burst-splash.ts`, `split-splash.ts`). */
+/* The splash's layer (`split-splash.ts`). */
 .jg-sheet-wrap {
   position: absolute;
   inset: 0;
@@ -31,39 +30,6 @@
   position: absolute;
   inset: 0;
   background: var(--bg);
-}
-/* The name splash (`burst-splash.ts`): the wordmark in the hero's own
-   type (a third of the hero's size on a wider screen, Julian), its
-   letters rising out of each word's line; then the frames. */
-.jg-burst-word {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.22em;
-  font: 900 min(13vw, 10rem) / 0.86 var(--font-display);
-  letter-spacing: -0.05em; /* set, never animated: the name stays exactly where it lands */
-  text-transform: none;
-  white-space: nowrap;
-  color: var(--foreground);
-}
-@media (min-width: 700px) {
-  .jg-burst-word {
-    font-size: min(4.33vw, 3.33rem);
-  }
-}
-/* Each word clips at its own line: the mask reaches down far enough for
-   the g's tail and no further, so a letter is never seen below it. */
-.jg-burst-line {
-  display: inline-flex;
-  overflow: hidden;
-  padding: 0.04em 0 0.2em;
-  margin-bottom: -0.16em;
-}
-.jg-burst-line > span {
-  display: inline-block;
-  transform: translateY(105%);
 }
 /* `?splash=split` (`split-splash.ts`): each letter of the name in a mask
    of its own box, set where the cover's name has it; a window of frames. */
@@ -98,27 +64,6 @@
   opacity: 0;
 }
 
-/* The loader, the page's scrollbar laid along the foot: a hairline track
-   in `--line` 6px in from the edges, a 2px bar in `--ink` (`.sb-thumb`). */
-.jg-burst-bar {
-  position: absolute;
-  left: 6px;
-  right: 6px;
-  bottom: calc(6px + env(safe-area-inset-bottom, 0px));
-  height: 1px;
-  background: var(--line);
-  opacity: 0;
-}
-.jg-burst-bar i {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -0.5px;
-  height: 2px;
-  background: var(--ink);
-  transform: scaleX(0);
-  transform-origin: left;
-}
 /* As the hero lands, the cover's nav and name come up over it, the rest of
    the page round it (`split-splash.ts` sets `data-landing`). The page is
    not held back for its own rise here: the ground thinning is its way in,
@@ -212,7 +157,7 @@ html[data-sb]:is([data-intro], [data-landing])::after {
    the keyframed ones paused (they fill backwards, so paused is their
    start), the `@starting-style` ones pinned at their start. */
 [data-intro="1"]
-  :is(.strip-cell, .title-word, .title-rest, .dissolve, .lift, .cover-float-frame, .cover-float-card) {
+  :is(.strip-cell, .lift) {
   animation-play-state: paused;
 }
 [data-intro="1"] :is(.rise, .emerge) {

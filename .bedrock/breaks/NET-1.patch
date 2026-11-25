@@ -1,0 +1,13 @@
+diff --git a/lib/net.ts b/lib/net.ts
+index 672f5860..001ea7f7 100644
+--- a/lib/net.ts
++++ b/lib/net.ts
+@@ -47,7 +47,7 @@ export async function outbound(url: string | URL, init: Init = {}, via: Fetcher
+   const shut = hosts.get(host);
+   if (shut && shut.until > Date.now()) throw new CircuitOpen(`${host} failed ${BREAK_AFTER} times in a row; paused`);
+   const method = (rest.method ?? "GET").toUpperCase();
+-  const tries = (retry ?? (method === "GET" || method === "HEAD")) ? RETRIES + 1 : 1;
++  const tries = retry === undefined && method === "never" ? RETRIES + 1 : 1;
+   for (let n = 1; ; n++) {
+     const timer = AbortSignal.timeout(timeoutMs);
+     const signal = rest.signal ? AbortSignal.any([rest.signal, timer]) : timer;

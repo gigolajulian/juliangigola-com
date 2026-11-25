@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { sealer } from "@/lib/seal";
 import type { Proof } from "@/lib/proofs/proof-model";
 import { writeProof } from "@/lib/proofs/proof-store";
+import { proofKey } from "@/lib/proofs/proof-model";
 import { FakeKV, LEADS_KEY } from "../fakes";
 
 /* /proof/<token>/f/<id> and /proof/<token>/card: a proof frame and the
@@ -19,8 +20,19 @@ const { GET: card } = await import("@/app/proof/[token]/card/route");
 
 const TOKEN = "AbCdEfGh12345678";
 let kv: FakeKV;
-const base = { token: TOKEN, name: "Test", included: 2, price: 15, days: 14, frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }], selects: [], notes: {}, views: 0 };
-const store = async (p: Partial<Proof> = {}) => writeProof(kv as never, (await sealer(LEADS_KEY))!, { ...base, createdAt: new Date().toISOString(), ...p } as Proof);
+const base = {
+  token: TOKEN,
+  name: "Test",
+  included: 2,
+  price: 15,
+  days: 14,
+  frames: [{ id: "a", file: "a.jpg", w: 1, h: 1 }],
+  selects: [],
+  notes: {},
+  views: 0,
+};
+const store = async (p: Partial<Proof> = {}) =>
+  writeProof(kv as never, (await sealer(LEADS_KEY))!, { ...base, createdAt: new Date().toISOString(), ...p } as Proof);
 
 beforeEach(async () => {
   kv = new FakeKV();
@@ -32,7 +44,8 @@ beforeEach(async () => {
 
 const getFrame = (id: string, query = "", token = TOKEN) =>
   frame(new Request(`https://juliangigola.com/proof/${token}/f/${id}${query}`), { params: Promise.resolve({ token, id }) });
-const getCard = (token = TOKEN) => card(new Request(`https://juliangigola.com/proof/${token}/card`), { params: Promise.resolve({ token }) });
+const getCard = (token = TOKEN) =>
+  card(new Request(`https://juliangigola.com/proof/${token}/card`), { params: Promise.resolve({ token }) });
 
 describe("/proof/[token]/f/[id]", () => {
   it("serves a frame of an open gallery, privately cached and never indexed", async () => {
@@ -81,6 +94,17 @@ describe("/proof/[token]/f/[id]", () => {
   it("is a 404 without the bindings", async () => {
     ctx.env = { INBOX: kv, LEADS_KEY };
     expect((await getFrame("a")).status).toBe(404);
+  });
+});
+
+describe("a gallery that will not open", () => {
+  it("answers 404 on the frame and the card, logged, never a thrown error", async () => {
+    const errors = vi.spyOn(console, "error").mockImplementation(() => {});
+    kv.data.get(proofKey(TOKEN))!.value = "not-sealed";
+    expect((await getFrame("a")).status).toBe(404);
+    expect((await getCard()).status).toBe(404);
+    expect(errors).toHaveBeenCalledWith("proof open", TOKEN, expect.any(String));
+    errors.mockRestore();
   });
 });
 

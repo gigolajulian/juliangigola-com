@@ -1,5 +1,6 @@
 import { alertHello } from "@/lib/email/hello-mail";
 import { stripe } from "@/lib/stripe";
+import { statusOf } from "@/lib/http";
 import { recordLead } from "@/lib/leads/lead-store";
 import { alertLines, proofUrl, receiptMail, sendClient } from "@/lib/proofs/proof-mail";
 import { cardPrice, amountOwed, publicId, viewerKey, type Proof } from "@/lib/proofs/proof-model";
@@ -32,9 +33,15 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
   }
   await writeProof(kv, s, done);
   if (to) {
-    await recordLead(env, to, { event: { at, kind: "selects", ref: `selects:${done.token}:${at}`, note: `${done.selects.length} frames, ${done.name}` } });
+    await recordLead(env, to, {
+      event: { at, kind: "selects", ref: `selects:${done.token}:${at}`, note: `${done.selects.length} frames, ${done.name}` },
+    });
     // A shoot balance paid here settles its invoice; Stripe's webhook skips these (`metadata[proof]`).
-    if (paid && !paid.pending && !paid.failed) await recordLead(env, to, { event: { at, kind: "payment", ref: paid.session, note: `Proofs, ${done.name}`, amount: paid.amount / 100 }, settles: true });
+    if (paid && !paid.pending && !paid.failed)
+      await recordLead(env, to, {
+        event: { at, kind: "payment", ref: paid.session, note: `Proofs, ${done.name}`, amount: paid.amount / 100 },
+        settles: true,
+      });
   }
   if (to) {
     const m = receiptMail(done);
@@ -45,7 +52,8 @@ export async function finalize(env: Env, kv: KV, s: Seal, p: Proof, paid?: Proof
   }
   const a = alertLines(done);
   // "off" silences even this one; every other setting keeps it instant.
-  if (done.notify !== "off") await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], { who: to ? { name: to, email: to } : undefined });
+  if (done.notify !== "off")
+    await alertHello(env.EMAIL, a.subject, [...a.lines, "", proofUrl(publicId(done))], { who: to ? { name: to, email: to } : undefined });
   return done;
 }
 
@@ -65,13 +73,20 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
   const x = amountOwed(p);
   const back = proofUrl(publicId(p));
   const list = cardPrice(x.cents);
-  const what = [x.balance ? "Shoot balance" : "", x.n ? `${x.n} extra retouched ${x.n === 1 ? "frame" : "frames"}` : ""].filter(Boolean).join(" + ");
+  const what = [x.balance ? "Shoot balance" : "", x.n ? `${x.n} extra retouched ${x.n === 1 ? "frame" : "frames"}` : ""]
+    .filter(Boolean)
+    .join(" + ");
   // v2: the request gained payment_intent_data metadata; Stripe refuses an old key with new parameters.
   const tag = `proof2-${p.token}-${x.cents}-${p.selects.join(".")}`;
   // One list price on both receipts; bank gets it back as a discount.
   const off = card
     ? null
-    : await stripe(key, "/coupons", { amount_off: String(list - x.cents), currency: "usd", duration: "once", max_redemptions: "1", name: "Paid by bank" }, `${tag}-coupon`.slice(-255)).catch((e) => (console.error("proof bank coupon", String(e)), null)); // the card checkout still opens
+    : await stripe(
+        key,
+        "/coupons",
+        { amount_off: String(list - x.cents), currency: "usd", duration: "once", max_redemptions: "1", name: "Paid by bank" },
+        `${tag}-coupon`.slice(-255),
+      ).catch((e) => (console.error("proof bank coupon", String(e)), null)); // the card checkout still opens
   if (!card && !off) return checkout(key, p, "card");
   const s = await stripe(
     key,
@@ -104,22 +119,36 @@ export async function checkout(key: string, p: Proof, method: "bank" | "card" = 
 /** A Checkout session that is paid, for this gallery, for at least what the selects cost now. */
 export async function paidFor(key: string, p: Proof, session: string): Promise<Proof["paid"] | null> {
   // A session already counted in `paid` never pays again, even replayed after a reopen.
-  if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session) || session === p.paid?.session) return null;
-  const s = await stripe(key, `/checkout/sessions/${session}`);
+  const counted = p.paid ? (p.paid.sessions ?? [p.paid.session]) : [];
+  if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(session) || counted.includes(session)) return null;
+  // The charge comes along, so a refunded payment is seen: Checkout keeps saying "paid" after a refund.
+  const s = await stripe(key, `/checkout/sessions/${session}?expand[]=payment_intent.latest_charge`);
+  const charge = (s.payment_intent as { latest_charge?: { amount_refunded?: number; refunded?: boolean } } | null)?.latest_charge;
+  if (charge && (charge.refunded || (charge.amount_refunded ?? 0) > 0)) return null;
   const meta = s.metadata as Record<string, string> | undefined;
   // A bank payment comes back complete but unpaid: accepted, settling in about 4 business days. The selects lock now; recheckTransfer() follows it.
   const bank = s.status === "complete" && s.payment_status === "unpaid";
   // No amount is no payment: NaN would pass the `<` check and be stored as paid.
   const total = s.amount_total;
-  if ((s.payment_status !== "paid" && !bank) || meta?.proof !== p.token || typeof total !== "number" || total < amountOwed(p).cents) return null;
+  if ((s.payment_status !== "paid" && !bank) || meta?.proof !== p.token || typeof total !== "number" || total < amountOwed(p).cents)
+    return null;
   // Added to anything paid before the gallery was reopened.
   // A card payment carries Stripe's fee on top: only what was owed counts toward the balance and extras.
-  return { session, amount: (p.paid?.amount ?? 0) + Math.min(total, amountOwed(p).cents), at: new Date().toISOString(), ...(bank ? { pending: true } : {}) };
+  return {
+    session,
+    sessions: [...counted, session],
+    amount: (p.paid?.amount ?? 0) + Math.min(total, amountOwed(p).cents),
+    at: new Date().toISOString(),
+    ...(bank ? { pending: true } : {}),
+  };
 }
 
 /** paidFor, with Stripe's silence told apart: a refused session (4xx) is null, no answer or a 5xx is "down". */
 export const checkPaid = (key: string, p: Proof, session: string) =>
-  paidFor(key, p, session).catch((e: { status?: number }) => (e.status && e.status < 500 ? null : ("down" as const)));
+  paidFor(key, p, session).catch((e: unknown) => {
+    const s = statusOf(e);
+    return s && s < 500 ? null : ("down" as const);
+  });
 
 /** A settling bank payment, checked again: cleared, bounced, or still on its way. Null when nothing changed. */
 export async function recheckTransfer(key: string, p: Proof): Promise<Proof | null> {
@@ -129,6 +158,7 @@ export async function recheckTransfer(key: string, p: Proof): Promise<Proof | nu
   const pi = s.payment_intent as { status?: string } | null;
   // Without an amount to take back, leave it settling: the next check tries again.
   if (typeof s.amount_total !== "number") return null;
-  if (pi?.status === "requires_payment_method" || pi?.status === "canceled") return { ...p, paid: { ...p.paid, pending: undefined, failed: true, amount: Math.max(0, p.paid.amount - s.amount_total) } };
+  if (pi?.status === "requires_payment_method" || pi?.status === "canceled")
+    return { ...p, paid: { ...p.paid, pending: undefined, failed: true, amount: Math.max(0, p.paid.amount - s.amount_total) } };
   return null;
 }

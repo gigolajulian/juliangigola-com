@@ -11,12 +11,13 @@
 import type { Sealer } from "@/lib/seal";
 import { gcalToken } from "@/lib/google";
 import { HttpError } from "@/lib/http";
-import { eventsCsv, paidTotal, readMaster, SHEET_DIRTY, type MasterEntry } from "../activity-log";
-import { leadsCsv } from "../lead-crm";
+import { paidTotal, readMaster, SHEET_DIRTY, type MasterEntry } from "../activity-log";
+import { eventsCsv, leadsCsv } from "../lead-crm";
 import { everyLead } from "../lead-store";
 import type { Lead } from "../leads";
 import type { InboxKV as KV } from "@/lib/kv";
 import { DAY_MS } from "@/lib/time-zone";
+import { outbound } from "@/lib/net";
 
 const SHEETS = "https://sheets.googleapis.com/v4/spreadsheets";
 export const SHEET_ID = "sheet:id";
@@ -27,8 +28,8 @@ const TABS = [
 ];
 
 /** The Clients CSV, with what each client paid from one pass over the master log. */
-export async function clientsCsv(kv: KV, s: Sealer, master?: MasterEntry[]): Promise<string> {
-  const all = await everyLead(kv, s);
+export async function clientsCsv(kv: KV, s: Sealer, master?: MasterEntry[], strict = false): Promise<string> {
+  const all = await everyLead(kv, s, { strict });
   const byLead = new Map<string, Lead["events"]>();
   for (const m of master ?? (await readMaster(kv, s))) byLead.set(m.lead, [...(byLead.get(m.lead) ?? []), m.event]);
   const paid: Record<string, number> = {};
@@ -46,18 +47,22 @@ export async function syncSheet(kv: KV, s: Sealer, oauth: string | undefined, no
     const headers = { authorization: `Bearer ${await gcalToken(oauth)}`, "content-type": "application/json" };
     let id = await kv.get(SHEET_ID);
     if (!id) {
-      const made = await fetch(SHEETS, {
+      const made = await outbound(SHEETS, {
         method: "POST",
         headers,
-        body: JSON.stringify({ properties: { title: "JG Leads (juliangigola.com, read only)" }, sheets: TABS.map((properties) => ({ properties })) }),
+        body: JSON.stringify({
+          properties: { title: "JG Leads (juliangigola.com, read only)" },
+          sheets: TABS.map((properties) => ({ properties })),
+        }),
       });
       id = ((await made.json().catch(() => ({}))) as { spreadsheetId?: string }).spreadsheetId ?? null;
       if (!made.ok || !id) throw new HttpError(`Sheets create ${made.status}`, made.status);
       await kv.put(SHEET_ID, id);
     }
     const master = await readMaster(kv, s);
-    const data = [await clientsCsv(kv, s, master), eventsCsv(master)];
-    const res = await fetch(`${SHEETS}/${id}:batchUpdate`, {
+    // Strict: the paste replaces the whole tab, so a lead that will not open stops the copy rather than vanish from it.
+    const data = [await clientsCsv(kv, s, master, true), eventsCsv(master)];
+    const res = await outbound(`${SHEETS}/${id}:batchUpdate`, {
       method: "POST",
       headers,
       body: JSON.stringify({

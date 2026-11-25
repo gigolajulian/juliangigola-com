@@ -45,7 +45,10 @@ test("keyboard: a row takes focus and Enter opens its session", async ({ browser
   const sec = page.locator("#sessions");
   await sec.locator(".mt-br").first().waitFor();
   // Tab from the page, so the focus is a keyboard's (:focus-visible)
-  const row = sec.locator(".mt-br").filter({ hasText: /Headshots/i }).first();
+  const row = sec
+    .locator(".mt-br")
+    .filter({ hasText: /Headshots/i })
+    .first();
   await sec.locator(".mt-br").first().focus();
   await page.keyboard.press("Tab");
   await expect(row).toBeFocused();
@@ -62,16 +65,18 @@ for (const r of [RATIOS[0], RATIOS[4]]) {
     const { ctx, page } = await open(browser, browserName, r);
     await page.goto("/#about", { waitUntil: "load" });
     await expect.poll(() => page.locator("#about").evaluate((e) => Math.abs(Math.round(e.getBoundingClientRect().top)))).toBeLessThan(80);
-    // a full load: a hash-only move this soon after the first load races the router
-    await page.goto("/#contact");
-    await page.reload({ waitUntil: "load" });
-    const card = page.locator(".mt-inq");
+    // a fresh page: a hash-only goto here can land before the router's first replaceState, which puts /#about back,
+    // so a reload after it loaded /#about again (Firefox, #1512)
+    const contact = await ctx.newPage();
+    await page.close();
+    await contact.goto("/#contact", { waitUntil: "load" });
+    const card = contact.locator(".mt-inq");
     await expect(card).toBeVisible();
     expect(await card.evaluate((e) => e.contains(document.activeElement)), "focus is in the card").toBe(true);
-    await expect(page.locator("footer#contact")).toBeInViewport();
-    await page.keyboard.press("Escape");
+    await expect(contact.locator("footer#contact")).toBeInViewport();
+    await contact.keyboard.press("Escape");
     await expect(card).toHaveCount(0);
-    await expect(page.locator("#contact .mt-ph-btn")).toBeFocused();
+    await expect(contact.locator("#contact .mt-ph-btn")).toBeFocused();
     await ctx.close();
   });
 }
@@ -84,10 +89,19 @@ test("on the home, a link to /#contact glides to the footer, then opens the card
   // the motion engine starts in the same effect pass that adds the home's click listener;
   // then the page height holds over two frames, so the glide aims at where the footer stays
   await page.waitForFunction(() => document.documentElement.hasAttribute("data-mt-motion"), null, { timeout: 15000 });
-  await expect.poll(() => page.evaluate(() => new Promise<boolean>((done) => {
-    const h = document.documentElement.scrollHeight;
-    requestAnimationFrame(() => requestAnimationFrame(() => done(document.documentElement.scrollHeight === h)));
-  })), { message: "page height holds" }).toBe(true);
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () =>
+            new Promise<boolean>((done) => {
+              const h = document.documentElement.scrollHeight;
+              requestAnimationFrame(() => requestAnimationFrame(() => done(document.documentElement.scrollHeight === h)));
+            }),
+        ),
+      { message: "page height holds" },
+    )
+    .toBe(true);
   // no link on the home points there today: a stand-in, as any page link to /#contact would be
   await page.evaluate(() => {
     const a = Object.assign(document.createElement("a"), { href: "/#contact", id: "t-contact", textContent: "contact" });

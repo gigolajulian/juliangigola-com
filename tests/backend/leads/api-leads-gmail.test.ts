@@ -15,7 +15,8 @@ vi.mock("@opennextjs/cloudflare", async () => (await import("../fakes")).cloudfl
 
 const SECRET = "worker-key-for-tests";
 const OAUTH = JSON.stringify({ client_id: "c", client_secret: "s", refresh_token: "r" });
-const call = (auth?: string) => POST(new Request("https://juliangigola.com/api/leads/gmail", { method: "POST", headers: auth ? { authorization: auth } : {} }));
+const call = (auth?: string) =>
+  POST(new Request("https://juliangigola.com/api/leads/gmail", { method: "POST", headers: auth ? { authorization: auth } : {} }));
 
 let kv: FakeKV;
 beforeEach(() => {
@@ -23,7 +24,11 @@ beforeEach(() => {
   kv = new FakeKV();
   ctx.env = { INBOX: kv, LEADS_KEY, WORKER_KEY: SECRET, GCAL_OAUTH: OAUTH };
   vi.stubGlobal("fetch", async (url: string) =>
-    url.includes("oauth2") ? Response.json({ access_token: "t", expires_in: 3600 }) : url.endsWith("/profile") ? Response.json({ historyId: "4242" }) : Response.json({}, { status: 404 }),
+    url.includes("oauth2")
+      ? Response.json({ access_token: "t", expires_in: 3600 })
+      : url.endsWith("/profile")
+        ? Response.json({ historyId: "4242" })
+        : Response.json({}, { status: 404 }),
   );
 });
 afterEach(() => vi.unstubAllGlobals());
@@ -66,15 +71,31 @@ describe("POST /api/leads/gmail", () => {
   it("folds mail from a person on a lead into that lead, and skips a stranger", async () => {
     const s = await sealer(LEADS_KEY)!;
     const id = await s.id("brand@example.com");
-    await writeLead(kv as never, s, id, { ...applyLeadEvent(null, "brand@example.com", { event: { at: "2026-11-15T10:00:00Z", kind: "inquiry" } }), people: [{ name: "Ana", email: "ana@agency.com" }] });
+    await writeLead(kv as never, s, id, {
+      ...applyLeadEvent(null, "brand@example.com", { event: { at: "2026-11-15T10:00:00Z", kind: "inquiry" } }),
+      people: [{ name: "Ana", email: "ana@agency.com" }],
+    });
     await kv.put(personKey(await s.id("ana@agency.com")), id);
     await kv.put(CURSOR, "100");
-    const msg = (mid: string, from: string) => ({ id: mid, labelIds: ["INBOX"], internalDate: String(Date.UTC(2026, 10, 15, 12)), payload: { headers: [{ name: "From", value: from }, { name: "Subject", value: "Shot list" }] } });
+    const msg = (mid: string, from: string) => ({
+      id: mid,
+      labelIds: ["INBOX"],
+      internalDate: String(Date.UTC(2026, 10, 15, 12)),
+      payload: {
+        headers: [
+          { name: "From", value: from },
+          { name: "Subject", value: "Shot list" },
+        ],
+      },
+    });
     vi.stubGlobal("fetch", async (url: string) =>
       url.includes("oauth2")
         ? Response.json({ access_token: "t", expires_in: 3600 })
         : url.includes("/history")
-          ? Response.json({ history: [{ id: "101", messagesAdded: [{ message: { id: "m1" } }, { message: { id: "m2" } }] }], historyId: "101" })
+          ? Response.json({
+              history: [{ id: "101", messagesAdded: [{ message: { id: "m1" } }, { message: { id: "m2" } }] }],
+              historyId: "101",
+            })
           : Response.json(url.includes("/messages/m1") ? msg("m1", "Ana Diaz <ana@agency.com>") : msg("m2", "news@shop.com")),
     );
     expect(await (await call(`Bearer ${SECRET}`)).json()).toEqual({ folded: 1 });

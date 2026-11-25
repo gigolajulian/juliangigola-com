@@ -6,7 +6,12 @@ describe("og share", () => {
     const m = shareMeta("Portraits", "One line.");
     expect(m.title).toBe("Portraits");
     expect(m.description).toBe("One line.");
-    expect(m.openGraph).toMatchObject({ siteName: "Julian Gigola", locale: "en_US", title: "Portraits | Julian Gigola", description: "One line." });
+    expect(m.openGraph).toMatchObject({
+      siteName: "Julian Gigola",
+      locale: "en_US",
+      title: "Portraits | Julian Gigola",
+      description: "One line.",
+    });
     expect(m.twitter).toEqual({ card: "summary_large_image", title: "Portraits | Julian Gigola", description: "One line." });
   });
 
@@ -35,6 +40,8 @@ describe("og share", () => {
   it("projectFacts falls back to Photography with no credits", () => {
     const f = projectFacts({ categories: [], credits: [] });
     expect(f.description).toBe("Photography by Julian Gigola.");
-    expect(projectFacts({ categories: [], credits: [{ role: "Model", name: "Kai" }] }).description).toBe("Photography by Julian Gigola, with model Kai.");
+    expect(projectFacts({ categories: [], credits: [{ role: "Model", name: "Kai" }] }).description).toBe(
+      "Photography by Julian Gigola, with model Kai.",
+    );
   });
 });

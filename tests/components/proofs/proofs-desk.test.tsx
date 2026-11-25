@@ -14,12 +14,12 @@ describe("ProofsDesk", () => {
     render(<ProofsDesk />);
     expect(await screen.findByRole("heading", { name: "Nothing waiting on clients" })).toBeTruthy();
     expect(screen.getByText(/No galleries yet/)).toBeTruthy();
-    expect(fetchMock).toHaveBeenCalledWith("/api/proof?list", expect.anything());
+    expect(fetchMock).toHaveBeenCalledWith("/api/proof/list", expect.anything());
   });
 
   it("asks for a key when not signed in", async () => {
     vi.stubGlobal("fetch", reply({ error: "Not authorized." }, 401));
     render(<ProofsDesk />);
-    expect(await screen.findByLabelText("Inbox key or GitHub token")).toBeTruthy();
+    expect(await screen.findByLabelText("Admin key or GitHub token")).toBeTruthy();
   });
 });
