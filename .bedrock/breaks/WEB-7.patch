@@ -1,0 +1,13 @@
+diff --git a/lib/leads/enquiry.ts b/lib/leads/enquiry.ts
+index ca015596..e395eaa8 100644
+--- a/lib/leads/enquiry.ts
++++ b/lib/leads/enquiry.ts
+@@ -453,7 +453,7 @@ const subjectOf = (e: Enquiry) => {
+ };
+ 
+ const esc = (s: string) =>
+-  s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
++  s.replace(/[&"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]!);
+ 
+ /** `looks`: each frame's look in the picker
+     (`lib/leads/looks.json`), passed in so this module imports no

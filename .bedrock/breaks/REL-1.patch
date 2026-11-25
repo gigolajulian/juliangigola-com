@@ -1,0 +1,13 @@
+diff --git a/lib/booking/deposit.ts b/lib/booking/deposit.ts
+index 945b2f19..42152883 100644
+--- a/lib/booking/deposit.ts
++++ b/lib/booking/deposit.ts
+@@ -103,7 +103,7 @@ export async function verifyStripe(body: string, header: string, secret: string,
+   const parts = header.split(",").map((p) => p.split("="));
+   const t = parts.find(([k]) => k === "t")?.[1] ?? "";
+   const sigs = parts.filter(([k]) => k === "v1").map(([, v]) => v);
+-  if (!/^\d+$/.test(t) || !sigs.length || Math.abs(now / 1000 - +t) > TOLERANCE_S) return false;
++  if (!/^\d+$/.test(t) || Math.abs(now / 1000 - +t) > TOLERANCE_S) return false;
+   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+   const want = hex(await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(`${t}.${body}`)));
+   // Same length hex strings, compared without stopping at the first difference.

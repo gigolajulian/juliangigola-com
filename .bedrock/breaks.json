@@ -1,3 +1,86 @@
 {
-  "WEB-10": {"file": "lib/booking/deposit.ts", "find": "Math.abs(now / 1000 - +t) > TOLERANCE_S) return false;", "replace": "Math.abs(now / 1000 - +t) > TOLERANCE_S * 1e9) return false;"}
+ "WEB-10": {
+  "file": "lib/booking/deposit.ts",
+  "find": "Math.abs(now / 1000 - +t) > TOLERANCE_S) return false;",
+  "replace": "Math.abs(now / 1000 - +t) > TOLERANCE_S * 1e9) return false;"
+ },
+ "SEC-5": {
+  "file": "lib/admin/vouch.ts",
+  "find": "if (!expected || !given) return false;",
+  "replace": "if (!expected) return true;\n  if (!given) return false;"
+ },
+ "AUTHZ-3": {
+  "file": "lib/admin/vouch.ts",
+  "find": "if (await authorised(request, key)) return true;",
+  "replace": "if ((await authorised(request, key)) || !bearer(request)) return true;"
+ },
+ "AUTHZ-1": {
+  "edits": [
+   {
+    "file": "lib/booking/manage-link.ts",
+    "find": "enc.encode(`${id}.${e}`)",
+    "replace": "enc.encode(`${e}`)"
+   },
+   {
+    "file": "lib/booking/manage-link.ts",
+    "find": "enc.encode(`${id}.${m[1]}`)",
+    "replace": "enc.encode(`${m[1]}`)"
+   }
+  ]
+ },
+ "AUTHZ-2": {
+  "file": "lib/admin/vouch.ts",
+  "find": "ok = scopes.includes(\"repo\") || scopes.includes(\"public_repo\");",
+  "replace": "ok = scopes.length > 0;"
+ },
+ "WEB-1": {
+  "file": "next.config.ts",
+  "find": "\"object-src 'none'\",",
+  "replace": "\"object-src *\","
+ },
+ "WEB-4": {
+  "file": "lib/leads/enquiry.ts",
+  "find": ".filter((src) => /^\\/(work\\/[\\w-]+|hero|covers)\\/[\\w.-]+\\.(jpe?g|png|webp)$/i.test(src))",
+  "replace": ".filter((src) => /\\.(jpe?g|png|webp)$/i.test(src))"
+ },
+ "WEB-5": {
+  "file": "lib/leads/enquiry.ts",
+  "find": "? head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff",
+  "replace": "? head.length > 0"
+ },
+ "WEB-7": {
+  "file": "lib/leads/enquiry.ts",
+  "find": "s.replace(/[&<>\"]/g,",
+  "replace": "s.replace(/[&\"]/g,"
+ },
+ "ABU-3": {
+  "file": "lib/http.ts",
+  "find": "res.headers.set(\"retry-after\", \"60\");",
+  "replace": ""
+ },
+ "ABU-13": {
+  "file": "lib/leads/enquiry-action.ts",
+  "find": "if (today >= DAILY_CAP) {",
+  "replace": "if (today >= DAILY_CAP * 1e6) {"
+ },
+ "PRIV-4": {
+  "file": "lib/seal.ts",
+  "find": "return `${b64(iv)}.${b64(ct)}`;",
+  "replace": "return `${b64(iv)}.${b64(ct)}.${JSON.stringify(value)}`;"
+ },
+ "SEC-3": {
+  "file": ".github/workflows/ci.yml",
+  "find": "      - run: node scripts/test/gate.mjs --backend",
+  "replace": "      - run: npm install\n      - run: node scripts/test/gate.mjs --backend"
+ },
+ "REL-1": {
+  "file": "lib/booking/deposit.ts",
+  "find": "if (!/^\\d+$/.test(t) || !sigs.length ||",
+  "replace": "if (!/^\\d+$/.test(t) ||"
+ },
+ "JOB-1": {
+  "file": "lib/booking/engine.ts",
+  "find": "const had = await store.get<string>(intentKey(b.intent));",
+  "replace": "const had = null as string | null;"
+ }
 }

@@ -1,0 +1,22 @@
+diff --git a/lib/booking/manage-link.ts b/lib/booking/manage-link.ts
+index f630c18e..6a1734da 100644
+--- a/lib/booking/manage-link.ts
++++ b/lib/booking/manage-link.ts
+@@ -16,7 +16,7 @@ const key = (secret: string, use: "sign" | "verify") => crypto.subtle.importKey(
+ /** The token for booking `id`, good until `exp` (ms). */
+ export async function bookingToken(secret: string, id: string, exp: number) {
+   const e = Math.floor(exp / 1000);
+-  return `${e}.${b64url(await crypto.subtle.sign("HMAC", await key(secret, "sign"), enc.encode(`${id}.${e}`)))}`;
++  return `${e}.${b64url(await crypto.subtle.sign("HMAC", await key(secret, "sign"), enc.encode(`${e}`)))}`;
+ }
+ 
+ /** Whether `token` opens booking `id` now. */
+@@ -24,7 +24,7 @@ export async function tokenOpens(secret: string | undefined, id: string, token:
+   const m = /^(\d{9,11})\.([A-Za-z0-9_-]{43})$/.exec(token ?? "");
+   if (!secret || !m || +m[1] * 1000 < now) return false;
+   // `verify` compares in constant time.
+-  return crypto.subtle.verify("HMAC", await key(secret, "verify"), Buffer.from(m[2], "base64url"), enc.encode(`${id}.${m[1]}`));
++  return crypto.subtle.verify("HMAC", await key(secret, "verify"), Buffer.from(m[2], "base64url"), enc.encode(`${m[1]}`));
+ }
+ 
+ /** The two links for the client's mail, or null while BOOKING_SECRET is unset. */

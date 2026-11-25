@@ -1,0 +1,13 @@
+diff --git a/lib/admin/vouch.ts b/lib/admin/vouch.ts
+index c11a33f5..7b0ac5d1 100644
+--- a/lib/admin/vouch.ts
++++ b/lib/admin/vouch.ts
+@@ -132,7 +132,7 @@ export async function refuseWorker(request: Request, secret?: string): Promise<R
+ 
+ /** The admin gate: the admin key, or a GitHub token that can push. */
+ export async function isAdmin(request: Request, key?: string) {
+-  if (await authorised(request, key)) return true;
++  if ((await authorised(request, key)) || !bearer(request)) return true;
+   const token = bearer(request);
+   return !!token && (await canPush(token));
+ }

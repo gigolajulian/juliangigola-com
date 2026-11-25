@@ -30,7 +30,11 @@ export function upstreamError(label: string, e: unknown, error: string) {
 /** The public-write limiter (`PUBLIC_WRITE_LIMIT`, five a minute per address and `kind`): the 429 to answer, or null to go on. */
 export async function limited(limiter: { limit(o: { key: string }): Promise<{ success: boolean }> }, kind: string, request: Request) {
   const ip = request.headers.get("cf-connecting-ip") ?? "unknown";
-  return (await limiter.limit({ key: `${kind}:${ip}` })).success ? null : json({ error: "Too many tries. Wait a minute." }, 429);
+  if ((await limiter.limit({ key: `${kind}:${ip}` })).success) return null;
+  const res = json({ error: "Too many tries. Wait a minute." }, 429);
+  // The limiter's window is a minute; a client or crawler told when may come back waits instead of hammering.
+  res.headers.set("retry-after", "60");
+  return res;
 }
 
 /**
