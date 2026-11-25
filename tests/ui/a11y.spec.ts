@@ -43,8 +43,10 @@ test.describe("reduced motion", () => {
           `${path} flashes`,
         ).toEqual([]);
         if (reducedMotion === "reduce") expect(anims, `${path} moves under reduced motion`).toEqual([]);
-        // The check sees motion when it is allowed: /portfolio's photos drift as they scroll.
-        else if (path === "/portfolio") expect(anims.length).toBeGreaterThan(0);
+        // The check sees motion when it is allowed: /portfolio's photos drift as they scroll (where the browser
+        // has scroll timelines; Firefox does not yet, so its photos sit still either way).
+        else if (path === "/portfolio" && (await p.evaluate(() => CSS.supports("animation-timeline: view()"))))
+          expect(anims.length).toBeGreaterThan(0);
       }
       await ctx.close();
     }
