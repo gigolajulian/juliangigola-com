@@ -10,3 +10,5 @@ html[data-mt-held] .mt-foot[data-mt-near] .mt-fwall{will-change:transform,opacit
 html[data-mt-motion] .mt-fcut{position:absolute;left:0;top:0;z-index:3;pointer-events:none;opacity:0;color:var(--bg);will-change:transform}
 html[data-mt-motion] .mt-fdot{position:absolute;left:0;top:0;z-index:5;width:14px;height:14px;border-radius:50%;background:#ececec;pointer-events:none;mix-blend-mode:difference;opacity:0;will-change:transform}
 html[data-mt-motion] .mt-foot[data-hot] .mt-stage,html[data-mt-motion] .mt-foot[data-hot] .mt-stage *{cursor:none}
+/* the still climbs at 70% of the page speed as the footer comes up (--in, engine.ts), so it sits back behind the links; it is 30% taller to cover the travel */
+html[data-mt-held] .mt-foot .mt-fwall{bottom:-30%;translate:0 calc((1 - var(--in,1)) * -30svh)}

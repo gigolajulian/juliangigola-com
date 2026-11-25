@@ -116,10 +116,11 @@ export function Home({ data }: { data: HomeData }) {
       <HomeIntro extras={data.extras} />
       <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
         <HomeHero frames={data.hero} extras={data.extras} />
-        {/* order: Motion, Cover art, About, Sessions, By quote, then Commissions */}
-        <HomeFilms films={data.films} />
-        <HomeCovers />
+        {/* order: About, Commissions, By quote, Motion, Sessions, then Cover art */}
         <HomeAbout disciplines={data.disciplines} />
+        <HomeCommissions frames={data.commissions} />
+        <ByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
+        <HomeFilms films={data.films} />
         <BookOnline
           open={book}
           opener={bookOpener}
@@ -127,8 +128,7 @@ export function Home({ data }: { data: HomeData }) {
           quotePhoto={quotePhoto}
           onRowPick={() => setQuotePhoto(null)}
         />
-        <ByQuote stills={data.stills} reply={data.reply} onOptionPick={setQuotePhoto} />
-        <HomeCommissions frames={data.commissions} />
+        <HomeCovers />
         <HomeFoot />
       </section>
       <MotionLayer />
