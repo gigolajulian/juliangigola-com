@@ -1,6 +1,6 @@
 import { sealedStore } from "@/lib/kv";
 import { isFrameId, isToken, THUMB_W } from "@/lib/proofs/proof-model";
-import { readPublic, shutReason } from "@/lib/proofs/proof-store";
+import { guardOf, readPublic, shutReason } from "@/lib/proofs/proof-store";
 import { servedSize } from "@/lib/proofs/watermark";
 import { logged } from "@/lib/utils";
 
@@ -13,7 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ toke
   const { token, id } = await params;
   const { env, seal, kv } = await sealedStore();
   if (!isToken(token) || !isFrameId(id) || !kv || !env.PROOFS || !seal) return new Response("Not found", { status: 404 });
-  const p = await readPublic(kv, seal, token);
+  const p = await readPublic(kv, seal, token, guardOf(env, request.headers));
   if (!p || (await shutReason(p, request.headers.get("cookie"), env.LEADS_KEY)) || !p.frames.some((f) => f.id === id))
     return new Response("Not found", { status: 404 });
   // The watermark, when on, is in the bytes. If it cannot be drawn the frame is not served at all.

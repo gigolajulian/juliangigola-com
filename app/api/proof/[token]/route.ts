@@ -17,7 +17,7 @@ import {
   type Proof,
 } from "@/lib/proofs/proof-model";
 import { isEmail, logged } from "@/lib/utils";
-import { checkPass, passCookie, passValue, shutReason, readPublic, writeProof } from "@/lib/proofs/proof-store";
+import { checkPass, guardOf, passCookie, passValue, shutReason, readPublic, writeProof, type Guard } from "@/lib/proofs/proof-store";
 import { bodyOf, json, limited, upstreamError } from "@/lib/http";
 import { alertHello } from "@/lib/email/hello-mail";
 import { actionAlert, worthMail } from "@/lib/proofs/proof-mail";
@@ -37,13 +37,13 @@ export const dynamic = "force-dynamic";
 const unopenable = () => json({ error: "This gallery cannot be opened right now." }, 500);
 
 /** A gallery by its public id: null when there is none, undefined when it will not open (logged). */
-const openPublic = (kv: InboxKV, s: Seal, token: string) => readPublic(kv, s, token).catch(logged("proof open", token));
+const openPublic = (kv: InboxKV, s: Seal, token: string, guard?: Guard) => readPublic(kv, s, token, guard).catch(logged("proof open", token));
 
 /** The gallery for this request: open, online, and past its password when it has one (the gate's cookie). */
 async function load(token: string, request: Request) {
   const { env, seal, kv } = await sealedStore();
   if (!kv || !seal || !isToken(token)) return null;
-  const proof = await openPublic(kv, seal, token);
+  const proof = await openPublic(kv, seal, token, guardOf(env, request.headers));
   if (proof === undefined) return unopenable();
   return proof && !(await shutReason(proof, request.headers.get("cookie"), env.LEADS_KEY)) ? { env, kv, seal, proof } : null;
 }
@@ -52,7 +52,7 @@ async function load(token: string, request: Request) {
 async function unlock(token: string, request: Request, password: unknown) {
   const { env, seal, kv } = await sealedStore();
   if (!kv || !seal || !isToken(token)) return json({ error: "This gallery closed." }, 404);
-  const p = await openPublic(kv, seal, token);
+  const p = await openPublic(kv, seal, token, guardOf(env, request.headers));
   if (p === undefined) return unopenable();
   const why = await shutReason(p, null, env.LEADS_KEY);
   if (!p || (why && why !== "locked")) return json({ error: why === "offline" ? "This gallery is offline." : "This gallery closed." }, 404);
