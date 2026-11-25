@@ -32,7 +32,7 @@ describe("Contact", () => {
     fireEvent.click(screen.getByRole("button", { name: "Send note" }));
     const alerts = screen.getAllByRole("alert").map((a) => a.textContent);
     expect(alerts).toContain("Add your name");
-    expect(alerts).toContain("Email looks incomplete");
+    expect(alerts).toContain("That email does not look right");
   });
 });
 

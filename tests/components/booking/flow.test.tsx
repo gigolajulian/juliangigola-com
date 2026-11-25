@@ -30,7 +30,7 @@ describe("flow helpers", () => {
   });
 
   it("checkYou flags a missing name and a bad email", () => {
-    expect(checkYou("", "x")).toEqual({ name: "Add your name", email: "Email looks incomplete" });
+    expect(checkYou("", "x")).toEqual({ name: "Add your name", email: "That email does not look right" });
     expect(checkYou("Ana", "ana@example.com")).toEqual({});
   });
 });

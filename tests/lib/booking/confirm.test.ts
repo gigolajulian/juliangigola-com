@@ -30,6 +30,9 @@ describe("confirmMail", () => {
     expect(m.subject).toBe("Booked: Portraits, Sat, Nov 21, 10:00 to 11:00 AM PST");
     expect(m.text).toContain("You're in.");
     expect(m.text).toContain("Thanks, Ana.");
+    expect(m.text).toContain("Your portrait session is booked.");
+    expect(confirmMail({ ...base, session: "Headshots", kind: "reminder" }).text).toContain("your headshot session is tomorrow");
+    expect(confirmMail({ ...base, session: "Graduation photos" }).text).toContain("Your graduation session is booked.");
     expect(m.text).toContain("When: Sat, Nov 21, 10:00 to 11:00 AM PST, 60 minutes");
     expect(m.text).toContain("Booking: abcdef12");
     expect(m.text).toContain("https://juliangigola.com/booking/t?do=reschedule");

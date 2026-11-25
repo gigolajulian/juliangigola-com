@@ -239,7 +239,7 @@ export function siteGraph() {
         name: "Julian Gigola",
         jobTitle: ["Photographer", "Creative Director"],
         description:
-          "Photographer and creative director based in the San Francisco Bay Area with 12+ years of experience in editorial fashion, brand campaigns and artist development. Published in WIRED.",
+          "Photographer and creative director based in the San Francisco Bay Area with 12+ years of experience in fashion editorials, brand campaigns, cover art and music videos. Published in WIRED.",
         url: SITE,
         image: `${SITE}/about/julian.jpg`,
         email: EMAIL,
