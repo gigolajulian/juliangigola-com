@@ -168,7 +168,7 @@ export function Contact() {
             <Duo dark={DOORS.commissions.d} light={DOORS.commissions.l} alt="" sizes="(max-width: 800px) 100vw, 50vw" />
             <span className="lbl mute">For art directors and artists</span>
             <h3>Commissions</h3>
-            <p>Campaigns, editorial, cover art and presskits. Three short steps.</p>
+            <p>Campaigns, editorial, cover art and press kits. Three short steps.</p>
             <div>
               <span className="btn fill">Start an inquiry</span>
             </div>
@@ -204,7 +204,7 @@ const STEPS = [
 ] as const;
 
 /* ── /contact/form: the commission stepper (Project, Scope, You, Sent) ── */
-const KINDS = ["Brand campaign", "Editorial", "Cover art", "Artist presskit", "Music video", "Event coverage", "Other"];
+const KINDS = ["Brand campaign", "Editorial", "Cover art", "Artist press kit", "Music video", "Event coverage", "Other"];
 const WHEN = ["This month", "Next month", "Later this year", "Flexible"];
 const BUDGET = ["Under $2k", "$2k to $5k", "$5k to $10k", "$10k and up", "Not sure yet"];
 /* The inbox's shoot types (lib/leads/enquiry.ts SHOOT_TYPES). */
@@ -212,7 +212,7 @@ const TYPE: Record<string, string> = {
   "Brand campaign": "campaign",
   Editorial: "editorial",
   "Cover art": "coverart",
-  "Artist presskit": "presskit",
+  "Artist press kit": "presskit",
   "Music video": "video",
   "Event coverage": "event",
 };
@@ -252,7 +252,7 @@ export function CommissionForm() {
     cta = "Continue";
   if (at === 1) {
     head = "Have something in mind?";
-    sub = "Campaigns, editorial, cover art and presskits. I come back with an approach and a quote.";
+    sub = "Campaigns, editorial, cover art and press kits. I'll reply with an approach and a quote.";
     body = (
       <>
         <span className="lbl mute">Pick all that fit</span>
@@ -322,7 +322,7 @@ export function CommissionForm() {
     cta = "Send inquiry";
   } else {
     head = "Sent.";
-    sub = `Thanks${v.name.trim() ? `, ${first(v.name)}` : ""}. I'll come back with an approach and a quote.`;
+    sub = `Thanks${v.name.trim() ? `, ${first(v.name)}` : ""}. I'll reply with an approach and a quote.`;
     body = (
       <div className="done-lines">
         {[

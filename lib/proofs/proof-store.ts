@@ -3,6 +3,7 @@
 
 import type { InboxKV as KV } from "@/lib/kv";
 import type { Seal } from "@/lib/seal";
+import { logged } from "@/lib/utils";
 import { type Proof, aliasKey, isDateId, isOpen, isStrongId, proofDay, proofKey, publicId, shootIdTag } from "@/lib/proofs/proof-model";
 import { sha256Hex } from "@/lib/token";
 
@@ -59,7 +60,7 @@ export async function passOk(
 }
 /** Why a client cannot see a gallery right now, or null when they can. Closed is the clock (or a missing gallery). */
 export async function shutReason(
-  p: Proof | null,
+  p: Proof | null | undefined,
   cookie: string | null | undefined,
   secret: string | undefined,
 ): Promise<"closed" | "offline" | "locked" | null> {
@@ -87,7 +88,6 @@ export async function findProof(kv: KV, s: Seal, id: string): Promise<Proof | nu
   const token = isDateId(id) ? await kv.get(aliasKey(id)) : null;
   return token ? readProof(kv, s, token) : null;
 }
-/** The gallery a link opens (page, frames, card): only by its public id, so a renamed gallery's old link closes. */
 /** Who is asking, for a public read: their address and the limiter wrong guesses count against. */
 export type Guard = { ip: string; limiter?: { limit(o: { key: string }): Promise<{ success: boolean }> } };
 /** The guard for a request: Cloudflare's address for it and PUBLIC_WRITE_LIMIT. */
@@ -99,7 +99,10 @@ const guessKey = async (ip: string) => `proofguess:${(await sha256Hex(ip)).slice
 /** Seconds an address that keeps guessing old ids reads none of them. */
 export const GUESS_BLOCK_S = 3600;
 
-export async function readPublic(kv: KV, s: Seal, id: string, guard?: Guard): Promise<Proof | null> {
+/** The gallery a link opens (page, frames, card): only by its public id, so a renamed gallery's old link closes.
+    `undefined` when it is there but will not open (a rotated LEADS_KEY, a bad record): logged, never thrown, so a
+    client's page shows the gallery closed rather than an error. */
+export async function readPublic(kv: KV, s: Seal, id: string, guard?: Guard): Promise<Proof | null | undefined> {
   /* Old date ids (`MMDDYYYY-NN-xxxx`) carry only 4 random characters, and the day and counter are guessable. On a
      public read each miss on one counts against the limiter; past it that address reads no old id for an hour.
      A real link hits first time; walking a day takes hundreds of addresses. The shoot id and the 16-character token
@@ -107,9 +110,9 @@ export async function readPublic(kv: KV, s: Seal, id: string, guard?: Guard): Pr
   const weak = !!guard && isDateId(id) && !isStrongId(id);
   const block = weak ? await guessKey(guard.ip) : "";
   if (weak && (await kv.get(block)) !== null) return null;
-  const p = await findProof(kv, s, id);
-  const found = p && publicId(p) === id ? p : null;
-  if (weak && !found && guard.limiter && !(await guard.limiter.limit({ key: `proof-miss:${guard.ip}` })).success)
+  const p = await findProof(kv, s, id).catch(logged("proof open", id));
+  const found = p && publicId(p) === id ? p : p === undefined ? undefined : null;
+  if (weak && found === null && guard.limiter && !(await guard.limiter.limit({ key: `proof-miss:${guard.ip}` })).success)
     await kv.put(block, "1", { expirationTtl: GUESS_BLOCK_S });
   return found;
 }

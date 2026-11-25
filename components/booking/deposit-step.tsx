@@ -401,7 +401,7 @@ export function DepositStep({
         </div>
         <div ref={wallet} className={cn(!wallets && "hidden")} />
         <p className="lbl mute">
-          90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Card payment through Stripe. By
+          90% refund up to 48 hours before the shoot, 70% up to 24 hours. Reschedule up to 24 hours before. Card payment through Stripe. By
           paying you agree to the{" "}
           <a
             href="/legal#terms"

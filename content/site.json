@@ -30,7 +30,7 @@
     {
       "slug": "portraits",
       "name": "Portraits",
-      "blurb": "One hour with direction, lighting and edited selects. Studio located in San Jose, available to travel across the SF Bay Area.",
+      "blurb": "One hour with direction, lighting and edited selects. My studio is in San Jose, and I travel across the Bay Area.",
       "from": null,
       "includes": [
         "One hour, studio or location",
@@ -44,7 +44,7 @@
     {
       "slug": "graduation",
       "name": "Graduation",
-      "blurb": "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. Studio located in San Jose, available to travel across the SF Bay Area. On campus at SJSU or SCU; a travel fee applies further out.",
+      "blurb": "Cap and gown, on campus or in studio. Enough coverage for the family frame and the announcement. My studio is in San Jose, and I travel across the Bay Area. SJSU and SCU are included. A travel fee applies farther out.",
       "from": 400,
       "includes": [
         "90 minutes on location",
@@ -57,7 +57,7 @@
     {
       "slug": "headshots",
       "name": "Headshots",
-      "blurb": "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. Studio located in San Jose, available to travel across the SF Bay Area.",
+      "blurb": "Clean, current and usable everywhere: LinkedIn, press, casting, a company about page. My studio is in San Jose, and I travel across the Bay Area.",
       "from": 400,
       "includes": [
         "Studio lighting",
@@ -70,7 +70,7 @@
     {
       "slug": "studio-digitals",
       "name": "Studio digitals",
-      "blurb": "Agency-standard digitals: clean light, no retouching, accurate to how you actually look. Studio located in San Jose.",
+      "blurb": "Agency-standard digitals: clean light, no retouching, true to how you look. Studio located in San Jose.",
       "from": 300,
       "includes": [
         "Full length, three-quarter and close",
@@ -82,7 +82,7 @@
     {
       "slug": "weddings",
       "name": "Weddings",
-      "blurb": "Coverage that reads as editorial rather than as a wedding album. Limited dates each year.",
+      "blurb": "Editorial coverage of the full day. Limited dates each year.",
       "from": null,
       "includes": [
         "Full-day coverage",

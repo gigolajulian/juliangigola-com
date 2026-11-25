@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
   ...shareOg(
     "About",
-    "I photograph people, mostly for fashion, music and brands, and cover headshots, portraits and graduations across the Bay Area.",
+    "I photograph people, mostly for fashion, music and brands, and cover headshots, portraits, graduations and weddings across the Bay Area.",
   ),
 };
 

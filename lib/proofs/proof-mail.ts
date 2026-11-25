@@ -93,7 +93,7 @@ ${p.note ? `<tr><td class="mono fg rule" style="font-size:13px;line-height:1.65;
 ${imgs}
 ${rows(terms)}
 <tr><td style="padding:28px 0 30px"><a href="${url}" class="mono cta" style="display:inline-block;padding:14px 20px;background:${C.fg};color:${C.bg};text-decoration:none;font-size:12px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase">Open proofs</a></td></tr>
-<tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">1. Tap the ring on a frame to select it. Tap the photo to see it large.<br>2. Hit Send selects. Extras are paid on the way out.<br>3. I retouch your selects and email you the finals.</td></tr>`,
+<tr><td class="mono mu" style="font-size:13px;line-height:1.9;color:${C.mu}">1. Tap the ring on a frame to select it. Tap the photo to see it large.<br>2. Hit Send selects. Extras are paid at checkout.<br>3. I retouch your selects and email you the finals.</td></tr>`,
   );
   const text = [
     "Your proofs are ready.",
@@ -393,8 +393,8 @@ export function signedMail(c: ContractMailIn, copy?: { html: string; filename: s
     ["SHA-256", s.hash],
   ];
   const lead = copy
-    ? "Thanks for signing. Your signed copy is attached, below and on the same link any time."
-    : "Thanks for signing. Your copy is below and on the same link any time.";
+    ? "Thanks for signing. Your signed copy is attached and below. The same link opens it any time."
+    : "Thanks for signing. Your copy is below. The same link opens it any time.";
   const html = page(
     "Contract signed",
     "Thanks for signing. Your copy is inside.",

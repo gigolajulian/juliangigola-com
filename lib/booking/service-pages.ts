@@ -95,7 +95,7 @@ const session = (slug: string): SessionType => {
 };
 
 /** The reply-time promise, where one is made. */
-const reply = RESPONSE_TIME ? `The reply comes back ${RESPONSE_TIME}.` : "";
+const reply = RESPONSE_TIME ? `I reply ${RESPONSE_TIME}.` : "";
 
 /** How a commission runs: About's four steps, in the same words. */
 const PROCESS: Block = {
@@ -227,7 +227,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "What should I wear for a headshot?",
-        a: "What you would actually wear to work, in solid mid to dark colors. Nothing with logos or fine stripes. Bring a second top for the second background.",
+        a: "What you would wear to work, in solid mid to dark colors. Nothing with logos or fine stripes. Bring a second top for the second background.",
       },
       {
         q: "How fast will I get my headshots?",
@@ -239,7 +239,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "Can you photograph a whole team?",
-        a: `Yes. Say how many people and roughly when in the booking form, and the quote comes back for the day. ${reply}`.trim(),
+        a: `Yes. Say how many people and roughly when in the booking form, and I quote for the day. ${reply}`.trim(),
       },
     ],
     tiles: framesOf("headshots"),
@@ -289,7 +289,7 @@ export const BOOKING_PAGES: BookingPage[] = [
         q: "How much are graduation photos?",
         a: costAnswer(
           grad,
-          "{price} for 90 minutes on campus at SJSU or Santa Clara University, with two outfit changes, an edited gallery and a print release. At SF State, USF, UC Berkeley and further out, a travel fee applies.",
+          "{price} for 90 minutes on campus at SJSU or Santa Clara University, with two outfit changes, an edited gallery and a print release. At SF State, USF, UC Berkeley and farther out, a travel fee applies.",
         ),
       },
       {
@@ -306,7 +306,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "Do you photograph other campuses?",
-        a: "Yes, anywhere in the Bay Area: SF State, USF, UC Berkeley, Stanford, UC Santa Cruz. SJSU and Santa Clara University are included; a travel fee applies further out.",
+        a: "Yes, anywhere in the Bay Area: SF State, USF, UC Berkeley, Stanford, UC Santa Cruz. SJSU and Santa Clara University are included; a travel fee applies farther out.",
       },
     ],
     tiles: framesOf("graduation"),
@@ -320,7 +320,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     description: `Agency-standard model digitals (polaroids) in San Francisco and San Jose: full length, three-quarter and close, front and profile, unretouched. ${formatPrice(digitals.from)}.`,
     h1: "Model digitals in San Francisco & San Jose",
     kicker: "Digitals · Polaroids · Agency submissions",
-    lead: "Agency-standard digitals: clean light, no retouching, accurate to how you actually look. Everything an agency asks for, in one short session.",
+    lead: "Agency-standard digitals: clean light, no retouching, true to how you look. Everything an agency asks for, in one short session.",
     ...sessionFacts(digitals),
     service: "Model digitals",
     back: SESSIONS_LINK,
@@ -407,7 +407,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "Studio or location?",
-        a: "Either. A place in San Francisco, San Jose or anywhere in the Bay Area that means something to you, or the studio when the light should be controlled.",
+        a: "Either. A place in San Francisco, San Jose or anywhere in the Bay Area that means something to you, or the studio, when the light needs to be controlled.",
       },
       {
         q: "What do I get, and when?",
@@ -433,7 +433,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     name: "Weddings",
     title: "Editorial Wedding Photographer, SF & San Jose",
     description:
-      "Editorial wedding photography in San Francisco, San Jose and across the Bay Area: full-day coverage that reads like a magazine, not an album. Limited dates.",
+      "Editorial wedding photography in San Francisco, San Jose and across the Bay Area: full-day coverage that reads like a magazine. Limited dates.",
     h1: "Editorial weddings in San Francisco & San Jose",
     kicker: "Full day · Editorial · Limited dates",
     lead: weddings.blurb,
@@ -443,8 +443,8 @@ export const BOOKING_PAGES: BookingPage[] = [
     blocks: [
       { heading: "What's included", items: weddings.includes },
       {
-        heading: "Editorial, not an album",
-        body: "The day photographed the way a magazine would run it: the people, the place and the light, as a story rather than a checklist.",
+        heading: "Shot like an editorial",
+        body: "The day photographed the way a magazine would run it: the people, the place and the light, told as one story.",
       },
       {
         heading: "Limited dates",
@@ -478,7 +478,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "Do you travel for weddings?",
-        a: "Anywhere in the Bay Area, and to Los Angeles, New York and further. Travel is quoted with the booking.",
+        a: "Anywhere in the Bay Area, and to Los Angeles, New York and beyond. Travel is quoted with the booking.",
       },
     ],
     tiles: framesOf("weddings"),
@@ -523,7 +523,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     faqs: [
       {
         q: "How much do press photos cost?",
-        a: `Quoted per project. Say what the release is, when it is out and what it needs, and the quote comes back with a treatment. ${reply}`.trim(),
+        a: `Quoted per project. Say what the release is, when it is out and what it needs, and I send a quote with a treatment. ${reply}`.trim(),
       },
       {
         q: "What photos do I need for an EPK?",
@@ -579,7 +579,7 @@ export const BOOKING_PAGES: BookingPage[] = [
     faqs: [
       {
         q: "How much does a fashion shoot cost?",
-        a: `Quoted per project. Say what the shoot is for, where the images run and when you need them, and the quote comes back with a treatment. ${reply}`.trim(),
+        a: `Quoted per project. Say what the shoot is for, where the images run and when you need them, and I send a quote with a treatment. ${reply}`.trim(),
       },
       {
         q: "Who brings the styling and the team?",
@@ -614,7 +614,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       "Campaign photography for consumer and tech brands in San Francisco, San Jose and Silicon Valley: concept, art direction, shoot and retouch. Quoted per project.",
     h1: "Brand & campaign photography",
     kicker: "Consumer · Tech · Fashion",
-    lead: "Campaign imagery for consumer and technology brands in San Francisco, San Jose and Silicon Valley, from the concept and the art direction to the shoot and the retouch.",
+    lead: "Campaign imagery for consumer and technology brands in San Francisco, San Jose and Silicon Valley, from concept and art direction to shoot and retouch.",
     rate: "Quoted per project",
     price: null,
     service: "Brand campaign photography",
@@ -624,14 +624,14 @@ export const BOOKING_PAGES: BookingPage[] = [
       {
         // About's list, in its order.
         heading: "Services",
-        items: ["Creative direction", "Art direction", "Photography", "Camera operating", "Producing", "Post-production"],
+        items: ["Creative direction", "Art direction", "Photography", "Camera operation", "Producing", "Post-production"],
       },
     ],
     where: COMMISSION_WHERE,
     faqs: [
       {
         q: "What does a campaign shoot cost?",
-        a: `Quoted per project, because where the images run matters as much as the day itself. Send the brief through the booking form and the quote comes back with a treatment. ${reply}`.trim(),
+        a: `Quoted per project, because where the images run matters as much as the day itself. Send the brief through the booking form and I send a quote with a treatment. ${reply}`.trim(),
       },
       {
         q: "How is usage licensed?",
@@ -643,7 +643,7 @@ export const BOOKING_PAGES: BookingPage[] = [
       },
       {
         q: "Do you travel for shoots?",
-        a: "Yes: across the Bay Area, and to Los Angeles, New York and further. Travel is quoted with the shoot.",
+        a: "Yes: across the Bay Area, and to Los Angeles, New York and beyond. Travel is quoted with the shoot.",
       },
       {
         q: "What should a brief include?",
@@ -704,7 +704,7 @@ export const BOOK_MENU: MenuItem[] = [
     "Press photos, cover art and music videos for a release, planned together so it reads as one thing.",
   ),
   callOf("fashion-photography", "Fashion & Editorial", "Editorials, lookbooks and campaign images, shot and art-directed as one story."),
-  callOf("brand-photography", "Brand campaigns", "Campaign imagery from the concept and the art direction to the shoot and the retouch."),
+  callOf("brand-photography", "Brand campaigns", "Campaign imagery, from concept and art direction to shoot and retouch."),
   // ponytail: no call yet; add `cal: "juliangigola/event-call"` once the event exists in `EVENTS` (`lib/booking/rules.ts`).
   {
     slug: "events",
