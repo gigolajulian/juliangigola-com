@@ -162,58 +162,14 @@ describe("EditorialCard", () => {
     expect((day("Continue") as HTMLButtonElement).disabled).toBe(false);
   });
 
-  it("opens the details after Continue and says when the time was taken", async () => {
-    stubFetch(() => Response.json({ error: "That time was just taken. Pick another.", code: "taken" }, { status: 409 }));
-    render(<Card path="julian/call" title="Pick a time" fallback={null} />);
+  it("hands the picked time to the reschedule on Continue, with no form of its own", async () => {
+    stubFetch();
+    const onPicked = vi.fn();
+    render(<Card path="julian/call" title="Pick a time" fallback={null} onPicked={onPicked} />);
     fireEvent.click(await screen.findByRole("button", { name: "11:00 AM" }));
     fireEvent.click(day("Continue"));
-    const email = await screen.findByRole("textbox", { name: "Email" }, { timeout: 3000 });
-    fireEvent.change(screen.getByRole("textbox", { name: "First name" }), { target: { value: "Ana" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Last name" }), { target: { value: "Lee" } });
-    fireEvent.change(email, { target: { value: "ana@example.com" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Phone" }), { target: { value: "(408) 555 0134" } });
-    fireEvent.click(screen.getByRole("button", { name: "Book it" }));
-
-    expect((await screen.findByRole("alert")).textContent).toBe("That time was just taken. Pick another.");
-    const [url, init] = calls().find(([u]) => u === "/api/book")!;
-    expect(url).toBe("/api/book");
-    expect(JSON.parse(String(init?.body))).toMatchObject({
-      slug: "call",
-      name: "Ana Lee",
-      email: "ana@example.com",
-      phone: "+14085550134",
-      via: "Video",
-      start: "2026-11-19T19:00:00.000Z",
-    });
-    // The times are asked for again, fresh.
-    await waitFor(() => expect(calls().some(([u]) => u.startsWith("/api/slots") && u.endsWith("&fresh"))).toBe(true));
-  });
-
-  it("takes a paid session to its deposit instead of booking", async () => {
-    vi.stubEnv("NEXT_PUBLIC_STRIPE_PK", "pk_test_123");
-    stubFetch();
-    render(<Card path="julian/portraits" title="Pick a time" fallback={null} />);
-    fireEvent.click(await screen.findByRole("button", { name: "10:00 AM" }));
-    fireEvent.click(day("Continue"));
-    const email = await screen.findByRole("textbox", { name: "Email" }, { timeout: 3000 });
-    expect(screen.getByText("Next: $250 deposit")).toBeTruthy();
-    fireEvent.change(screen.getByRole("textbox", { name: "First name" }), { target: { value: "Ana" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Last name" }), { target: { value: "Lee" } });
-    fireEvent.change(email, { target: { value: "ana@example.com" } });
-    fireEvent.change(screen.getByRole("textbox", { name: "Phone" }), { target: { value: "4085550134" } });
-    fireEvent.click(screen.getByRole("button", { name: "Continue" }));
-
-    const step = await screen.findByTestId("deposit");
-    expect(JSON.parse(step.dataset.body!)).toMatchObject({
-      slug: "portraits",
-      name: "Ana Lee",
-      email: "ana@example.com",
-      phone: "+14085550134",
-      start: "2026-11-19T18:00:00.000Z",
-    });
-    expect(screen.getByText("$250")).toBeTruthy();
-    expect(screen.getByText("Session: Session, 60 min")).toBeTruthy();
-    expect(calls().some(([u]) => u === "/api/book")).toBe(false);
+    await waitFor(() => expect(onPicked).toHaveBeenCalledWith("2026-11-19T19:00:00.000Z"), { timeout: 3000 });
+    expect(screen.queryByRole("textbox")).toBeNull();
   });
 });
 

@@ -53,7 +53,7 @@ export function BookTimes({
 }: {
   path: string;
   title: string;
-  skin?: StepsSkin;
+  skin: StepsSkin;
   startView?: "week" | "month";
 }) {
   // Try again mounts a fresh picker, which asks for the times anew.

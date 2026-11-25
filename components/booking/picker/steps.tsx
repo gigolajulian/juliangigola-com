@@ -152,7 +152,6 @@ export function BookSteps({ c, l }: { c: CardCtx & { skin: StepsSkin }; l: Retur
     const price = skin.from != null ? `$${skin.from}` : "Quoted";
     return (
       <DepositStep
-        skin="v3"
         shell={(p) => shell(p)}
         head={
           <div className="fig">

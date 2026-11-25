@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { warmGsap, withGsap } from "@/lib/motion/gsap-lazy";
 import { cn } from "@/lib/utils";
 import { depositFor } from "@/lib/leads/deposit-terms";
 import type { Status } from "@/lib/booking/deposit";
@@ -116,25 +115,18 @@ export type DepositBody = Booking & {
 
 type Stage = "loading" | "ready" | "paying" | "confirming" | "taken" | "refunded" | "failed" | "slow" | "broken" | "declined";
 
-/** The look it is drawn in: JG V3's stepper hands its shell (`head` is the deposit figure, `rows` the bill, the
-    "Deposit today" row the live one); the editorial card (editorial.css) has its step bar and heading in `head`. */
-type Skin =
-  | { skin: "v3"; shell: (p: { head: string; sub?: string; body: React.ReactNode; bar: React.ReactNode }) => React.ReactNode }
-  | { skin: "editorial"; shell?: never };
-
 export function DepositStep({
   body,
   rows,
   onBooked,
   onTaken,
   onBack,
-  className,
-  skin,
   shell,
   head,
   refs,
-}: Skin & {
-  className?: string;
+}: {
+  /** JG V3's stepper's shell: `head` is the deposit figure, `rows` the bill, the "Deposit today" row the live one. */
+  shell: (p: { head: string; sub?: string; body: React.ReactNode; bar: React.ReactNode }) => React.ReactNode;
   /** The card's References (`refs` files, `picks`), sent once the intent exists. */
   refs?: FormData | null;
   head?: React.ReactNode;
@@ -146,7 +138,6 @@ export function DepositStep({
   /** Back to the form, what was typed still in it. */
   onBack: () => void;
 }) {
-  const editorial = skin === "editorial";
   const box = React.useRef<HTMLDivElement>(null);
   const number = React.useRef<HTMLDivElement>(null);
   const expiry = React.useRef<HTMLDivElement>(null);
@@ -157,63 +148,6 @@ export function DepositStep({
   const [error, setError] = React.useState("");
   const [tries, setTries] = React.useState(0);
   const [wallets, setWallets] = React.useState(false);
-  const payBtn = React.useRef<HTMLButtonElement>(null);
-  /* Editorial: Pay turns red and shakes on a decline, then grows into the
-     red card; paid, it grows into the teal booked card (Julian). */
-  const [bad, setBad] = React.useState(false);
-  const calm = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const grow = (no: boolean, then: () => void) => {
-    const b = payBtn.current;
-    const card = box.current;
-    if (!editorial || !b || !card || calm()) return then();
-    withGsap((gsap) => {
-      const c = card.getBoundingClientRect();
-      const r = b.getBoundingClientRect();
-      const g = document.createElement("div");
-      g.className = "ed-grow";
-      if (no) g.dataset.bad = "";
-      card.append(g);
-      gsap.set(g, { left: r.left - c.left, top: r.top - c.top, width: r.width, height: r.height, borderRadius: 2 });
-      gsap.to(g, {
-        left: 0,
-        top: 0,
-        width: c.width,
-        height: c.height,
-        borderRadius: getComputedStyle(card).borderRadius,
-        duration: 0.7,
-        ease: "expo.inOut",
-        onComplete: () => {
-          then();
-          gsap.to(g, { autoAlpha: 0, duration: 0.35, delay: 0.05, onComplete: () => g.remove() });
-        },
-      });
-    });
-  };
-  const decline = (msg: string) => {
-    setError(msg);
-    setBad(true);
-    withGsap((gsap) => {
-      if (!calm() && payBtn.current)
-        gsap.to(payBtn.current, { keyframes: { x: [0, -6, 5, -3, 2, 0] }, duration: 0.34, ease: "power1.out", clearProps: "transform" });
-      gsap.delayedCall(calm() ? 0 : 0.6, () => grow(true, () => setStage("declined")));
-    });
-  };
-  React.useEffect(warmGsap, []);
-  /* The red card and back again come in as the steps do. */
-  const was = React.useRef(stage);
-  React.useLayoutEffect(() => {
-    const from = was.current;
-    was.current = stage;
-    if (!editorial || calm() || !box.current || (stage !== "declined" && from !== "declined")) return;
-    const els = box.current.querySelectorAll(".ed-l > *, .ed-r > *, .ed-floor");
-    withGsap((gsap) =>
-      gsap.fromTo(
-        els,
-        { autoAlpha: 0, y: 14 },
-        { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out", stagger: 0.035, clearProps: "opacity,visibility,transform" },
-      ),
-    );
-  }, [stage, editorial]);
   /* Development only, to see the ends without a charge: `?sim=no` (a
      decline), `ok`, `taken`, `refunded`, `failed`, `slow`, `broken`. */
   const sim =
@@ -251,14 +185,13 @@ export function DepositStep({
       await new Promise((go) => setTimeout(go, 1000));
       const r = await getJson<{ status: Status }>(`/api/deposit/${encodeURIComponent(intentId)}`);
       const status = r.ok ? r.data?.status : undefined;
-      if (status === "booked") return grow(false, onBooked);
+      if (status === "booked") return onBooked();
       if (status === "refunded" || status === "failed") return setStage(status);
     }
     setStage("slow");
   };
   // The wallet's handler is set once; it calls these as they are now.
-  // A card the bank turned down is the red card in the editorial look.
-  const no = (e: StripeError) => (editorial && e.type === "card_error" ? decline(words(e)) : back(words(e)));
+  const no = (e: StripeError) => back(words(e));
   const now = React.useRef({ make, back, words, paid, no });
   React.useEffect(() => {
     now.current = { make, back, words, paid, no };
@@ -360,8 +293,11 @@ export function DepositStep({
       setStage("paying");
       setError("");
       await new Promise((go) => setTimeout(go, 900));
-      if (sim === "no") return decline("Your card was declined.");
-      if (sim === "ok") return grow(false, onBooked);
+      if (sim === "no") {
+        setError("Your card was declined.");
+        return setStage("declined");
+      }
+      if (sim === "ok") return onBooked();
       return setStage(sim as Stage);
     }
     if (!e) return;
@@ -382,7 +318,6 @@ export function DepositStep({
     void paid(m.intentId);
   };
   const retry = () => {
-    setBad(false);
     setError("");
     setStage("loading");
     setTries((t) => t + 1);
@@ -408,227 +343,96 @@ export function DepositStep({
   };
   const end = ends[stage];
 
-  if (skin === "v3") {
-    const bill = (
-      <div className="bill lbl">
-        {rows.map(([k, v]) => (
-          <div key={k} className={k === "Deposit today" ? "now" : undefined}>
-            <span>{k}</span>
-            <span>{v}</span>
-          </div>
-        ))}
-      </div>
-    );
-    const btns = (acts: [string, () => void][]) =>
-      acts.map(([label, go], i) => (
-        <button key={label} type="button" className={i === acts.length - 1 ? "btn fill" : "btn"} onClick={go}>
-          {label}
-        </button>
-      ));
-    /* The ends in the master's error box, with the way on. */
-    if (end) {
-      const acts: [string, () => void][] = [
-        ...(end.edit ? [["Edit details", onBack] as [string, () => void]] : []),
-        ...(end.on ? [end.on] : []),
-      ];
-      return shell({
-        head: end.line,
-        body: (
-          <div ref={box} className="f-stack" role="region" aria-label="Deposit">
-            <p className="err" role="alert">
-              {end.why}
-            </p>
-            {bill}
-          </div>
-        ),
-        bar: btns(acts),
-      });
-    }
-    return shell({
-      head: "Hold the date",
-      sub: `$${usd} holds your date. The balance is due after the shoot.`,
-      body: (
-        <div ref={box} className="f-stack" role="region" aria-label="Deposit" aria-busy={stage === "loading"}>
-          {head}
-          {bill}
-          <label className="fld">
-            <span className="lbl mute">Card</span>
-            <div ref={number} className="f-card" />
-          </label>
-          <div className="f-two">
-            <label className="fld">
-              <span className="lbl mute">Expiry</span>
-              <div ref={expiry} className="f-card" />
-            </label>
-            <label className="fld">
-              <span className="lbl mute">CVC</span>
-              <div ref={cvc} className="f-card" />
-            </label>
-          </div>
-          <div ref={wallet} className={cn(!wallets && "hidden")} />
-          <p className="lbl mute">
-            90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Card payment through Stripe. By
-            paying you agree to the{" "}
-            <a
-              href="/legal#terms"
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))",
-                textDecoration: "underline",
-                textUnderlineOffset: "0.2em",
-              }}
-            >
-              booking terms
-            </a>
-            .
-          </p>
-          {error ? (
-            <p className="err" role="alert">
-              {error}
-            </p>
-          ) : null}
+  const bill = (
+    <div className="bill lbl">
+      {rows.map(([k, v]) => (
+        <div key={k} className={k === "Deposit today" ? "now" : undefined}>
+          <span>{k}</span>
+          <span>{v}</span>
         </div>
-      ),
-      bar: (
-        <>
-          <button type="button" className="btn" onClick={onBack}>
-            Back
-          </button>
-          <button type="button" className="btn fill" onClick={pay} disabled={!canPay}>
-            {payLabel ?? `Pay $${usd} deposit`}
-          </button>
-        </>
-      ),
-    });
-  }
-
-  return (
-    <div
-      ref={box}
-      aria-label="Deposit"
-      role="region"
-      data-declined={stage === "declined" ? "" : undefined}
-      className={cn("tp ed", className)}
-    >
-      {head}
-      {end ? (
-        <>
-          <div className="ed-body" role="status">
-            <div className="ed-l">
-              <p className="ed-said">
-                <b>{end.line}</b> {end.why}
-              </p>
-            </div>
-            <div className="ed-r">
-              {rows.map(([k, v]) => (
-                <div key={k} className="ed-row">
-                  <span className="label">{k}</span>
-                  <span className="ed-v break-words">{v}</span>
-                </div>
-              ))}
-              <div className="ed-row">
-                <span className="label">Help</span>
-                <a href="mailto:hello@juliangigola.com" className="ed-v break-words">
-                  hello@juliangigola.com
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="ed-floor">
-            {end.edit ? (
-              <button type="button" onClick={onBack} className="label ed-quiet">
-                Edit details
-              </button>
-            ) : (
-              <span />
-            )}
-            {end.on ? (
-              <button type="button" onClick={end.on[1]} data-stick="fill" className="ed-btn">
-                {end.on[0]}
-              </button>
-            ) : null}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="ed-body">
-            {/* What the deposit is for; the amount is the heading over it. */}
-            <div className="ed-l">
-              {rows.map(([k, v]) => (
-                <div key={k} className="ed-row">
-                  <span className="label">{k}</span>
-                  <span className="ed-v break-words">{v}</span>
-                </div>
-              ))}
-              <div className="ed-row">
-                <span className="label">Due now</span>
-                <span className="ed-v">${usd}</span>
-              </div>
-            </div>
-            <div className="ed-r" aria-busy={stage === "loading"}>
-              <label className="ed-row">
-                <span className="label">Card</span>
-                <div ref={number} className="ed-field" />
-              </label>
-              <div className="ed-exp">
-                <label className="ed-row">
-                  <span className="label">Expiry</span>
-                  <div ref={expiry} className="ed-field" />
-                </label>
-                <label className="ed-row">
-                  <span className="label">CVC</span>
-                  <div ref={cvc} className="ed-field" />
-                </label>
-              </div>
-              <div ref={wallet} className={cn("ed-wallet", !wallets && "hidden")} />
-              <p className="ed-copy">
-                ${usd} holds your date. 90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before.
-                Balance due after the shoot. By paying you agree to the{" "}
-                <a
-                  href="/legal#terms"
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))",
-                    textDecoration: "underline",
-                    textUnderlineOffset: "0.2em",
-                  }}
-                >
-                  booking terms
-                </a>
-                .
-              </p>
-              {error && !bad ? (
-                <p role="alert" className="ed-err">
-                  {error}
-                </p>
-              ) : null}
-            </div>
-          </div>
-          <div className="ed-floor">
-            <span className="label ed-lock">
-              <svg aria-hidden viewBox="0 0 12 14" className="w-3 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.3">
-                <rect x="1" y="6" width="10" height="7" rx="1" />
-                <path d="M3.5 6V4a2.5 2.5 0 0 1 5 0v2" />
-              </svg>
-              Secured by Stripe. I never see your card.
-            </span>
-            <button
-              ref={payBtn}
-              type="button"
-              onClick={pay}
-              disabled={bad || !canPay}
-              data-accent=""
-              data-bad={bad ? "" : undefined}
-              data-stick="fill"
-              className="ed-btn"
-            >
-              {bad ? "Declined" : (payLabel ?? `Pay $${usd}`)}
-            </button>
-          </div>
-        </>
-      )}
+      ))}
     </div>
   );
+  const btns = (acts: [string, () => void][]) =>
+    acts.map(([label, go], i) => (
+      <button key={label} type="button" className={i === acts.length - 1 ? "btn fill" : "btn"} onClick={go}>
+        {label}
+      </button>
+    ));
+  /* The ends in the master's error box, with the way on. */
+  if (end) {
+    const acts: [string, () => void][] = [
+      ...(end.edit ? [["Edit details", onBack] as [string, () => void]] : []),
+      ...(end.on ? [end.on] : []),
+    ];
+    return shell({
+      head: end.line,
+      body: (
+        <div ref={box} className="f-stack" role="region" aria-label="Deposit">
+          <p className="err" role="alert">
+            {end.why}
+          </p>
+          {bill}
+        </div>
+      ),
+      bar: btns(acts),
+    });
+  }
+  return shell({
+    head: "Hold the date",
+    sub: `$${usd} holds your date. The balance is due after the shoot.`,
+    body: (
+      <div ref={box} className="f-stack" role="region" aria-label="Deposit" aria-busy={stage === "loading"}>
+        {head}
+        {bill}
+        <label className="fld">
+          <span className="lbl mute">Card</span>
+          <div ref={number} className="f-card" />
+        </label>
+        <div className="f-two">
+          <label className="fld">
+            <span className="lbl mute">Expiry</span>
+            <div ref={expiry} className="f-card" />
+          </label>
+          <label className="fld">
+            <span className="lbl mute">CVC</span>
+            <div ref={cvc} className="f-card" />
+          </label>
+        </div>
+        <div ref={wallet} className={cn(!wallets && "hidden")} />
+        <p className="lbl mute">
+          90% refund up to 48 hours before the shoot, 70% up to 24 hours. Move it up to 24 hours before. Card payment through Stripe. By
+          paying you agree to the{" "}
+          <a
+            href="/legal#terms"
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              color: "color-mix(in srgb, var(--accent) 65%, var(--foreground))",
+              textDecoration: "underline",
+              textUnderlineOffset: "0.2em",
+            }}
+          >
+            booking terms
+          </a>
+          .
+        </p>
+        {error ? (
+          <p className="err" role="alert">
+            {error}
+          </p>
+        ) : null}
+      </div>
+    ),
+    bar: (
+      <>
+        <button type="button" className="btn" onClick={onBack}>
+          Back
+        </button>
+        <button type="button" className="btn fill" onClick={pay} disabled={!canPay}>
+          {payLabel ?? `Pay $${usd} deposit`}
+        </button>
+      </>
+    ),
+  });
 }

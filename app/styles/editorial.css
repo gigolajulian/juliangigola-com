@@ -33,10 +33,8 @@
 .ed-btn { position: relative; flex-shrink: 0; font: 500 0.6875rem/1 var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; background: var(--foreground); color: var(--background); padding: 1rem 1.375rem; border-radius: 2px; min-height: 3rem; }
 .ed-btn:disabled { opacity: 0.35; pointer-events: none; }
 .ed-btn[data-accent] { background: var(--accent); color: var(--accent-foreground); }
-.ed-btn[data-bad] { background: var(--ed-bad); color: oklch(0.97 0.004 80); opacity: 1; }
+
 @media (hover: hover) { .ed-btn:hover { opacity: 0.85; } }
-.ed-quiet { position: relative; color: var(--muted-foreground); }
-@media (hover: hover) { .ed-quiet:hover { color: var(--foreground); } }
 
 /* the month or week over the days */
 .ed-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 0.75rem 1rem; flex-wrap: wrap; }
@@ -89,33 +87,7 @@
 @media (hover: hover) { .ed-slot:not([aria-pressed="true"]):hover { border-color: var(--foreground); } }
 .ed-none { padding: 1rem 0; color: var(--muted-foreground); border-top: 0.5px solid var(--ed-line); border-bottom: 0.5px solid var(--ed-line); }
 .ed-back { position: relative; display: none; align-items: center; gap: 0.75rem; align-self: flex-start; margin-bottom: 1rem; }
-.ed-row { position: relative; display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); align-items: baseline; column-gap: 0.75rem; border-bottom: 0.5px solid var(--ed-line); padding: 0.875rem 0 0.625rem; transition: border-color 0.2s; }
-.ed-row:focus-within { border-bottom-color: var(--accent); }
-.ed-row > .label, .ed-row > legend { color: var(--muted-foreground); }
-.ed-row:focus-within > .label { color: var(--foreground); }
-.ed-row input, .ed-v { width: 100%; min-width: 0; background: transparent; outline: none; font: 400 1rem/1.4 var(--font-mono); color: var(--foreground); text-transform: none; }
-.ed-row input::placeholder { color: color-mix(in oklab, var(--foreground) 30%, transparent); text-transform: none; }
-fieldset.ed-row { margin: 0; min-width: 0; }
-fieldset.ed-row > legend { float: left; padding: 0; }
-.ed-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-.ed-pair label { display: flex; flex-direction: column; min-width: 0; }
-.ed-opts { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; }
-.ed-opts label { position: relative; cursor: pointer; font: 400 1rem/1.4 var(--font-mono); color: var(--muted-foreground); text-transform: none; }
-.ed-opts input:checked + span { color: var(--foreground); text-decoration: underline 2px var(--accent); text-underline-offset: 6px; }
-.ed-opts input:focus-visible + span { outline: 1px solid var(--foreground); outline-offset: 3px; }
-.ed-err { padding-top: 0.75rem; font-size: 0.875rem; line-height: 1.5; text-transform: none; }
-.ed-field { min-height: 1.4rem; }
-.ed-exp { display: grid; grid-template-columns: 1fr 1fr; column-gap: 1.5rem; }
-.ed-exp > .ed-row + .ed-row { grid-template-columns: 3.75rem minmax(0, 1fr); }
-.ed-copy { margin-top: 1rem; font-size: 0.8125rem; line-height: 1.6; color: var(--muted-foreground); text-transform: none; text-wrap: pretty; }
-.ed-wallet { margin-top: 1rem; }
-.ed-lock { display: flex; align-items: center; gap: 0.5rem; }
-.ed-why { font-size: 0.9375rem; line-height: 1.5; text-transform: none; margin: 1.125rem 0 0.625rem; max-width: 40ch; text-wrap: pretty; }
-.ed-r > .ed-row:first-child { border-top: 0.5px solid var(--ed-line); }
-.ed-next { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); column-gap: 0.75rem; row-gap: 0.375rem; padding: 1rem 0; font-size: 0.875rem; line-height: 1.5; text-transform: none; }
-.ed-next > .label { color: var(--muted-foreground); grid-row: span 2; }
-.ed-grow { position: absolute; z-index: 30; background: var(--accent); pointer-events: none; }
-.ed-grow[data-bad] { background: var(--ed-bad); }
+
 /* Booked and declined keep the card dark (Julian's mock): the red is
    the card field's line and the words, not the whole card. */
 
@@ -126,7 +98,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed:is([data-fit="2"], [data-fit="3"]) { --ed-cell: 2.25rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-body { padding-top: 1rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-times { margin-top: 0.875rem; }
-.ed:is([data-fit="2"], [data-fit="3"]) .ed-row { padding-block: 0.5rem; }
+
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-slot { height: 2.125rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-day { padding-block: 0.5rem 0.625rem; }
 .ed:is([data-fit="2"], [data-fit="3"]) .ed-times > .ed-on { display: block; }
@@ -190,9 +162,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
   .ed-slots { display: flex; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x proximity; scrollbar-width: none; padding-right: 2.5rem; mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent); }
   .ed-slots::-webkit-scrollbar { display: none; }
   .ed-slot { height: 3.5rem; font-size: 1.125rem; flex: 0 0 5.75rem; scroll-snap-align: start; }
-  .ed-row, .ed-next { grid-template-columns: 5.25rem minmax(0, 1fr); }
-  .ed-exp { grid-template-columns: minmax(0, 1fr); }
-  .ed-exp > .ed-row + .ed-row { grid-template-columns: 5.25rem minmax(0, 1fr); }
+
   .ed-floor { flex-wrap: wrap; }
   .ed-floor > .ed-btn { flex: 1 0 100%; }
 }
@@ -213,16 +183,14 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 }
 
 /* the form and the ends may run longer than a short card: they alone scroll */
-.ed-form .ed-body, .ed[data-booked] .ed-body, .ed .ed-body[role="status"] { overflow-y: auto; overscroll-behavior: contain; }
+.ed .ed-body[role="status"] { overflow-y: auto; overscroll-behavior: contain; }
 
 /* a call: a handset or a camera, its length as a timer, the number big */
 .ed-handset { width: 1em; height: 1em; flex-shrink: 0; }
 .ed-call { order: 9; margin-left: auto; display: flex; align-items: center; gap: 0.5rem; padding-bottom: 0.5rem; color: var(--muted-foreground); white-space: nowrap; }
 .ed-call .ed-handset { width: 0.875rem; height: 0.875rem; color: var(--foreground); }
-.ed-via { display: inline-flex; align-items: center; gap: 0.5rem; }
+
 @container card (max-width: 36rem) { .ed-call { display: none; } }
-.ed-row textarea.tp-notes { width: 100%; min-width: 0; resize: none; background: transparent; outline: none; font: 400 1rem/1.4 var(--font-mono); color: var(--foreground); text-transform: none; }
-.ed-row textarea.tp-notes::placeholder { color: color-mix(in oklab, var(--foreground) 30%, transparent); }
 
 /* Over even split in two (a phone on its side, 390 tall): the body
    scrolls, rather than clip the days out of reach (QA on #204). The bar
@@ -265,7 +233,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 }
 /* Not the reference picker (`reference-picks.tsx`): its chips keep their
    own colours, or the lit chip is a white pill with a white label. */
-.ed .label:not(.reference-panel *), .ed .ed-row > .label { color: var(--ed-mu); }
+.ed .label:not(.reference-panel *) { color: var(--ed-mu); }
 /* Typed into on a touch screen: 16px, or iOS zooms in on focus. */
 @media (pointer: coarse) { .ed :is(.ed-row input, .ed-row textarea.tp-notes) { font-size: 1rem !important; } }
 
@@ -284,8 +252,7 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-hero small { color: var(--ed-mu); text-align: right; padding-bottom: 0.35rem; }
 .ed-mk { display: flex; align-items: center; gap: 0.625rem; color: var(--ed-mu); padding-bottom: 1.25rem; border-bottom: 1px solid var(--ed-line); }
 .ed-mk i { width: 5px; height: 5px; background: var(--foreground); flex-shrink: 0; }
-.ed-box { border: 1px solid var(--foreground); color: var(--foreground) !important; padding: 0.3rem 0.5rem; margin-left: 0.25rem; }
-@media (hover: hover) { .ed-box:hover { background: var(--foreground); color: var(--background) !important; } }
+
 .ed-body { padding-top: 1.25rem; }
 
 /* the month: boxes all round, the days either side barely there, the pick filled */
@@ -320,57 +287,28 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 
 /* the floor: the same button on every step */
 .ed-btn, .ed-btn[data-accent] { background: var(--foreground); color: var(--background) !important; border-radius: 0; padding: 0.95rem 1.5rem; }
-.ed-btn[data-bad] { background: var(--ed-err); color: var(--background) !important; }
 
 /* details: two fields to a row, labels over values */
-.ed-fields { display: grid !important; grid-template-columns: 1fr 1fr; gap: 0 2rem; align-content: start; }
-.ed-fields > * { grid-column: 1 / -1; }
-.ed-fields > label.ed-row { grid-column: auto; }
-.ed .ed-row { display: flex; flex-direction: column; align-items: stretch; gap: 0.5rem; padding: 0.875rem 0 0.75rem; }
-.ed .ed-row { border-bottom: 1px solid var(--ed-line); }
-.ed-r > .ed-row:first-child, .ed-l > .ed-row:first-child { border-top: 1px solid var(--ed-line); }
-.ed .ed-v { color: var(--foreground); }
-.ed-opts { gap: 0.5rem; }
-.ed-opts label > span { display: inline-flex; border: 1px solid var(--ed-line); padding: 0.55rem 0.8rem; color: var(--ed-mu); }
-.ed-opts input:checked + span { background: var(--foreground); color: var(--background); border-color: var(--foreground); text-decoration: none; }
-.ed-row textarea.tp-notes { border: 1px solid var(--ed-line); padding: 0.75rem; min-height: 4.5rem; }
-.ed-pair { gap: 2rem; }
 
 /* deposit, and its ends */
-.ed-l .ed-row { flex-direction: row; justify-content: space-between; align-items: center; }
-.ed-l .ed-v { width: auto; text-align: right; }
-.ed-copy { margin-top: auto; padding-top: 1rem; color: var(--ed-mu); }
-.ed[data-declined] .ed-said b { color: var(--ed-err); }
-.ed-said { color: var(--ed-mu); max-width: 34ch; }
-.ed-said b { color: var(--foreground); font-weight: 600; }
-.ed-err { color: var(--ed-err); }
 
 /* booked: the check, what was sent, then the rows */
 /* Booked: the check sits on the Booked line in
    the square's place, and the message is a sentence in the body face,
    the page's ink, two lines wide, straight over the rows. */
-.ed[data-booked] .ed-mk > i { display: none; }
-.ed[data-booked] .ed-mk > svg { width: 1.125rem; height: 1.125rem; flex-shrink: 0; color: var(--accent); }
-.ed.tp[data-booked] .ed-why { font-family: var(--font-sans) !important; font-size: 1.0625rem !important; font-weight: 400 !important; line-height: 1.5 !important; letter-spacing: 0 !important; text-transform: none !important; color: var(--foreground); max-width: none; margin: 1.5rem 0 1.75rem; text-align: justify; text-wrap: pretty; }
-.ed-nb { white-space: nowrap; }
+
 /* One long line over the rows, not one per column (Julian). */
-.ed[data-booked] .ed-r { border-top: 1px solid var(--ed-line); }
-.ed[data-booked] .ed-r > .ed-row:first-child { border-top: 0; }
-.ed-why { color: var(--ed-mu); max-width: 34ch; margin: 0; }
-.ed-next { display: none; }
 
 @container ed (min-width: 40rem) {
-  .ed[data-booked] .ed-body, .ed .ed-body:has(> .ed-l + .ed-r):not(:has(> .ed-times)) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: stretch; }
+  .ed .ed-body:has(> .ed-l + .ed-r):not(:has(> .ed-times)) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: stretch; }
   /* Booked: the summary rows two across under the message. */
-  .ed[data-booked] .ed-body:has(> .ed-l + .ed-r) { grid-template-columns: minmax(0, 1fr); align-content: start; }
-  .ed[data-booked] .ed-r { grid-column: 1 / -1; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 2rem; align-content: start; }
-  .ed[data-booked] .ed-r > .ed-next { grid-column: 1 / -1; }
+
 }
 @container card (max-width: 36rem) {
   .ed-hero { padding-top: 1.5rem; }
   .ed-hero h2 { font-size: 3rem; flex-direction: column; align-items: flex-start; }
   .ed-hero small { text-align: left; }
-  .ed-fields { grid-template-columns: minmax(0, 1fr); }
+
   .ed-slots { border: 0; gap: 0.4rem !important; }
   .ed-slot { border: 1px solid var(--ed-line); justify-content: center; min-height: 3.25rem; flex: 0 0 6.5rem; }
   .ed-slot[aria-pressed="true"] { background: var(--foreground); color: var(--background); border-color: var(--foreground); }
@@ -388,6 +326,4 @@ fieldset.ed-row > legend { float: left; padding: 0; }
 .ed-cell { display: flex; align-items: flex-start; }
 
 /* Details: the heading's hairline is the first; notes take the full width; hints in caps. */
-.ed-fields > .ed-row:first-child { border-top: 0; }
-.ed-fields > label.ed-row:has(textarea) { grid-column: 1 / -1; }
-.ed .ed-row input::placeholder, .ed .ed-row textarea.tp-notes::placeholder { text-transform: uppercase; }
+
