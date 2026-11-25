@@ -5,12 +5,12 @@
  *
  * This is a gallery. The work is high-contrast and mostly low-key, and it
  * glows against near-black the way prints do on a dark wall — on the old
- * site's light grey it went muddy. So dark is the site, and it is what a
- * visitor gets with no preference expressed, including one whose system is
- * set to light.
+ * site's light grey it went muddy. So dark is the ground the site is built on.
  *
- * The light palette further down is opt-in only, reached by the toggle in the
- * bar. It is not an inversion: photographs are mounted on a warm off-white,
+ * The light palette further down follows the visitor's system: the inline
+ * script in app/layout.tsx sets `data-theme` to light for a system set to
+ * light, and the toggle in the bar overrides it either way for the session.
+ * It is not an inversion: photographs are mounted on a warm off-white,
  * because paper white beside a photograph reads as a blown highlight and
  * makes every frame look underexposed.
  *
@@ -338,9 +338,10 @@
 }
 
 /* ── light ────────────────────────────────────────────────────────
- * Dark is the site. This is the alternative, and it is opt-in: the
- * attribute is only ever set by someone choosing it, so no preference —
- * including a system set to light — leaves the dark ground in place.
+ * Dark is the site's own ground. This is the alternative: `data-theme` is
+ * light when the visitor's system is set to light or they picked light in the
+ * bar (app/layout.tsx), so key light-only rules on `[data-theme="light"]`,
+ * never on prefers-color-scheme.
  *
  * Not an inversion. Photographs are mounted on a warm off-white rather
  * than on paper white, because pure white next to a photograph reads as a
