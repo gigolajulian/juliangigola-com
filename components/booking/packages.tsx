@@ -90,7 +90,7 @@ export function Packages() {
           <p className="pk-more lbl">
             {MORE.map(([q, a, href]) => (
               <Link key={href} href={href} prefetch={false} data-step={href.startsWith("/book/") ? "" : undefined}>
-                <span>{q}</span>
+                <span>{q}</span>{" "}
                 <b>
                   {a} <i aria-hidden="true">&rarr;</i>
                 </b>
