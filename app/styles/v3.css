@@ -1202,9 +1202,11 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .mo-player .pl-ctl button{all:unset;cursor:pointer;padding:6px 0}
 .mo-player .pl-ctl button:hover{color:rgb(var(--on-photo))}.mo-player .pl-ctl button:focus-visible,.mo-player .pl-ctl input:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
 .mo-player .pl-time{font-variant-numeric:tabular-nums;min-width:13ch}
-.mo-player .pl-ctl input{flex:1;appearance:none;height:16px;margin:0;background:linear-gradient(var(--accent),var(--accent)) 0 50%/var(--p) 1px no-repeat,linear-gradient(rgb(var(--on-photo) / .3),rgb(var(--on-photo) / .3)) 0 50%/100% 1px no-repeat;cursor:pointer}
-.mo-player .pl-ctl input::-webkit-slider-thumb{appearance:none;width:1px;height:16px;background:transparent}
-.mo-player .pl-ctl input::-moz-range-thumb{width:1px;height:16px;border:0;background:transparent}
+.mo-player .pl-ctl input{flex:1;appearance:none;height:24px;margin:-4px 0;background:linear-gradient(var(--accent),var(--accent)) 0 50%/var(--p) 1px no-repeat,linear-gradient(rgb(var(--on-photo) / .3),rgb(var(--on-photo) / .3)) 0 50%/100% 1px no-repeat;cursor:pointer}
+.mo-player .pl-ctl input::-webkit-slider-thumb{appearance:none;width:1px;height:24px;background:transparent}
+.mo-player .pl-ctl input::-moz-range-thumb{width:1px;height:24px;border:0;background:transparent}
+/* a finger gets 44px to land on; the track stays the 1px line, the negative margin keeps the row its height */
+@media (pointer:coarse){.mo-player .pl-ctl input{height:44px;margin:-14px 0}.mo-player .pl-ctl input::-webkit-slider-thumb{height:44px}.mo-player .pl-ctl input::-moz-range-thumb{height:44px}}
 .mo-player .pl-step{all:unset;position:absolute;top:0;bottom:0;z-index:2;width:33.333%;display:flex;flex-direction:column;justify-content:center;gap:10px;padding:0 var(--g);box-sizing:border-box;cursor:pointer;opacity:0;transition:opacity .3s ease}
 .mo-player .pl-step.prev{left:0;align-items:flex-start;background:linear-gradient(to right,rgb(var(--scrim) / .35),rgb(var(--scrim) / 0))}
 .mo-player .pl-step.next{right:0;align-items:flex-end;text-align:right;padding:0 var(--gr);background:linear-gradient(to left,rgb(var(--scrim) / .35),rgb(var(--scrim) / 0))}
