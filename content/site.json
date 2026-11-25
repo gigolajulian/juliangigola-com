@@ -31,7 +31,7 @@
       "slug": "portraits",
       "name": "Portraits",
       "blurb": "One hour with direction, lighting and edited selects. Studio located in San Jose, available to travel across the SF Bay Area.",
-      "from": null,
+      "from": 650,
       "includes": [
         "One hour, studio or location",
         "Two looks",
