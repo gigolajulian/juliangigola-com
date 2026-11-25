@@ -85,7 +85,8 @@ export function FlowShell({
           <ol ref={rail} className="rail lbl" aria-label="Steps">
             {lead ? (
               <li className="done">
-                <Link href={lead.href} data-back data-step aria-label={`Step 1, ${lead.name}`}>
+                {/* full prefetch: /book renders on request (it reads ?session=), so the default prefetch carries no page and the step back waited ~1.4s */}
+                <Link href={lead.href} prefetch data-back data-step aria-label={`Step 1, ${lead.name}`}>
                   {pad(1)} <span className="nm">{lead.name}</span>
                 </Link>
               </li>
