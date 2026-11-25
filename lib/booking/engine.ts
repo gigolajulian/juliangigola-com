@@ -72,6 +72,16 @@ export type BookingRecord = {
 };
 
 /** What the DO keeps its records in: its own storage, or a Map in tests. */
+/** `take`: the day's count for `key`, one more if under `cap`. Called inside the lock's queue, so two never race. */
+export async function takeQuota(store: Store, key: string, day: string, cap: number) {
+  const k = `quota:${key}`;
+  const held = await store.get<{ day: string; count: number }>(k);
+  const count = held?.day === day ? held.count : 0;
+  if (count >= cap) return { ok: false, count };
+  await store.put(k, { day, count: count + 1 });
+  return { ok: true, count };
+}
+
 export type Store = {
   get<T>(key: string): Promise<T | undefined>;
   put(key: string, value: unknown): Promise<void>;
@@ -382,7 +392,7 @@ export async function markReminded(store: Store, id: string, now = Date.now()) {
 
 /* ── reaching the lock from a route ───────────────────────────── */
 
-type LockEnv = {
+export type LockEnv = {
   BOOKING_LOCK?: { idFromName(name: string): unknown; get(id: unknown): { fetch(url: string, init: RequestInit): Promise<Response> } };
 };
 
@@ -415,6 +425,8 @@ export type LockOps = {
   headed: [string, { ok: boolean }];
   hours: [null, { hours: Hours }];
   setHours: [Hours, { hours: Hours }];
+  /** One more against a daily quota (`key`, `day`), if it is under `cap`: race-safe, the lock runs one op at a time. */
+  take: [{ key: string; day: string; cap: number }, { ok: boolean; count: number }];
   get: [string, { record: BookingRecord | null }];
 };
 
@@ -427,7 +439,9 @@ export async function lockOp<K extends keyof LockOps>(env: LockEnv, op: K, arg: 
   if (!ns) throw new Error("BOOKING_LOCK is not bound");
   const stub = ns.get(ns.idFromName("hello@"));
   // A timeout throws like any lock error: deposit's ask-again path (#1512) handles a lost answer, so no retry here.
-  const res = await outbound("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }), timeoutMs: LOCK_MS }, (u, i) => stub.fetch(String(u), i));
+  const res = await outbound("https://lock/", { method: "POST", body: JSON.stringify({ op, arg }), timeoutMs: LOCK_MS }, (u, i) =>
+    stub.fetch(String(u), i),
+  );
   if (!res.ok) {
     // A failing lock may answer plain text: keep the status when the body is not JSON.
     const out = (await res.json().catch(() => ({}))) as { error?: string };
