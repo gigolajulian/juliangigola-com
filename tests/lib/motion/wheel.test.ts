@@ -62,4 +62,18 @@ describe("notchStream", () => {
     expect(isNotch(ev(4, 500), 1)).toBe(false);
     expect(isNotch(ev(120, 510), 1)).toBe(false);
   });
+
+  it("reads Safari's 40px line notch on a 1x screen as a notch", () => {
+    // Safari 26 at dpr 1: one line = deltaY 40, three lines = 120 (JG - MAC, #1578).
+    const isNotch = notchStream();
+    expect([0, 300, 600].map((t) => isNotch(ev(40, t), 1))).toEqual([true, true, true]);
+    expect(isNotch(ev(-40, 900), 1)).toBe(true);
+    expect(isNotch(ev(120, 1200), 1)).toBe(true);
+    expect(isNotch(ev(39.9, 1500), 1)).toBe(false);
+  });
+
+  it("keeps a 1x trackpad stream a trackpad when it passes 40", () => {
+    const isNotch = notchStream();
+    expect([4, 18, 40, 120, 60].map((d, i) => isNotch(ev(d, i * 16), 1))).toEqual([false, false, false, false, false]);
+  });
 });
