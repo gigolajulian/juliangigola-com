@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { PkDots } from "@/components/booking/pk-dots";
 import { PageFoot } from "@/components/site/foot";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
 import { depositFor } from "@/lib/leads/deposit-terms";
@@ -87,6 +88,7 @@ export function Packages() {
               );
             })}
           </ul>
+          <PkDots count={CARDS.length} />
           <p className="pk-more lbl">
             {MORE.map(([q, a, href]) => (
               <Link key={href} href={href} prefetch={false} data-step={href.startsWith("/book/") ? "" : undefined}>
