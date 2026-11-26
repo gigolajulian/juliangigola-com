@@ -6,6 +6,8 @@ version is version.json's (set at each release to the same number as its tag);
 
 ## Unreleased
 
+The Motion section on the home page now shows the Ladera Granola film.
+
 The name and tagline at the top of the home page are placed for each screen size, and the tagline stays on one line.
 
 On a phone, the session packages on the booking page show dots under the cards, so you can see where you are as you swipe.
