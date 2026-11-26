@@ -97,7 +97,7 @@ export const FILM_FILES: Record<string, string> = {
 export const FILM_PICKS = [
   ["Director's Reel", "Reel"],
   ["The Description", "Music video"],
-  ["Dide O Del", "Music video"],
+  ["Ladera Granola", "Commercial"],
 ] as const satisfies readonly (readonly [title: string, kind: string])[];
 export type FilmTitle = (typeof FILM_PICKS)[number][0];
 
