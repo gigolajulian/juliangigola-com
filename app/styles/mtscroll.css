@@ -671,41 +671,45 @@ html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(
    iPad tall (and an iPad Pro upright) stack the three; a phone on its side keeps them on one line, name and tagline capped
    to the room left beside the buttons after the side insets, so they never meet them. */
 @media (min-width:1024px) and (min-height:600px) and (orientation:landscape){
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(45.5 * var(--u));bottom:calc(64 * var(--u) + 1.2 * (max(11px,11.6 * var(--u)) - 11.6 * var(--u)));font-size:calc(170.24 * var(--u));line-height:.86}
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:calc(91 * var(--u));bottom:calc(46 * var(--u));font-size:max(11px,calc(11.6 * var(--u)))!important;line-height:1.2}
-  html:root:root .v3 .mt-hero .mt-name .mt-ctas{right:calc(36 * var(--u));bottom:calc(54 * var(--u));gap:calc(8 * var(--u))}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(45.5 * var(--u) + var(--dnl,0px));bottom:calc(64 * var(--u) + 1.2 * (max(11px,11.6 * var(--u)) - 11.6 * var(--u)) + var(--dnb,0px));font-size:calc(170.24 * var(--u));line-height:.86}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:calc(91 * var(--u) + var(--dcl,0px));bottom:calc(46 * var(--u) + var(--dcb,0px));font-size:max(11px,calc(11.6 * var(--u)))!important;line-height:1.2}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas{right:calc(36 * var(--u) + var(--dbr,0px));bottom:calc(54 * var(--u) + var(--dbb,0px));gap:calc(8 * var(--u))}
   html:root:root .v3 .mt-hero .mt-name .mt-ctas .btn{height:calc(44 * var(--u));padding:0 calc(20 * var(--u));font-size:max(11px,calc(11 * var(--u)))}
 }
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name{--nm:calc((100vw - 32px) / 5.62);--cf:calc(var(--nm) * .2057)}}
 @media (min-width:600px) and (max-width:1023px) and (min-height:600px),(min-width:1024px) and (min-height:600px) and (orientation:portrait){html:root:root .v3 .mt-hero .mt-name{--nm:min(112px,12vw);--cf:calc(var(--nm) * .1331)}}
 @media (max-width:599px),(min-width:600px) and (max-width:1023px) and (min-height:600px),(min-width:1024px) and (min-height:600px) and (orientation:portrait){
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:16px;bottom:calc(77.4px + 2.4 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom));font-size:calc(1.041 * var(--nm));line-height:.86}
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:16px;bottom:calc(76.7px + env(safe-area-inset-bottom));font-size:var(--cf)!important;line-height:1.2}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(16px + var(--dnl,0px));bottom:calc(77.4px + 2.4 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom) + var(--dnb,0px));font-size:calc(1.041 * var(--nm));line-height:.86}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:calc(16px + var(--dcl,0px));bottom:calc(76.7px + env(safe-area-inset-bottom) + var(--dcb,0px));font-size:var(--cf)!important;line-height:1.2}
   html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .pl{margin-top:0}
-  html:root:root .v3 .mt-hero .mt-name .mt-ctas{left:16px;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));gap:8px}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas{left:16px;right:calc(16px + var(--dbr,0px));bottom:calc(16px + env(safe-area-inset-bottom) + var(--dbb,0px));gap:8px}
   html:root:root .v3 .mt-hero .mt-name .mt-ctas .btn{flex:1;height:44px;min-height:44px;font-size:11px}
 }
 /* phone: the name runs edge to edge with the same 16px as the tagline and buttons (the name is 5.705 of its size wide) */
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{font-size:calc((100vw - 32px) / 5.705)}}
 @media (max-height:599px) and (min-width:600px){
   html:root:root .v3 .mt-hero .mt-name{--nm:clamp(44px,7.5vw,84px);--sl:max(16px,env(safe-area-inset-left));--sr:max(16px,env(safe-area-inset-right));--room:calc(100vw - var(--sl) - var(--sr));--cf:min(calc(var(--nm) * .2008),calc((var(--room) - 300px) / 40.5))}
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(var(--sl) + 6.3px - .022 * var(--nm));bottom:calc(22px + 1.2 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom));font-size:min(calc(1.315 * var(--nm)),calc((var(--room) - 300px) / 5.71));line-height:.86}
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:var(--sl);bottom:calc(22px + env(safe-area-inset-bottom));font-size:var(--cf)!important;line-height:1.2}
-  html:root:root .v3 .mt-hero .mt-name .mt-ctas{left:auto;right:var(--sr);bottom:calc(22px + env(safe-area-inset-bottom))}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(var(--sl) + 6.3px - .022 * var(--nm) + var(--dnl,0px));bottom:calc(22px + 1.2 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom) + var(--dnb,0px));font-size:min(calc(1.315 * var(--nm)),calc((var(--room) - 300px) / 5.71));line-height:.86}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:calc(var(--sl) + var(--dcl,0px));bottom:calc(22px + env(safe-area-inset-bottom) + var(--dcb,0px));font-size:var(--cf)!important;line-height:1.2}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas{left:auto;right:calc(var(--sr) + var(--dbr,0px));bottom:calc(22px + env(safe-area-inset-bottom) + var(--dbb,0px))}
   html:root:root .v3 .mt-hero .mt-name .mt-ctas .btn{flex:none;height:44px}
-}
-/* desktop where the name is small (u under .752): the 11px tagline reaches under the g of Gigola, so the name rises clear of it,
-   one tagline line plus 8px; the tagline stays on one line (Julian, 2026-11-26) */
-@media (min-width:1024px) and (min-height:600px) and (orientation:landscape) and (max-width:1085px),(min-width:1024px) and (min-height:600px) and (orientation:landscape) and (max-height:679px){
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{bottom:calc(64 * var(--u) + 1.2 * (2 * max(11px,11.6 * var(--u)) - 11.6 * var(--u)) + 8px)}
 }
 /* a small phone on its side (667 wide): the one-line tagline would reach the buttons, so it takes two lines and the name rises a line */
 @media (max-height:599px) and (min-width:600px) and (max-width:759px){
   html:root:root .v3 .mt-hero .mt-name{--cf:calc(var(--nm) * .2008)}
   html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .pl{display:block}
   html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .pl::before{content:none}
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{bottom:calc(22px + 2.4 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom))}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{bottom:calc(22px + 2.4 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom) + var(--dnb,0px))}
 }
+/* Julian's per-size tune (2026-11-26, from the hero tuner at 5c69b962): offsets added to the layout above, so each screen lands
+   where he put it. Desktop: anchors at u .7 (1024x600), .8194 (1180x820), .8533 (1366x768), 1 (1440x900), 1.2 (1920x1080), blended
+   linearly in u between them so resizing never jumps; past 16:9 the --wx term (px wider than 16:9) brings the block in, as he set
+   at 2474x660. Phone, tablet upright, phone on its side and the small side phone each take one constant offset. */
+@media (min-width:1024px) and (min-height:600px) and (orientation:landscape){html:root:root .v3 .mt-hero .mt-name{--wx:max(0px,100vw - 177.78svh);--dnl:calc(15px + -125.6281 * clamp(0px,var(--u) - 0.7px,0.1194px) + 28.6299 * clamp(0px,var(--u) - 0.8533px,0.1467px) + -2.0000 * clamp(0px,var(--u) - 1px,0.2000px) + 0.22857 * var(--wx));--dnb:calc(16.4px + -137.3534 * clamp(0px,var(--u) - 0.7px,0.1194px) + 70.8930 * clamp(0px,var(--u) - 0.8533px,0.1467px) + -66.5000 * clamp(0px,var(--u) - 1px,0.2000px) + 0.015568 * var(--wx));--dcl:calc(-15.4px + 187.6047 * clamp(0px,var(--u) - 0.7px,0.1194px) + -607.6696 * clamp(0px,var(--u) - 0.8194px,0.0339px) + 77.0279 * clamp(0px,var(--u) - 0.8533px,0.1467px) + 11.5000 * clamp(0px,var(--u) - 1px,0.2000px) + 0.22945 * var(--wx));--dcb:calc(11.7px + -129.8157 * clamp(0px,var(--u) - 0.7px,0.1194px) + -35.3982 * clamp(0px,var(--u) - 0.8194px,0.0339px) + 51.1247 * clamp(0px,var(--u) - 0.8533px,0.1467px) + -12.5000 * clamp(0px,var(--u) - 1px,0.2000px) + 0.012455 * var(--wx));--dbr:calc(0px + 0.32336 * var(--wx));--dbb:calc(0px + 0.025294 * var(--wx))}}
+@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name{--dnb:4.7px;--dcb:-2.9px}}
+@media (min-width:600px) and (max-width:1023px) and (min-height:600px),(min-width:1024px) and (min-height:600px) and (orientation:portrait){html:root:root .v3 .mt-hero .mt-name{--dcb:8.1px}}
+@media (max-height:599px) and (min-width:600px){html:root:root .v3 .mt-hero .mt-name{--dnb:3.4px;--dcb:-2.8px}}
+@media (max-height:599px) and (min-width:600px) and (max-width:759px){html:root:root .v3 .mt-hero .mt-name{--dnb:3.1px;--dcb:0px;--dcl:8.3px}}
 /* the booking flow's first height (stepper plus the calendar wait) while its chunk is still on the way (book-online.tsx) */
 [data-mtscroll] .mt-bin-wait{min-height:calc(849px + 1.5vw)} /* measured 865-888px from 1024 to 2560 wide */
 @media not ((min-width:1024px) and (min-height:600px)){[data-mtscroll] .mt-bin-wait{min-height:761px}}
