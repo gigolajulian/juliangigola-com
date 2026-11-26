@@ -6,6 +6,8 @@ version is version.json's (set at each release to the same number as its tag);
 
 ## Unreleased
 
+The Motion row on the home page now reads Director of Photography.
+
 Booking, galleries and the contact form recover from a slow or failing service on their own, and the daily limit on
 the contact form holds even when many messages arrive at once.
 
