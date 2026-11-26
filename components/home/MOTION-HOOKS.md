@@ -44,7 +44,7 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 - Motion only: `.mt-row` is a native snap row; `.mt-track` takes the vertical-to-sideways
   transform on D. `section[data-cur]` and `.mt-item[data-on]` follow the row's own
   scroll (replace the source with p when the row is held).
-- Cover art: four `.mt-cv-sleeve`, no driver. The slide in, the scale up and the record (`.mt-cv-disc`, `--o`, `--r`) are CSS from the section's `--in` (`flow.css`).
+- Cover art: four `.mt-cv-sleeve`, no driver. The slide in and the record (`.mt-cv-disc`, `--o`, `--r`) are CSS from the section's `--in` and `--p` (`flow.css`).
 - Title lines: `.mt-ttl > .ln > span`.
 - Films: `.mt-film[data-film]` holds the poster; the preview iframe goes inside.
 
