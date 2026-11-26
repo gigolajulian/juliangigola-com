@@ -13,3 +13,16 @@ export type WheelDelta = { deltaMode: number; deltaX: number; deltaY: number };
 export function isTrackpad(e: WheelDelta, dpr: number) {
   return e.deltaMode === 0 && Math.max(Math.abs(e.deltaX), Math.abs(e.deltaY)) * (dpr || 1) < NOTCH_PX;
 }
+
+/** Reads a wheel stream (events under `gapMs` apart) by its first event: a stream that opens on a notch is a mouse
+    wheel to its end, one that opens under a notch is a trackpad to its end, even when a fast flick later passes
+    `NOTCH_PX` (it does on 2x screens). Call it on every wheel event, so it sees where each stream starts. */
+export function notchStream(gapMs = 120) {
+  let at = -Infinity,
+    notch = false;
+  return (e: WheelDelta & { timeStamp: number }, dpr: number) => {
+    if (e.timeStamp - at > gapMs) notch = !isTrackpad(e, dpr);
+    at = e.timeStamp;
+    return notch;
+  };
+}

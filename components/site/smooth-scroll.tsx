@@ -3,6 +3,7 @@
 import * as React from "react";
 import Lenis from "lenis";
 import { usePathname } from "next/navigation";
+import { notchStream } from "@/lib/motion/wheel";
 
 type ScrollFn = (y: number) => void;
 const scrollFns = new Set<ScrollFn>();
@@ -103,6 +104,10 @@ export function onLenisScroll(fn: ScrollFn) {
  *  trackpad moved nothing at all in Leads. */
 const NATIVE = ["/proof/", "/delivery/", "/contract/", "/admin"];
 
+/** On the homepage a mouse wheel notch moves this many times its delta; a trackpad is left as it is.
+ *  The home is ten screens tall with its holds, about 80 notches at 1x (Julian: "needs more effort"). `?wheel=1.4` tries another value. */
+const HOME_NOTCH = 1.6;
+
 export function SmoothScroll() {
   const pathname = usePathname();
   const lenisRef = React.useRef<Lenis | null>(null);
@@ -118,7 +123,11 @@ export function SmoothScroll() {
     // 1.2s glide on every event, which read as lag on a trackpad.
     // 0.13, not 0.2: the v4 home's motion is tied to the scroll, and at 0.2 each wheel notch read as a step.
     // `?lerp=0.1` tries another value.
-    const asked = parseFloat(new URLSearchParams(location.search).get("lerp") ?? "");
+    const q = new URLSearchParams(location.search);
+    const asked = parseFloat(q.get("lerp") ?? "");
+    const wheelAsked = parseFloat(q.get("wheel") ?? "");
+    const notchBoost = wheelAsked >= 1 && wheelAsked <= 4 ? wheelAsked : HOME_NOTCH;
+    const isNotch = notchStream();
     const lenis = new Lenis({
       lerp: asked > 0.02 && asked <= 1 ? asked : 0.13,
       orientation: "vertical",
@@ -127,6 +136,11 @@ export function SmoothScroll() {
       wheelMultiplier: 1.0,
       touchMultiplier: 1.5,
       autoRaf: true,
+      // Lenis reads deltaY back after this returns, so scaling it here is the whole boost
+      virtualScroll: (d) => {
+        if (d.event instanceof WheelEvent && isNotch(d.event, devicePixelRatio) && location.pathname === "/") d.deltaY *= notchBoost;
+        return true;
+      },
     });
     lenisRef.current = live = lenis;
     lenis.on("scroll", () => scrollFns.forEach((fn) => fn(window.scrollY)));
