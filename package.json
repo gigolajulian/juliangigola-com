@@ -17,7 +17,7 @@
   "dependencies": {
     "@astryxdesign/core": "0.7.17",
     "@astryxdesign/theme-neutral": "0.7.17",
-    "@opennextjs/cloudflare": "^1.20.6",
+    "@opennextjs/cloudflare": "^1.20.19",
     "@stylexjs/stylex": "^0.19.2",
     "cn": "^0.5.2",
     "gsap": "^3.15.1",
@@ -57,5 +57,10 @@
     "Safari >= 16.4",
     "iOS >= 16.4",
     "last 2 ChromeAndroid major versions"
-  ]
+  ],
+  "overrides": {
+    "@ts-morph/common": {
+      "minimatch": "^11.0.1"
+    }
+  }
 }
