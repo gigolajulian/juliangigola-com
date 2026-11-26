@@ -662,8 +662,8 @@ html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data
   html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 56%,transparent) 42%,color-mix(in srgb,var(--bg) 48%,transparent) 62%,color-mix(in srgb,var(--bg) 26%,transparent) 80%,color-mix(in srgb,var(--bg) 8%,transparent) 92%,transparent)}
 }
 
-/* Hero tagline in Geist Mono 600, larger than the labels. */
-html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:600;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
+/* Hero tagline in Geist Mono 400, larger than the labels. */
+html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:400;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(118px + env(safe-area-inset-bottom))}}
 /* Name, tagline and buttons, tuned by Julian in the hero tuner (third pass, 2026-11-25), layout A: name and tagline on the
    left, buttons on the right, one bottom line. The tagline keeps one size ratio to the name at every screen (its size matched
