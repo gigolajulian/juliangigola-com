@@ -157,19 +157,11 @@ function depth(play: Play, el: HTMLElement, ox: number, oy: number, d: number, a
   el.style.zIndex = String(Math.round(d * 100));
   const r = (1 - d * S0) / (1 - d); // how much more than the wall this plane has grown when the wall is at 1
   const dur = until - at;
-  const blur = Math.round(5 + d * 14);
   const gone = 0.74 - d * 0.22; // nearer planes pass the lens sooner
   play(el, [{ scale: "1", easing: IN_OUT }, { scale: String(r) }], { duration: dur, delay: at });
-  play(
-    el,
-    [
-      { opacity: 1, filter: "blur(0px)" },
-      { opacity: 1, filter: `blur(${blur * 0.25}px)`, offset: 0.34 },
-      { opacity: 0, filter: `blur(${blur}px)`, offset: gone },
-      { opacity: 0, filter: `blur(${blur}px)` },
-    ],
-    { duration: dur, delay: at },
-  );
+  // Opacity only: a blur on these big scaling planes was the heaviest paint of the splash (audit, 2026-11-25).
+  // The J and G marks keep theirs.
+  play(el, [{ opacity: 1 }, { opacity: 1, offset: 0.34 }, { opacity: 0, offset: gone }, { opacity: 0 }], { duration: dur, delay: at });
 }
 
 /** Extra tiles build() draws: above and below each real column, and the columns on the wall's pitch where none stands. Its loops, counted. */
@@ -195,7 +187,7 @@ function tilesOf(g: Canvas) {
 function fitExtras(hero: HTMLElement, wall: HTMLElement) {
   const g = canvasOf(hero, wall);
   if (!g) return null;
-  // a tile is drawn at S0 and blurs out as it grows with the push, so its drawn size is enough. Three widths, so the resizer keeps few copies.
+  // a tile is drawn at S0 and fades out as it grows with the push, so its drawn size is enough. Three widths, so the resizer keeps few copies.
   const px = g.w * S0 * devicePixelRatio;
   return { n: Math.max(1, tilesOf(g)), width: px <= 256 ? 256 : px <= 384 ? 384 : 640 };
 }
