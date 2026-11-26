@@ -6,6 +6,8 @@ version is version.json's (set at each release to the same number as its tag);
 
 ## Unreleased
 
+Behind the scenes: two library security patches.
+
 In Safari on a standard screen, a mouse wheel now moves the home page as far per notch as everywhere else.
 
 The Motion section on the home page is a short list of films: point at one to preview it, click to open it on the Motion page. The cover art slides in as you scroll, and a mouse wheel moves the home page further per notch.
