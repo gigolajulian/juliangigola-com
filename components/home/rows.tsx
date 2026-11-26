@@ -132,7 +132,7 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
       >
         <div className="mt-mohead">
           <h2>Motion</h2>
-          <p className="lbl mute">Director and Director of Photography</p>
+          <p className="lbl mute">Director of Photography</p>
         </div>
         <div className="mt-row" ref={row} role="group" tabIndex={0} aria-label="Films">
           <div className="mt-track">
