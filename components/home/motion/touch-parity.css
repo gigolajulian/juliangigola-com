@@ -7,8 +7,6 @@ html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-hero .mt-more { position: 
 html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion { position: relative; z-index: 2; background: var(--bg); }
 
 
-/* films: the film in the row gets its muted preview (rows.ts). The player is drawn over the poster, so the film is its box. */
-html[data-mt-motion][data-tp]:not([data-mt-held]) .mt-motion .mt-film { position: relative; }
 
 
 /* sheet: on phones the note slides up from the bottom and back down, and the handle drags it (inquiry-card.tsx) */
