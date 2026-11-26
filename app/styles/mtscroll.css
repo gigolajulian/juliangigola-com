@@ -694,6 +694,11 @@ html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(
   html:root:root .v3 .mt-hero .mt-name .mt-ctas{left:auto;right:var(--sr);bottom:calc(22px + env(safe-area-inset-bottom))}
   html:root:root .v3 .mt-hero .mt-name .mt-ctas .btn{flex:none;height:44px}
 }
+/* desktop where the name is small (u under .752): the 11px tagline reaches under the g of Gigola, so the name rises clear of it,
+   one tagline line plus 8px; the tagline stays on one line (Julian, 2026-11-26) */
+@media (min-width:1024px) and (min-height:600px) and (orientation:landscape) and (max-width:1085px),(min-width:1024px) and (min-height:600px) and (orientation:landscape) and (max-height:679px){
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{bottom:calc(64 * var(--u) + 1.2 * (2 * max(11px,11.6 * var(--u)) - 11.6 * var(--u)) + 8px)}
+}
 /* a small phone on its side (667 wide): the one-line tagline would reach the buttons, so it takes two lines and the name rises a line */
 @media (max-height:599px) and (min-width:600px) and (max-width:759px){
   html:root:root .v3 .mt-hero .mt-name{--cf:calc(var(--nm) * .2008)}
