@@ -694,14 +694,6 @@ html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(
   html:root:root .v3 .mt-hero .mt-name .mt-ctas{left:auto;right:var(--sr);bottom:calc(22px + env(safe-area-inset-bottom))}
   html:root:root .v3 .mt-hero .mt-name .mt-ctas .btn{flex:none;height:44px}
 }
-/* short or narrow desktop, where the tagline sits at its 11px floor: one line would run under the g of Gigola, so the place
-   takes a second line and the name rises by it */
-@media (min-width:1024px) and (min-height:600px) and (orientation:landscape) and (max-width:1365px),(min-width:1024px) and (min-height:600px) and (orientation:landscape) and (max-height:853px){
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .pl{display:block}
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .sep{display:none}
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .pl::before{content:none}
-  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{bottom:calc(64 * var(--u) + 1.2 * (2 * max(11px,11.6 * var(--u)) - 11.6 * var(--u)))}
-}
 /* a small phone on its side (667 wide): the one-line tagline would reach the buttons, so it takes two lines and the name rises a line */
 @media (max-height:599px) and (min-width:600px) and (max-width:759px){
   html:root:root .v3 .mt-hero .mt-name{--cf:calc(var(--nm) * .2008)}
