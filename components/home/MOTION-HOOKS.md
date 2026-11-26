@@ -6,8 +6,8 @@ Styles: `app/styles/mtscroll.css` (design unit `--u`, structures D / T / P / L).
 
 ## Every held section
 - `section[data-mt="<name>"][data-hold="<viewports>"] > .mt-stage`: wrap the stage
-  in the held wrapper and write `--p` (0 to 1) on the section. Hero, Cover art
-  and Motion carry a hold; the markup holds the values. The other sections have none.
+  in the held wrapper and write `--p` (0 to 1) on the section. Only the hero
+  carries a hold; the markup holds the values. The other sections have none.
 - Ancestors use `overflow-x: clip`, never `hidden`, so sticky stages work.
 
 ## Root attributes (html)
@@ -41,12 +41,10 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 - Four frames, no driver: the rise and fade are CSS from the section's `--in` (`flow.css`, `.mt-cm-grid figure` `--e`).
 
 ## Cover art and Motion (`rows.tsx`)
-- Motion only: `.mt-row` is a native snap row; `.mt-track` takes the vertical-to-sideways
-  transform on D. `section[data-cur]` and `.mt-item[data-on]` follow the row's own
-  scroll (replace the source with p when the row is held).
 - Cover art: four `.mt-cv-sleeve`, no driver. The slide in and the record (`.mt-cv-disc`, `--o`, `--r`) are CSS from the section's `--in` and `--p` (`flow.css`).
-- Title lines: `.mt-ttl > .ln > span`.
-- Films: `.mt-film[data-film]` holds the poster; the preview iframe goes inside.
+- Motion: one plain screen, no hold. `section[data-cur]` is the film on screen (0, the reel, unless a list title is hovered,
+  focused or tapped); `.mt-film[data-on]` and `[data-was]` follow it. `.mt-film[data-film]` holds the poster; motion/rows.ts
+  puts the preview player inside. The list is `.mt-molist`.
 
 ## Book online
 - `section[data-on]` (row key).

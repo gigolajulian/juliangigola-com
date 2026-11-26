@@ -65,17 +65,36 @@
 [data-mtscroll] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{position:absolute;left:calc(6 * var(--u));top:calc(6 * var(--u));width:calc(308 * var(--u));height:calc(308 * var(--u));border-radius:50%;background-size:cover;background-position:center;overflow:hidden;box-shadow:inset 0 0 0 2px #050505,inset 0 0 0 3px rgba(255,255,255,.16);transform:translateX(calc(var(--o,0) * 103 * var(--u))) rotate(calc(var(--o,0) * 200deg))}
 [data-mtscroll] .mt-sleeve .disc::before,.cv4 .mt-sleeve .disc::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,transparent 0 16.5%,rgba(0,0,0,.5) 16.6% 17.2%,transparent 17.4% 97%,rgba(0,0,0,.65) 98.5%),repeating-radial-gradient(circle,rgba(0,0,0,.22) 0 .6px,rgba(255,255,255,.05) .6px 1.3px,rgba(0,0,0,0) 1.3px 2.1px),radial-gradient(circle,rgba(0,0,0,.28),rgba(0,0,0,.1) 60%,rgba(0,0,0,.34)),linear-gradient(rgba(8,10,14,.26),rgba(8,10,14,.26))}
 [data-mtscroll] .mt-sleeve .disc::after,.cv4 .mt-sleeve .disc::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#070707 0 1.9%,rgba(255,255,255,.3) 2% 2.4%,transparent 2.5%),conic-gradient(from 18deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.2) 14deg,rgba(255,255,255,0) 32deg,rgba(255,255,255,0) 170deg,rgba(255,255,255,.13) 192deg,rgba(255,255,255,0) 214deg,rgba(255,255,255,0) 360deg);transform:rotate(calc(var(--o,0) * -200deg))}
-[data-mtscroll] .mt-motion .mt-stage{padding-top:calc(104 * var(--u));padding-bottom:calc(72 * var(--u))}
-[data-mtscroll] .mt-mohead,[data-mtscroll] .mt-mofoot{position:relative;width:min(100%,calc(1440 * var(--u)));margin-inline:auto;padding-inline:calc(36 * var(--u))}
+/* Motion (rows.tsx HomeFilms): the films' layers, the head, the list. Phones and tablets: the head, a square film, the list under it on the page.
+   Desktop (the block at "Motion: one screen" below): the film fills the screen and the words sit on it. */
+[data-mtscroll] .mt-motion .mt-stage{padding:calc(104 * var(--u)) calc(var(--fx) + 36 * var(--u)) calc(72 * var(--u))}
 [data-mtscroll] .mt-mohead h2{font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em;margin:0 0 calc(14 * var(--u))}
 [data-mtscroll] .mt-mohead p{margin:0}
-[data-mtscroll] .mt-motion .mt-row{--pl:calc(var(--fx) + 36 * var(--u));margin-top:calc(42 * var(--u));padding:0 calc(100vw - var(--pl) - 700 * var(--u)) 0 var(--pl);scroll-padding-left:var(--pl)}
-[data-mtscroll] .mt-motion .mt-track{gap:calc(60 * var(--u))}
-[data-mtscroll] .mt-film{display:block;width:calc(700 * var(--u));height:calc(394 * var(--u));border-radius:calc(4 * var(--u));overflow:hidden;background:var(--night)}
-[data-mtscroll] .mt-mofoot{margin-top:calc(38 * var(--u))}
-[data-mtscroll] .mt-mofoot p{margin:0}
-[data-mtscroll] .mt-mofoot h3{font:900 calc(64 * var(--u))/.9 var(--display);letter-spacing:-.05em;margin:calc(10 * var(--u)) 0 calc(12 * var(--u))}
-[data-mtscroll] .mt-mofoot .btn{position:absolute;right:calc(36 * var(--u));bottom:0}
+[data-mtscroll] .mt-mofilms{position:relative;aspect-ratio:1;margin-top:24px;overflow:hidden;background:var(--night)}
+/* a hard cut: the new film is drawn at once over the one before it (`data-was`), never through black */
+[data-mtscroll] .mt-film{position:absolute;inset:0;visibility:hidden}
+[data-mtscroll] .mt-film[data-was]{visibility:visible;z-index:1}
+[data-mtscroll] .mt-film[data-on]{visibility:visible;z-index:2}
+[data-mtscroll] .mt-film img{object-fit:cover}
+/* pushed in from the top left corner, poster and preview alike: a mark burnt into the bottom right of the video is cut */
+[data-mtscroll] .mt-film :is(img,video){transform-origin:0 0;transform:scale(var(--z,1))}
+[data-mtscroll] .mt-molg{display:none}
+[data-mtscroll] .mt-molist{margin:24px 0 0;padding:0;list-style:none}
+[data-mtscroll] .mt-molist li+li{margin-top:16px}
+[data-mtscroll] .mt-molist a{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:baseline;color:inherit;text-decoration:none;opacity:.62;transition:opacity 150ms var(--ease-out-strong)}
+[data-mtscroll] .mt-molist .n{position:relative}
+[data-mtscroll] .mt-molist .t{font:900 26px/1 var(--display);letter-spacing:-.045em}
+[data-mtscroll] .mt-molist .k{grid-column:2;margin-top:6px}
+[data-mtscroll] .mt-molist .k i{font-style:normal}
+[data-mtscroll] .mt-molist :is(li[data-on] a,a:focus-visible){opacity:1}
+/* the current film: a short teal rule before its number (the one accent marks the current step) */
+[data-mtscroll] .mt-molist li[data-on] .n::before{content:"";position:absolute;right:calc(100% + 8px);top:50%;width:14px;height:2px;background:var(--accent)}
+[data-mtscroll] .mt-molist a:focus-visible{outline:0}
+[data-mtscroll] .mt-molist a:focus-visible .t{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.14em}
+/* touch: the current title opens on the next tap, and says so */
+[data-mtscroll] .mt-molist .w{display:none;margin-left:12px;text-decoration:underline;text-underline-offset:4px}
+@media (hover:none){[data-mtscroll] .mt-molist li[data-on] .w{display:inline}}
+[data-mtscroll] .mt-momore{margin-top:28px}
 
 /* ── Book online (3.4) and By quote (3.5) ── */
 [data-mtscroll] .mt-book>.mt-frame{min-height:max(100svh,600px)}
@@ -251,20 +270,12 @@
 
   /* Rows: snap rows, the snapped item centred. */
   [data-mtscroll] .mt-held .mt-stage{min-height:0;padding:48px 0 40px}
-  [data-mtscroll] .mt-mohead,[data-mtscroll] .mt-mofoot{padding-inline:16px;height:auto}
+  [data-mtscroll] .mt-motion .mt-stage{padding:48px 16px 40px}
   [data-mtscroll] .mt-item{scroll-snap-align:center}
   [data-mtscroll] .mt-sleeve{width:var(--cv);height:var(--cv)}
   [data-mtscroll] .mt-sleeve .disc{display:none;left:calc(var(--cv) * .014);top:calc(var(--cv) * .014);width:calc(var(--cv) * .972);height:calc(var(--cv) * .972);transform:translateY(calc(var(--o,0) * 118px)) rotate(calc(var(--o,0) * 66deg))}
   [data-mtscroll] .mt-sleeve[data-on] .disc{display:block}
   [data-mtscroll] .mt-mohead h2{font-size:46px}
-  /* the film runs edge to edge */
-  [data-mtscroll] .mt-motion .mt-row{--fw:100vw;margin-top:28px;padding:0;scroll-padding:0}
-  [data-mtscroll] .mt-motion .mt-film{border-radius:0}
-  [data-mtscroll] .mt-motion .mt-track{gap:12px}
-  [data-mtscroll] .mt-film{width:var(--fw);height:calc(var(--fw) * 9 / 16)}
-  [data-mtscroll] .mt-mofoot{margin-top:24px}
-  [data-mtscroll] .mt-mofoot h3{font-size:34px}
-  [data-mtscroll] .mt-mofoot .btn{position:static;margin-top:16px}
 
   /* Book online and By quote: photo on top, rows under it, held bar. */
   [data-mtscroll] .mt-book>.mt-frame{min-height:0;width:100%;padding:24px 0 24px}
@@ -399,7 +410,6 @@
   [data-mtscroll] .mt-cap .pl::before{content:" | ";content:" | " / ""}
   [data-mtscroll] .mt-ctas{left:auto;right:max(16px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 52px)}
   [data-mtscroll] .mt-ctas .btn{flex:none}
-  [data-mtscroll] .mt-motion .mt-row{--fw:60vw}
   [data-mtscroll] .mt-ph{font-size:120px}
 }
 /* intro waiting state, set by the head script before first paint (the rest lives in components/home/intro/intro.css) */
@@ -437,23 +447,23 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
   [data-mtscroll] .mt-bar .btn{white-space:nowrap;justify-content:center;text-align:center;font-size:12px;padding-inline:10px}
 }
 
-/* Motion: vertical films */
-/* Desktop structure: the films stack one under another in natural scroll, the
-   head and the current film's lines stay beside them. This is also the whole
-   layout with the engine off (reduced motion); motion/rows.css closes the films
-   that are not at the middle of the screen. --fh: frame height, --ft: where the
-   film lines hold, their foot level with the foot of a frame at mid screen. */
+/* Motion: one screen. The film fills it, the head sits top left, the list bottom left, View more bottom right, all on the
+   film with the on-photo set over a soft ground top and bottom. */
 @media (min-width:1024px) and (min-height:600px){
-  [data-mtscroll] .mt-motion .mt-stage{--fh:calc(450 * var(--u));--ft:calc(50svh + 60 * var(--u));display:grid;grid-template-columns:minmax(0,1fr) calc(800 * var(--u));column-gap:calc(36 * var(--u));padding-inline:calc(var(--fx) + 36 * var(--u))}
-  [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-mofoot){grid-area:1/1;align-self:start;position:sticky;top:calc(104 * var(--u));width:auto;margin:0;padding:0}
-  /* Keeps the heading's margin box as deep as the film lines reach, so both let go together at the last film. */
-  [data-mtscroll] .mt-motion .mt-mohead{margin-bottom:calc(var(--ft) - 59 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-mofoot{top:var(--ft);margin-top:calc(var(--ft) - 104 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-mofoot h3{font-size:calc(52 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-mofoot .btn{position:static;margin-top:calc(22 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-row{grid-area:1/2;margin-top:max(0px,calc(50svh - var(--fh) / 2 - 104 * var(--u)));padding:0;overflow:visible;scroll-snap-type:none}
-  [data-mtscroll] .mt-motion .mt-track{flex-direction:column;width:auto;gap:calc(24 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-film{width:100%;height:var(--fh)}
+  [data-mtscroll] .mt-motion .mt-stage{position:relative;min-height:max(100svh,600px);padding:0;color:rgb(var(--on-photo))}
+  [data-mtscroll] .mt-mofilms{position:absolute;inset:0;aspect-ratio:auto;margin:0}
+  [data-mtscroll] .mt-mofilms::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 50%,rgb(0 0 0 / .62))}
+  [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-molist,.mt-momore,.mt-molg){position:absolute;z-index:4}
+  [data-mtscroll] .mt-motion .mt-mohead{left:calc(var(--fx) + 36 * var(--u));top:calc(96 * var(--u))}
+  [data-mtscroll] .mt-motion .mute{color:rgb(var(--on-photo) / .72)}
+  [data-mtscroll] .mt-molist{left:calc(var(--fx) + 36 * var(--u));bottom:calc(84 * var(--u));margin:0}
+  [data-mtscroll] .mt-molist li+li{margin-top:calc(18 * var(--u))}
+  [data-mtscroll] .mt-molist a{column-gap:calc(16 * var(--u))}
+  [data-mtscroll] .mt-molist .t{font-size:calc(44 * var(--u))}
+  [data-mtscroll] .mt-molist li[data-on] .n::before{background:var(--dark-accent)}
+  [data-mtscroll] .mt-momore{right:calc(var(--fx) + 36 * var(--u));bottom:calc(84 * var(--u));margin:0;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
+  /* the client mark: top right only, small, never at the bottom (Julian) */
+  [data-mtscroll] .mt-molg{display:block;top:calc(96 * var(--u));right:calc(var(--fx) + 48 * var(--u));height:calc(28 * var(--u));aspect-ratio:var(--ar);background:rgb(var(--on-photo) / .8);-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;pointer-events:none}
 }
 
 /* Book online: one line a row, and the booking in place (book-online.tsx) */
