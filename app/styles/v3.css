@@ -1839,6 +1839,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pk-more b{font-weight:400;color:var(--ink);white-space:nowrap}
 .v3 .pk-more i{font-style:normal}
 .v3 .pk-more a:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .pk-dots{display:none}
 .v3 .rail a:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
 @media (hover:hover){.v3 .pk-more a:hover b{color:var(--accent)}}
 @media (max-width:1023px){
@@ -1846,6 +1847,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pk-row{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:none;margin:6px calc(-1*var(--gr)) 0 calc(-1*var(--g));padding:0 var(--gr) 5px var(--g);scroll-padding-left:var(--g)}
 .v3 .pk-row::-webkit-scrollbar{display:none}
 .v3 .pk-c{flex:0 0 min(84%,340px);scroll-snap-align:start}
+.v3 .pk-dots{display:flex;gap:8px;list-style:none;margin:-6px 0 0;padding:0}
+.v3 .pk-dots li{width:5px;height:5px;background:var(--line);transition:background-color var(--dur-small) var(--ease-out-strong)}
+.v3 .pk-dots li.on{background:var(--ink)}
 .v3 .pk-c h2{font-size:1.875rem;margin-top:16px}
 .v3 .pk-more{grid-template-columns:1fr;margin-top:22px}
 .v3 .pk-more a:nth-last-child(2){border-bottom:0}}
@@ -1853,6 +1857,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (max-width:299.98px){
 .v3 .pk-row{flex-direction:column;overflow:visible;gap:32px}
 .v3 .pk-c{flex:none}
+.v3 .pk-dots{display:none}
 .v3 .pk-c h2,.v3 .pk-more b{white-space:normal}
 .v3 .pk-more a{flex-wrap:wrap;padding:8px 0}}
 /* A booking step travels right to left, and back the other way (Julian, 2026-11-25).
