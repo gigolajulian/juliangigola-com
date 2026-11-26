@@ -5,7 +5,6 @@
    (`data-navtop`, set by components/site/nav-ink.ts, which also picks white or black for each word). */
 :root[data-navfx]{--nav-veil:47%;--nav-teal:oklch(.51 .09 195)}
 /* Light page: the line under the bar is barely there. Dark keeps --line. */
-@media (prefers-color-scheme:light){:root[data-navfx]:not([data-theme="dark"]){--nav-line:color-mix(in srgb,var(--line) 30%,transparent)}}
 :root[data-navfx][data-theme="light"]{--nav-line:color-mix(in srgb,var(--line) 30%,transparent)}
 
 /* The ground is on the bar itself: the bar is its own layer (view-transition-name), so a child could not blur

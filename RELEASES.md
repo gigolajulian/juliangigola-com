@@ -11,3 +11,6 @@ the contact form holds even when many messages arrive at once.
 
 Films can show captions (the CC button or the c key), the About photos and the footer still stop turning while you
 point at them or tab into them, and the booking time answers the Up and Down keys.
+
+The booking time labels are easier to read, the film seek bar is easier to hit on a touch screen, and the light theme
+looks the same whether you pick it on the site or your device does.
