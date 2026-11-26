@@ -18,3 +18,5 @@ looks the same whether you pick it on the site or your device does.
 The opening splash on the home page runs lighter on phones and tablets: the photos stay sharp as they rush past.
 
 Moving the pointer around the site does less work in the background.
+
+The leads board scrolls with a trackpad again.
