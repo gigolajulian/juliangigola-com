@@ -41,7 +41,7 @@ Typed readers live in `motion/root-attrs.ts` (`flipMs`); everything else reads t
 - Four frames, no driver: the rise and fade are CSS from the section's `--in` (`flow.css`, `.mt-cm-grid figure` `--e`).
 
 ## Cover art and Motion (`rows.tsx`)
-- Cover art: four `.mt-cv-sleeve`, no driver. The slide in and the record (`.mt-cv-disc`, `--o`, `--r`) are CSS from the section's `--in` and `--p` (`flow.css`).
+- Cover art: four `.mt-cv-sleeve`, no driver. The slide in, the scale up and the record (`.mt-cv-disc`, `--o`, `--r`) are CSS from the section's `--in` (`flow.css`).
 - Motion: one plain screen, no hold. `section[data-cur]` is the film on screen (0, the reel, unless a list title is hovered,
   focused or tapped); `.mt-film[data-on]` and `[data-was]` follow it. `.mt-film[data-film]` holds the poster; motion/rows.ts
   puts the preview player inside. The list is `.mt-molist`.

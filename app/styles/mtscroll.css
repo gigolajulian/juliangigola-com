@@ -79,14 +79,15 @@
 /* pushed in from the top left corner, poster and preview alike: a mark burnt into the bottom right of the video is cut */
 [data-mtscroll] .mt-film :is(img,video){transform-origin:0 0;transform:scale(var(--z,1))}
 [data-mtscroll] .mt-molg{display:none}
-[data-mtscroll] .mt-molist{margin:24px 0 0;padding:0;list-style:none}
+[data-mtscroll] .mt-molist{margin:24px 0 0;padding:0 0 0 22px;list-style:none}
 [data-mtscroll] .mt-molist li+li{margin-top:16px}
-[data-mtscroll] .mt-molist a{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:baseline;color:inherit;text-decoration:none;opacity:.62;transition:opacity 150ms var(--ease-out-strong)}
+[data-mtscroll] .mt-molist a{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:baseline;color:inherit;text-decoration:none}
 [data-mtscroll] .mt-molist .n{position:relative}
-[data-mtscroll] .mt-molist .t{font:900 26px/1 var(--display);letter-spacing:-.045em}
+[data-mtscroll] .mt-molist .t{font:900 26px/1 var(--display);letter-spacing:-.045em;opacity:.62;transition:opacity 150ms var(--ease-out-strong)}
 [data-mtscroll] .mt-molist .k{grid-column:2;margin-top:6px}
 [data-mtscroll] .mt-molist .k i{font-style:normal}
-[data-mtscroll] .mt-molist :is(li[data-on] a,a:focus-visible){opacity:1}
+/* only the large title dims (3:1 as large text); the small labels stay at full ink for 4.5:1 */
+[data-mtscroll] .mt-molist :is(li[data-on] a,a:focus-visible) .t{opacity:1}
 /* the current film: a short teal rule before its number (the one accent marks the current step) */
 [data-mtscroll] .mt-molist li[data-on] .n::before{content:"";position:absolute;right:calc(100% + 8px);top:50%;width:14px;height:2px;background:var(--accent)}
 [data-mtscroll] .mt-molist a:focus-visible{outline:0}
@@ -452,11 +453,11 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-motion .mt-stage{position:relative;min-height:max(100svh,600px);padding:0;color:rgb(var(--on-photo))}
   [data-mtscroll] .mt-mofilms{position:absolute;inset:0;aspect-ratio:auto;margin:0}
-  [data-mtscroll] .mt-mofilms::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 50%,rgb(0 0 0 / .62))}
+  [data-mtscroll] .mt-mofilms::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 40%,rgb(0 0 0 / .75))}
   [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-molist,.mt-momore,.mt-molg){position:absolute;z-index:4}
   [data-mtscroll] .mt-motion .mt-mohead{left:calc(var(--fx) + 36 * var(--u));top:calc(96 * var(--u))}
   [data-mtscroll] .mt-motion .mute{color:rgb(var(--on-photo) / .72)}
-  [data-mtscroll] .mt-molist{left:calc(var(--fx) + 36 * var(--u));bottom:calc(84 * var(--u));margin:0}
+  [data-mtscroll] .mt-molist{left:calc(var(--fx) + 36 * var(--u));bottom:calc(84 * var(--u));margin:0;padding:0}
   [data-mtscroll] .mt-molist li+li{margin-top:calc(18 * var(--u))}
   [data-mtscroll] .mt-molist a{column-gap:calc(16 * var(--u))}
   [data-mtscroll] .mt-molist .t{font-size:calc(44 * var(--u))}

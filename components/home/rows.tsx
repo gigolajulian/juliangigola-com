@@ -62,9 +62,12 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
     was.current = cur;
   }, [cur]);
   const hover = () => media("fine").matches;
+  // a finger on a touch-only screen: its first tap previews. A screen reader's activation has no pointer and opens at once.
+  const touch = React.useRef(false);
   const back = (e: React.FocusEvent | React.MouseEvent) => {
     const to = (e as React.FocusEvent).relatedTarget as Node | null;
-    if (e.type === "mouseleave" ? !list.current!.contains(document.activeElement) : !list.current!.contains(to)) setCur(0);
+    const kept = e.type === "mouseleave" ? list.current!.querySelector(":focus-visible") : to && list.current!.contains(to);
+    if (!kept) setCur(0);
   };
   const dress = FILM_DRESS[films[cur].title];
   return (
@@ -108,9 +111,10 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
                   onMouseEnter={() => hover() && setCur(i)}
                   // keyboard focus previews; a tap's own focus must not, or the tap that follows opens the film
                   onFocus={(e) => e.currentTarget.matches(":focus-visible") && setCur(i)}
+                  onPointerDown={(e) => (touch.current = e.pointerType === "touch" && matchMedia("(hover: none)").matches)}
                   onClick={(e) => {
                     // touch: the first tap previews, the next one opens
-                    if (!hover() && i !== cur) {
+                    if (touch.current && i !== cur) {
                       e.preventDefault();
                       setCur(i);
                     }
