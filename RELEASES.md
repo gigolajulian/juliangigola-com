@@ -6,6 +6,8 @@ version is version.json's (set at each release to the same number as its tag);
 
 ## Unreleased
 
+On a phone, the session packages on the booking page show dots under the cards, so you can see where you are as you swipe.
+
 The Motion row on the home page now reads Director of Photography.
 
 Booking, galleries and the contact form recover from a slow or failing service on their own, and the daily limit on
