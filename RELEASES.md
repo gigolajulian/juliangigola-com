@@ -14,3 +14,5 @@ point at them or tab into them, and the booking time answers the Up and Down key
 
 The booking time labels are easier to read, the film seek bar is easier to hit on a touch screen, and the light theme
 looks the same whether you pick it on the site or your device does.
+
+The opening splash on the home page runs lighter on phones and tablets: the photos stay sharp as they rush past.
