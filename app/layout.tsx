@@ -13,9 +13,7 @@ import { THEME_COLOR } from "@/lib/theme-color";
 import "./globals.css";
 import { ImageFallback } from "@/components/site/image-fallback";
 import { PageTransition } from "@/components/site/page-transition";
-import { CardTilt } from "@/components/effects/card-tilt";
 import { HoverSettle } from "@/components/effects/hover-settle";
-import { FocusField } from "@/components/contact/focus-field";
 import { ldJson, siteGraph } from "@/lib/og/seo";
 import { DebugGate } from "@/components/dev/debug-gate";
 import { VisitTrail } from "@/components/analytics/visit-trail";
@@ -257,10 +255,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           <PageTransition>{children}</PageTransition>
         </main>
         <SiteFooter />
-        {/* Focus round the pointer over a gallery: `focus-field.tsx`. */}
+        {/* FocusField and CardTilt were unmounted (2026-11-25): no page renders the galleries and cards they target. */}
         <MotionGate>
-          <FocusField />
-          <CardTilt />
           {/* A photograph's hover waits 600ms after a page lands: `hover-settle.tsx`. */}
           <HoverSettle />
         </MotionGate>
