@@ -60,64 +60,16 @@ html[data-mt-motion] .mt-film iframe[data-big]{width:calc(2 * max(100cqw,100cqh 
 html[data-mt-motion] .mt-film video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;opacity:0;transition:opacity .4s ease}
 html[data-mt-motion] .mt-film video[data-ready]{opacity:1}
 
-/* Motion, desktop structure with the engine on (m1): one screen, four films. The hold gives each film an even share of
-   the scroll (rows.tsx sets `data-on`). The new film develops over the one before it (`data-was`): a plain fade while
-   it goes from grey to color. It never dims and never passes through black. The static layout
-   (the "Motion: vertical films" block of mtscroll.css) is what reduced motion keeps. */
-@keyframes mt-dev-op{from{opacity:0}to{opacity:1}}
-@keyframes mt-dev-col{from{filter:grayscale(1) contrast(1.1)}to{filter:grayscale(0) contrast(1)}}
-html[data-mt-held] .mt-motion .mt-stage{display:block;padding:0;color:rgb(var(--on-photo))}
-html[data-mt-held] .mt-motion.mt-held .mt-row{position:absolute;inset:0;margin:0;padding:0;overflow:hidden;touch-action:auto;cursor:auto;user-select:auto;-webkit-user-select:auto}
-html[data-mt-held] .mt-motion.mt-held .mt-track{position:absolute;inset:0;display:block;width:auto;gap:0;will-change:auto}
-html[data-mt-held] .mt-motion .mt-film{position:absolute;inset:0;width:auto;height:auto;border-radius:0;opacity:0;visibility:hidden}
-html[data-mt-held] .mt-motion .mt-film[data-was]{opacity:1;visibility:visible;z-index:1}
-html[data-mt-held] .mt-motion[data-in] .mt-film[data-on]{visibility:visible;z-index:2;animation:mt-dev-op 1.2s cubic-bezier(.4,0,.2,1) both,mt-dev-col 2s cubic-bezier(.3,.4,.3,1) both}
-/* pushed in from the top left corner, poster and preview alike: a mark burnt into the bottom right of the video is cut */
-html[data-mt-held] .mt-motion .mt-film :is(img,video){transform-origin:0 0;transform:scale(var(--z,1))}
-html[data-mt-held] .mt-motion .mt-film iframe[data-big]{scale:calc(.6 * var(--z,1))}
-html[data-mt-held] .mt-motion .mt-film iframe:not([data-big]){scale:calc(1.2 * var(--z,1))}
-html[data-mt-held] .mt-motion .mt-film iframe{translate:calc(-50% + (var(--z,1) - 1) * 50cqw) calc(-50% + (var(--z,1) - 1) * 50cqh)}
-html[data-mt-held] .mt-motion .mt-film:focus-visible{outline:0}
-/* the focus mark on a full-screen film: white, 2px, well inside the edges.
-   Drawn on the stage, not the film: the film is scaled past the window while it arrives, the stage is the box on screen. It starts under the header, which is 61px tall, 69px from 1920 wide. */
-html[data-mt-held] .mt-motion:has(.mt-film:focus-visible) .mt-stage::after{content:"";position:absolute;inset:77px 8px 8px;z-index:4;border:2px solid var(--dark-ink);pointer-events:none}
-/* the words sit on the film: a soft ground under them, top and bottom */
-html[data-mt-held] .mt-motion .mt-stage::before{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 52%,rgb(0 0 0 / .62))}
-html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot){position:absolute;z-index:4;left:calc(var(--fx) + 36 * var(--u));width:auto;margin:0;padding:0;pointer-events:none}
-html[data-mt-held] .mt-motion .mt-mohead{top:calc(96 * var(--u))}
-/* smaller than the film's own title */
-html[data-mt-held] .mt-motion .mt-mohead h2{font-size:calc(56 * var(--u));margin-bottom:calc(10 * var(--u))}
-html[data-mt-held] .mt-motion :is(.mt-mohead,.mt-mofoot) .mute{color:rgb(var(--on-photo) / .72)}
-/* the film's title block sits bottom left */
-html[data-mt-held] .mt-motion .mt-mofoot{top:auto;bottom:calc(64 * var(--u))}
-html[data-mt-held] .mt-motion .mt-mofoot h3{font-size:calc(104 * var(--u));margin:calc(12 * var(--u)) 0 calc(14 * var(--u))}
-html[data-mt-held] .mt-motion .mt-mofoot{right:calc(var(--fx) + 36 * var(--u))}
-/* "Watch the films" sits bottom right, across from the title */
-html[data-mt-held] .mt-motion .mt-mofoot .btn{position:absolute;right:0;bottom:0;margin:0;pointer-events:auto;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
-/* on the right, small and close to the edge */
-html[data-mt-held] .mt-motion .mt-mopg{position:absolute;z-index:4;right:calc(var(--fx) + 20 * var(--u));top:50%;transform:translateY(-50%);margin:0;padding:0;list-style:none;display:grid;justify-items:end;gap:calc(10 * var(--u));pointer-events:none;font-size:max(11px,calc(13 * var(--u)))}
-/* The numbers sit on the film with no ground of their own. Julian: set them bold in the display face, like the
-   site's headings, so they read as large text on any frame (WCAG large text, 3:1), with a close dark halo for the palest
-   frames. No plate or patch behind them: a soft patch shows as a grey oval. All at full; the current one leads by
-   its rule. */
-html[data-mt-held] .mt-motion .mt-mopg li{display:flex;flex-direction:row-reverse;align-items:center;gap:calc(12 * var(--u));font:900 max(19px,calc(24 * var(--u)))/1 var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums;text-shadow:0 0 2px rgb(0 0 0 / .95),0 0 3px rgb(0 0 0 / .9),0 0 5px rgb(0 0 0 / .8),0 0 10px rgb(0 0 0 / .5);transition:opacity .25s ease}
-html[data-mt-held] .mt-motion .mt-mopg li::after{content:"";width:calc(40 * var(--u));height:1px;background:currentColor;box-shadow:0 0 2px rgb(0 0 0 / .8);transform-origin:100% 50%;transform:scaleX(0);transition:transform .4s cubic-bezier(.23,1,.32,1)}
-html[data-mt-held] .mt-motion .mt-mopg li[data-on]{opacity:1}
-html[data-mt-held] .mt-motion .mt-mopg li[data-on]::after{transform:none}
-/* the client mark: top right only, small, never at the bottom (Julian) */
-html[data-mt-held] .mt-motion .mt-molg{position:absolute;z-index:4;top:calc(96 * var(--u));right:calc(var(--fx) + 48 * var(--u));height:calc(28 * var(--u));aspect-ratio:var(--ar);background:rgb(var(--on-photo) / .8);-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;pointer-events:none;animation:mt-dev-op .8s cubic-bezier(.4,0,.2,1) both}
-/* how far through the films: on the right edge, under the page's own scroll thumb, one segment a film */
-html[data-mt-held] .mt-motion .mt-mobar{position:absolute;z-index:4;right:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,rgb(var(--on-photo)) calc(var(--p,0) * 100%),rgb(var(--on-photo) / .24) 0);-webkit-mask:repeating-linear-gradient(to bottom,#000 0 calc(100% / var(--n,4) - 6px),transparent 0 calc(100% / var(--n,4)));mask:repeating-linear-gradient(to bottom,#000 0 calc(100% / var(--n,4) - 6px),transparent 0 calc(100% / var(--n,4)))}
-html:not([data-mt-held]) .mt-motion :is(.mt-mopg,.mt-molg,.mt-mobar){display:none}
+/* the zoom (FILM_DRESS) on the players too, from the top left corner like the poster */
+html[data-mt-motion] .mt-motion .mt-film iframe[data-big]{scale:calc(.6 * var(--z,1))}
+html[data-mt-motion] .mt-motion .mt-film iframe:not([data-big]){scale:calc(1.2 * var(--z,1))}
+html[data-mt-motion] .mt-motion .mt-film iframe{translate:calc(-50% + (var(--z,1) - 1) * 50cqw) calc(-50% + (var(--z,1) - 1) * 50cqh)}
 
 /* Snap rows: the record now comes fully out of the bottom (118px), more than the static row's 72px of room. */
 
 /* rows.ts sets html[data-mt-par] while Cover art's driver runs. Coming in: the heading and the row ride up at their own rates.
    Going out: the stage sinks and dims while Motion slides over
    it, the same hand-over as hero into Commissions (flow.css). Motion's film settles from a slight push-in as it arrives. */
-html[data-mt-par][data-mt-held] .mt-motion{position:relative;z-index:2;background:var(--bg)}
-html[data-mt-par][data-mt-held] .mt-motion .mt-film{scale:calc(1.1 - var(--in,1) * .1)}
-html[data-mt-par][data-mt-held] .mt-motion .mt-mohead{translate:0 calc((1 - var(--in,1)) * 10svh)}
 /* Cover art on a screen taller than 1440: the covers grow to fill the stage (4K had a 780px empty band); their captions keep the page's size */
 /* The lid (rows.ts sets html[data-mt-lid] beside data-mt-par): the stage is held at the top of the window for the whole way in, under Commissions (z-index 2, flow.css),
    whose lower edge lifts off it. No ride up; the heading and covers come up from dim as the edge clears. */

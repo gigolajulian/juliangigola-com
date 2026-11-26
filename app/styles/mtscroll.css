@@ -65,17 +65,37 @@
 [data-mtscroll] .mt-sleeve .disc,.cv4 .mt-sleeve .disc{position:absolute;left:calc(6 * var(--u));top:calc(6 * var(--u));width:calc(308 * var(--u));height:calc(308 * var(--u));border-radius:50%;background-size:cover;background-position:center;overflow:hidden;box-shadow:inset 0 0 0 2px #050505,inset 0 0 0 3px rgba(255,255,255,.16);transform:translateX(calc(var(--o,0) * 103 * var(--u))) rotate(calc(var(--o,0) * 200deg))}
 [data-mtscroll] .mt-sleeve .disc::before,.cv4 .mt-sleeve .disc::before{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,transparent 0 16.5%,rgba(0,0,0,.5) 16.6% 17.2%,transparent 17.4% 97%,rgba(0,0,0,.65) 98.5%),repeating-radial-gradient(circle,rgba(0,0,0,.22) 0 .6px,rgba(255,255,255,.05) .6px 1.3px,rgba(0,0,0,0) 1.3px 2.1px),radial-gradient(circle,rgba(0,0,0,.28),rgba(0,0,0,.1) 60%,rgba(0,0,0,.34)),linear-gradient(rgba(8,10,14,.26),rgba(8,10,14,.26))}
 [data-mtscroll] .mt-sleeve .disc::after,.cv4 .mt-sleeve .disc::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle,#070707 0 1.9%,rgba(255,255,255,.3) 2% 2.4%,transparent 2.5%),conic-gradient(from 18deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.2) 14deg,rgba(255,255,255,0) 32deg,rgba(255,255,255,0) 170deg,rgba(255,255,255,.13) 192deg,rgba(255,255,255,0) 214deg,rgba(255,255,255,0) 360deg);transform:rotate(calc(var(--o,0) * -200deg))}
-[data-mtscroll] .mt-motion .mt-stage{padding-top:calc(104 * var(--u));padding-bottom:calc(72 * var(--u))}
-[data-mtscroll] .mt-mohead,[data-mtscroll] .mt-mofoot{position:relative;width:min(100%,calc(1440 * var(--u)));margin-inline:auto;padding-inline:calc(36 * var(--u))}
+/* Motion (rows.tsx HomeFilms): the films' layers, the head, the list. Phones and tablets: the head, a square film, the list under it on the page.
+   Desktop (the block at "Motion: one screen" below): the film fills the screen and the words sit on it. */
+[data-mtscroll] .mt-motion .mt-stage{padding:calc(104 * var(--u)) calc(var(--fx) + 36 * var(--u)) calc(72 * var(--u))}
 [data-mtscroll] .mt-mohead h2{font:900 calc(88 * var(--u))/.9 var(--display);letter-spacing:-.05em;margin:0 0 calc(14 * var(--u))}
 [data-mtscroll] .mt-mohead p{margin:0}
-[data-mtscroll] .mt-motion .mt-row{--pl:calc(var(--fx) + 36 * var(--u));margin-top:calc(42 * var(--u));padding:0 calc(100vw - var(--pl) - 700 * var(--u)) 0 var(--pl);scroll-padding-left:var(--pl)}
-[data-mtscroll] .mt-motion .mt-track{gap:calc(60 * var(--u))}
-[data-mtscroll] .mt-film{display:block;width:calc(700 * var(--u));height:calc(394 * var(--u));border-radius:calc(4 * var(--u));overflow:hidden;background:var(--night)}
-[data-mtscroll] .mt-mofoot{margin-top:calc(38 * var(--u))}
-[data-mtscroll] .mt-mofoot p{margin:0}
-[data-mtscroll] .mt-mofoot h3{font:900 calc(64 * var(--u))/.9 var(--display);letter-spacing:-.05em;margin:calc(10 * var(--u)) 0 calc(12 * var(--u))}
-[data-mtscroll] .mt-mofoot .btn{position:absolute;right:calc(36 * var(--u));bottom:0}
+[data-mtscroll] .mt-mofilms{position:relative;aspect-ratio:1;margin-top:24px;overflow:hidden;background:var(--night)}
+/* a hard cut: the new film is drawn at once over the one before it (`data-was`), never through black */
+[data-mtscroll] .mt-film{position:absolute;inset:0;visibility:hidden}
+[data-mtscroll] .mt-film[data-was]{visibility:visible;z-index:1}
+[data-mtscroll] .mt-film[data-on]{visibility:visible;z-index:2}
+[data-mtscroll] .mt-film img{object-fit:cover}
+/* pushed in from the top left corner, poster and preview alike: a mark burnt into the bottom right of the video is cut */
+[data-mtscroll] .mt-film :is(img,video){transform-origin:0 0;transform:scale(var(--z,1))}
+[data-mtscroll] .mt-molg{display:none}
+[data-mtscroll] .mt-molist{margin:24px 0 0;padding:0 0 0 22px;list-style:none}
+[data-mtscroll] .mt-molist li+li{margin-top:16px}
+[data-mtscroll] .mt-molist a{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:baseline;color:inherit;text-decoration:none}
+[data-mtscroll] .mt-molist .n{position:relative}
+[data-mtscroll] .mt-molist .t{font:900 26px/1 var(--display);letter-spacing:-.045em;opacity:.62;transition:opacity 150ms var(--ease-out-strong)}
+[data-mtscroll] .mt-molist .k{grid-column:2;margin-top:6px}
+[data-mtscroll] .mt-molist .k i{font-style:normal}
+/* only the large title dims (3:1 as large text); the small labels stay at full ink for 4.5:1 */
+[data-mtscroll] .mt-molist :is(li[data-on] a,a:focus-visible) .t{opacity:1}
+/* the current film: a short teal rule before its number (the one accent marks the current step) */
+[data-mtscroll] .mt-molist li[data-on] .n::before{content:"";position:absolute;right:calc(100% + 8px);top:50%;width:14px;height:2px;background:var(--accent)}
+[data-mtscroll] .mt-molist a:focus-visible{outline:0}
+[data-mtscroll] .mt-molist a:focus-visible .t{text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:.14em}
+/* touch: the current title opens on the next tap, and says so */
+[data-mtscroll] .mt-molist .w{display:none;margin-left:12px;text-decoration:underline;text-underline-offset:4px}
+@media (hover:none){[data-mtscroll] .mt-molist li[data-on] .w{display:inline}}
+[data-mtscroll] .mt-momore{margin-top:28px}
 
 /* ── Book online (3.4) and By quote (3.5) ── */
 [data-mtscroll] .mt-book>.mt-frame{min-height:max(100svh,600px)}
@@ -251,20 +271,12 @@
 
   /* Rows: snap rows, the snapped item centred. */
   [data-mtscroll] .mt-held .mt-stage{min-height:0;padding:48px 0 40px}
-  [data-mtscroll] .mt-mohead,[data-mtscroll] .mt-mofoot{padding-inline:16px;height:auto}
+  [data-mtscroll] .mt-motion .mt-stage{padding:48px 16px 40px}
   [data-mtscroll] .mt-item{scroll-snap-align:center}
   [data-mtscroll] .mt-sleeve{width:var(--cv);height:var(--cv)}
   [data-mtscroll] .mt-sleeve .disc{display:none;left:calc(var(--cv) * .014);top:calc(var(--cv) * .014);width:calc(var(--cv) * .972);height:calc(var(--cv) * .972);transform:translateY(calc(var(--o,0) * 118px)) rotate(calc(var(--o,0) * 66deg))}
   [data-mtscroll] .mt-sleeve[data-on] .disc{display:block}
   [data-mtscroll] .mt-mohead h2{font-size:46px}
-  /* the film runs edge to edge */
-  [data-mtscroll] .mt-motion .mt-row{--fw:100vw;margin-top:28px;padding:0;scroll-padding:0}
-  [data-mtscroll] .mt-motion .mt-film{border-radius:0}
-  [data-mtscroll] .mt-motion .mt-track{gap:12px}
-  [data-mtscroll] .mt-film{width:var(--fw);height:calc(var(--fw) * 9 / 16)}
-  [data-mtscroll] .mt-mofoot{margin-top:24px}
-  [data-mtscroll] .mt-mofoot h3{font-size:34px}
-  [data-mtscroll] .mt-mofoot .btn{position:static;margin-top:16px}
 
   /* Book online and By quote: photo on top, rows under it, held bar. */
   [data-mtscroll] .mt-book>.mt-frame{min-height:0;width:100%;padding:24px 0 24px}
@@ -399,7 +411,6 @@
   [data-mtscroll] .mt-cap .pl::before{content:" | ";content:" | " / ""}
   [data-mtscroll] .mt-ctas{left:auto;right:max(16px,env(safe-area-inset-right));bottom:calc(env(safe-area-inset-bottom) + 52px)}
   [data-mtscroll] .mt-ctas .btn{flex:none}
-  [data-mtscroll] .mt-motion .mt-row{--fw:60vw}
   [data-mtscroll] .mt-ph{font-size:120px}
 }
 /* intro waiting state, set by the head script before first paint (the rest lives in components/home/intro/intro.css) */
@@ -437,23 +448,23 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
   [data-mtscroll] .mt-bar .btn{white-space:nowrap;justify-content:center;text-align:center;font-size:12px;padding-inline:10px}
 }
 
-/* Motion: vertical films */
-/* Desktop structure: the films stack one under another in natural scroll, the
-   head and the current film's lines stay beside them. This is also the whole
-   layout with the engine off (reduced motion); motion/rows.css closes the films
-   that are not at the middle of the screen. --fh: frame height, --ft: where the
-   film lines hold, their foot level with the foot of a frame at mid screen. */
+/* Motion: one screen. The film fills it, the head sits top left, the list bottom left, View more bottom right, all on the
+   film with the on-photo set over a soft ground top and bottom. */
 @media (min-width:1024px) and (min-height:600px){
-  [data-mtscroll] .mt-motion .mt-stage{--fh:calc(450 * var(--u));--ft:calc(50svh + 60 * var(--u));display:grid;grid-template-columns:minmax(0,1fr) calc(800 * var(--u));column-gap:calc(36 * var(--u));padding-inline:calc(var(--fx) + 36 * var(--u))}
-  [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-mofoot){grid-area:1/1;align-self:start;position:sticky;top:calc(104 * var(--u));width:auto;margin:0;padding:0}
-  /* Keeps the heading's margin box as deep as the film lines reach, so both let go together at the last film. */
-  [data-mtscroll] .mt-motion .mt-mohead{margin-bottom:calc(var(--ft) - 59 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-mofoot{top:var(--ft);margin-top:calc(var(--ft) - 104 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-mofoot h3{font-size:calc(52 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-mofoot .btn{position:static;margin-top:calc(22 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-row{grid-area:1/2;margin-top:max(0px,calc(50svh - var(--fh) / 2 - 104 * var(--u)));padding:0;overflow:visible;scroll-snap-type:none}
-  [data-mtscroll] .mt-motion .mt-track{flex-direction:column;width:auto;gap:calc(24 * var(--u))}
-  [data-mtscroll] .mt-motion .mt-film{width:100%;height:var(--fh)}
+  [data-mtscroll] .mt-motion .mt-stage{position:relative;min-height:max(100svh,600px);padding:0;color:rgb(var(--on-photo))}
+  [data-mtscroll] .mt-mofilms{position:absolute;inset:0;aspect-ratio:auto;margin:0}
+  [data-mtscroll] .mt-mofilms::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 40%,rgb(0 0 0 / .75))}
+  [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-molist,.mt-momore,.mt-molg){position:absolute;z-index:4}
+  [data-mtscroll] .mt-motion .mt-mohead{left:calc(var(--fx) + 36 * var(--u));top:calc(96 * var(--u))}
+  [data-mtscroll] .mt-motion .mute{color:rgb(var(--on-photo) / .72)}
+  [data-mtscroll] .mt-molist{left:calc(var(--fx) + 36 * var(--u));bottom:calc(84 * var(--u));margin:0;padding:0}
+  [data-mtscroll] .mt-molist li+li{margin-top:calc(18 * var(--u))}
+  [data-mtscroll] .mt-molist a{column-gap:calc(16 * var(--u))}
+  [data-mtscroll] .mt-molist .t{font-size:calc(44 * var(--u))}
+  [data-mtscroll] .mt-molist li[data-on] .n::before{background:var(--dark-accent)}
+  [data-mtscroll] .mt-momore{right:calc(var(--fx) + 36 * var(--u));bottom:calc(84 * var(--u));margin:0;border-color:rgb(var(--on-photo));color:rgb(var(--on-photo))}
+  /* the client mark: top right only, small, never at the bottom (Julian) */
+  [data-mtscroll] .mt-molg{display:block;top:calc(96 * var(--u));right:calc(var(--fx) + 48 * var(--u));height:calc(28 * var(--u));aspect-ratio:var(--ar);background:rgb(var(--on-photo) / .8);-webkit-mask:var(--m) center/contain no-repeat;mask:var(--m) center/contain no-repeat;pointer-events:none}
 }
 
 /* Book online: one line a row, and the booking in place (book-online.tsx) */
@@ -662,17 +673,54 @@ html[data-theme="dark"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data
   html[data-theme="dark"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--bg) 56%,transparent) 42%,color-mix(in srgb,var(--bg) 48%,transparent) 62%,color-mix(in srgb,var(--bg) 26%,transparent) 80%,color-mix(in srgb,var(--bg) 8%,transparent) 92%,transparent)}
 }
 
-/* Hero tagline in Geist Mono 600, larger than the labels. */
-html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:600;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
+/* Hero tagline in Geist Mono 400, larger than the labels. */
+html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-family:var(--font-tagline),var(--mono);font-weight:400;letter-spacing:.08em;font-size:max(15px,calc(17.5 * var(--u)))!important}
 @media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:14.5px!important;letter-spacing:.06em}html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(118px + env(safe-area-inset-bottom))}}
-@media (min-width:1024px){html:root:root .v3 .mt-hero .mt-name h1{bottom:calc(114 * var(--u))}}
-/* Name and tagline, tuned by Julian per screen shape (hero tuner, second pass): phone, then desktop in three bands by shape.
-   Desktop values are in --u, so each band hits its tuned pixels at its sample screen (1440x900, 1920x1080, 2560x1080; --u 1, 1.2, 1.2). */
-@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{bottom:calc(107px + env(safe-area-inset-bottom))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:12px!important;left:calc(19 * var(--pu));bottom:calc(64px + env(safe-area-inset-bottom))}}
-@media (min-width:1024px) and (min-height:600px) and (max-aspect-ratio:17/10){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(33 * var(--u));bottom:calc(79 * var(--u))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:max(11px,calc(14 * var(--u)))!important;left:calc(46 * var(--u));bottom:calc(55 * var(--u))}}
-@media (min-width:1024px) and (min-height:600px) and (min-aspect-ratio:17/10) and (max-aspect-ratio:2/1){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(41.7 * var(--u));bottom:calc(90 * var(--u))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:max(11px,calc(12.5 * var(--u)))!important;left:calc(56.7 * var(--u));bottom:calc(64.2 * var(--u))}}
-@media (min-width:1024px) and (min-height:600px) and (min-aspect-ratio:2/1){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(35.8 * var(--u));bottom:calc(110.8 * var(--u))}html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{font-size:max(11px,calc(12.5 * var(--u)))!important;left:calc(60 * var(--u));bottom:calc(83.3 * var(--u))}}
-/* The name sits higher (phone 118px, desktop 114u) so the tagline never runs under the descenders of "Gigola". */
+/* Name, tagline and buttons, tuned by Julian in the hero tuner (third pass, 2026-11-25), layout A: name and tagline on the
+   left, buttons on the right, one bottom line. The tagline keeps one size ratio to the name at every screen (its size matched
+   to the tuner's line length in this font). Desktop is in --u, so the block keeps its 1440x900 shape at every size; phone and
+   iPad tall (and an iPad Pro upright) stack the three; a phone on its side keeps them on one line, name and tagline capped
+   to the room left beside the buttons after the side insets, so they never meet them. */
+@media (min-width:1024px) and (min-height:600px) and (orientation:landscape){
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(45.5 * var(--u) + var(--dnl,0px));bottom:calc(64 * var(--u) + 1.2 * (max(11px,11.6 * var(--u)) - 11.6 * var(--u)) + var(--dnb,0px));font-size:calc(170.24 * var(--u));line-height:.86}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:calc(91 * var(--u) + var(--dcl,0px));bottom:calc(46 * var(--u) + var(--dcb,0px));font-size:max(11px,calc(11.6 * var(--u)))!important;line-height:1.2}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas{right:calc(36 * var(--u) + var(--dbr,0px));bottom:calc(54 * var(--u) + var(--dbb,0px));gap:calc(8 * var(--u))}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas .btn{height:calc(44 * var(--u));padding:0 calc(20 * var(--u));font-size:max(11px,calc(11 * var(--u)))}
+}
+@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name{--nm:calc((100vw - 32px) / 5.62);--cf:calc(var(--nm) * .2057)}}
+@media (min-width:600px) and (max-width:1023px) and (min-height:600px),(min-width:1024px) and (min-height:600px) and (orientation:portrait){html:root:root .v3 .mt-hero .mt-name{--nm:min(112px,12vw);--cf:calc(var(--nm) * .1331)}}
+@media (max-width:599px),(min-width:600px) and (max-width:1023px) and (min-height:600px),(min-width:1024px) and (min-height:600px) and (orientation:portrait){
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(16px + var(--dnl,0px));bottom:calc(77.4px + 2.4 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom) + var(--dnb,0px));font-size:calc(1.041 * var(--nm));line-height:.86}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:calc(16px + var(--dcl,0px));bottom:calc(76.7px + env(safe-area-inset-bottom) + var(--dcb,0px));font-size:var(--cf)!important;line-height:1.2}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .pl{margin-top:0}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas{left:16px;right:calc(16px + var(--dbr,0px));bottom:calc(16px + env(safe-area-inset-bottom) + var(--dbb,0px));gap:8px}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas .btn{flex:1;height:44px;min-height:44px;font-size:11px}
+}
+/* phone: the name runs edge to edge with the same 16px as the tagline and buttons (the name is 5.705 of its size wide) */
+@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{font-size:calc((100vw - 32px) / 5.705)}}
+@media (max-height:599px) and (min-width:600px){
+  html:root:root .v3 .mt-hero .mt-name{--nm:clamp(44px,7.5vw,84px);--sl:max(16px,env(safe-area-inset-left));--sr:max(16px,env(safe-area-inset-right));--room:calc(100vw - var(--sl) - var(--sr));--cf:min(calc(var(--nm) * .2008),calc((var(--room) - 300px) / 40.5))}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{left:calc(var(--sl) + 6.3px - .022 * var(--nm) + var(--dnl,0px));bottom:calc(22px + 1.2 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom) + var(--dnb,0px));font-size:min(calc(1.315 * var(--nm)),calc((var(--room) - 300px) / 5.71));line-height:.86}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap.mt-cap{left:calc(var(--sl) + var(--dcl,0px));bottom:calc(22px + env(safe-area-inset-bottom) + var(--dcb,0px));font-size:var(--cf)!important;line-height:1.2}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas{left:auto;right:calc(var(--sr) + var(--dbr,0px));bottom:calc(22px + env(safe-area-inset-bottom) + var(--dbb,0px))}
+  html:root:root .v3 .mt-hero .mt-name .mt-ctas .btn{flex:none;height:44px}
+}
+/* a small phone on its side (667 wide): the one-line tagline would reach the buttons, so it takes two lines and the name rises a line */
+@media (max-height:599px) and (min-width:600px) and (max-width:759px){
+  html:root:root .v3 .mt-hero .mt-name{--cf:calc(var(--nm) * .2008)}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .pl{display:block}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .pl::before{content:none}
+  html:root:root .v3 .mt-hero .mt-name .mt-name-in h1{bottom:calc(22px + 2.4 * var(--cf) + .2 * var(--nm) + env(safe-area-inset-bottom) + var(--dnb,0px))}
+}
+/* Julian's per-size tune (2026-11-26, from the hero tuner at 5c69b962): offsets added to the layout above, so each screen lands
+   where he put it. Desktop: anchors at u .7 (1024x600), .8194 (1180x820), .8533 (1366x768), 1 (1440x900), 1.2 (1920x1080), blended
+   linearly in u between them so resizing never jumps; past 16:9 the --wx term (px wider than 16:9) brings the block in, as he set
+   at 2474x660. Phone, tablet upright, phone on its side and the small side phone each take one constant offset. */
+@media (min-width:1024px) and (min-height:600px) and (orientation:landscape){html:root:root .v3 .mt-hero .mt-name{--wx:max(0px,100vw - 177.78svh);--dnl:calc(15px + -125.6281 * clamp(0px,var(--u) - 0.7px,0.1194px) + 28.6299 * clamp(0px,var(--u) - 0.8533px,0.1467px) + -2.0000 * clamp(0px,var(--u) - 1px,0.2000px) + 0.22857 * var(--wx));--dnb:calc(16.4px + -137.3534 * clamp(0px,var(--u) - 0.7px,0.1194px) + 70.8930 * clamp(0px,var(--u) - 0.8533px,0.1467px) + -66.5000 * clamp(0px,var(--u) - 1px,0.2000px) + 0.015568 * var(--wx));--dcl:calc(-15.4px + 187.6047 * clamp(0px,var(--u) - 0.7px,0.1194px) + -607.6696 * clamp(0px,var(--u) - 0.8194px,0.0339px) + 77.0279 * clamp(0px,var(--u) - 0.8533px,0.1467px) + 11.5000 * clamp(0px,var(--u) - 1px,0.2000px) + 0.22945 * var(--wx));--dcb:calc(11.7px + -129.8157 * clamp(0px,var(--u) - 0.7px,0.1194px) + -35.3982 * clamp(0px,var(--u) - 0.8194px,0.0339px) + 51.1247 * clamp(0px,var(--u) - 0.8533px,0.1467px) + -12.5000 * clamp(0px,var(--u) - 1px,0.2000px) + 0.012455 * var(--wx));--dbr:calc(0px + 0.32336 * var(--wx));--dbb:calc(0px + 0.025294 * var(--wx))}}
+@media (max-width:599px){html:root:root .v3 .mt-hero .mt-name{--dnb:4.7px;--dcb:-2.9px}}
+@media (min-width:600px) and (max-width:1023px) and (min-height:600px),(min-width:1024px) and (min-height:600px) and (orientation:portrait){html:root:root .v3 .mt-hero .mt-name{--dcb:8.1px}}
+@media (max-height:599px) and (min-width:600px){html:root:root .v3 .mt-hero .mt-name{--dnb:3.4px;--dcb:-2.8px}}
+@media (max-height:599px) and (min-width:600px) and (max-width:759px){html:root:root .v3 .mt-hero .mt-name{--dnb:3.1px;--dcb:0px;--dcl:8.3px}}
 /* the booking flow's first height (stepper plus the calendar wait) while its chunk is still on the way (book-online.tsx) */
 [data-mtscroll] .mt-bin-wait{min-height:calc(849px + 1.5vw)} /* measured 865-888px from 1024 to 2560 wide */
 @media not ((min-width:1024px) and (min-height:600px)){[data-mtscroll] .mt-bin-wait{min-height:761px}}

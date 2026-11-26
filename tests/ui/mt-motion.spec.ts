@@ -7,10 +7,9 @@ import { errorsOn, open, RATIOS } from "./ratios";
    (data-bar, bars.ts) once their top is above 0.45 of the screen. Each section
    keeps its own bar while it is up there, so book and quote can carry it at once.
    Scrolled by script, not the wheel: Lenis would ease a wheel.
-   On a fine pointer a held row glides to its nearest item once the scroll stops
-   (motion/rows.ts, snap), and --p eases toward the scroll, so the --p check waits
-   for --p to match the hold's progress where the scroll came to rest. The two
-   ends are resting places of their own, so the snap leaves them at 0 and 1. */
+   --p eases toward the scroll, so the --p check waits for --p to match the hold's
+   progress where the scroll came to rest. The hero is the held section (Motion is one
+   plain screen since its film list, 2026-11-26). */
 
 const at = (name: string) => RATIOS.find((r) => r.name === name)!;
 const to = (page: Page, y: number) => page.evaluate((top) => scrollTo({ top, behavior: "instant" }), y);
@@ -46,9 +45,9 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
   await home(page);
   await expect(page.locator("html[data-mt-held]")).toBeAttached();
 
-  const held = page.locator('[data-mt="motion"]');
+  const held = page.locator('[data-mt="hero"]');
   await expect(held).toHaveAttribute("data-hold");
-  const { top, h, vh } = await boxOf(page, '[data-mt="motion"]');
+  const { top, h, vh } = await boxOf(page, '[data-mt="hero"]');
   expect(h, "the hold makes the section taller than the screen").toBeGreaterThan(vh);
   /** --p, and the hold's progress at the scroll as it is now. */
   const read = () =>
@@ -56,11 +55,9 @@ test("laptop: a held section's --p runs 0 to 1 through its hold, and no section 
       (el, [t, run]) => ({ p: parseFloat(el.style.getPropertyValue("--p")), at: Math.min(1, Math.max(0, (scrollY - t) / run)) }),
       [top, h - vh] as const,
     );
-  // the middle last: the snap glides from there to an item, and a jump made mid-glide is taken back by the glide
   for (const [y, want] of [
-    // Motion rests each film at the middle of its share, so the snap glides off both ends: only --p following the scroll is checked there
-    [top, null],
-    [top + h - vh, null],
+    [top, 0],
+    [top + h - vh, 1],
     [top + (h - vh) / 2, null],
   ] as const) {
     await to(page, y);

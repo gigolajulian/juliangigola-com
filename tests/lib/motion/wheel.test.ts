@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isTrackpad } from "@/lib/motion/wheel";
+import { isTrackpad, notchStream } from "@/lib/motion/wheel";
 
 const px = (deltaX: number, deltaY: number) => ({ deltaMode: 0, deltaX, deltaY });
 
@@ -37,5 +37,43 @@ describe("isTrackpad", () => {
   it("reads line and page modes as a wheel, however small", () => {
     expect(isTrackpad({ deltaMode: 1, deltaX: 0, deltaY: 1 }, 1)).toBe(false);
     expect(isTrackpad({ deltaMode: 2, deltaX: 0, deltaY: 1 }, 1)).toBe(false);
+  });
+});
+
+describe("notchStream", () => {
+  const ev = (deltaY: number, timeStamp: number, deltaMode = 0) => ({ deltaMode, deltaX: 0, deltaY, timeStamp });
+
+  it("keeps a trackpad flick a trackpad when it peaks past a notch", () => {
+    const isNotch = notchStream();
+    const flick = [2, 6, 14, 30, 55, 90, 140, 90, 40, 12, 3];
+    expect(flick.map((d, i) => isNotch(ev(d, i * 16), 2))).toEqual(flick.map(() => false));
+  });
+
+  it("reads a mouse spin as notches, and each slow notch on its own", () => {
+    const isNotch = notchStream();
+    expect([0, 40, 80].map((t) => isNotch(ev(100, t), 1.5))).toEqual([true, true, true]);
+    expect(isNotch(ev(100, 1000), 1.5)).toBe(true);
+    expect(isNotch(ev(1, 2000, 1), 1)).toBe(true);
+  });
+
+  it("starts a new read after a gap", () => {
+    const isNotch = notchStream();
+    isNotch(ev(100, 0), 1);
+    expect(isNotch(ev(4, 500), 1)).toBe(false);
+    expect(isNotch(ev(120, 510), 1)).toBe(false);
+  });
+
+  it("reads Safari's 40px line notch on a 1x screen as a notch", () => {
+    // Safari 26 at dpr 1: one line = deltaY 40, three lines = 120 (JG - MAC, #1578).
+    const isNotch = notchStream();
+    expect([0, 300, 600].map((t) => isNotch(ev(40, t), 1))).toEqual([true, true, true]);
+    expect(isNotch(ev(-40, 900), 1)).toBe(true);
+    expect(isNotch(ev(120, 1200), 1)).toBe(true);
+    expect(isNotch(ev(39.9, 1500), 1)).toBe(false);
+  });
+
+  it("keeps a 1x trackpad stream a trackpad when it passes 40", () => {
+    const isNotch = notchStream();
+    expect([4, 18, 40, 120, 60].map((d, i) => isNotch(ev(d, i * 16), 1))).toEqual([false, false, false, false, false]);
   });
 });

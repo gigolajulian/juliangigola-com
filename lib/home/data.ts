@@ -87,7 +87,7 @@ export const COVER_PRESS: Partial<Record<string, string>> = {
   "whole-summer": "#b02a2e",
   "in-the-hoodie-on-your-sleeve": "#d4483c",
 } satisfies Record<CoverKey, string>;
-/* Three films on the home; the rest are on /portfolio/video.
+/* The home's films: the reel plays by default and is not on the list, the other three are the list (Julian 2026-11-26); the rest are on /portfolio/video.
    Matched to content/site.json by title; kind is this screen's label. */
 /* Films the site hosts itself (public/films, 1080p, no sound, under the host's 25 MB a file), so they preload.
    The home plays these; the link still opens the film's page. */
@@ -96,8 +96,9 @@ export const FILM_FILES: Record<string, string> = {
 } satisfies Partial<Record<FilmTitle, string>>;
 export const FILM_PICKS = [
   ["Director's Reel", "Reel"],
+  ["Clean", "Music video"],
+  ["Ladera Granola", "Commercial"],
   ["The Description", "Music video"],
-  ["Dide O Del", "Music video"],
 ] as const satisfies readonly (readonly [title: string, kind: string])[];
 export type FilmTitle = (typeof FILM_PICKS)[number][0];
 

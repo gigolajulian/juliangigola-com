@@ -6,6 +6,14 @@ version is version.json's (set at each release to the same number as its tag);
 
 ## Unreleased
 
+In Safari on a standard screen, a mouse wheel now moves the home page as far per notch as everywhere else.
+
+The Motion section on the home page is a short list of films: point at one to preview it, click to open it on the Motion page. The cover art slides in as you scroll, and a mouse wheel moves the home page further per notch.
+
+The Motion section on the home page now shows the Ladera Granola film.
+
+The name and tagline at the top of the home page are placed for each screen size, and the tagline stays on one line.
+
 On a phone, the session packages on the booking page show dots under the cards, so you can see where you are as you swipe.
 
 The Motion row on the home page now reads Director of Photography.
