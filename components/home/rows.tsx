@@ -19,8 +19,8 @@ const COVERS = COVER_KEYS.map((k) => COVER_RELEASES.find((r) => r.slug === k)).f
 /** The home shows the first four of the picks, in his order; the rest are one click away. */
 const SHOWN = 4;
 
-/* Spec 3.7: four sleeves with a picture disc behind each. On scroll each sleeve comes in from the right, then its record
-   slides out and turns (motion/flow.css, from the engine's --in and --p). No driver. */
+/* Four sleeves with a picture disc behind each. On scroll each sleeve slides in from the right, small with its record out,
+   then grows to full size as the record goes back in (motion/flow.css, from the engine's --in). No driver. */
 export function HomeCovers() {
   return (
     <section className="mt-covers" data-mt="covers" aria-labelledby="mt-cv-h">
