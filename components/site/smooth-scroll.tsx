@@ -96,16 +96,23 @@ export function onLenisScroll(fn: ScrollFn) {
   return () => void scrollFns.delete(fn);
 }
 
+/** Pages that scroll natively, with no Lenis at all.
+ *  Proof galleries, deliveries and contracts: Lenis's glide read as a delay on a Mac trackpad.
+ *  /admin: the Leads desk and the editor pin themselves to the screen and scroll their own panes. Lenis
+ *  cancels every vertical wheel event to glide the window, which has nothing to scroll there, so a
+ *  trackpad moved nothing at all in Leads. */
+const NATIVE = ["/proof/", "/delivery/", "/contract/", "/admin"];
+
 export function SmoothScroll() {
   const pathname = usePathname();
   const lenisRef = React.useRef<Lenis | null>(null);
+  // Per route, not once on mount: a client hop onto one of these pages drops Lenis, a hop off brings it back.
+  const native = NATIVE.some((p) => pathname.startsWith(p));
 
   React.useEffect(() => {
     // Skip if reduced motion is requested
     if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // Native scroll in proof galleries: Lenis's glide read as a delay on a Mac trackpad.
-    if (location.pathname.startsWith("/proof/") || location.pathname.startsWith("/delivery/") || location.pathname.startsWith("/contract/"))
-      return;
+    if (native) return;
 
     // A lerp follows the wheel as it moves instead of replaying a fixed
     // 1.2s glide on every event, which read as lag on a trackpad.
@@ -139,7 +146,7 @@ export function SmoothScroll() {
       lenis.destroy();
       lenisRef.current = live = null;
     };
-  }, []);
+  }, [native]);
 
   // Re-measure on every route change too, in case the new page has the
   // same body height at first and only grows later.
