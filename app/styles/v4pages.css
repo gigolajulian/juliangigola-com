@@ -16,7 +16,6 @@
    The questions join them: half ink, full when open. Answers and paragraphs stay mono. */
 /* The unlit rows and questions: half ink, a step more in light so 18px rows keep 4.5:1 (54% gives 3.81:1). */
 html:root #p-service{--sv-dim:color-mix(in srgb,var(--ink) 54%,var(--bg))}
-@media (prefers-color-scheme:light){html:root:root:not([data-theme="dark"]) #p-service{--sv-dim:color-mix(in srgb,var(--ink) 64%,var(--bg))}}
 html[data-theme="light"]:root:root #p-service{--sv-dim:color-mix(in srgb,var(--ink) 64%,var(--bg))}
 :root #p-service .sv-v4 ul{counter-reset:row}
 :root #p-service .sv-v4 li{counter-increment:row;justify-content:flex-start;align-items:baseline;gap:14px;padding:14px 0;font:900 clamp(1.125rem,calc(1.6*var(--v3u)),1.5rem)/1.15 var(--display);letter-spacing:-.04em;text-wrap:balance;color:var(--sv-dim);transition:color .25s}
@@ -47,10 +46,8 @@ html[data-theme="light"]:root:root #p-service{--sv-dim:color-mix(in srgb,var(--i
 /* the page's own black behind the marks, no charcoal ground */
 :root:root:not([data-theme="light"]) .v3 .ab-logos{--band-mk:rgb(217 217 214 / .86)}
 :root:root:not([data-theme="light"]) .v3 .ab-logos h2{color:rgb(217 217 214 / .62)}
-@media (prefers-color-scheme:light){
-  :root:root:not([data-theme="dark"]) .v3 .ab-logos{background:none;--band-mk:var(--mute);border-block:1px solid var(--line)}
-  :root:root:not([data-theme="dark"]) .v3 .ab-logos h2{color:var(--mute)}
-}
+:root:root[data-theme="light"] .v3 .ab-logos{background:none;--band-mk:var(--mute);border-block:1px solid var(--line)}
+:root:root[data-theme="light"] .v3 .ab-logos h2{color:var(--mute)}
 @media (max-width:700px){
   :root .v3 .ab-logos{flex-direction:column;align-items:stretch;gap:8px;padding:40px 0;margin-bottom:48px}
   :root .v3 .ab-logos h2{padding:0 var(--g)}
@@ -277,4 +274,6 @@ html:root .v3 #p-campus .s4-row p{margin:14px 0 0;max-width:46ch;line-height:1.6
   html:root .v3 #p-campus .s4-row:first-of-type{border-top:0}
   /* The last row is as tall as the others, so the photo leaves with it. */
   html:root .v3 #p-campus .s4-row[data-on]{color:var(--ink)}
+  /* light: 54% ink is 3.82:1 on the paper ground; 64% clears 4.5:1, the same step as #p-service's --sv-dim */
+  html[data-theme="light"]:root .v3 #p-campus .s4-row:not([data-on]){color:color-mix(in srgb,var(--ink) 64%,var(--bg))}
 }

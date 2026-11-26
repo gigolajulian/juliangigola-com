@@ -103,20 +103,20 @@ html:has(.proof) #main{transform:none}
 .proof .proof-btn.ghost{background:none;color:var(--foreground);border-color:var(--p-hl)}
 .proof .proof-btn:disabled{opacity:.35;cursor:default}
 
-.proof-lb{position:fixed;inset:0;z-index:40;background:#060605;color:#f1f0ed;display:flex;flex-direction:column}
+.proof-lb{position:fixed;inset:0;z-index:40;background:#060605;color:var(--dark-ink);display:flex;flex-direction:column}
 .proof-close{position:relative}
-.proof-lt{display:flex;justify-content:space-between;padding:16px 22px;font:12px var(--p-mono);color:#92908d}
+.proof-lt{display:flex;justify-content:space-between;padding:16px 22px;font:12px var(--p-mono);color:var(--dark-mute)}
 .proof-li{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative;padding:0 56px}
 .proof-li img{max-width:100%;max-height:100%;object-fit:contain}
-.proof-arr{position:absolute;top:50%;transform:translateY(-50%);font:18px var(--p-mono)!important;color:#92908d!important;padding:16px!important}
+.proof-arr{position:absolute;top:50%;transform:translateY(-50%);font:18px var(--p-mono)!important;color:var(--dark-mute)!important;padding:16px!important}
 .proof-arr.l{left:4px}.proof-arr.r{right:4px}
 /* the global [role=dialog] button rule makes them relative, which drops them into the flex row under the photo */
 .proof-arr{position:absolute!important;flex-shrink:0;z-index:1}
-.proof-lf{display:flex;gap:12px;align-items:center;justify-content:space-between;font:12px var(--p-mono);color:#92908d;padding:16px 22px calc(22px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.11)}
-.proof-lf input{flex:1;min-width:0;color:#f1f0ed;border-color:rgba(255,255,255,.11)}
+.proof-lf{display:flex;gap:12px;align-items:center;justify-content:space-between;font:12px var(--p-mono);color:var(--dark-mute);padding:16px 22px calc(22px + env(safe-area-inset-bottom));border-top:1px solid rgba(255,255,255,.11)}
+.proof-lf input{flex:1;min-width:0;color:var(--dark-ink);border-color:rgba(255,255,255,.11)}
 .proof-lf input:disabled{opacity:.4}
-.proof-lb .proof-btn{border-color:#f1f0ed;background:#f1f0ed;color:#0b0a09}
-.proof-lb .proof-btn.ghost{background:none;color:#f1f0ed;border-color:rgba(255,255,255,.2)}
+.proof-lb .proof-btn{border-color:var(--dark-ink);background:var(--dark-ink);color:var(--dark-bg)}
+.proof-lb .proof-btn.ghost{background:none;color:var(--dark-ink);border-color:rgba(255,255,255,.2)}
 .proof-err{font:13px var(--p-mono);color:var(--destructive,#c0392b);margin:0 0 16px}
 /* above the total and the Pay buttons, read before the tap */
 .proof-lock{font:12px var(--p-mono);color:var(--foreground);margin:20px 0 -12px}

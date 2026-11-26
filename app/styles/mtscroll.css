@@ -36,7 +36,9 @@
 /* ── Hero wall (3.2) ── */
 [data-mtscroll] .mt-hero .mt-stage{position:relative;height:calc(2640 * var(--u))}
 [data-mtscroll] .mt-wall{position:absolute;inset:0}
-[data-mtscroll] .mt-col{position:absolute;top:calc(var(--top) * var(--u));left:calc(50% + (65 - 720 + var(--c) * 453) * var(--u));width:calc(403 * var(--u));display:grid;row-gap:calc(96 * var(--u));will-change:transform}
+[data-mtscroll] .mt-col{position:absolute;top:calc(var(--top) * var(--u));left:calc(50% + (65 - 720 + var(--c) * 453) * var(--u));width:calc(403 * var(--u));display:grid;row-gap:calc(96 * var(--u))}
+/* a layer only while the hero is within a screen of view (engine.ts sets data-mt-near), as rows.css does, and through the intro, whose .mt-col::after stacks inside it */
+[data-mtscroll] .mt-hero[data-mt-near] .mt-col,html[data-mt-intro] .mt-hero .mt-col{will-change:transform}
 [data-mtscroll] .mt-col figure{position:relative;margin:0;height:calc(504 * var(--u))}
 [data-mtscroll] .mt-col figure.xr{display:none}
 [data-mtscroll] .mt-col .ph{position:absolute;inset:0;overflow:hidden;background:var(--card)}
@@ -360,7 +362,6 @@
   [data-mtscroll] .mt-ctas{bottom:calc(2px + env(safe-area-inset-bottom))}
   [data-mtscroll] .mt-hero .mt-scrim.mt-scrim{background:linear-gradient(to top,color-mix(in srgb,var(--dark-bg) 37%,transparent),color-mix(in srgb,var(--dark-bg) 34%,transparent) 30%,transparent)}
   /* dark only: on the light page it showed as a grey band between the photos */
-  @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .mt-hero .mt-scrim.mt-scrim.mt-scrim{background:none}}
   :root[data-theme="light"] .mt-hero .mt-scrim.mt-scrim.mt-scrim{background:none}
   [data-mtscroll] .mt-photo{aspect-ratio:390/226}
   [data-mtscroll] .mt-fcols{grid-template-columns:1fr 1fr}
@@ -598,7 +599,6 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 [data-mtscroll] .mt-hero .mt-ctas .btn:not(.fill){background:linear-gradient(#fff,#fff) right/0 100% no-repeat rgb(0 0 0 / 48%);-webkit-backdrop-filter:blur(14px) saturate(1.15);backdrop-filter:blur(14px) saturate(1.15);color:#f1f1ee;border:.5px solid #f1f1ee;box-shadow:none;text-shadow:0 0 2px rgb(0 0 0 / 70%),0 1px 4px rgb(0 0 0 / 60%),0 0 14px rgb(0 0 0 / 50%)}
 /* Book a session, hovered: white with black words, wiped in from the right at Inquire's pace (v3.css motion plan 01 times it) */
 @media (hover:hover) and (pointer:fine){html[data-mtscroll] .v3 .mt-hero .mt-ctas .btn:not(.fill):hover{background-size:100% 100%;color:#000;border-color:#fff;text-shadow:none}}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}}
 :root[data-theme="light"] .v3 .mt-hero :is(.mt-name h1,.mt-cap){color:var(--dark-ink)}
 /* The tagline's letters change colour with what is under them: black or white, and grey over the white page. No blend: the three stacked blends
    went plain white in Safari once the photos moved. tone() in motion/hero.ts reads the photo under each letter and sets data-tone: w over a dark photo, k over a
@@ -609,7 +609,6 @@ html[data-mt-intro] .mt-hero :is(.mt-scrim,h1,.mt-cap,.mt-ctas,figcaption),html[
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w{transition:color .15s ease-out,text-shadow .15s ease-out}
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="w"]{color:#fff;text-shadow:0 0 2px rgb(0 0 0 / .6),0 1px 5px rgb(0 0 0 / .35)}
 :root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="k"]{color:#0b0b0c;text-shadow:none}
-@media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}}
 :root[data-theme="light"] .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w[data-tone="p"]{color:color-mix(in oklab,var(--ink) 58%,var(--bg))}
 /* No wordmark in the bar while the hero, with its big name, is on screen,
    at every size. */
@@ -627,26 +626,18 @@ html[data-mt-held] [data-mtscroll] .mt-hero .mt-stage,html[data-mt-held][data-mt
 
 /* Light theme hero name: light theme only, dark stays as live. The name goes dark ink with no shadow, and a page-colour band
    along the foot of the hero (the phone's, 741) holds it where it crosses a dark photo; the photos above the band run clear. The tagline sits on the band in one colour. */
-@media (prefers-color-scheme:light){
-  html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
-  html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
-  html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
-}
 html[data-theme="light"]:root .v3 .mt-hero .mt-name h1{color:var(--ink);text-shadow:none}
 html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap{color:var(--ink)}
 html[data-theme="light"]:root .v3 .mt-hero .mt-name .mt-name-in .mt-cap .w.w[data-tone]{color:inherit;text-shadow:none}
 @media (min-width:600px){
-  @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(422 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}}
   html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(422 * var(--u));background:linear-gradient(to top,color-mix(in srgb,var(--t) 63%,transparent) 30%,color-mix(in srgb,var(--t) 53%,transparent) 50%,color-mix(in srgb,var(--t) 30%,transparent) 70%,color-mix(in srgb,var(--t) 11%,transparent) 86%,transparent)}
 }
 /* 600 to 1023 wide the name sits higher than 400u reaches, which left it on bare photo (QA, #1238). The name sits about 260px up at these widths: a short band that holds its strength to there (Julian: 56svh went "too far up"). */
 @media (min-width:600px) and (max-width:1023px){
-  @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 66%,transparent) 30%,color-mix(in srgb,var(--bg) 60%,transparent) 60%,color-mix(in srgb,var(--bg) 52%,transparent) 78%,color-mix(in srgb,var(--bg) 16%,transparent) 92%,transparent)}}
   html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim.mt-scrim{height:320px;background:linear-gradient(to top,color-mix(in srgb,var(--bg) 66%,transparent) 30%,color-mix(in srgb,var(--bg) 60%,transparent) 60%,color-mix(in srgb,var(--bg) 52%,transparent) 78%,color-mix(in srgb,var(--bg) 16%,transparent) 92%,transparent)}
 }
 /* On a phone: a taller band than the phone's own, which left the tops of the letters on a dark photo at about 2:1. Both bands are the lightest that keep the name at 4.5:1 over the darkest 5% behind it (Julian: "a bit lighter"). */
 @media (max-width:599px){
-  @media (prefers-color-scheme:light){html:root:not([data-theme="dark"]) .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}}
   html[data-theme="light"]:root .v3 .mt-hero .mt-scrim.mt-scrim.mt-scrim{--t:var(--bg);height:calc(260px + env(safe-area-inset-bottom));background:linear-gradient(to top,color-mix(in srgb,var(--t) 56%,transparent) 42%,color-mix(in srgb,var(--t) 48%,transparent) 62%,color-mix(in srgb,var(--t) 26%,transparent) 80%,color-mix(in srgb,var(--t) 8%,transparent) 92%,transparent)}
 }
 
