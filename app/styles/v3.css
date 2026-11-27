@@ -70,6 +70,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 @media (hover:hover){.v3 .tbtn:hover svg{opacity:.75}}
 .v3 .tbtn:focus-visible{outline:1px solid currentColor;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.v3 .tbtn svg{transition:none}}
+/* ?themefx radial (chrome.tsx): one flat snapshot, old under, new clipped in from the toggle. :is(*,#_) outranks every named layer. */
+:root[data-themefx] :is(*,#_){view-transition-name:none!important}
+:root[data-themefx]::view-transition-old(root),:root[data-themefx]::view-transition-new(root){animation:none;mix-blend-mode:normal}
 .v3 .a-cover::before{content:"";position:absolute;inset:0 0 auto;height:22%;z-index:1;background:linear-gradient(to bottom,oklch(0.1 0.003 70 / .55),transparent);pointer-events:none}
 .v3 .a-cover .foot{position:relative;z-index:2;margin-top:auto;padding:0 var(--gr) 28px var(--g);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
 /* sized off the role line below it, so the line ends at Gigola's i (11.1 x its font) */
