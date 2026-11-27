@@ -33,7 +33,9 @@
   // `image-loader.ts`.
   "assets": {
     "directory": ".open-next/assets",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+    // Films go through the Worker: assets ignore Range, and Safari needs it to play video (lib/films-range.ts).
+    "run_worker_first": ["/films/*"]
   },
 
   // Where the contact form's enquiries are kept, and what /admin's Inbox
