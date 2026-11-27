@@ -6,6 +6,8 @@ version is version.json's (set at each release to the same number as its tag);
 
 ## Unreleased
 
+The film titles in the home Motion list stay readable over a bright white frame.
+
 New pages for event photography, team and model headshots, cover art, and San Francisco and San Jose sessions. The theme toggle has a clearer focus ring, the Motion label reads on bright frames, and the View more link holds still when the reel pauses.
 
 The home reel now plays in Safari. The Motion list, the reel pause control, focus rings and a few booking labels are easier to see and use.
