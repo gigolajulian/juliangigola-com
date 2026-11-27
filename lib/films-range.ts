@@ -1,8 +1,12 @@
-/* ── byte ranges for /films/*.mp4, outside Next ─────────────────────
+/* ── byte ranges for the site's own films, outside Next ─────────────
  * Workers Static Assets answer a Range request with the whole file (200, no
  * Content-Range), and Safari will not play or seek an MP4 without ranges
- * (Cloudflare's static-assets limits page says the same). `wrangler.jsonc`
- * sends /films/* to the Worker first; `worker.ts` asks here before OpenNext.
+ * (Cloudflare's static-assets limits page says the same). Its fix,
+ * `run_worker_first`, makes OpenNext demand `html_handling: "none"`, which
+ * would drop /client/prdx-preview/. So the home plays films from /stream/<file>:
+ * no asset sits there, the Worker answers, reads public/films/<file> through
+ * ASSETS and serves the bytes asked for. `next.config.ts` rewrites /stream for
+ * `next dev`. `worker.ts` asks here before OpenNext.
  * ─────────────────────────────────────────────────────────────── */
 
 type Env = { ASSETS?: { fetch: (req: Request) => Promise<Response> } };
@@ -21,47 +25,34 @@ export function parseRange(header: string | null, size: number): { start: number
   return start < size && start <= end ? { start, end } : "bad";
 }
 
-/** Bytes start..end (inclusive) of a stream, read through once and dropped as they pass. */
-export function sliceStream(body: ReadableStream<Uint8Array>, start: number, end: number): ReadableStream<Uint8Array> {
-  let at = 0;
-  return body.pipeThrough(
-    new TransformStream<Uint8Array, Uint8Array>({
-      transform(chunk, out) {
-        const from = Math.max(start - at, 0);
-        const to = Math.min(end + 1 - at, chunk.length);
-        at += chunk.length;
-        if (to > from) out.enqueue(chunk.subarray(from, to));
-        if (at > end) out.terminate();
-      },
-    }),
-  );
-}
-
 export async function filmRange(request: Request, env: Env): Promise<Response | null> {
   const url = new URL(request.url);
-  if (!env.ASSETS || !url.pathname.startsWith("/films/") || (request.method !== "GET" && request.method !== "HEAD")) return null;
+  const file = /^\/stream\/([a-z0-9-]+\.mp4)$/.exec(url.pathname)?.[1];
+  if (!env.ASSETS || !file || (request.method !== "GET" && request.method !== "HEAD")) return null;
+  const src = new URL(`/films/${file}`, url);
   const range = request.headers.get("range");
   // no range: let a cached copy revalidate (304) as it did when assets answered directly
   const etag = range ? null : request.headers.get("if-none-match");
-  const res = await env.ASSETS.fetch(new Request(url.toString(), { method: request.method, headers: etag ? { "if-none-match": etag } : {} }));
+  const res = await env.ASSETS.fetch(new Request(src.toString(), { headers: etag ? { "if-none-match": etag } : {} }));
   if (res.status !== 200) return res;
-  const size = Number(res.headers.get("content-length"));
   const headers = new Headers(res.headers);
   headers.set("accept-ranges", "bytes");
-  const r = Number.isFinite(size) && size > 0 ? parseRange(range, size) : null;
-  if (!r) return new Response(res.body, { status: 200, headers });
-  if (r === "bad" || request.method === "HEAD") res.body?.cancel();
+  const head = request.method === "HEAD";
+  if (!range) {
+    if (head) res.body?.cancel();
+    return new Response(head ? null : res.body, { status: 200, headers });
+  }
+  // shortcut: the ASSETS response carries no length, so the file is read whole (23 MB, well inside the 128 MB a
+  // Worker has); a size cache keyed by ETag would let later ranges stream if a film ever grows past ~60 MB
+  const buf = await res.arrayBuffer();
+  headers.delete("content-length"); // the body below sets its own
+  const r = parseRange(range, buf.byteLength);
+  if (!r) return new Response(buf, { status: 200, headers });
   if (r === "bad") {
-    headers.set("content-range", `bytes */${size}`);
-    headers.delete("content-length");
+    headers.set("content-range", `bytes */${buf.byteLength}`);
     return new Response(null, { status: 416, headers });
   }
-  const len = r.end - r.start + 1;
-  headers.set("content-range", `bytes ${r.start}-${r.end}/${size}`);
-  headers.set("content-length", String(len));
-  if (request.method === "HEAD") return new Response(null, { status: 206, headers });
-  // FixedLengthStream (Workers) keeps Content-Length on the wire
-  const part = sliceStream(res.body!, r.start, r.end);
-  const body = typeof FixedLengthStream === "function" ? part.pipeThrough(new FixedLengthStream(len)) : part;
-  return new Response(body, { status: 206, headers });
+  headers.set("content-range", `bytes ${r.start}-${r.end}/${buf.byteLength}`);
+  if (head) headers.set("content-length", String(r.end - r.start + 1));
+  return new Response(head ? null : buf.slice(r.start, r.end + 1), { status: 206, headers });
 }

@@ -1,5 +1,5 @@
 /* ── the site Worker's entry (wrangler `main`) ─────────────────────
- * OpenNext's generated worker, with film byte ranges (`lib/films-range.ts`)
+ * OpenNext's generated worker, with film byte ranges on /stream (`lib/films-range.ts`)
  * and the delivery downloads answered first:
  * its response wrapper drops a streamed body's length and backpressure.
  * See `lib/proofs/delivery-serve.ts`. Everything else goes to OpenNext.
