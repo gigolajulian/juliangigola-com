@@ -50,6 +50,8 @@ export function HomeCovers() {
    On touch the first tap on a title previews it, a tap on the current one opens it. motion/rows.ts plays the previews. */
 export function HomeFilms({ films }: { films: HomeFilm[] }) {
   const [cur, setCur] = React.useState(0);
+  // WCAG 2.2.2: the reel starts by itself and loops, so it gets a way to stop. motion/rows.ts reads `data-paused`.
+  const [paused, setPaused] = React.useState(false);
   // `data-was`: the film that was on screen stays under the new one until the new one is drawn, so the cut never shows black.
   const was = React.useRef(0);
   const list = React.useRef<HTMLOListElement>(null);
@@ -71,7 +73,7 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
   };
   const dress = FILM_DRESS[films[cur].title];
   return (
-    <section className="mt-motion" data-mt="motion" data-cur={cur} aria-labelledby="mt-mo-h">
+    <section className="mt-motion" data-mt="motion" data-cur={cur} data-paused={paused ? "" : undefined} aria-labelledby="mt-mo-h">
       <div className="mt-stage">
         <div className="mt-mohead">
           <h2 id="mt-mo-h">Motion</h2>
@@ -131,9 +133,14 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
             );
           })}
         </ol>
-        <Link className="btn mt-sm mt-momore" href="/portfolio/video">
-          View more
-        </Link>
+        <div className="mt-moacts">
+          <button type="button" className="lbl mt-mopause" onClick={() => setPaused((p) => !p)}>
+            {paused ? "Play" : "Pause"}
+          </button>
+          <Link className="btn mt-sm mt-momore" href="/portfolio/video">
+            View more
+          </Link>
+        </div>
       </div>
     </section>
   );

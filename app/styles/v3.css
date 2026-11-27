@@ -46,7 +46,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .b-head>.btn{height:32px;padding:0 14px;font-size:11px}
 @media (hover:hover){.v3 .btn:hover{background:var(--ink);color:var(--bg)}}
 @media (hover:hover){.v3 .btn.fill:hover{background:transparent;color:var(--ink)}}
-.v3 .btn:focus-visible,.v3 .row:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .btn:focus-visible,.v3 .row:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .v3 .wm{font:900 1rem/1 var(--display);letter-spacing:-.045em}
 .v3 h2,.v3 h3{text-wrap:balance;margin:0}
 .v3 .nav{display:flex;justify-content:space-between;align-items:center;padding:20px var(--gr) 0 var(--g);gap:16px}
@@ -292,7 +292,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 /* Grid titles: #709's curve, denser behind the type so it holds over light covers (AZURE BLOOM
    2.5 to 3.4:1, I WANNA BE A HUMAN 4.0 to 5.2:1), no shadow round the letters. Julian picked
    the in-between, 2026-11-09. */
-.v3 .wt-n{gap:6px;padding:76px 14px 12px;text-shadow:none;background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .68) 16%,rgb(var(--scrim) / .5) 34%,rgb(var(--scrim) / .3) 52%,rgb(var(--scrim) / .13) 72%,rgb(var(--scrim) / .03) 88%,rgb(var(--scrim) / 0))}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
+.v3 .wt-n{gap:6px;padding:76px 14px 12px;text-shadow:0 0 18px rgb(var(--scrim) / .45);background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .68) 16%,rgb(var(--scrim) / .5) 34%,rgb(var(--scrim) / .3) 52%,rgb(var(--scrim) / .13) 72%,rgb(var(--scrim) / .03) 88%,rgb(var(--scrim) / 0))}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
 .v3 .sc-n{gap:10px;padding:64px 24px 22px}.v3 .sc-n b{font-size:min(clamp(2.5rem,calc(4.6*var(--v3u)),5rem),calc((100cqi - 48px) * 2.6 / var(--n)),calc((100cqi - 48px) * 1.4 / var(--w)))}
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
@@ -520,7 +520,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 .v3 .refs .up:hover .swap .drag{opacity:1}}
 .v3 .refs .up.over{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,transparent)}
 .v3 .refs .up.full{opacity:.4;pointer-events:none}
-.v3 .refs .up:focus-within{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .refs .up:focus-within{outline:2px solid var(--accent);outline-offset:3px}
 .v3 .reference-panel{border-radius:4px;border-color:var(--line);background:var(--bg);color:var(--ink);-webkit-backdrop-filter:none;backdrop-filter:none}
 .v3 .reach-out b,.v3 .reach-call :is(h2,h3),.v3 .reach-fields :is(h2,h3){font:900 clamp(2rem,calc(4*var(--v3u)),3.25rem)/.92 var(--display);letter-spacing:-.045em;margin:0}
 .v3 .reach-out p,.v3 .reach-call p{margin:0}
@@ -663,7 +663,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
    (project pages, service pages, legal) read in the same palette. */
 :root,:root[data-theme="light"]{--border:var(--line);--muted-foreground:var(--mute)}
 /* One focus ring everywhere: the accent. */
-.v3 :focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
 :root{--font-wordmark:var(--font-display)}
 /* Touch: 44px targets for the toggle and Menu. */
@@ -696,7 +696,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Service pages (/[service]): their own screens, in the V3 tokens. */
 .svc{--radius-photo:4px}
 .svc :is(h1,h2,h3){text-transform:none}
-.svc :focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.svc :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .svc :is(.action,.action-quiet,.cover-cta){display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;border-radius:0;font:500 11px/1 var(--font-mono),ui-monospace,monospace;letter-spacing:.14em;text-indent:0;-webkit-backdrop-filter:none;backdrop-filter:none;-webkit-text-stroke:0}
 .svc :is(.action,.action-quiet,.cover-cta)::before{display:none}
 .svc .cover-cta{--i:var(--hero-ink);--o:var(--hero-on-ink)}
@@ -783,7 +783,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
   .v3 .a-cover .right>.lbl .ticks button{width:18px;height:24px}
   .v3 .a-cover .right>.lbl .ticks button::after{left:2px;right:2px}
 }
-.v3 .wsearch:has(input:focus-visible){outline:1px solid var(--accent);outline-offset:4px}
+.v3 .wsearch:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:4px}
 .v3 .tbtn:focus-visible{outline-color:var(--accent)}
 /* Narrow phones: the calendar's gaps cost the day cells their 44px. */
 @media (pointer:coarse) and (max-width:360px){.v3 .cal{gap:0}}
@@ -1120,7 +1120,7 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .nf-list .row:is(:hover,:focus-visible) .t{color:var(--ink)}
 .v3 .nf-list .row:is(:hover,:focus-visible) .n{color:var(--accent)}
 .v3 .nf-list .row:is(:hover,:focus-visible) .p{opacity:1}
-.v3 .nf-list .row:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .nf-list .row:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media (hover:none){.v3 .nf-list .row .t{color:var(--ink)}.v3 .nf-list .row .p{opacity:1}}
 /* Play with sound over the film: glass with a dark tint (Julian). */
 .v3 .btn.fill.cn-light{background:rgb(var(--scrim) / .28);color:rgb(var(--on-photo));border-color:rgb(var(--on-photo) / .28);-webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2)}
@@ -1137,20 +1137,20 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 .v3 .mo-shot[data-on]{opacity:1}
 /* The caption over a bright reel (audit): Ladera's still put the label at 1.9:1 and the title at 3:1. A shade up from the bottom, long-tailed so it shows no edge, under the corner one: 7:1 and up on every reel. */
 .v3 .mo-stage::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .66) 16%,rgb(var(--scrim) / .4) 30%,rgb(var(--scrim) / .16) 44%,rgb(var(--scrim) / .04) 54%,rgb(var(--scrim) / 0) 62%),linear-gradient(20deg,rgb(var(--scrim) / .5) 0%,rgb(var(--scrim) / 0) 42%);pointer-events:none;z-index:1}
-.v3 .mo-stage::before{content:"";position:absolute;inset:0 0 auto;height:300px;background:linear-gradient(to bottom,rgb(var(--scrim) / .72),rgb(var(--scrim) / .36) 55%,rgb(var(--scrim) / 0));pointer-events:none;z-index:1}
+.v3 .mo-stage::before{content:"";position:absolute;inset:0 0 auto;height:360px;background:radial-gradient(ellipse 42% 100% at 100% 0,rgb(var(--scrim) / .5),transparent 90%),linear-gradient(to bottom,rgb(var(--scrim) / .72),rgb(var(--scrim) / .36) 46%,rgb(var(--scrim) / 0) 83%);pointer-events:none;z-index:1}
 .v3 .mo-hit{all:unset;position:absolute;inset:0;z-index:2;cursor:pointer}
 /* all:unset drops the global ring: put it back for keyboard focus. */
-.v3 .mo-hit:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
+.v3 .mo-hit:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
 .v3 .mo-h,.v3 .mo-cap,.v3 .mo-index,.v3 .mo-play{position:absolute;z-index:3}
 .v3 .mo-h{top:24px;left:var(--g);margin:0;color:rgb(var(--on-photo) / .9)}
 .v3 .mo-cap{left:var(--g);bottom:32px;display:flex;flex-direction:column;gap:14px;max-width:min(70vw,1000px);pointer-events:none;animation:mo-in .5s cubic-bezier(.2,.7,.2,1)}
 .v3 .mo-cap .lbl{color:rgb(var(--on-photo) / .9)}
 .v3 .mo-cap h2{margin:0;font:900 clamp(3rem,calc(8*var(--v3u)),7rem)/.86 var(--display);letter-spacing:-.05em;text-wrap:balance}
 .v3 .mo-index{top:24px;right:var(--gr);list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:0;text-align:right}
-.v3 .mo-index button{all:unset;cursor:pointer;color:rgb(var(--on-photo) / .66);display:inline-block;line-height:24px}
+.v3 .mo-index button{all:unset;cursor:pointer;color:rgb(var(--on-photo) / .8);display:inline-block;line-height:24px;min-height:24px;text-shadow:0 0 2px rgb(var(--scrim) / .6),0 0 10px rgb(var(--scrim) / .55)}
 .v3 .mo-index button span{margin-right:12px}
 .v3 .mo-index button[aria-current]{color:rgb(var(--on-photo))}.v3 .mo-index button[aria-current] span{color:var(--accent)}
-.v3 .mo-index button:hover{color:rgb(var(--on-photo))}.v3 .mo-index button:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .mo-index button:hover{color:rgb(var(--on-photo))}.v3 .mo-index button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .v3 .mo-play{right:var(--gr);bottom:32px;display:flex;align-items:center;gap:24px}
 .v3 .mo-mark{position:absolute;z-index:3;top:64px;left:var(--g);line-height:0;color:rgb(var(--on-photo));animation:mo-in .5s cubic-bezier(.2,.7,.2,1)}
 .v3 .mo-stack{display:none}
@@ -1195,12 +1195,12 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .mo-player .pl-info{bottom:0;padding-top:96px;padding-bottom:32px;background:linear-gradient(to top,rgb(var(--scrim) / .55),rgb(var(--scrim) / 0))}
 .mo-player .pl-bar span{color:rgb(var(--on-photo) / .7)}
 .mo-player .pl-bar button{all:unset;cursor:pointer;padding:8px 0}
-.mo-player .pl-bar button:hover{color:var(--accent)}.mo-player .pl-bar button:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.mo-player .pl-bar button:hover{color:var(--accent)}.mo-player .pl-bar button:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .mo-player .pl-info{display:flex;flex-direction:column;gap:20px}
 .mo-player .pl-meta>div{display:flex;flex-direction:column;gap:8px}
 .mo-player .pl-ctl{display:flex;align-items:center;gap:24px;color:rgb(var(--on-photo) / .8)}
 .mo-player .pl-ctl button{all:unset;cursor:pointer;padding:6px 0}
-.mo-player .pl-ctl button:hover{color:rgb(var(--on-photo))}.mo-player .pl-ctl button:focus-visible,.mo-player .pl-ctl input:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.mo-player .pl-ctl button:hover{color:rgb(var(--on-photo))}.mo-player .pl-ctl button:focus-visible,.mo-player .pl-ctl input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .mo-player .pl-time{font-variant-numeric:tabular-nums;min-width:13ch}
 .mo-player .pl-ctl input{flex:1;appearance:none;height:24px;margin:-4px 0;background:linear-gradient(var(--accent),var(--accent)) 0 50%/var(--p) 1px no-repeat,linear-gradient(rgb(var(--on-photo) / .3),rgb(var(--on-photo) / .3)) 0 50%/100% 1px no-repeat;cursor:pointer}
 .mo-player .pl-ctl input::-webkit-slider-thumb{appearance:none;width:1px;height:24px;background:transparent}
@@ -1388,7 +1388,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .hbtn{display:grid;place-items:center;width:44px;height:44px;padding:0;background:none;border:0;color:var(--mute);cursor:pointer}
 .v3 .hbtn:is([aria-pressed="true"],[data-on]){color:var(--accent)}
 @media (hover:hover){.v3 .hbtn:hover{color:var(--ink)}}
-.v3 .hbtn:focus-visible{outline:1px solid var(--accent);outline-offset:-4px}
+.v3 .hbtn:focus-visible{outline:2px solid var(--accent);outline-offset:-4px}
 .v3 .hsearch{display:flex;align-items:center;gap:10px;flex:1;min-width:0;height:44px;border-bottom:1px solid var(--accent);color:var(--accent)}
 .v3 .hsearch input{flex:1;min-width:0;align-self:stretch;background:none;border:0;outline:0;color:var(--ink);font:inherit;letter-spacing:.04em;text-transform:none}
 /* 16px on touch: iOS zooms into any smaller field on focus. */
@@ -1466,7 +1466,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    and the name takes the accent; touch and reduced motion skip it. */
 .v3 .a-seq a.fig{display:block;color:inherit;text-decoration:none}
 .v3 .a-seq a.fig .ph{cursor:pointer}
-.v3 .a-seq a.fig:focus-visible{outline:1px solid var(--accent);outline-offset:4px}
+.v3 .a-seq a.fig:focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 @media (hover:hover) and (pointer:fine){
 .v3 .a-seq a.fig .nm{transition:color .3s var(--ease-out-strong)}
 .v3 .a-seq a.fig:hover .nm{color:var(--accent)}}
@@ -1653,7 +1653,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @keyframes cv-in{from{opacity:0}}@keyframes cv-out{to{opacity:0}}@keyframes cv-cell{from{opacity:0;scale:.94}}
 .v3 .cv-q{background:none;border:0;padding:8px 0;color:var(--mute);font:inherit;letter-spacing:inherit;text-transform:inherit;cursor:pointer}
 @media (hover:hover){.v3 .cv-q:hover{color:var(--ink)}}
-.v3 .cv-q:focus-visible,.v3 .cv-open a:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .cv-q:focus-visible,.v3 .cv-open a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .v3 .cv-help{position:absolute;right:var(--gr);bottom:52px;max-width:300px;padding:14px 16px;background:var(--bg);border:1px solid var(--line)}
 .v3 .cv-help p{margin:0 0 6px;font-size:12px;line-height:1.5}
 .v3 .cv-open{position:absolute;inset:0;background:color-mix(in oklab,var(--bg) 88%,transparent)}
@@ -1671,7 +1671,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .cv-scale input::-moz-range-track{height:1px;background:var(--line)}
 .v3 .cv-scale input::-webkit-slider-thumb{-webkit-appearance:none;width:9px;height:9px;margin-top:-4px;border:0;border-radius:50%;background:var(--accent)}
 .v3 .cv-scale input::-moz-range-thumb{width:9px;height:9px;border:0;border-radius:50%;background:var(--accent)}
-.v3 .cv-scale input:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .cv-scale input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .v3 .cv-scale output{min-width:4ch;color:var(--ink);font-variant-numeric:tabular-nums}
 @media (max-width:700px){.v3 .cv-foot>span:first-child{display:none}.v3 .cv-scale input{width:110px}}
 /* Large text on a phone (WCAG 1.4.4): at 200% text the rem
@@ -1700,7 +1700,7 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
    close x slides in. Phone: Grid, Strip and Canvas fold into the one that is on; the
    eyedropper's hairline divides them. Springs are the house --ease-spring. */
 .v3 :is(.wsearch,.hsearch){position:relative;gap:10px;height:40px;padding:0 4px 0 12px;background:var(--card);border:0;border-radius:4px;color:var(--mute);cursor:text}
-.v3 :is(.wsearch,.hsearch):focus-within,.v3 .wsearch:has(input:focus-visible){outline:1px solid var(--accent);outline-offset:-1px;color:var(--accent)}
+.v3 :is(.wsearch,.hsearch):focus-within,.v3 .wsearch:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-1px;color:var(--accent)}
 .v3 :is(.wsearch,.hsearch) input{letter-spacing:.02em}
 .v3 .hsearch input::placeholder{color:var(--mute)}
 .v3 :is(.wsearch,.hsearch) input::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
@@ -1838,9 +1838,9 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 .v3 .pk-more a:nth-last-child(-n+2){border-bottom:1px solid var(--line)}
 .v3 .pk-more b{font-weight:400;color:var(--ink);white-space:nowrap}
 .v3 .pk-more i{font-style:normal}
-.v3 .pk-more a:focus-visible{outline:1px solid var(--accent);outline-offset:3px}
+.v3 .pk-more a:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 .v3 .pk-dots{display:none}
-.v3 .rail a:focus-visible{outline:1px solid var(--accent);outline-offset:-1px}
+.v3 .rail a:focus-visible{outline:2px solid var(--accent);outline-offset:-1px}
 @media (hover:hover){.v3 .pk-more a:hover b{color:var(--accent)}}
 @media (max-width:1023px){
 .v3 .pk{gap:20px;padding-top:18px}
