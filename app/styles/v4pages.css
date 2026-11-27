@@ -143,7 +143,7 @@ html:root .v3 .pj-next:has(.pj-stage)>span[aria-hidden]{position:relative;z-inde
 
 /* ── view (j3). A frame on a project page opens full size (the gallery's `.fv`, v3.css). ── */
 html[data-v4pages~="view"] .v3 #p-project :is(.pj-big,.pj-r){cursor:zoom-in}
-html[data-v4pages~="view"] .v3 #p-project :is(.pj-big,.pj-r):focus-visible{outline:1px solid var(--accent);outline-offset:4px}
+html[data-v4pages~="view"] .v3 #p-project :is(.pj-big,.pj-r):focus-visible{outline:2px solid var(--accent);outline-offset:4px}
 
 /* Cover art in the site's system (components/cover/cover-page.tsx) */
 
@@ -173,7 +173,7 @@ html:root .cv4c{display:none}
 /* Pinned here: mtscroll.css and rows.css both dress the face at the same weight, and they load in separate files. */
 html:root .cv4 .mt-sleeve .face{overflow:visible;background:none}
 html:root .cv4 .mt-sleeve .face img{object-fit:cover}
-html:root .cv4 .mt-sleeve:focus-visible{outline:1px solid var(--accent);outline-offset:-1px;z-index:3}
+html:root .cv4 .mt-sleeve:focus-visible{outline:2px solid var(--accent);outline-offset:-1px;z-index:3}
 /* The record only exists where it can move: no hover on touch, no slide under reduced motion.
    On the home hover tucks it in; here it rests inside and hover brings it out, a third of the sleeve. */
 html:root .cv4 .mt-sleeve .disc{display:none}

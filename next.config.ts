@@ -442,6 +442,8 @@ const nextConfig: NextConfig = {
       { source: "/", has: [{ type: "host" as const, value: ADMIN_HOST }], destination: "/admin" },
       // leads.juliangigola.com is the Leads app, opening on Needs me.
       { source: "/", has: [{ type: "host" as const, value: LEADS_HOST }], destination: "/admin/leads" },
+      // The home's films play from /stream (lib/films-range.ts answers it in the Worker); `next dev` reads the file.
+      { source: "/stream/:file", destination: "/films/:file" },
     ];
     if (!LOCAL && process.env.NODE_ENV !== "development") return { beforeFiles, afterFiles: listings };
     return {
