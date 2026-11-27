@@ -26,6 +26,10 @@ export function CoverPage({ releases, onwards }: { releases: CoverRelease[]; onw
             <div>
               <h2>Want something like this?</h2>
               <p className="mute">Tell me what you have in mind and I&apos;ll reply with an approach and a quote.</p>
+              <p className="mute">
+                Need a cover for your next release? The <Link href="/music-photography/cover-art">cover art page</Link> has how I work and what it
+                costs.
+              </p>
             </div>
             <div className="cv4b">
               <Link className="btn fill" href={`/contact/form?${new URLSearchParams({ type: "coverart", ref: "Cover art" })}`}>

@@ -859,6 +859,10 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Service page (components/booking/service.tsx): head, sequence, rows. */
 .v3 .sv-top{display:flex;flex-direction:column;align-items:flex-start;gap:20px;padding:96px var(--gr) 0 var(--g)}
 .v3 .sv-top .pg-t{max-width:12ch;text-wrap:balance}
+/* Event photography on one line, the rest of the title under it, sized to the title's column: the line is about 8.4em wide in its font. */
+.v3 .sv-top:has(.pg-t .one){container-type:inline-size}
+.v3 .sv-top .pg-t:has(.one){max-width:none;font-size:min(clamp(3rem,calc(8*var(--v3u)),7rem),calc(100cqw / 8.6))}
+.v3 .sv-top .pg-t .one{display:block;white-space:nowrap}
 .v3 .sv-lead{margin:0;max-width:46ch;font-size:clamp(1rem,calc(1.3*var(--v3u)),1.125rem);line-height:1.55;text-wrap:pretty}
 .v3 .sv-top .inc{max-width:72ch}
 .v3 .sv-top .ctas{display:flex;gap:10px;flex-wrap:wrap}
