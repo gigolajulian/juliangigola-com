@@ -20,6 +20,8 @@ type Films = {
 // YouTube: onStateChange carries the state as `info`, infoDelivery as `info.playerState`; Vimeo: playProgress `data.seconds`
 type PlayerMsg = { event?: string; info?: number | { playerState?: number }; data?: { seconds?: number } };
 
+// the visitor's Pause on the Motion screen (rows.tsx): the current film holds still until Play
+const stopped = (s: Films) => s.el.hasAttribute("data-paused");
 const win = (v: Pv) => (v.player instanceof HTMLIFrameElement ? v.player.contentWindow : null);
 const say = (v: Pv, yt: string, vimeo: string) =>
   v.player instanceof HTMLVideoElement
@@ -47,8 +49,8 @@ function mountFile(s: Films, i: number, film: HTMLElement, file: string) {
   f.setAttribute("aria-hidden", "true");
   f.addEventListener("playing", () => {
     v.played = true;
-    if (i !== s.cur) f.pause();
-    else f.setAttribute("data-ready", "");
+    if (i !== s.cur || stopped(s)) f.pause();
+    if (i === s.cur) f.setAttribute("data-ready", "");
   });
   film.append(f);
   s.pool.set(i, v);
@@ -103,7 +105,10 @@ function preview(s: Films) {
       clearTimeout(v.timer);
       v.player.removeAttribute("data-ready");
       if (v.played) say(v, "pauseVideo", "pause");
-    } else if (v.played) say(v, "playVideo", "play");
+    } else if (v.played) {
+      if (stopped(s)) say(v, "pauseVideo", "pause");
+      else say(v, "playVideo", "play");
+    }
   }
   s.pvT = window.setTimeout(() => fill(s), wants(s, cur) && s.items[cur].dataset.file ? 0 : 300);
 }
@@ -139,6 +144,7 @@ function heard(s: Films, e: MessageEvent) {
     v.played = true;
     if (state === 1) captionsOff(win(v));
     if (i !== s.cur) return void say(v, "pauseVideo", "pause");
+    if (stopped(s)) say(v, "pauseVideo", "pause");
     if (v.player.hasAttribute("data-ready") || v.timer) return;
     // YouTube draws its own title and controls for a moment after a first start; a loaded one resumes clean
     v.timer = window.setTimeout(() => ((v.timer = 0), v.player.setAttribute("data-ready", "")), v.isYoutube ? (first ? 2500 : 350) : 0);
@@ -184,7 +190,7 @@ function films(): Driver {
       const io = new IntersectionObserver(([e]) => ((s.seen = e.isIntersecting), preview(s)), { rootMargin: "100% 0px" });
       io.observe(el);
       const mo = new MutationObserver(() => filmTold(s));
-      mo.observe(el, { attributeFilter: ["data-cur"] });
+      mo.observe(el, { attributeFilter: ["data-cur", "data-paused"] });
       addEventListener("resize", () => requestAnimationFrame(() => filmResize(s)), opts);
       return () => filmsOff(s, ac, mo, io);
     },
