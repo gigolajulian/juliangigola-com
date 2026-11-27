@@ -68,8 +68,13 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 :root[data-theme="light"] .v3 .tbtn svg{transform:rotate(180deg)}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .tbtn svg{transform:rotate(180deg)}}
 @media (hover:hover){.v3 .tbtn:hover svg{opacity:.75}}
-.v3 .tbtn:focus-visible{outline:1px solid currentColor;outline-offset:2px}
+.v3 .tbtn:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.v3 .tbtn svg{transition:none}}
+/* ?themefx radial (chrome.tsx): one flat snapshot, old under, new clipped in from the toggle. :is(*,#_) outranks every named layer;
+   the stacked :root outranks the page-transition fades on root, and the new shot sits over the old (motion-plan.css lifts old to z-index 1). */
+:root[data-themefx] :is(*,#_){view-transition-name:none!important}
+:root:root:root:root[data-themefx]::view-transition-old(root),:root:root:root:root[data-themefx]::view-transition-new(root){animation:none!important;mix-blend-mode:normal}
+:root:root:root:root[data-themefx]::view-transition-new(root){z-index:2}
 .v3 .a-cover::before{content:"";position:absolute;inset:0 0 auto;height:22%;z-index:1;background:linear-gradient(to bottom,oklch(0.1 0.003 70 / .55),transparent);pointer-events:none}
 .v3 .a-cover .foot{position:relative;z-index:2;margin-top:auto;padding:0 var(--gr) 28px var(--g);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
 /* sized off the role line below it, so the line ends at Gigola's i (11.1 x its font) */
@@ -859,6 +864,10 @@ html{font-family:var(--font-mono),ui-monospace,monospace}
 /* Service page (components/booking/service.tsx): head, sequence, rows. */
 .v3 .sv-top{display:flex;flex-direction:column;align-items:flex-start;gap:20px;padding:96px var(--gr) 0 var(--g)}
 .v3 .sv-top .pg-t{max-width:12ch;text-wrap:balance}
+/* Event photography on one line, the rest of the title under it, sized to the title's column: the line is about 8.4em wide in its font. */
+.v3 .sv-top:has(.pg-t .one){container-type:inline-size}
+.v3 .sv-top .pg-t:has(.one){max-width:none;font-size:min(clamp(3rem,calc(8*var(--v3u)),7rem),calc(100cqw / 8.6))}
+.v3 .sv-top .pg-t .one{display:block;white-space:nowrap}
 .v3 .sv-lead{margin:0;max-width:46ch;font-size:clamp(1rem,calc(1.3*var(--v3u)),1.125rem);line-height:1.55;text-wrap:pretty}
 .v3 .sv-top .inc{max-width:72ch}
 .v3 .sv-top .ctas{display:flex;gap:10px;flex-wrap:wrap}

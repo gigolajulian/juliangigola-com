@@ -20,13 +20,16 @@
 import { RESPONSE_TIME } from "../site";
 import { formatPrice, isSession, SESSION_TYPES, SESSIONS, type SessionType } from "@/lib/booking/catalog";
 import { CONTENT } from "../content";
-import { getProject, projectsIn } from "../work/work";
+import { ALL_PROJECTS, LINKABLE, getProject, projectsIn } from "../work/work";
+import { COVER_RELEASES } from "../work/cover-art-data";
+import { PROJECTS as ARCHIVE } from "../work/work-data";
 import type { BookingSlug } from "./slugs";
 import type { Frame } from "@/lib/work/work-types";
 
 /** `link`: words of the answer that are a link on the page (`label` is found in `a`); the answer itself stays plain text. */
 export type Faq = { q: string; a: string; link?: { href: string; label: string } };
-export type Block = { heading: string; items?: string[]; body?: string };
+/** `link`: as on a `Faq`, words of `body` that are a link. */
+export type Block = { heading: string; items?: string[]; body?: string; link?: { href: string; label: string } };
 export type Tile = { frame: Frame; href: string; caption: string };
 /** A place on the Where screen: its name and what working there means. */
 export type Place = { name: string; note: string };
@@ -65,7 +68,24 @@ export type BookingPage = {
   /** Presets for the form on the Book screen.
       `cal`: the event it books ("juliangigola/event-slug"; the slug keys
       `EVENTS` in `lib/booking/rules.ts`), picked on the Book screen in place of the form. */
-  book: { type: string; session?: string; title: string; cal?: string };
+  book: { type: string; session?: string; title: string; cal?: string; href?: string };
+  /** The frame beside the title, kept out of the work screen; without it, the first frame, shown in both. */
+  hero?: string;
+  /** The h1's words before " in " held on one line (Event photography). */
+  h1One?: boolean;
+};
+
+/** A page under a booking page, or a city page: the booking page's layout at its own address
+    (`app/headshots/[kind]`, `app/music-photography/cover-art`, `app/san-*-photographer`). */
+export type GuidePage = Omit<BookingPage, "slug"> & {
+  /** Its address without the leading slash: "headshots/teams". */
+  slug: string;
+  /** The middle step of the crumb, where it has one. */
+  parent?: { href: string; name: string };
+  /** The cities its structured data serves, where they are not its Where list. */
+  area?: string[];
+  /** How many frames the work screen shows (six). */
+  n?: number;
 };
 
 /** Every city the pages name, for the structured data's service area. */
@@ -175,8 +195,11 @@ const coversOf = (category: string, n = Infinity, prefer: string[] = []): Tile[]
 /** Chosen frames by address, in the order given, each opening its project. */
 const framesAt = (srcs: string[]): Tile[] =>
   srcs.map((src) => {
-    const p = getProject(src.split("/")[2]);
-    const frame = p?.images.find((f) => f.src === src);
+    /* A folder can keep its old name after the project's slug changed (giselle-studio-digitals is
+       /portfolio/giselle), and a picked frame can be one the set no longer shows (giselle 08, Julian's pick). */
+    const dir = src.slice(0, src.lastIndexOf("/") + 1);
+    const p = getProject(src.split("/")[2]) ?? LINKABLE.find((x) => x.images.some((f) => f.src.startsWith(dir)));
+    const frame = p?.images.find((f) => f.src === src) ?? ARCHIVE.flatMap((x) => x.images).find((f) => f.src === src);
     if (!p || !frame) throw new Error(`lib/booking/service-pages.ts: no frame "${src}" in the work data.`);
     return { frame, href: `/portfolio/${p.slug}`, caption: caption(p.name) };
   });
@@ -191,6 +214,9 @@ const heads = session("headshots");
 const digitals = session("studio-digitals");
 const portraits = session("portraits");
 const weddings = session("weddings");
+
+/** Cover design alone, in dollars (Julian, 2026-11-26). */
+const COVER_DESIGN = 200;
 
 export const BOOKING_PAGES: BookingPage[] = [
   {
@@ -208,7 +234,8 @@ export const BOOKING_PAGES: BookingPage[] = [
       { heading: "What's included", items: heads.includes },
       {
         heading: "For teams",
-        body: "Booking for a company? Say how many people and roughly when in the booking form, and the quote covers the whole team.",
+        body: "Booking for a company? The team headshots page explains how I set up at your office, how long it takes and how new hires get matched later.",
+        link: { href: "/headshots/teams", label: "The team headshots page" },
       },
       {
         heading: "Who it's for",
@@ -217,6 +244,11 @@ export const BOOKING_PAGES: BookingPage[] = [
           "Actors who need current casting shots",
           "Anyone whose LinkedIn photo is older than their job",
         ],
+      },
+      {
+        heading: "Models",
+        body: "Models have their own page, which covers what agencies and casting sites ask for. Model digitals are a separate session.",
+        link: { href: "/headshots/models", label: "their own page" },
       },
     ],
     where: SESSION_WHERE,
@@ -518,6 +550,11 @@ export const BOOKING_PAGES: BookingPage[] = [
           "Music videos: directed and shot",
         ],
       },
+      {
+        heading: "Cover art only",
+        body: `If you only need the cover, cover design is $${COVER_DESIGN} and the cover art page explains how it works.`,
+        link: { href: "/music-photography/cover-art", label: "the cover art page" },
+      },
       PROCESS,
       ...(MUSIC_VIDEOS.length ? [{ heading: "Music videos", items: MUSIC_VIDEOS.slice(0, 4) }] : []),
     ],
@@ -656,7 +693,310 @@ export const BOOKING_PAGES: BookingPage[] = [
     gallery: { href: "/portfolio?d=campaigns", label: "The campaigns" },
     book: { type: "campaign", title: "Brief a campaign", cal: "juliangigola/campaign" },
   },
+  {
+    slug: "event-photography",
+    name: "Events",
+    title: "Event Photographer, San Francisco & San Jose",
+    description:
+      "Event photography in San Francisco and San Jose. I shoot concerts, club nights, DJ sets, launches and brand events in the light the room already has, and deliver an edited gallery. Quoted on request.",
+    h1: "Event photography in San Francisco & San Jose",
+    h1One: true,
+    kicker: "Concerts · Club nights · Launches",
+    lead: "I photograph concerts, club nights, DJ sets and brand launches, mostly in dark rooms. I move between the stage and the crowd, so the gallery shows the artist and the whole night around them.",
+    rate: "On request",
+    turnaround: "2 days",
+    price: null,
+    service: "Event photography",
+    back: PORTFOLIO,
+    blocks: [
+      {
+        heading: "What I shoot",
+        items: [
+          "Concerts and live sets, with the artist on stage and the crowd in front of them",
+          "Club nights and DJ sets, where I shoot the booth, the lights and the people on the floor",
+          "Launches and brand events, where I shoot the space, the guests and the product",
+        ],
+      },
+      {
+        heading: "How it runs",
+        items: [
+          "Before the night, you send me the date, the set times, who is playing and what the photos are for.",
+          "On the night, I shoot the stage, the booth and the room in whatever light is there.",
+          "Afterwards you get an edited gallery in 2 days, and I can send a few selects the next morning for your posts.",
+        ],
+      },
+    ],
+    where: [
+      { name: "San Francisco", note: "Clubs, venues and private events." },
+      { name: "San Jose", note: "And across the South Bay and Silicon Valley." },
+      { name: "Oakland", note: "And the East Bay." },
+      { name: "Santa Cruz", note: "And the coast." },
+      { name: "Los Angeles", note: "Travel is quoted with the event." },
+      { name: "New York", note: "Travel is quoted with the event." },
+    ],
+    faqs: [
+      {
+        q: "How much does an event photographer cost in San Francisco or San Jose?",
+        a: "It's quoted on request and depends on what you need. Send me the date, the venue and the set times through the form and I'll come back with a quote.",
+      },
+      {
+        q: "How soon do I get the photos?",
+        a: "The edited gallery is ready in 2 days. If you need something for the next day's posts, I send a few selects first.",
+      },
+      {
+        q: "Do you shoot with flash?",
+        a: "I can do both. When the room is lit well, I keep its light so the photos look the way the night felt. When it is too dark, or you want a sharper and brighter look, I use flash.",
+      },
+      {
+        q: "Can you shoot video at the same event?",
+        a: "Yes. I can shoot photos and video at the same event and plan them together, so just mention it in the brief.",
+      },
+      {
+        q: "Can the venue, the promoter and the artist all use the photos?",
+        a: "Usage is part of the quote, so tell me in the brief who needs the photos and where they will be posted.",
+      },
+      {
+        q: "Do you cover events outside the Bay Area?",
+        a: "Yes, I shoot in Los Angeles, New York and further out. Travel is quoted along with the event.",
+      },
+    ],
+    // Julian's mock: 12 beside the title, then two a column, [05 01] [07 08] [03 15].
+    tiles: framesAt(["12", "05", "07", "03", "01", "08", "15"].map((n) => `/work/events/${n}.jpg`)),
+    hero: "/work/events/12.jpg",
+    gallery: { href: "/portfolio/events", label: "Event coverage" },
+    book: { type: "event", title: "Inquire" },
+  },
 ];
+
+/* ── pages under a booking page, and the city pages ───────────────── */
+
+const work = (slug: string, ns: string[]) => ns.map((n) => `/work/${slug}/${n}.jpg`);
+/** The lowest session price, for the city pages. */
+const lowest = Math.min(...SESSION_TYPES.flatMap((s) => (s.from === null ? [] : [s.from])));
+const HEADSHOTS = { href: "/headshots", name: "Headshots" };
+
+export const GUIDE_PAGES: GuidePage[] = [
+  {
+    slug: "headshots/teams",
+    name: "Team headshots",
+    parent: HEADSHOTS,
+    title: "Team Headshots for Companies, SF & San Jose",
+    description:
+      "Team headshots in San Francisco and San Jose, at your office or in my studio. One light and one background for the whole team, and new hires matched later. Quoted on request.",
+    h1: "Team headshots in San Francisco & San Jose",
+    kicker: "",
+    lead: "I photograph whole teams, either at your office or in my studio in San Jose. Everyone sits in front of the same light and the same background, so the team page on your site looks like one company. When someone new joins later, I set up the same way and their headshot matches the rest.",
+    rate: "On request",
+    price: null,
+    service: "Team headshot photography",
+    back: { href: "/headshots", label: "Headshots" },
+    blocks: [],
+    where: SESSION_WHERE,
+    faqs: [
+      {
+        q: "How much do team headshots cost?",
+        a: "Team headshots are quoted on request, because the price depends on how many people there are and where the shoot is. Tell me the head count and a rough date in the form and I'll send a quote.",
+      },
+      {
+        q: "How much space do you need at the office?",
+        a: "A conference room or a quiet corner is enough. I bring the light, the backdrop and everything else, and each person sits for about 15 minutes.",
+      },
+      {
+        q: "What should people wear?",
+        a: "Whatever they'd wear to an important meeting. Solid colors photograph better than busy patterns, and I'm happy to look at a few options before the shoot.",
+      },
+      {
+        q: "Some of our team is remote. Can they match?",
+        a: "Yes. They can book a session in my studio, and I'll use the same setup so their photo sits next to everyone else's without standing out.",
+      },
+    ],
+    /* FUN.XYZ, a team shot at their office on one setup. The project is hidden in /admin, so the
+       frames are shown here with no link to it and no name. */
+    tiles: work("fun-xyz", ["01", "02", "03", "04", "08", "11"]).map((src) => {
+      const frame = ALL_PROJECTS.find((x) => x.slug === "fun-xyz")?.images.find((f) => f.src === src);
+      if (!frame) throw new Error(`lib/booking/service-pages.ts: no frame "${src}" in the work data.`);
+      return { frame, href: "/headshots/teams#work", caption: "Team headshots" };
+    }),
+    hero: "/work/fun-xyz/01.jpg",
+    gallery: { href: "#work", label: "Team headshots" },
+    book: { type: "session", session: heads.name, title: "Inquire", href: "/contact/form" },
+  },
+  {
+    slug: "headshots/models",
+    name: "Model headshots",
+    parent: HEADSHOTS,
+    title: "Model Headshots, San Francisco & San Jose",
+    description:
+      "Model headshots in San Francisco and San Jose: a clean look and a moodier one in one session, lightly retouched, with selects ready for your agency the same week.",
+    h1: "Model headshots in San Francisco & San Jose",
+    kicker: "",
+    lead: "A model headshot shows an agency or a client what you look like right now. I keep the light simple and the retouching light, so your skin and your face stay yours. I shoot a clean look and a moodier one in the same session, and you can send the selects to your agency the same week. Actors who need casting headshots book the same session.",
+    ...sessionFacts(heads),
+    service: "Model headshot photography",
+    back: { href: "/headshots", label: "Headshots" },
+    blocks: [],
+    where: SESSION_WHERE,
+    faqs: [
+      {
+        q: "How many looks do I get?",
+        a: "Two as standard: a clean, bright look and a moodier one. If you need more, tell me when you book and I'll plan the time for it.",
+      },
+      {
+        q: "What should I wear?",
+        a: "Simple tops in solid colors that you feel good in. Bring a couple of options for each look and I'll help you pick on the day.",
+      },
+      {
+        q: "How is this different from model digitals?",
+        a: "Digitals are the plain, unretouched snaps agencies ask for. Headshots are lit for a look and lightly retouched, for your book and your profiles.",
+        link: { href: "/model-digitals", label: "Digitals" },
+      },
+      {
+        q: "Will the photos work for agencies and casting sites?",
+        a: "Yes. I deliver each select at full size and cropped for the common casting sites, including an 8x10 crop for print.",
+      },
+      {
+        q: "How often should I update my headshots?",
+        a: "Whenever your hair or your look changes in a way an agency would notice. For most models that's every year or so.",
+      },
+    ],
+    // Julian's order: mostly floor work, no chair shots, none of the /model-digitals picks.
+    tiles: framesAt([
+      "/work/zoe/19.jpg",
+      "/work/taneka/09.jpg",
+      "/work/giselle-studio-digitals/09.jpg",
+      "/work/zoe/07.jpg",
+      "/work/giselle-studio-digitals/08.jpg",
+      "/work/taneka/07.jpg",
+      "/work/zoe/16.jpg",
+      "/work/mya/07.jpg",
+    ]),
+    hero: "/work/zoe/19.jpg",
+    n: 7,
+    gallery: { href: "/model-digitals", label: "Model headshots" },
+    book: { type: "session", session: heads.name, title: "Book a session", cal: "juliangigola/headshots" },
+  },
+  {
+    slug: "music-photography/cover-art",
+    name: "Cover art",
+    parent: { href: "/music-photography", name: "Music" },
+    title: "Album & Single Cover Art Photographer, Bay Area",
+    description: `Single and album cover art, designed and art-directed in the Bay Area. Square at 3000 pixels or larger, ready for every platform. Cover design $${COVER_DESIGN}.`,
+    h1: "Single & album cover art",
+    kicker: "",
+    lead: `I design covers for singles and albums and handle the art direction from start to finish. You get the front, the back and crops for your socials and streaming profile, all square at 3000 pixels or larger so every platform takes them. I've made ${COVER_RELEASES.length} covers so far, for artists like BANX, Nameera and Sammy Shiblaq.`,
+    rate: `Cover design $${COVER_DESIGN}`,
+    price: COVER_DESIGN,
+    service: "Cover art design",
+    back: { href: "/music-photography", label: "Music" },
+    blocks: [],
+    where: COMMISSION_WHERE,
+    faqs: [
+      {
+        q: "How much does cover art cost?",
+        a: `Cover design is $${COVER_DESIGN}. If you want a photo made just for the cover, the shoot is extra and I quote it with the release. If you're booking an artist press kit, the cover is already part of it.`,
+      },
+      {
+        q: "What size do you deliver?",
+        a: "Square and at least 3000 by 3000 pixels, which is what Apple Music asks for and what every other platform accepts.",
+      },
+      {
+        q: "Do you do the type and layout?",
+        a: "Yes. The title, the artist name and the layout are part of the design, so the cover arrives ready to upload.",
+      },
+      {
+        q: "How far ahead of the release should I book?",
+        a: "Book 6 weeks or more before your release date, since distributors often want the artwork a few weeks before the song goes live.",
+      },
+    ],
+    // The fronts, in /portfolio/coverart's order.
+    tiles: COVER_RELEASES.map((r) => {
+      const { src, width, height, color, alt } = r.frames[0];
+      return { frame: { src, width, height, color, alt }, href: "/portfolio/coverart", caption: r.title };
+    }),
+    n: 12,
+    gallery: { href: "/portfolio/coverart", label: "Cover art" },
+    book: { type: "coverart", title: "Inquire", href: `/contact/form?${new URLSearchParams({ type: "coverart", ref: "Cover art" })}` },
+  },
+  {
+    slug: "san-francisco-photographer",
+    name: "San Francisco",
+    area: ["San Francisco"],
+    title: "Photographer in San Francisco | Portraits, Headshots, Events",
+    description:
+      "Photographer in San Francisco for portraits, headshots, events and editorial work, at City Hall, Embarcadero station, the Financial District, the Bay Bridge and Twin Peaks.",
+    h1: "Photographer in San Francisco",
+    kicker: "",
+    lead: "I shoot in San Francisco often. These are the spots I go back to, each with a frame I made there: City Hall, the stairs at Embarcadero station, the steam vents in the Financial District, the sidewalks downtown, the Bay Bridge at night and Twin Peaks under Sutro Tower. To plan a shoot in the city, pick a session below.",
+    rate: formatPrice(lowest),
+    price: lowest,
+    service: "Photography in San Francisco",
+    back: { href: "/", label: "Home" },
+    blocks: [],
+    where: [
+      "City Hall",
+      "The stairs at Embarcadero station",
+      "The steam vents in the Financial District",
+      "The sidewalks downtown",
+      "The Bay Bridge at night",
+      "Twin Peaks under Sutro Tower",
+    ].map((name) => ({ name, note: "" })),
+    faqs: [
+      {
+        q: "Do you charge extra to shoot in San Francisco?",
+        a: "Yes. My studio is in San Jose, so shoots in San Francisco and around the Bay Area have a travel fee. I add it to the quote.",
+      },
+    ],
+    // Julian's city tags.
+    tiles: framesAt([
+      ...work("urban-reverie", ["01", "02", "03", "04", "05", "06"]),
+      ...work("wired-magazine", ["01", "02", "03", "04", "05", "06"]),
+      ...work("places", ["02", "04", "06", "07", "10", "13", "14", "18"]),
+      "/work/weddings/01.jpg",
+    ]),
+    hero: "/work/urban-reverie/01.jpg",
+    n: 20,
+    gallery: { href: "/portfolio/places", label: "Shot in San Francisco" },
+    book: { type: "session", title: "Book a session", href: "/book" },
+  },
+  {
+    slug: "san-jose-photographer",
+    name: "San Jose",
+    area: ["San Jose"],
+    title: "Photographer in San Jose | Portraits, Headshots, Events",
+    description:
+      "Photographer in San Jose with a studio in the city: portraits, headshots, editorial and brand work, and travel to San Francisco, Oakland and Santa Cruz.",
+    h1: "Photographer in San Jose",
+    kicker: "",
+    lead: "My studio is in San Jose, so most of my sessions start here: portraits, headshots, editorial and brand work. When a shoot needs a location, I travel for it, to San Francisco, Oakland and Santa Cruz. Every session I book is linked below.",
+    rate: formatPrice(lowest),
+    price: lowest,
+    service: "Photography in San Jose",
+    back: { href: "/", label: "Home" },
+    blocks: [],
+    where: [
+      { name: "San Jose", note: "My studio. I send the exact address once you book." },
+      { name: "San Francisco", note: "A travel fee applies." },
+      { name: "Oakland", note: "A travel fee applies." },
+      { name: "Santa Cruz", note: "A travel fee applies." },
+    ],
+    faqs: [
+      { q: "Where is your studio?", a: "In San Jose. I send the exact address once you book." },
+      {
+        q: "Can we shoot somewhere other than the studio?",
+        a: "Yes. Tell me the place in the form, or ask and I'll suggest one that fits the look you want. Outside San Jose, a travel fee applies.",
+      },
+    ],
+    // Julian's city tags; the SJSU frames stay on the graduation page.
+    tiles: framesAt(work("places", ["01", "05", "08", "09", "11"])),
+    hero: "/work/places/01.jpg",
+    gallery: { href: "/portfolio/places", label: "Shot in San Jose" },
+    book: { type: "session", title: "Book a session", href: "/book" },
+  },
+];
+
+export const guidePage = (slug: string) => GUIDE_PAGES.find((p) => p.slug === slug);
+/** The city pages, by the city a Where row names. */
+export const CITY_PAGES: Record<string, string> = { "San Francisco": "/san-francisco-photographer", "San Jose": "/san-jose-photographer" };
 
 export const bookingPage = (slug: string) => BOOKING_PAGES.find((p) => p.slug === slug);
 export const bookingHref = (p: BookingPage) => `/${p.slug}`;
@@ -713,7 +1053,7 @@ export const BOOK_MENU: MenuItem[] = [
     name: "Event coverage",
     blurb: "Launches, brand events, concerts and parties, shot as they happen.",
     group: "commission",
-    page: "/portfolio/events",
+    page: "/event-photography",
     form: { type: "event" },
   },
 ];

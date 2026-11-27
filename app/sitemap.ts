@@ -13,7 +13,7 @@ import { DISCIPLINE_TILES } from "@/lib/work/disciplines";
 import type { Frame } from "@/lib/work/work-types";
 import { COVER_RELEASES } from "@/lib/work/cover-art-data";
 import DATES from "@/lib/sitemap-dates.json";
-import { BOOKING_PAGES, bookingHref } from "@/lib/booking/service-pages";
+import { BOOKING_PAGES, GUIDE_PAGES, bookingHref } from "@/lib/booking/service-pages";
 import { CAMPUS_GUIDES, campusHref } from "@/lib/graduation/campus-guides";
 
 const SITE = "https://juliangigola.com";
@@ -146,6 +146,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
+  /* The pages under a booking page and the city pages: their pictures are the ones they show. */
+  const subpages = GUIDE_PAGES.map((p) => ({
+    url: `${SITE}/${p.slug}`,
+    ...showing(p.tiles.map((t) => t.frame)),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
   /* Real pages with no photo set of their own to date them by. /book sits
      with the booking pages; the rest with /portfolio. */
   const plain = ["/about", "/contact", "/book", "/bts"].map((path) => ({
@@ -154,5 +162,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: path === "/book" ? 0.9 : 0.8,
   }));
 
-  return [...pages, ...plain, ...booking, ...guides, ...categories, ...projects];
+  return [...pages, ...plain, ...booking, ...subpages, ...guides, ...categories, ...projects];
 }

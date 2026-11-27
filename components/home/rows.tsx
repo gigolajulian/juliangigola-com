@@ -135,7 +135,7 @@ export function HomeFilms({ films }: { films: HomeFilm[] }) {
         </ol>
         <div className="mt-moacts">
           <button type="button" className="lbl mt-mopause" onClick={() => setPaused((p) => !p)}>
-            {paused ? "Play" : "Pause"}
+            <span>{paused ? "Play" : "Pause"}</span>
           </button>
           <Link className="btn mt-sm mt-momore" href="/portfolio/video">
             View more

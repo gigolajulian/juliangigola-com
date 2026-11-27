@@ -15,6 +15,7 @@ export const BOOKING_SLUGS = [
   "music-photography",
   "fashion-photography",
   "brand-photography",
+  "event-photography",
 ] as const;
 
 export type BookingSlug = (typeof BOOKING_SLUGS)[number];

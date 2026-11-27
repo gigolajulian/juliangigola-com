@@ -96,7 +96,10 @@
 [data-mtscroll] .mt-molist .w{display:none;margin-left:12px;text-decoration:underline;text-underline-offset:4px}
 @media (hover:none){[data-mtscroll] .mt-molist li[data-on] .w{display:inline}}
 [data-mtscroll] .mt-moacts{display:flex;align-items:center;gap:24px;margin-top:28px}
-[data-mtscroll] .mt-mopause{min-height:24px;padding:0;border:0;background:none;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+[data-mtscroll] .mt-mopause{display:inline-grid;justify-items:start;min-height:24px;padding:0;border:0;background:none;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+/* "Play" and "Pause" share one cell sized to "Pause", so View more holds still when the label swaps */
+[data-mtscroll] .mt-mopause>span,[data-mtscroll] .mt-mopause::after{grid-area:1/1}
+[data-mtscroll] .mt-mopause::after{content:"Pause";visibility:hidden}
 @media (prefers-reduced-motion:reduce){[data-mtscroll] .mt-mopause{display:none}}
 
 /* ── Book online (3.4) and By quote (3.5) ── */
@@ -455,11 +458,13 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
 @media (min-width:1024px) and (min-height:600px){
   [data-mtscroll] .mt-motion .mt-stage{position:relative;min-height:max(100svh,600px);padding:0;color:rgb(var(--on-photo))}
   [data-mtscroll] .mt-mofilms{position:absolute;inset:0;aspect-ratio:auto;margin:0}
-  [data-mtscroll] .mt-mofilms::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse 50% 60% at 0 0,rgb(0 0 0 / .62),transparent 85%),linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 40%,rgb(0 0 0 / .75))}
+  /* the head's ground sits on the head (at --fx, sized in --u) so the label holds 4.5:1 with no halo, even over a white frame */
+  [data-mtscroll] .mt-mofilms::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(calc(1000 * var(--u)) calc(560 * var(--u)) at var(--fx) 0,rgb(0 0 0 / .78),rgb(0 0 0 / .56) 45%,transparent),linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 40%,rgb(0 0 0 / .75))}
   [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-molist,.mt-moacts,.mt-molg){position:absolute;z-index:4}
   [data-mtscroll] .mt-motion .mt-mohead{left:calc(var(--fx) + 36 * var(--u));top:calc(96 * var(--u))}
   [data-mtscroll] .mt-motion .mute{color:rgb(var(--on-photo) / .72)}
-  [data-mtscroll] .mt-motion .mt-mohead .mute{color:rgb(var(--on-photo));text-shadow:0 0 3px rgb(0 0 0 / .75),0 0 12px rgb(0 0 0 / .6)}
+  /* the label runs the width of "Motion" (88u heading, mono label 16.9em wide), like the line under the name on the cover */
+  [data-mtscroll] .mt-motion .mt-mohead .mute{font-size:calc(16.1 * var(--u));color:rgb(var(--on-photo));text-shadow:0 0 3px rgb(0 0 0 / .75),0 0 12px rgb(0 0 0 / .6)}
   [data-mtscroll] .mt-molist{left:calc(var(--fx) + 36 * var(--u));bottom:calc(84 * var(--u));margin:0;padding:0}
   [data-mtscroll] .mt-molist li+li{margin-top:calc(18 * var(--u))}
   [data-mtscroll] .mt-molist a{column-gap:calc(16 * var(--u))}
