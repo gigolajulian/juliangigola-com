@@ -357,6 +357,8 @@ type ServiceLd = {
   price: number | null;
   faqs: { q: string; a: string }[];
   places: string[];
+  /** The page above it in the crumb (Headshots, for /headshots/teams). */
+  parent?: { href: string; name: string };
 };
 
 export function serviceGraph(p: ServiceLd) {
@@ -404,7 +406,8 @@ export function serviceGraph(p: ServiceLd) {
         "@type": "BreadcrumbList",
         itemListElement: [
           { "@type": "ListItem", position: 1, name: "Julian Gigola", item: SITE },
-          { "@type": "ListItem", position: 2, name: p.name, item: url },
+          ...(p.parent ? [{ "@type": "ListItem", position: 2, name: p.parent.name, item: `${SITE}${p.parent.href}` }] : []),
+          { "@type": "ListItem", position: p.parent ? 3 : 2, name: p.name, item: url },
         ],
       },
     ],
