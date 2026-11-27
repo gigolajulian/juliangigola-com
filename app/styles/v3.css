@@ -68,7 +68,7 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
 :root[data-theme="light"] .v3 .tbtn svg{transform:rotate(180deg)}
 @media (prefers-color-scheme:light){:root:not([data-theme="dark"]) .v3 .tbtn svg{transform:rotate(180deg)}}
 @media (hover:hover){.v3 .tbtn:hover svg{opacity:.75}}
-.v3 .tbtn:focus-visible{outline:1px solid currentColor;outline-offset:2px}
+.v3 .tbtn:focus-visible{outline:2px solid currentColor;outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.v3 .tbtn svg{transition:none}}
 .v3 .a-cover::before{content:"";position:absolute;inset:0 0 auto;height:22%;z-index:1;background:linear-gradient(to bottom,oklch(0.1 0.003 70 / .55),transparent);pointer-events:none}
 .v3 .a-cover .foot{position:relative;z-index:2;margin-top:auto;padding:0 var(--gr) 28px var(--g);display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
