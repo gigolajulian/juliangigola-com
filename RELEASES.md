@@ -6,6 +6,8 @@ version is version.json's (set at each release to the same number as its tag);
 
 ## Unreleased
 
+The home reel now plays in Safari. The Motion list, the reel pause control, focus rings and a few booking labels are easier to see and use.
+
 Behind the scenes: two library security patches.
 
 In Safari on a standard screen, a mouse wheel now moves the home page as far per notch as everywhere else.
