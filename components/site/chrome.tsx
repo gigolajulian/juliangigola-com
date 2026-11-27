@@ -43,6 +43,27 @@ const set = (t: Theme) => {
   paint(t);
 };
 let turns = 0;
+/* ?themefx (opt-in, lasts the visit): the new theme grows as a circle from the toggle's divider line. */
+const radialOn = () => {
+  if (new URLSearchParams(location.search).has("themefx")) sessionSet("themefx", "1");
+  return sessionGet("themefx") === "1" && typeof document.startViewTransition === "function" && !matchMedia("(prefers-reduced-motion: reduce)").matches;
+};
+const radial = (from: HTMLElement, apply: () => void) => {
+  const b = from.getBoundingClientRect();
+  const x = b.left - 16.5; // the 1px line, .tbtn::before at left:-17px
+  const y = b.top + b.height / 2;
+  const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+  const root = document.documentElement;
+  root.dataset.themefx = "";
+  const t = document.startViewTransition(apply);
+  t.ready.then(() =>
+    root.animate(
+      { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${r}px at ${x}px ${y}px)`] },
+      { duration: 650, easing: "cubic-bezier(.65,0,.35,1)", pseudoElement: "::view-transition-new(root)" },
+    ),
+  );
+  t.finished.finally(() => delete root.dataset.themefx);
+};
 
 function ThemeButton() {
   const [theme, setTheme] = React.useState<Theme | null>(null);
@@ -63,14 +84,16 @@ function ThemeButton() {
   }, []);
   const here = usePathname();
   React.useEffect(() => paint(read()), [here]);
-  const flip = () => {
+  const flip = (e: React.MouseEvent<HTMLButtonElement>) => {
     const next: Theme = read() === "light" ? "dark" : "light";
-    set(next);
+    const phone = matchMedia("(max-width: 700px) and (pointer: coarse)").matches;
+    if (!phone && radialOn()) radial(e.currentTarget, () => set(next));
+    else set(next);
     sessionSet(KEY, next);
     /* iPhone Safari keeps the old colour in the bars above and below the
        page until it loads again (Julian): reload, and the head script
        paints the chosen theme from the first frame. */
-    if (matchMedia("(max-width: 700px) and (pointer: coarse)").matches) return void location.reload();
+    if (phone) return void location.reload();
     turns += 360;
     document.documentElement.style.setProperty("--tb-r", `${turns}deg`);
     setSpun(true);
