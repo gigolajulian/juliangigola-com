@@ -96,7 +96,10 @@
 [data-mtscroll] .mt-molist .w{display:none;margin-left:12px;text-decoration:underline;text-underline-offset:4px}
 @media (hover:none){[data-mtscroll] .mt-molist li[data-on] .w{display:inline}}
 [data-mtscroll] .mt-moacts{display:flex;align-items:center;gap:24px;margin-top:28px}
-[data-mtscroll] .mt-mopause{min-height:24px;padding:0;border:0;background:none;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+[data-mtscroll] .mt-mopause{display:inline-grid;justify-items:start;min-height:24px;padding:0;border:0;background:none;color:inherit;cursor:pointer;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+/* "Play" and "Pause" share one cell sized to "Pause", so View more holds still when the label swaps */
+[data-mtscroll] .mt-mopause>span,[data-mtscroll] .mt-mopause::after{grid-area:1/1}
+[data-mtscroll] .mt-mopause::after{content:"Pause";visibility:hidden}
 @media (prefers-reduced-motion:reduce){[data-mtscroll] .mt-mopause{display:none}}
 
 /* ── Book online (3.4) and By quote (3.5) ── */
