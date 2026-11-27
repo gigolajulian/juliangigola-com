@@ -460,7 +460,8 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
   [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-molist,.mt-moacts,.mt-molg){position:absolute;z-index:4}
   [data-mtscroll] .mt-motion .mt-mohead{left:calc(var(--fx) + 36 * var(--u));top:calc(96 * var(--u))}
   [data-mtscroll] .mt-motion .mute{color:rgb(var(--on-photo) / .72)}
-  [data-mtscroll] .mt-motion .mt-mohead .mute{color:rgb(var(--on-photo));text-shadow:0 0 3px rgb(0 0 0 / .75),0 0 12px rgb(0 0 0 / .6)}
+  /* the label runs the width of "Motion" (88u heading, mono label 16.9em wide), like the line under the name on the cover */
+  [data-mtscroll] .mt-motion .mt-mohead .mute{font-size:calc(16.1 * var(--u));color:rgb(var(--on-photo));text-shadow:0 0 3px rgb(0 0 0 / .75),0 0 12px rgb(0 0 0 / .6)}
   [data-mtscroll] .mt-molist{left:calc(var(--fx) + 36 * var(--u));bottom:calc(84 * var(--u));margin:0;padding:0}
   [data-mtscroll] .mt-molist li+li{margin-top:calc(18 * var(--u))}
   [data-mtscroll] .mt-molist a{column-gap:calc(16 * var(--u))}
