@@ -4,7 +4,17 @@ import { CoverPage } from "@/components/cover/cover-page";
 import { SESSION_SEO } from "@/lib/og/seo";
 import { projectFacts, shareMeta } from "@/lib/og/share";
 import { ProjectView } from "@/components/portfolio/project";
-import { LINKABLE, UNLISTED, COVER_ART, COVER_RELEASES, getProject, isDisciplineGallery, nextAfter, nextDiscipline } from "@/lib/work/work";
+import {
+  LINKABLE,
+  UNLISTED,
+  COVER_ART,
+  COVER_RELEASES,
+  getProject,
+  isDisciplineGallery,
+  nextAfter,
+  nextDiscipline,
+  titleCase,
+} from "@/lib/work/work";
 
 /* ── the case study ───────────────────────────────────────────────
  * The old site rendered a project as a grid of thumbnails with the credits
@@ -82,6 +92,10 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
               href: `/portfolio/${next.slug}`,
               name: `Next: ${next.name}`,
               cover: next.images.find((f) => f.width <= f.height) ?? next.images[0],
+              /* ds: the Next band's top line. */
+              meta: [next.categories[0] && titleCase(next.categories[0].name), `${String(next.images.length).padStart(2, "0")} frames`]
+                .filter(Boolean)
+                .join(" · "),
             }
           : undefined;
       })();
