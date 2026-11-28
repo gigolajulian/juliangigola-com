@@ -68,7 +68,7 @@ export function useCoverPreload(
         if (!im?.complete) {
           if (im && im.loading !== "lazy" && !waits.has(im)) {
             waits.add(im);
-            im.decode().then(schedule, schedule);
+            void im.decode?.().then(schedule, schedule); // optional: jsdom has no decode
           }
           continue;
         }
