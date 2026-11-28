@@ -199,7 +199,15 @@ export function WorkIndex({
     const here = new Set([...document.querySelectorAll<HTMLElement>("#p-work [data-flip-id]")].map((e) => e.dataset.flipId));
     const gone = st.elementStates.filter((s) => !s.element.isConnected && !here.has(s.id));
     const whole = !!was && !was.el.isConnected;
-    const travels = !whole && gone.length < st.elementStates.length;
+    /* Covers that stay and land on screen. From a small chip (Chroma) to All they land further down the page: with
+       nothing travelling in view, new covers that waited left the grid empty for 120ms (JG - MAC). */
+    const travels =
+      !whole &&
+      st.elementStates.some((s) => {
+        if (!s.element.isConnected) return false;
+        const r = s.element.getBoundingClientRect();
+        return r.bottom > 0 && r.top < innerHeight;
+      });
     const sec = page.current;
     let ghost: HTMLDivElement | null = null;
     if (sec && was && (whole || gone.length)) {
@@ -207,8 +215,6 @@ export function WorkIndex({
       g.className = whole ? "wghost" : `wghost ${was.el.className}`;
       g.inert = true; // fading out: not for the keyboard or a screen reader
       g.setAttribute("aria-hidden", "true");
-      g.setAttribute("aria-hidden", "true");
-      g.inert = true;
       sec.prepend(g);
       const o = g.getBoundingClientRect();
       const dy = flipAt.current - scrollY;
@@ -244,7 +250,7 @@ export function WorkIndex({
       paused: true,
       // The vectorscope (Color view) opens 40ms apart, the seventh on together.
       stagger: swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0,
-      // New covers wait 120ms while covers still travel, so they do not land on one that has not left its place yet.
+      // New covers wait 120ms while covers still travel in view, so they do not land on one that has not left its place yet.
       onEnter: (els) =>
         els.forEach((e) =>
           e.animate(

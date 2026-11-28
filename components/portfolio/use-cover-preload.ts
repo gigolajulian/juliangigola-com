@@ -45,12 +45,7 @@ export function useCoverPreload(
      promotes the real <img>, so each file is fetched once at its own width.
      A layout effect, with the first pass run at once: a cover is hidden until this marks it, and as a passive effect
      that came a frame or more after the grid was drawn, which showed an empty grid on every chip. */
-  const ran = React.useRef(false); // false until the page's first covers have been through
   React.useLayoutEffect(() => {
-    /* A chip or view change, not the page arriving: the covers on screen show at once, photo or not. Safari does not
-       call a cached photo complete in the frame its <img> mounts, so going to All drew an empty grid for 50 to 150ms. */
-    const again = ran.current;
-    ran.current = true;
     const net = navigator.connection;
     if (view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
     const LOOK_CAP = 3;
@@ -67,7 +62,7 @@ export function useCoverPreload(
       let n = 0;
       for (const f of document.querySelectorAll<HTMLElement>("#p-work :is(.wgrid .wt, .wstrip .sc):not([data-up])")) {
         const im = f.querySelector<HTMLImageElement>("img:not(.bk)");
-        if (!im?.complete && !(first && again)) continue;
+        if (!im?.complete) continue;
         const r = f.getBoundingClientRect();
         const shown =
           (Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height) *
