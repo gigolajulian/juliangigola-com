@@ -83,7 +83,7 @@
 [data-mtscroll] .mt-molist li+li{margin-top:16px}
 [data-mtscroll] .mt-molist a{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:baseline;color:inherit;text-decoration:none}
 [data-mtscroll] .mt-molist .n{position:relative}
-[data-mtscroll] .mt-molist .t{font:900 26px/1 var(--display);letter-spacing:-.045em;opacity:.62;transition:opacity 150ms var(--ease-out-strong)}
+[data-mtscroll] .mt-molist .t{white-space:nowrap;font:900 26px/1 var(--display);letter-spacing:-.045em;opacity:.62;transition:opacity 150ms var(--ease-out-strong)}
 [data-mtscroll] .mt-molist .k{grid-column:2;margin-top:6px}
 [data-mtscroll] .mt-molist .k i{font-style:normal}
 /* only the large title dims (3:1 as large text); the small labels stay at full ink for 4.5:1 */
@@ -147,7 +147,8 @@
 [data-mtscroll] .mt-cm-grid figure{margin:0}
 [data-mtscroll] .mt-cm-ph{position:relative;display:block;aspect-ratio:4/5;overflow:hidden;background:var(--card)}
 [data-mtscroll] .mt-cm-ph img{object-fit:cover}
-[data-mtscroll] .mt-cm-ph::after{content:"";position:absolute;inset:0 0 auto;height:34%;background:linear-gradient(rgb(0 0 0 / .5),transparent);pointer-events:none}
+/* a corner ground under the client mark, so it reads on a light cover too (Photo Is Always Night) */
+[data-mtscroll] .mt-cm-ph::after{content:"";position:absolute;inset:0 0 auto;height:34%;background:radial-gradient(70% 60% at 100% 0,rgb(0 0 0 / .55),transparent),linear-gradient(rgb(0 0 0 / .5),transparent);pointer-events:none}
 [data-mtscroll] .mt-cm-mk{position:absolute;z-index:1;top:14px;right:14px;color:rgb(var(--on-photo));font:900 17px/1 var(--display);letter-spacing:-.04em}
 [data-mtscroll] .mt-cm-mk .mk{display:block}
 [data-mtscroll] .mt-cm-grid figcaption{margin-top:12px;text-align:right}
@@ -460,7 +461,7 @@ html:not([data-mt-intro]) .mt-hero .mt-col.side{visibility:var(--vis,visible)}
   [data-mtscroll] .mt-mofilms{position:absolute;inset:0;aspect-ratio:auto;margin:0}
   /* the head's ground sits on the head (at --fx, sized in --u) so the label holds 4.5:1 with no halo, even over a white frame;
      a second ground on the film list keeps the dimmed titles over 3:1 there too */
-  [data-mtscroll] .mt-mofilms::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(calc(1000 * var(--u)) calc(560 * var(--u)) at var(--fx) 0,rgb(0 0 0 / .78),rgb(0 0 0 / .56) 45%,transparent),radial-gradient(calc(1100 * var(--u)) calc(760 * var(--u)) at var(--fx) 100%,rgb(0 0 0 / .78),rgb(0 0 0 / .56) 45%,transparent),linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 40%,rgb(0 0 0 / .75))}
+  [data-mtscroll] .mt-mofilms::after{content:"";position:absolute;inset:0;z-index:3;pointer-events:none;background:radial-gradient(calc(1000 * var(--u)) calc(560 * var(--u)) at var(--fx) 0,rgb(0 0 0 / .78),rgb(0 0 0 / .56) 45%,transparent),radial-gradient(calc(1300 * var(--u)) calc(900 * var(--u)) at var(--fx) 100%,rgb(0 0 0 / .78),rgb(0 0 0 / .56) 45%,transparent),linear-gradient(rgb(0 0 0 / .6),transparent 30%,transparent 40%,rgb(0 0 0 / .75))}
   [data-mtscroll] .mt-motion :is(.mt-mohead,.mt-molist,.mt-moacts,.mt-molg){position:absolute;z-index:4}
   [data-mtscroll] .mt-motion .mt-mohead{left:calc(var(--fx) + 36 * var(--u));top:calc(96 * var(--u))}
   [data-mtscroll] .mt-motion .mute{color:rgb(var(--on-photo) / .72)}
