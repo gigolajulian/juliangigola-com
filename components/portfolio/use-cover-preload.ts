@@ -42,8 +42,10 @@ export function useCoverPreload(
   /* On for everyone: the lazy photos
      within 1.5 screens ahead of the scroll are asked for in reading order,
      LOOK_CAP at a time, so covers land in order and never as a burst. It
-     promotes the real <img>, so each file is fetched once at its own width. */
-  React.useEffect(() => {
+     promotes the real <img>, so each file is fetched once at its own width.
+     A layout effect, with the first pass run at once: a cover is hidden until this marks it, and as a passive effect
+     that came a frame or more after the grid was drawn, which showed an empty grid on every chip. */
+  React.useLayoutEffect(() => {
     const net = navigator.connection;
     if (view === "color" || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
     const LOOK_CAP = 3;
@@ -98,6 +100,7 @@ export function useCoverPreload(
     const schedule = () => {
       raf ||= requestAnimationFrame(pump);
     };
+    reveal();
     schedule();
     addEventListener("scroll", schedule, { capture: true, passive: true });
     addEventListener("load", schedule, true); // a photo landing, by native lazy or this queue

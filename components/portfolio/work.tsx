@@ -129,9 +129,28 @@ export function WorkIndex({
       Flip.current = F;
     });
   }, []);
-  const flipped = (set: () => void) => {
-    if (Flip.current && !matchMedia("(prefers-reduced-motion: reduce)").matches) flip.current = Flip.current.getState(seen());
-    set();
+  const flipAt = React.useRef(0); // the page's scroll when the covers were read
+  const gridWas = React.useRef<{ el: HTMLElement; r: DOMRect } | null>(null); // and the grid they sat in, for the ones that leave
+  /* A chip or a view button answers the click first: `next` is what the visitor picked, painted on the control in this
+     frame. The grid is rebuilt two frames later; the click used to hold the page still for 0.4 to 0.8s with nothing
+     changed. Not a React transition: under the page boundary that starts a view transition, a page slide on a chip. `next` clears in the same commit as the grid. */
+  const [next, setNext] = React.useState<{ filter?: string; view?: "grid" | "strip" | "color" } | null>(null);
+  const flipped = (pick: NonNullable<typeof next>, set: () => void) => {
+    setNext((n) => ({ ...n, ...pick }));
+    // Two frames: the first paints the control. One was not enough, React could commit the grid before that frame was shown.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        if (Flip.current && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+          const els = seen();
+          flip.current = Flip.current.getState(els);
+          flipAt.current = scrollY;
+          const el = document.querySelector<HTMLElement>("#p-work .wgrid:not(.wghost)");
+          gridWas.current = el && { el, r: el.getBoundingClientRect() };
+        }
+        set();
+        setNext(null);
+      }),
+    );
   };
   const go = (v: typeof view | "canvas") => {
     if (v === "canvas") {
@@ -140,7 +159,7 @@ export function WorkIndex({
     } else if (canvas) {
       closeCanvas();
       setView(v);
-    } else flipped(() => setView(v));
+    } else flipped({ view: v }, () => setView(v));
   };
   const {
     raw,
@@ -170,6 +189,46 @@ export function WorkIndex({
     flip.current = null;
     const w = strip.current;
     if (w) w.style.overflow = "visible"; // the strip would clip covers flying up into it
+    /* A chip in the grid. What leaves is put back where it stood, in a layer of its own, and fades out; React has
+       dropped those nodes, so they are free to move. They used to be cut, which left holes.
+       - Covers that leave while others stay: each fades out in its place (150).
+       - A grid replaced whole (a gallery chip to or from the projects, no cover in common): a plain crossfade, the
+         old grid out (250) as the new covers come in (250). */
+    const was = swap ? null : gridWas.current;
+    gridWas.current = null;
+    const here = new Set([...document.querySelectorAll<HTMLElement>("#p-work [data-flip-id]")].map((e) => e.dataset.flipId));
+    const gone = st.elementStates.filter((s) => !s.element.isConnected && !here.has(s.id));
+    const whole = !!was && !was.el.isConnected;
+    const travels = !whole && gone.length < st.elementStates.length;
+    const sec = page.current;
+    let ghost: HTMLDivElement | null = null;
+    if (sec && was && (whole || gone.length)) {
+      const g = (ghost = document.createElement("div"));
+      g.className = whole ? "wghost" : `wghost ${was.el.className}`;
+      g.setAttribute("aria-hidden", "true");
+      g.inert = true;
+      sec.prepend(g);
+      const o = g.getBoundingClientRect();
+      const dy = flipAt.current - scrollY;
+      const put = (e: HTMLElement, r: DOMRect, more: string) => {
+        e.style.cssText = `position:absolute;margin:0;left:${r.left - o.left}px;top:${r.top - o.top + dy}px;width:${r.width}px;${more}`;
+        g.append(e);
+      };
+      if (whole) put(was.el, was.r, `height:${was.r.height}px`);
+      else
+        for (const s of gone) {
+          let e = s.element as HTMLElement; // the tile: the top of what React took out
+          while (e.parentElement) e = e.parentElement;
+          put(e, s.bounds, "");
+        }
+      g.querySelectorAll("[data-flip-id]").forEach((e) => e.removeAttribute("data-flip-id"));
+      void g
+        .animate({ opacity: [1, 0] }, { duration: whole ? 250 : 150, easing: "cubic-bezier(.23,1,.32,1)", fill: "forwards" })
+        .finished.then(
+          () => g.remove(),
+          () => g.remove(),
+        );
+    }
     /* Motion plan item 9 (docs/decisions.md): grid and strip trade places as
        one move, photo 600 on `move`, no stagger, new covers fade in 250, in
        both directions; a chip slides the tiles to their new places, page 400
@@ -179,14 +238,30 @@ export function WorkIndex({
       duration: swap ? 0.6 : 0.4,
       ease: "power3.inOut",
       scale: true,
+      zIndex: 1, // a cover on its way passes over the ones arriving, not under them
+      paused: true,
       // The vectorscope (Color view) opens 40ms apart, the seventh on together.
       stagger: swap && view === "color" ? (i: number) => Math.min(i, 5) * 0.04 : 0,
-      onEnter: (els) => els.forEach((e) => e.animate({ opacity: [0, 1] }, { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" })),
+      // New covers wait 120ms while covers still travel, so they do not land on one that has not left its place yet.
+      onEnter: (els) =>
+        els.forEach((e) =>
+          e.animate(
+            { opacity: [0, 1] },
+            { duration: 250, delay: travels ? 120 : 0, fill: "backwards", easing: "cubic-bezier(.23,1,.32,1)" },
+          ),
+        ),
       onComplete: () => {
         if (w) w.style.overflow = "";
       },
     });
-    return () => void tl.progress(1);
+    /* Started two frames after the commit: the frame that builds the new grid is a long one, and a timeline started
+       inside it had run a third of its way before anything was drawn. */
+    let raf = requestAnimationFrame(() => (raf = requestAnimationFrame(() => tl.play())));
+    return () => {
+      cancelAnimationFrame(raf);
+      tl.progress(1);
+      ghost?.remove();
+    };
   }, [view, filter]);
   const bar = React.useRef<HTMLDivElement>(null);
   const chips = React.useRef<HTMLDivElement>(null);
@@ -292,7 +367,9 @@ export function WorkIndex({
     };
   }, [syncChips]);
 
-  const rep = canvas ? "canvas" : view === "color" ? back : view;
+  const viewOn = next?.view ?? view; // what the buttons show: the pick, then the view once it is up
+  const filterOn = next?.filter ?? filter;
+  const rep = canvas ? "canvas" : viewOn === "color" ? back : viewOn;
   const fold = (act: () => void) => {
     if (!unfold && matchMedia("(max-width: 700px)").matches) return setUnfold(true);
     act();
@@ -300,7 +377,7 @@ export function WorkIndex({
   };
   const searchField = (head: boolean) => <SearchField head={head} raw={raw} setRaw={setRaw} setRowOn={setRowOn} close={close} />;
   const views = (
-    <Views canvas={canvas} view={view} back={back} setBack={setBack} go={go} unfold={unfold} fold={fold} rep={rep} warm={warm} />
+    <Views canvas={canvas} view={viewOn} back={back} setBack={setBack} go={go} unfold={unfold} fold={fold} rep={rep} warm={warm} />
   );
 
   return (
@@ -344,15 +421,16 @@ export function WorkIndex({
               <button
                 key={d}
                 type="button"
-                aria-pressed={d === filter}
+                aria-pressed={d === filterOn}
                 onClick={() => {
-                  flipped(() => setFilter(d));
+                  if (d === filterOn) return;
+                  flipped({ filter: d }, () => setFilter(d));
                   filterUrl(Object.keys(chip).find((k) => chip[k] === d));
                 }}
               >
                 {d}
                 {/* The count only on the chip that is on (Julian). */}
-                {d === filter && (d === "All" || counts[d] > 1) ? <span>{d === "All" ? work.length : counts[d]}</span> : null}
+                {d === filterOn && (d === "All" || counts[d] > 1) ? <span>{d === "All" ? work.length : counts[d]}</span> : null}
               </button>
             ))}
           </div>
