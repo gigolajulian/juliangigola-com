@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { WorkIndex } from "@/components/portfolio/work";
 import type { WorkPayload } from "@/components/portfolio/work-tiles";
 import { PROJECTS, categoryLabel } from "@/lib/work/work";
@@ -19,14 +19,15 @@ describe("WorkIndex", () => {
     expect(screen.getByRole("group", { name: "View" })).toBeTruthy();
   });
 
-  it("a discipline chip narrows the grid", () => {
+  it("a discipline chip narrows the grid", async () => {
     const { container } = render(<WorkIndex work={WORK} />);
     const d = WORK[0].d[0];
     const group = screen.getByRole("group", { name: "Filter by discipline" });
     const chip = [...group.querySelectorAll("button")].find((b) => b.textContent?.startsWith(d))!;
     fireEvent.click(chip);
     const outside = WORK.find((w) => !w.d.includes(d));
-    if (outside) expect(container.querySelector(`.wgrid a[href="/portfolio/${outside.s}"]`)).toBeNull();
+    expect(chip.getAttribute("aria-pressed")).toBe("true"); // the chip answers at once, the grid two frames later
+    if (outside) await waitFor(() => expect(container.querySelector(`.wgrid:not(.wghost) a[href="/portfolio/${outside.s}"]`)).toBeNull());
   });
 
   it("search keeps the spaces typed, matches on the trimmed words, and Esc clears", () => {

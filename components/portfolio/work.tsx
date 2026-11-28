@@ -205,6 +205,8 @@ export function WorkIndex({
     if (sec && was && (whole || gone.length)) {
       const g = (ghost = document.createElement("div"));
       g.className = whole ? "wghost" : `wghost ${was.el.className}`;
+      g.inert = true; // fading out: not for the keyboard or a screen reader
+      g.setAttribute("aria-hidden", "true");
       g.setAttribute("aria-hidden", "true");
       g.inert = true;
       sec.prepend(g);
