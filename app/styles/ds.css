@@ -272,7 +272,7 @@ html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) {
   --nh: min(calc(max(94svh, 600px) - 92px), calc((100vw - var(--g) - var(--gr)) * 0.52 / var(--nar)));
   display: block;
   align-content: normal;
-  height: max(94svh, 600px);
+  height: calc(var(--nh) + 92px);
   padding: 0 var(--gr) 0 var(--g);
   overflow: visible;
   background: none;
@@ -305,9 +305,9 @@ html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) > b {
   position: absolute;
   left: var(--g);
   right: calc(var(--gr) + 32px + var(--nh) * var(--nar));
-  bottom: 24px;
+  bottom: 36px;
   z-index: 1;
-  font-size: min(14.7vw, calc((100vw - var(--g) - var(--gr) - 32px - var(--nh) * var(--nar)) / (var(--nl, 8) * 0.52)));
+  font-size: min(14.7vw, calc((100vw - var(--g) - var(--gr) - 32px - var(--nh) * var(--nar)) / (var(--nl, 8) * 0.6)));
   line-height: 0.84;
   text-wrap: balance;
 }
@@ -327,7 +327,9 @@ html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) > b {
   }
   html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) .pj-stage::after {
     content: "";
-    background: linear-gradient(to top, rgb(var(--scrim) / 0.72), rgb(var(--scrim) / 0) 50%);
+    background:
+      linear-gradient(to bottom, rgb(var(--scrim) / 0.6), rgb(var(--scrim) / 0) 28%),
+      linear-gradient(to top, rgb(var(--scrim) / 0.72), rgb(var(--scrim) / 0) 50%);
   }
   html[data-ds]:root .v3 .pj-next .ds-nx-top {
     position: absolute;
@@ -342,7 +344,7 @@ html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) > b {
   html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) > b {
     right: var(--gr);
     bottom: 20px;
-    font-size: min(27vw, calc((100vw - var(--g) - var(--gr)) / (var(--nl, 8) * 0.5)));
+    font-size: min(27vw, calc((100vw - var(--g) - var(--gr)) / (var(--nl, 8) * 0.6)));
     line-height: 0.86;
   }
 }
