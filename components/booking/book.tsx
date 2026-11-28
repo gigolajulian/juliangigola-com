@@ -10,7 +10,7 @@ import { BookTimes } from "@/components/booking/book-times";
 import { PageFoot } from "@/components/site/foot";
 import { Calendar, DotList } from "@/components/booking/flow";
 import { weekdayDateLabel, localDayKey } from "@/components/booking/picker/dates";
-import { Failed, Field, FlowShell, Hidden, useEnquiry, type Shell } from "@/components/enquiry/flow";
+import { Failed, Field, FlowShell, Hidden, SendButton, useEnquiry, type Shell } from "@/components/enquiry/flow";
 import { duration } from "@/lib/booking/rules";
 import { LENGTH, SESSIONS, TAB_ORDER, priceLabel, type SessionSlug } from "@/lib/booking/catalog";
 import { looksLikeEmail, noSubscribe } from "@/lib/utils";
@@ -294,7 +294,7 @@ function OnRequest(props: { slug: SessionSlug; shell: Shell }) {
 
 function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell; stamp: string }) {
   const S = SESSIONS[slug];
-  const { state, pending, sent, send } = useEnquiry();
+  const { state, pending, sent, st, send } = useEnquiry();
   const today = React.useMemo(() => new Date(stamp), [stamp]);
   const [k, setK] = React.useState(1);
   const [view, setView] = React.useState<"week" | "month">("month");
@@ -406,9 +406,9 @@ function OnRequestFlow({ slug, shell, stamp }: { slug: SessionSlug; shell: Shell
           <button type="button" className="btn" onClick={() => go(2)}>
             Back
           </button>
-          <button type="submit" className="btn fill" disabled={pending}>
+          <SendButton st={st} pending={pending}>
             Send request
-          </button>
+          </SendButton>
         </>
       ),
     };

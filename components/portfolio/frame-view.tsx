@@ -6,6 +6,7 @@ import Image from "next/image";
 import { pad } from "@/lib/utils";
 import { launchSpeed, stepSpring, springSettled, frameDt } from "@/lib/motion/spring";
 import { GRID_SIZES } from "@/components/portfolio/work-tiles";
+import { dsOn } from "@/lib/flags/ds";
 
 /** The motion plan's `out` curve for GSAP: power4.out is cubic-bezier(.23, 1, .32, 1). */
 const GSAP_OUT = "power4.out";
@@ -110,6 +111,29 @@ export function FrameTile({ f, first, onOpen }: { f: FrameItem; first?: boolean;
   );
 }
 
+/* ds: the frame grows from its cell on the page to full size (500ms, the project open's curve). The cell is found by
+   its photo. Nothing to grow from, or reduced motion: it opens as it does today. */
+function growIn(d: HTMLDialogElement, src: string) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const stem = src.replace(/\.\w+$/, "");
+  const from = [...document.querySelectorAll<HTMLImageElement>("img")].find(
+    (im) => !d.contains(im) && im.getBoundingClientRect().width > 0 && decodeURIComponent(im.currentSrc || im.src).includes(stem),
+  );
+  const ph = d.querySelector<HTMLElement>('.fv-ph:not([aria-hidden="true"])');
+  if (!from || !ph) return;
+  const a = from.getBoundingClientRect(),
+    b = ph.getBoundingClientRect();
+  // the photo inside the full-size box, which shows it whole
+  const r = from.naturalWidth / from.naturalHeight || a.width / a.height;
+  const w = Math.min(b.width, b.height * r);
+  const scale = Math.max(a.width / w, a.height / (w / r));
+  const move = `translate(${a.left + a.width / 2 - b.left - b.width / 2}px, ${a.top + a.height / 2 - b.top - b.height / 2}px) scale(${scale})`;
+  const o = { duration: 500, easing: "cubic-bezier(.32,.72,0,1)" };
+  ph.animate([{ transform: move }, { transform: "none" }], o);
+  d.animate([{ backgroundColor: "transparent" }, { backgroundColor: "#000" }], o);
+  d.animate([{ opacity: 0 }, { opacity: 1 }], { ...o, pseudoElement: "::backdrop" });
+}
+
 /** A gallery's frames full size over the page: arrows step, Escape or Back closes. */
 export function FrameView({
   list,
@@ -179,6 +203,7 @@ export function FrameView({
     const d = ref.current;
     if (!open || !d) return;
     d.showModal();
+    if (dsOn() && at !== null) growIn(d, list[at].src);
     // Into the dialog however it opened (a tap or click left focus on the page).
     d.querySelector<HTMLButtonElement>(".fv-bar button")?.focus();
     history.pushState({ frame: 1 }, "");
@@ -190,6 +215,8 @@ export function FrameView({
       if (d.open) d.close();
       if (history.state?.frame) history.back();
     };
+    // `at` and `list` are read once, as the viewer opens (growIn)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, onClose]);
   const n = list.length;
   const wrap = (i: number) => (i + n) % n;
@@ -216,7 +243,7 @@ export function FrameView({
     g.killTweensOf(el);
     stop();
     going.current = by;
-    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: 0.6, ease: "power3.inOut", onComplete: done });
+    g.to(el, { x: -by * el.offsetWidth, y: 0, duration: dsOn() ? 0.5 : 0.6, ease: "power3.inOut", onComplete: done }); // ds: the lightbox step is 500ms (--ds-page)
   };
   /* A new frame: the photos keep their elements (keyed by photo), so the
      track goes back to 0 in the same paint and nothing reloads or jumps.

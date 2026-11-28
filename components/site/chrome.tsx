@@ -9,6 +9,7 @@ import { scrollTop } from "./smooth-scroll";
 import { useNavInk } from "./nav-ink";
 import { noSubscribe } from "@/lib/utils";
 import { sessionGet, sessionSet } from "@/lib/storage";
+import { dsOn } from "@/lib/flags/ds";
 
 /* JG V3 chrome: the glass header, the phone menu, the theme
    toggle and the footer line. Every route uses it, /admin included. */
@@ -87,13 +88,23 @@ function ThemeButton() {
   const flip = (e: React.MouseEvent<HTMLButtonElement>) => {
     const next: Theme = read() === "light" ? "dark" : "light";
     const phone = matchMedia("(max-width: 700px) and (pointer: coarse)").matches;
+    const ds = dsOn();
     if (!phone && radialOn()) radial(e.currentTarget, () => set(next));
-    else set(next);
+    else {
+      /* ds: the page fades to the other theme in 300ms (ds.css `data-ds-fade`: colors only, no view transition,
+         so the page changes keep theirs). A phone gets it too, without the reload. */
+      if (ds) {
+        const root = document.documentElement;
+        root.dataset.dsFade = "";
+        setTimeout(() => delete root.dataset.dsFade, 340);
+      }
+      set(next);
+    }
     sessionSet(KEY, next);
     /* iPhone Safari keeps the old colour in the bars above and below the
        page until it loads again (Julian): reload, and the head script
        paints the chosen theme from the first frame. */
-    if (phone) return void location.reload();
+    if (phone && !ds) return void location.reload();
     turns += 360;
     document.documentElement.style.setProperty("--tb-r", `${turns}deg`);
     setSpun(true);

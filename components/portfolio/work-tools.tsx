@@ -123,6 +123,7 @@ export function Views({
   fold,
   rep,
   warm,
+  warmCanvas,
 }: {
   canvas: boolean;
   view: View;
@@ -133,9 +134,11 @@ export function Views({
   fold: (act: () => void) => void;
   rep: string;
   warm: (n: number) => void;
+  /** ds: the pointer or the keyboard has reached the view buttons. */
+  warmCanvas?: () => void;
 }) {
   return (
-    <div className="wviews" role="group" aria-label="View">
+    <div className="wviews" role="group" aria-label="View" onPointerEnter={warmCanvas} onFocus={warmCanvas}>
       {/* The vectorscope is a mode of its own: on, then off back to
           the view it came from. Then Strip, and Grid in the corner. */}
       <button

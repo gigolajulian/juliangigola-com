@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { v4pages } from "@/lib/flags/v4pages";
+import { dsOn } from "@/lib/flags/ds";
 import { matches } from "@/lib/device";
 import type { FrameView } from "@/components/portfolio/work";
 import type { FrameItem } from "@/components/portfolio/frame-view";
@@ -13,7 +14,12 @@ import type { FrameItem } from "@/components/portfolio/frame-view";
    view (j3): a click on a frame opens it full size in the gallery's FrameView. Still on trial (`?v4pages`). */
 const FIGS = ".pj-big, .pj-lead .pj-r, .pj-flow .pj-r"; // document order = the order of `frames`
 
-export function ProjectViewer({ frames }: { frames: FrameItem[] }) {
+/* ds: the edited spreads mount after hydration and run in the site's frame order, so the figures are
+   read at the click and matched to `dsFrames` (components/portfolio/ds-project.tsx). */
+const DS_FIGS = ".pj-big, .ds-fr";
+
+export function ProjectViewer({ frames, dsFrames }: { frames: FrameItem[]; dsFrames?: FrameItem[] }) {
+  const [list, setList] = React.useState(frames);
   const [at, setAt] = React.useState<number | null>(null);
   // work.tsx is loaded on the first open, so the project page does not carry the gallery
   const [View, setView] = React.useState<typeof FrameView | null>(null);
@@ -76,14 +82,18 @@ export function ProjectViewer({ frames }: { frames: FrameItem[] }) {
     const open = (e: Event) => {
       const t = e.target as Element;
       if (t.closest("a")) return; // the client's logo on the opening frame is a link
-      const i = figs.indexOf(t.closest<HTMLElement>(".pj-big, .pj-r")!);
-      if (i < 0 || i >= n) return;
+      const ds = dsFrames && dsOn() ? dsFrames : null;
+      const i = ds
+        ? [...root.querySelectorAll<HTMLElement>(DS_FIGS)].indexOf(t.closest<HTMLElement>(DS_FIGS)!)
+        : figs.indexOf(t.closest<HTMLElement>(".pj-big, .pj-r")!);
+      if (i < 0 || i >= (ds ? ds.length : n)) return;
       if (e instanceof KeyboardEvent) {
         if (e.key !== "Enter" && e.key !== " ") return;
         e.preventDefault();
       }
       void import("@/components/portfolio/work").then((m) => {
         setView(() => m.FrameView);
+        setList(ds ?? frames);
         setAt(i);
       });
     };
@@ -94,7 +104,7 @@ export function ProjectViewer({ frames }: { frames: FrameItem[] }) {
       root.removeEventListener("keydown", open);
       figs.forEach((f) => (f.removeAttribute("tabindex"), f.removeAttribute("role"), f.removeAttribute("aria-label")));
     };
-  }, [n]);
+  }, [n, frames, dsFrames]);
 
-  return View ? <View list={frames} at={at} onGo={setAt} onClose={close} /> : null;
+  return View ? <View list={list} at={at} onGo={setAt} onClose={close} /> : null;
 }
