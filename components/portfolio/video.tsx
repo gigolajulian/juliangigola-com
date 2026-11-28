@@ -442,6 +442,8 @@ function Film({ v }: { v: Video }) {
   const [up, setUp] = React.useState(false);
   const yt = v.provider === "youtube";
   const poster = posterFor(v);
+  // The player's empty page is white until it draws: kept off the black box until the still is over it (iPhone, 43 to 167ms of white).
+  const [seen, setSeen] = React.useState(!poster);
   React.useEffect(() => {
     const t = setTimeout(() => setUp(true), 3000);
     const onMsg = (e: MessageEvent) => {
@@ -471,9 +473,20 @@ function Film({ v }: { v: Video }) {
         title={v.title}
         allow="autoplay; fullscreen; picture-in-picture"
         allowFullScreen
+        style={seen || up ? undefined : { opacity: 0 }}
       />
       {poster ? (
-        <Image className="mo-still" data-up={up || undefined} src={poster} alt="" fill sizes="100vw" style={{ objectFit: "cover" }} />
+        <Image
+          className="mo-still"
+          data-up={up || undefined}
+          src={poster}
+          alt=""
+          fill
+          sizes="100vw"
+          style={{ objectFit: "cover" }}
+          onLoad={() => setSeen(true)}
+          onError={() => setSeen(true)}
+        />
       ) : null}
     </div>
   );
