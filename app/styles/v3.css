@@ -1265,7 +1265,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @keyframes ix-in{from{scale:1.03}}
 /* Motion plan 08: page titles rise in a mask on arrival (the clip travels with the type, so the mask holds still). */
 @media (prefers-reduced-motion:no-preference){
-:root[data-v3motion] .v3 .pg-t{animation:t-rise .5s .1s cubic-bezier(.16,1,.3,1) backwards}}
+:root[data-v3motion] .v3 .pg-t{animation:t-rise .5s .1s cubic-bezier(.16,1,.3,1) backwards}
+:root[data-nav-pop] .v3 .pg-t{animation:none}}
 @keyframes t-rise{from{translate:0 100%;clip-path:inset(-.2em -1em 100% -1em)}to{translate:0 0;clip-path:inset(-.2em -1em -.2em -1em)}}
 /* The next set's cover beside its name, at the height of the type. */
 .v3 .pj-nx{position:relative;flex:none;align-self:center;height:clamp(64px,7vw,112px);aspect-ratio:4/5;border-radius:4px;overflow:hidden;background:var(--card)}
@@ -1875,6 +1876,8 @@ dialog.v3.mo-player,.mo-player>iframe{background:#000}
 @media (prefers-reduced-motion:no-preference){
 :root:root:root[data-nav-step]::view-transition-old(root){animation:pk-off-l var(--dur-small) var(--ease-out-strong) both!important}
 :root:root:root[data-nav-step][data-nav="out"]::view-transition-old(root){animation-name:pk-off-r!important}
+/* The page arriving fades in on its picture (book.tsx slides it): no rise, the step travels sideways. */
+:root:root:root[data-nav-step]::view-transition-new(root){animation:mp-in var(--dur-page) var(--ease-drawer) both!important}
 /* Back to the cards: only the page leaving moves. The cards arrive in place: no drop or fade on their snapshot (Safari takes one, Chromium does not). */
 :root:root:root[data-nav-step][data-nav="out"]::view-transition-new(root){animation:none!important}
 /* `backwards`, not `both`: a finished step-in is over, so it is not held (or counted again) for the rest of the step. */

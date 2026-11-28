@@ -219,6 +219,37 @@ function markKeyed(x: SessionSlug) {
   if (tabbed) keyed = x;
 }
 
+/* Cards to calendar. The cards (the old page's picture) fade out over 250 as this page fades in over 400, both from
+   the trip's first frame, as v3.css always asked. They did not: nothing outside the page changes between the two steps,
+   so React hides the root's pictures for the trip (a zero-length animation on `::view-transition-group(root)`), the cards
+   were cut as it began and this page came up from nothing: one black frame. That animation is cancelled here, and the
+   fade is the picture's own (`mp-in`, v3.css), so only the slide is left to this script. The step's own entrance
+   (`pk-step`) is for a step that mounts in place and is dropped: with the page fading too, the two multiplied. */
+function stepIn(el: HTMLElement) {
+  el.querySelector(".f-body")
+    ?.getAnimations()
+    .forEach((a) => a.cancel());
+  const slide = (fade: boolean) =>
+    void el.animate(
+      [
+        { opacity: fade ? 0 : 1, translate: "7vw 0" },
+        { opacity: 1, translate: "0 0" },
+      ],
+      { duration: 400, easing: "cubic-bezier(0.32, 0.72, 0, 1)" },
+    );
+  const trip = (document as Document & { activeViewTransition?: { ready: Promise<void> } | null }).activeViewTransition;
+  // No trip (a browser without view transitions): the page fades itself in, as before.
+  if (!trip) return slide(true);
+  trip.ready.then(
+    () => {
+      for (const a of document.getAnimations())
+        if ((a.effect as KeyframeEffect | null)?.pseudoElement === "::view-transition-group(root)") a.cancel();
+      slide(false);
+    },
+    () => slide(true),
+  );
+}
+
 export function SessionBook({ slug }: { slug: SessionSlug }) {
   // the tab flag as read for this slug: a ref, since React's dev double effect would read it twice
   const fromTab = React.useRef<{ slug: SessionSlug; tab: boolean } | null>(null);
@@ -235,17 +266,7 @@ export function SessionBook({ slug }: { slug: SessionSlug }) {
       const step = "navStep" in document.documentElement.dataset;
       fromTab.current = { slug, tab: tabbed || step };
       tabbed = false;
-      if (step && !matchMedia("(prefers-reduced-motion: reduce)").matches)
-        page.current?.animate(
-          [
-            { opacity: 0, translate: "7vw 0" },
-            { opacity: 1, translate: "0 0" },
-          ],
-          {
-            duration: 400,
-            easing: "cubic-bezier(0.32, 0.72, 0, 1)",
-          },
-        );
+      if (step && page.current && !matchMedia("(prefers-reduced-motion: reduce)").matches) stepIn(page.current);
     }
     if (SESSIONS[slug].cal && !fromTab.current.tab) mountCover();
   }, [slug]);
