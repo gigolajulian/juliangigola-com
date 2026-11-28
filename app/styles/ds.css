@@ -461,3 +461,10 @@ html[data-ds] .mt .ds-cv-cap span {
     margin-top: 12px;
   }
 }
+
+/* ── Portfolio ────────────────────────────────────────────────────────────
+   The order and the canvas loading ahead are in components/portfolio (work.tsx, canvas.tsx).
+   A canvas frame still on its way shows in the page tone, never a bright block. */
+html[data-ds] .v3 .cv-cell {
+  background-color: var(--bg);
+}

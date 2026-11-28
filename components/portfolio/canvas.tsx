@@ -7,6 +7,7 @@ import { DECEL } from "@/lib/motion/throw";
 import { isTrackpad } from "@/lib/motion/wheel";
 import { projectHref } from "@/lib/work/project-href";
 import type { WorkItem } from "@/components/portfolio/work-tiles";
+import { dsOn } from "@/lib/flags/ds";
 
 /* The canvas view: every frame
    of every project as one endless field you pan by dragging, flicking or
@@ -30,6 +31,30 @@ let kept: Frames | null = null;
 /* Upright frames sit as 3:4 on the field, like the grid and strip; square and wide keep theirs. The opened frame shows the whole photo. */
 const shape = (r: number) => (r > 1.02 ? 4 / 3 : r);
 const mod = (a: number, b: number) => ((a % b) + b) % b;
+/** A cell's width in px at a scale. */
+const cellW = (scale = 1) => Math.round((innerWidth < 700 ? innerWidth * 0.42 : Math.min(260, Math.max(200, innerWidth / 6.4))) * scale);
+
+/** ds: the canvas ahead of its opening. The frame list always (one request, kept), then up to `photos` of the frames a
+    first look shows, at the cell's own width: the small files the grid asks for too, so most are in the cache already. */
+export async function warmCanvas(list: WorkItem[], photos: number) {
+  kept ??= await fetch("/canvas.json")
+    .then((r) => (r.ok ? (r.json() as Promise<Frames>) : null))
+    .catch(() => null);
+  if (!kept || !photos) return;
+  const W = cellW();
+  const frames = list.flatMap((w) => kept?.[w.slug] ?? []);
+  // a first look shows the top of the left columns: column c holds frames c, c + COLS, ...
+  for (let i = 0, n = 0; i < frames.length && n < photos; i++) {
+    if (i % COLS >= COLS / 2) continue;
+    const [src, r] = frames[i];
+    const { props } = getImageProps({ src, alt: "", width: W, height: Math.round(W * r), sizes: `${W}px` });
+    const im = new Image();
+    im.sizes = `${W}px`;
+    if (props.srcSet) im.srcset = props.srcSet;
+    im.src = props.src;
+    n++;
+  }
+}
 
 /** `onLeave`: Open project takes the canvas down. The canvas runs under the page's own title
     and toolbar: it is cut off above `top` px, comes in once its frames are laid out, and fades
@@ -103,12 +128,12 @@ export function WorkCanvas({
     const el = field.current;
     if (!el || !frames.length) return;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ds = dsOn();
     let W = 0;
     let cols: Col[] = [];
     const srcs = new Map<number, { src: string; srcSet?: string }>();
     const layout = () => {
-      const base = innerWidth < 700 ? innerWidth * 0.42 : Math.min(260, Math.max(200, innerWidth / 6.4));
-      W = Math.round(base * scaleRef.current);
+      W = cellW(scaleRef.current);
       srcs.clear();
       const per = Math.max(3, Math.ceil(frames.length / COLS));
       cols = Array.from({ length: COLS }, (_, c) => {
@@ -175,6 +200,8 @@ export function WorkCanvas({
               const fr = frames[it.i],
                 w = list[fr.p],
                 ip = props(it.i);
+              // ds: the cell says how wide it is, so the browser takes the small file and not the full photo
+              if (ds) p.img.sizes = `${W}px`;
               if (ip.srcSet) p.img.srcset = ip.srcSet;
               else p.img.removeAttribute("srcset");
               p.img.src = ip.src;
@@ -185,7 +212,8 @@ export function WorkCanvas({
                 im.onload = im.onerror = () => (im.style.opacity = "");
               }
               p.img.alt = fr.alt;
-              p.f.style.backgroundColor = fr.color ?? "";
+              // ds: a frame still on its way shows in the page tone (ds.css), never its own bright colour
+              p.f.style.backgroundColor = ds ? "" : (fr.color ?? "");
               p.cap.textContent = `${w.name} · ${w.disciplines.join(", ")}`;
               p.f.dataset.i = String(it.i);
             }
