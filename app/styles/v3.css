@@ -299,6 +299,9 @@ html[data-sb]{scrollbar-width:none}html[data-sb]::-webkit-scrollbar{display:none
    the in-between, 2026-11-09. */
 .v3 .wt-n{gap:6px;padding:76px 14px 12px;text-shadow:0 0 18px rgb(var(--scrim) / .45);background:linear-gradient(to top,rgb(var(--scrim) / .8),rgb(var(--scrim) / .68) 16%,rgb(var(--scrim) / .5) 34%,rgb(var(--scrim) / .3) 52%,rgb(var(--scrim) / .13) 72%,rgb(var(--scrim) / .03) 88%,rgb(var(--scrim) / 0))}.v3 .wt-n b{font-size:min(clamp(1.25rem,calc(1.6*var(--v3u)),1.75rem),calc((100cqi - 28px) * 2.6 / var(--n)),calc((100cqi - 28px) * 1.4 / var(--w)))}
 .v3 .sc-n{gap:10px;padding:64px 24px 22px}.v3 .sc-n b{font-size:min(clamp(2.5rem,calc(4.6*var(--v3u)),5rem),calc((100cqi - 48px) * 2.6 / var(--n)),calc((100cqi - 48px) * 1.4 / var(--w)))}
+/* Covers leaving on a chip or view change (work.tsx): put back where they stood, still, while the layer fades. */
+.v3 .wghost{position:absolute!important;left:0;top:0;width:0!important;height:0!important;display:block!important;margin:0!important;padding:0!important;overflow:visible!important;pointer-events:none}
+.v3 .wghost,.v3 .wghost *{animation:none!important;transition:none!important}
 @media (max-width:1000px){.v3 .wgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:700px){.v3 .wgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 10px}}
 /* A gallery chip's frames (Automotive, Places…): every cell one height, a
