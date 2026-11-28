@@ -672,3 +672,14 @@ html[data-ds] .v3 .ds-sb[data-st="2"] path {
     transition-duration: var(--ds-small);
   }
 }
+
+/* ── Rules across the site ────────────────────────────────────────────────
+   R2, Frames are square: every photo, tile and film has no corner. The chip and the dots stay round. */
+html[data-ds] .v3 :is(.ab-frame, .ab-photo img, .bts-f, .f-photo .ph, .mo-frame, .pj-nx, .pj-r img, .pk-ph, .sc, .sv-pics img, .sv-seq .ph, .vt .ph, .wt .ph),
+html[data-ds] .mt .mt-sleeve .face {
+  border-radius: 0;
+}
+/* S1: the next open day under a service page's booking button. */
+html[data-ds] .v3 .ds-next {
+  margin: 14px 0 0;
+}
