@@ -4,6 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import dynamic from "next/dynamic";
+import { useDs } from "@/lib/flags/ds";
 import { createPortal } from "react-dom";
 import type { Flip as FlipT } from "gsap/Flip";
 import { loadFlip } from "@/lib/motion/gsap-lazy";
@@ -29,6 +30,10 @@ export { FrameView };
    Grid, Strip and Color views. Best first (lib's order: the vectorscope's
    DOPE list, then the site's running order). */
 
+/* ds: the projects that open /portfolio in both themes (mock N1: Paranoia, Celestis, Vigil, Valgur). */
+const DS_LEAD = ["paranoia", "celestis", "vigil", "valgur"];
+/* ds: photos the canvas may ask for before it is opened. */
+const CV_AHEAD = 12;
 const plural = (n: number) => `${n} ${n === 1 ? "project" : "projects"}`;
 
 /** The covers on screen, for the view change below. */
@@ -64,7 +69,12 @@ export function WorkIndex({
   frames?: Record<string, FrameItem[]>;
 }) {
   /* The payload's one-letter keys as names, once: everything below reads `WorkItem`. */
-  const work = React.useMemo(() => payload.map(workItem), [payload]);
+  const ds = useDs();
+  const work = React.useMemo(() => {
+    const all = payload.map(workItem);
+    // ds: one order in both themes, the dark work first (DS_LEAD), then Julian's order
+    return ds ? [...DS_LEAD.flatMap((s) => all.filter((w) => w.slug === s)), ...all.filter((w) => !DS_LEAD.includes(w.slug))] : all;
+  }, [payload, ds]);
   const [filter, setFilter] = React.useState("All");
   const [at, setAt] = React.useState<number | null>(null);
   const closeView = React.useCallback(() => setAt(null), []);
@@ -236,6 +246,24 @@ export function WorkIndex({
   );
   const stripFrames = React.useMemo(() => cells.flatMap((c) => (c.f ? [c.f] : [])), [cells]);
   const warm = useCoverPreload(view, list, cells, shown, strip);
+  /* ds: the canvas loads ahead (mock N9). Its code and frame list once the page has been idle a moment (two requests);
+     the first photos only when the pointer or the keyboard reaches the view buttons (CV_AHEAD at most, once a visit).
+     Save-Data and slow lines get neither. The site once hit the Workers request cap by loading ahead: keep this small. */
+  const cvWarm = React.useRef(0);
+  const warmCanvas = React.useCallback(
+    (photos: number) => {
+      const net = navigator.connection;
+      if (!ds || cvWarm.current > photos || net?.saveData || /2g|3g/.test(net?.effectiveType ?? "")) return;
+      cvWarm.current = photos + 1;
+      void import("@/components/portfolio/canvas").then((m) => m.warmCanvas(field, photos)).catch(() => {});
+    },
+    [ds, field],
+  );
+  React.useEffect(() => {
+    if (!ds) return;
+    const t = setTimeout(() => warmCanvas(0), 2500);
+    return () => clearTimeout(t);
+  }, [ds, warmCanvas]);
 
   const { scope, scoreSet } = useColorScope(view, pick);
   const res =
@@ -300,7 +328,7 @@ export function WorkIndex({
   };
   const searchField = (head: boolean) => <SearchField head={head} raw={raw} setRaw={setRaw} setRowOn={setRowOn} close={close} />;
   const views = (
-    <Views canvas={canvas} view={view} back={back} setBack={setBack} go={go} unfold={unfold} fold={fold} rep={rep} warm={warm} />
+    <Views canvas={canvas} view={view} back={back} setBack={setBack} go={go} unfold={unfold} fold={fold} rep={rep} warm={warm} warmCanvas={() => warmCanvas(CV_AHEAD)} />
   );
 
   return (

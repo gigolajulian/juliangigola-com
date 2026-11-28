@@ -7,6 +7,8 @@ import type { SHOOT_TYPES } from "@/lib/leads/enquiry";
 
 /** A photo with its caption: `ratio` is height / width. */
 export type HomeFrame = { src: string; name: string; meta: string; slug: string; ratio: number };
+/** A gallery frame (ds): the project's name, and where a phone holds the frame sideways (percent). */
+export type HomeGalFrame = HomeFrame & { title: string; x: number };
 export type HomeFilm = {
   id: string;
   title: string;
@@ -24,6 +26,10 @@ export const EXTRAS = { perCol: 4, sides: 16, xrSides: 22, wall: 30 } as const;
 
 export type HomeData = {
   hero: HomeFrame[];
+  /** ds: the wall in the dark theme. */
+  heroDark: HomeFrame[];
+  /** ds: the full-screen gallery, in play order. */
+  gallery: HomeGalFrame[];
   extras: HomeFrame[];
   commissions: HomeFrame[];
   films: HomeFilm[];
@@ -46,6 +52,36 @@ export const HERO_KEYS = [
   "oakley-x-nike/01",
   "astral-allure/04",
   "liminal/01",
+];
+/* ds: the wall in the dark theme. The mock names five (slots 0, 1, 2, 3, 5); the rest are the live picks that
+   are not on a project already in the set. An open pick for Julian. */
+export const HERO_KEYS_DARK = [
+  "paranoia/03",
+  "celestis/03",
+  "valgur/01",
+  "vigil/01",
+  "nyx/06",
+  "paranoia/10",
+  "threshold/05",
+  "ukiyosunknown/01",
+  "sago/01",
+  "oakley-x-nike/01",
+  "astral-allure/04",
+  "liminal/01",
+];
+/* ds: Julian's eleven gallery picks (mock N3), in his order, each with the phone's sideways hold. */
+export const GALLERY_KEYS: [key: string, x: number][] = [
+  ["noct/06", 50],
+  ["kala-x-sharks/08", 50],
+  ["noct/03", 36],
+  ["redtide/04", 58],
+  ["aesc/01", 24],
+  ["fauxtopia/06", 25],
+  ["ravaged/05", 22],
+  ["nova/02", 68],
+  ["events/17", 55],
+  ["events/16", 50],
+  ["diesel/03", 30],
 ];
 export const COMM_KEYS = [
   "cyber1a/01",

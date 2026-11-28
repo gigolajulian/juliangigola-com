@@ -4,11 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { QUOTE_OPTS } from "@/lib/home/data";
 import { CardsCtx } from "./ctx";
+import { useDs } from "@/lib/flags/ds";
 
 /* "Have something in mind?": the ask with its two ways in (a note, a free call), and the four kinds of work I quote
    as rows. A row opens the inquiry card on that kind of work; Inquire opens it on the first, as the live block did at rest. */
 export function ByQuote() {
   const cards = React.useContext(CardsCtx);
+  // ds: Weddings is a quote call with its own page, off this list
+  const opts = useDs() ? QUOTE_OPTS.filter((o) => o.key !== "weddings") : QUOTE_OPTS;
   return (
     <section className="mt-quote" data-mt="quote" aria-labelledby="mt-ask-h">
       <div className="mt-frame mt-ask">
@@ -29,7 +32,7 @@ export function ByQuote() {
           </div>
         </div>
         <div className="mt-ask-rows">
-          {QUOTE_OPTS.map((o) => (
+          {opts.map((o) => (
             <button
               key={o.key}
               type="button"
