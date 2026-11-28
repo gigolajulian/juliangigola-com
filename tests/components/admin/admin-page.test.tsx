@@ -23,7 +23,7 @@ const project: AdminProject = {
 const props = () => ({
   project,
   disciplines: [{ slug: "editorial", name: "Editorial", group: "Work" }],
-  overrides: { categories: {}, frames: {}, credits: { x: [{ role: "Client", name: "Acme", instagram: null }] }, copy: {}, slugs: {} },
+  overrides: { categories: {}, frames: {}, credits: { x: [{ role: "Client", name: "Acme", instagram: null }] }, copy: {}, slugs: {}, spreads: {} },
   onClose: vi.fn(),
 });
 

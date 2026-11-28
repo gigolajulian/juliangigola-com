@@ -310,6 +310,8 @@ export type AddedFile = {
    * wins over it.
    */
   covers: Record<string, string>;
+  /** A project's spread blocks arranged in the admin, slug to a code (`lib/work/spreads.ts`). Wins over the hand pick in spreads.json. */
+  spreads: Record<string, string>;
   /**
    * A collaborator's profile photograph, by Instagram handle.
    *
@@ -517,6 +519,7 @@ function parse(v: unknown): AddedFile {
   }
 
   const covers = recordOf(v.covers, "covers", (src, category) => str(src, `covers["${category}"]`));
+  const spreads = recordOf(v.spreads, "spreads", (code, slug) => str(code, `spreads["${slug}"]`));
 
   const rawSlugs = optRecord(v.slugs, "slugs");
   const slugs: Record<string, string> = {};
@@ -538,6 +541,7 @@ function parse(v: unknown): AddedFile {
     bts,
     order,
     covers,
+    spreads,
     avatars,
     slugs,
     disciplines,
@@ -571,6 +575,8 @@ export const AVATARS: Readonly<Record<string, string>> = FILE.avatars;
 
 /** Hand-picked discipline covers, by category slug. Frame paths. */
 export const DISCIPLINE_COVERS: Readonly<Record<string, string>> = FILE.covers;
+/** Spread blocks arranged in the admin, by project slug. */
+export const SPREADS: Readonly<Record<string, string>> = FILE.spreads;
 
 /** Renamed addresses, original slug to current. See `AddedFile.slugs`. */
 export const SLUGS: Readonly<Record<string, string>> = FILE.slugs;

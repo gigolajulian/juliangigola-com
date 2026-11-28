@@ -7,6 +7,7 @@ import Image from "next/image";
 import { ADDED_PATH, type TrashedProject, type ManifestRead } from "@/lib/work/added";
 import { commitFiles, readFile } from "@/lib/admin/admin-github";
 import { AdminFrames } from "@/components/admin/admin-frames";
+import { AdminSpreads } from "@/components/admin/admin-spreads";
 import { srcOf } from "@/components/admin/use-sequence";
 import { twinStats } from "@/lib/work/frame-twins";
 import { AdminCredits } from "@/components/admin/admin-credits";
@@ -502,6 +503,12 @@ export function AdminProjects({
               {isOpen ? (
                 <>
                   <AdminFrames slug={p.slug} original={p.images} frames={frames} onChange={(next) => onOverride("frames", p.slug, next)} />
+                  <AdminSpreads
+                    slug={p.slug}
+                    photos={(frames ?? p.images).map(srcOf).filter(Boolean)}
+                    value={overrides.spreads[p.slug]}
+                    onChange={(next) => onOverride("spreads", p.slug, next)}
+                  />
                   <AdminBts
                     slug={p.slug}
                     published={publishedBts[p.slug]}

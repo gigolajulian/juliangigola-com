@@ -4,6 +4,7 @@ import { CoverPage } from "@/components/cover/cover-page";
 import { SESSION_SEO } from "@/lib/og/seo";
 import { projectFacts, shareMeta } from "@/lib/og/share";
 import { ProjectView } from "@/components/portfolio/project";
+import { SPREADS } from "@/lib/work/added";
 import {
   LINKABLE,
   UNLISTED,
@@ -108,5 +109,5 @@ export default async function ProjectPage(props: PageProps<"/portfolio/[slug]">)
   }
 
   /* A vertical page, the client's logo in the head. */
-  return <ProjectView project={project} next={onwards} />;
+  return <ProjectView project={project} next={onwards} spread={SPREADS[project.slug]} />;
 }

@@ -33,6 +33,7 @@ export function remapSlugs(draft: Draft, slugs: Record<string, string>): Draft {
     frames: moveKeys(draft.frames),
     credits: moveKeys(draft.credits),
     copy: moveKeys(draft.copy),
+    spreads: moveKeys(draft.spreads),
     bts: moveKeys(draft.bts),
     order: moveList(draft.order),
   };

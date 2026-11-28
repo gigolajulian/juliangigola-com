@@ -32,6 +32,22 @@ export function spreadBlocks(code: string | null | undefined, count: number): Sp
 /** The code back from blocks (the admin's arrange control writes this). */
 export const spreadCode = (blocks: SpreadBlock[]): string => blocks.map((b) => b.kind[0]).join("");
 
+const SIZE = (ch: string) => KIND[ch]?.[1] ?? 0;
+/** A code made to cover frames 2 to `count`: its letters kept while they fit, the rest filled with rows, then a pair or a full. */
+export function refit(code: string, count: number): string {
+  let out = "",
+    left = Math.max(0, count - 1);
+  for (const ch of code) {
+    if (!SIZE(ch) || SIZE(ch) > left) break;
+    out += ch;
+    left -= SIZE(ch);
+  }
+  return out + "r".repeat(Math.floor(left / 3)) + ["", "f", "p"][left % 3];
+}
+/** The code with block `i` changed to `kind`, the blocks after it kept where they still fit (the admin's arrange control). */
+export const setBlock = (code: string, i: number, kind: SpreadKind, count: number): string =>
+  refit(code.slice(0, i) + kind[0] + code.slice(i + 1), count);
+
 export const SPREAD_SEED: Record<string, string> = SEED;
 
 /** A project's blocks: its override if it has one that fits, else the hand pick, else null (today's layout). */

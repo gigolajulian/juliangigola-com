@@ -12,6 +12,7 @@ const overridesOf = (m: Draft): Overrides => ({
   credits: m.credits,
   copy: m.copy,
   slugs: m.slugs,
+  spreads: m.spreads,
 });
 
 /**
