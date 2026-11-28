@@ -204,13 +204,10 @@ export function HomeIntro({ extras = [] }: { extras?: HomeFrame[] }) {
     if (!shouldPlay()) {
       delete root.dataset.mtIntro;
       const calm = matches("calm") && !qflag("intro", "0") && window.scrollY <= 4;
-      let seen = true;
+      // A calm first visit counts as seen. No fade on the wall: it is painted already, and fading it showed the photos, hid them, then showed them again.
       try {
-        seen = !!sessionStorage.getItem("jg-intro");
-        if (calm && !seen) sessionStorage.setItem("jg-intro", "1");
+        if (calm && !sessionStorage.getItem("jg-intro")) sessionStorage.setItem("jg-intro", "1");
       } catch {}
-      if (calm && !seen)
-        document.querySelector('[data-mt="hero"] .mt-wall')?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 400, easing: "ease" });
       return;
     }
     const hero = document.querySelector<HTMLElement>('[data-mt="hero"]');

@@ -179,12 +179,20 @@ function HeaderBar() {
   // The header: ground off at the top, white or black words (navfx.css).
   useNavInk(hdr, path);
   const [menu, setMenu] = React.useState(false);
-  /* A route change closes it. */
+  /* A route change closes it, as a cut: a link in the drawer leaves it open, the page change fades it out with the
+     page it was over, and the page arriving has no drawer. Closing on the tap left it half shut in the old page's
+     picture, and sliding over the new one. */
+  const [cut, setCut] = React.useState(false);
   const [was, setWas] = React.useState(path);
   if (was !== path) {
     setWas(path);
     setMenu(false);
+    setCut(menu);
   }
+  const toggle = () => {
+    setCut(false);
+    setMenu(!menu);
+  };
   /* Focus goes into the drawer on open and back to the button that opened it
      on close; the page and footer behind it are inert, the header (its close
      button) stays live. Read in a layout effect, before inert drops focus. */
@@ -248,7 +256,7 @@ function HeaderBar() {
             aria-expanded={menu}
             aria-controls="pmenu"
             aria-label={menu ? "Close menu" : "Menu"}
-            onClick={() => setMenu(!menu)}
+            onClick={toggle}
           >
             <i aria-hidden />
             <i aria-hidden />
@@ -262,13 +270,17 @@ function HeaderBar() {
           clips: iOS Safari pans sideways to a fixed panel waiting past the
           right edge (Julian's iPhone). */}
       <div className="pwrap">
-        <div className={menu ? "pdim open" : "pdim"} aria-hidden onClick={() => setMenu(false)} />
+        <div className={menu ? "pdim open" : cut ? "pdim cut" : "pdim"} aria-hidden onClick={toggle} />
         <nav
-          className={menu ? "pmenu drawer open" : "pmenu drawer"}
+          className={menu ? "pmenu drawer open" : cut ? "pmenu drawer cut" : "pmenu drawer"}
           id="pmenu"
           aria-label="Menu"
           inert={!menu}
-          onClick={(e) => (e.target as HTMLElement).closest("a") && setMenu(false)}
+          onClick={(e) => {
+            // A link to another page: the route change closes the drawer. This page's own link, or mail: close now.
+            const a = (e.target as HTMLElement).closest("a");
+            if (a && (a.origin !== location.origin || a.pathname === location.pathname || e.metaKey || e.ctrlKey)) toggle();
+          }}
         >
           <Link href="/">Home</Link>
           {NAV.map((n) => (

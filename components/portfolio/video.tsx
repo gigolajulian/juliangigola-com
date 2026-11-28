@@ -430,6 +430,68 @@ function Row({ v, i, onOpen, bare = false }: { v: Video; i: number; onOpen: (v: 
   );
 }
 
+/* The phone's film: the player with the film's still held over it until the player says frames are moving, so its
+   loading (a black box, then YouTube's white one) is never on screen. The still takes no taps, and lifts after 3s
+   whatever happens: a phone that refuses autoplay then shows the player's own play button. Once up it stays up. */
+// Ask to be told: YouTube's states, Vimeo's progress. Nothing else is sent, the player keeps its own settings.
+const listen = (w: Window | null | undefined, yt: boolean) =>
+  w?.postMessage(JSON.stringify(yt ? { event: "listening", id: 1 } : { method: "addEventListener", value: "playProgress" }), "*");
+
+function Film({ v }: { v: Video }) {
+  const ref = React.useRef<HTMLIFrameElement>(null);
+  const [up, setUp] = React.useState(false);
+  const yt = v.provider === "youtube";
+  const poster = posterFor(v);
+  // The player's empty page is white until it draws: kept off the black box until the still is over it (iPhone, 43 to 167ms of white).
+  const [seen, setSeen] = React.useState(!poster);
+  React.useEffect(() => {
+    const t = setTimeout(() => setUp(true), 3000);
+    const onMsg = (e: MessageEvent) => {
+      if (e.source !== ref.current?.contentWindow) return;
+      let m;
+      try {
+        m = typeof e.data === "string" ? JSON.parse(e.data) : e.data;
+      } catch {
+        return;
+      }
+      if (m?.event === "ready") return void listen(ref.current?.contentWindow, yt);
+      const state = m?.event === "onStateChange" ? m.info : m?.event === "infoDelivery" ? m.info?.playerState : undefined;
+      if (state === 1 || vimeoPlays(m)) setUp(true);
+    };
+    addEventListener("message", onMsg);
+    return () => {
+      clearTimeout(t);
+      removeEventListener("message", onMsg);
+    };
+  }, [yt]);
+  return (
+    <div className="mo-film">
+      <iframe
+        ref={ref}
+        onLoad={() => listen(ref.current?.contentWindow, yt)}
+        src={embedUrl(v) + (yt ? "&enablejsapi=1" : "")}
+        title={v.title}
+        allow="autoplay; fullscreen; picture-in-picture"
+        allowFullScreen
+        style={seen || up ? undefined : { opacity: 0 }}
+      />
+      {poster ? (
+        <Image
+          className="mo-still"
+          data-up={up || undefined}
+          src={poster}
+          alt=""
+          fill
+          sizes="100vw"
+          style={{ objectFit: "cover" }}
+          onLoad={() => setSeen(true)}
+          onError={() => setSeen(true)}
+        />
+      ) : null}
+    </div>
+  );
+}
+
 /* Phones (Julian): the films stacked, one 16:9 still each, for an easy
    scroll. A tap opens that film's page: it plays at the top, its title,
    credit and logo under it, the next two films side by side. A history entry
@@ -465,9 +527,7 @@ function Stack({ films }: { films: Video[] }) {
       <button type="button" className="mo-back lbl" onClick={() => history.back()}>
         ← Motion
       </button>
-      <div className="mo-film">
-        <iframe key={open.id} src={embedUrl(open)} title={open.title} allow="autoplay; fullscreen; picture-in-picture" allowFullScreen />
-      </div>
+      <Film key={open.id} v={open} />
       <div className="mo-row mo-now">
         <span className="mo-row-cap">
           <span className="lbl mute">{subOf(open)}</span>
