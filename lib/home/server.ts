@@ -1,4 +1,4 @@
-import { BOOK_ROWS, COMM_HOME, COMM_KEYS, SESSION_SAMPLES, FILM_DRESS, FILM_FILES, FILM_PICKS, HERO_KEYS, type HomeData, type HomeFrame } from "@/lib/home/data";
+import { BOOK_ROWS, COMM_HOME, COMM_KEYS, SESSION_SAMPLES, FILM_DRESS, FILM_FILES, FILM_PICKS, GALLERY_KEYS, HERO_KEYS, HERO_KEYS_DARK, type HomeData, type HomeFrame } from "@/lib/home/data";
 import { PROJECTS, categoryLabel, getProject } from "@/lib/work/work";
 import { CONTENT } from "@/lib/content";
 import { REEL, posterFor, previewUrl } from "@/lib/work/videos";
@@ -31,6 +31,8 @@ const vid = (title: string) => CONTENT.videos.find((v) => v.title === title);
 const used = new Set([...HERO_KEYS, ...COMM_KEYS].map((k) => k.split("/")[0]));
 export const HOME_DATA: HomeData = {
   hero: HERO_KEYS.map(frame),
+  heroDark: HERO_KEYS_DARK.map(frame),
+  gallery: GALLERY_KEYS.map(([key, x]) => ({ ...frame(key), title: getProject(key.split("/")[0])?.name ?? "", x })),
   // Side columns on wide screens (spec 5): Commissions frames, then each project's first frame not already on the wall.
   // 70 of them: wide screens show 30 on the wall itself (side columns, rows five and six) and the intro canvas draws 30 more.
   // Only projects whose files sit under /work/<slug>/: `frame` builds that path, and Cover art keeps its files in /covers/ (it 404ed).

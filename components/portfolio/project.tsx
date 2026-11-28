@@ -1,3 +1,4 @@
+import * as React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Mark } from "@/components/site/duo";
@@ -7,6 +8,9 @@ import { billing, titleCase } from "@/lib/work/work";
 import { markFor } from "@/lib/work/press";
 import { tailHole } from "@/lib/work/sheet";
 import { ProjectViewer } from "@/components/portfolio/project-viewer";
+import { DsCredits, DsSpreads } from "@/components/portfolio/ds-project";
+import { creditsFold } from "@/lib/work/credits-fold";
+import { spreadFor } from "@/lib/work/spreads";
 import type { Frame, Project } from "@/lib/work/work-types";
 
 /* JG V3 project page (leftovers sheet, card B; Julian: vertical, with the
@@ -45,7 +49,21 @@ const KIND: Record<string, string> = {
 };
 const kindOf = (p: Project) => p.categories.map((c) => KIND[c.slug]).find(Boolean);
 
-export function ProjectView({ project, next }: { project: Project; next?: { href: string; name: string; cover?: Frame } }) {
+/* The Next band sizes its name by the longer of its two lines (ds.css): a short name holds one line,
+   a long one breaks into two balanced lines and stays large. */
+const lineChars = (name: string) =>
+  name.length <= 12 ? name.length : Math.max(...name.split(" ").map((w) => w.length), Math.ceil(name.length / 2) + 1);
+
+export function ProjectView({
+  project,
+  next,
+  spread,
+}: {
+  project: Project;
+  next?: { href: string; name: string; cover?: Frame; meta?: string };
+  /** The admin's override for this project's spreads (content/projects.json), if any. */
+  spread?: string | null;
+}) {
   const mark = markFor(project.slug);
   const client = billing(project);
   const sub = [client, project.categories[0] && titleCase(project.categories[0].name)].filter(Boolean).join(" · ");
@@ -81,51 +99,64 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
   const tail = tailHole(rest);
   const hole = tail && project.credits.length && project.credits.length <= 6 ? tail : null;
   const half = Math.floor(project.credits.length / 2);
+  /* A credit's name: a link to their Instagram where there is a handle, the avatar on hover. */
+  const who = (c: Credit) => {
+    const h = handleOf(c);
+    const label = creditLabel(c, h);
+    const av = c.avatar ?? (h === "juliangigola" ? "/people/juliangigola.jpg" : null);
+    return h ? (
+      <a href={`https://instagram.com/${h}`} target="_blank" rel="noopener noreferrer">
+        {/* Their avatar, on hover (always on a phone); the initial where there is none. */}
+        <span className="cr-av" aria-hidden="true">
+          {av ? <Image src={av} alt="" fill sizes="28px" /> : label.replace(/^@/, "")[0]}
+        </span>
+        {label === `@${h}` || ORG.test(c.role.trim()) ? (
+          label
+        ) : (
+          <>
+            <span className="cr-n">{label}</span>
+            <span className="cr-h">@{h}</span>
+          </>
+        )}
+      </a>
+    ) : (
+      label
+    );
+  };
   const credits = (
     <section className="sv-row">
       <h2 className="lbl mute">Credits</h2>
       {/* Two columns on a large screen, read down then across; an odd count puts the extra name on the right. Not in a one-cell hole. */}
       <ul className={hole?.span === 1 ? undefined : "cr2"}>
         {project.credits.map((c, i) => {
-          const h = handleOf(c);
-          const label = creditLabel(c, h);
-          const av = c.avatar ?? (h === "juliangigola" ? "/people/juliangigola.jpg" : null);
           return (
             <li
               key={`${c.role}${c.name}`}
               style={{ "--r": i < half ? i + 1 : i - half + 1, "--c": i < half ? 1 : 2 } as React.CSSProperties}
             >
               <span className="mute">{c.role}</span>
-              <b>
-                {h ? (
-                  <a href={`https://instagram.com/${h}`} target="_blank" rel="noopener noreferrer">
-                    {/* Their avatar, on hover (always on a phone); the initial where there is none. */}
-                    <span className="cr-av" aria-hidden="true">
-                      {av ? <Image src={av} alt="" fill sizes="28px" /> : label.replace(/^@/, "")[0]}
-                    </span>
-                    {label === `@${h}` || ORG.test(c.role.trim()) ? (
-                      label
-                    ) : (
-                      <>
-                        <span className="cr-n">{label}</span>
-                        <span className="cr-h">@{h}</span>
-                      </>
-                    )}
-                  </a>
-                ) : (
-                  label
-                )}
-              </b>
+              <b>{who(c)}</b>
             </li>
           );
         })}
       </ul>
     </section>
   );
+  /* Design system preview (`?ds`): the frames after the hero as edited spreads, the credits and the
+     action pair on the first screen. All of it is hidden, or not rendered, without the flag (ds.css). */
+  const blocks = spreadFor(project.slug, imgs.length, spread);
+  const ask = `/contact/form?${new URLSearchParams({ ...(kindOf(project) ? { type: kindOf(project)! } : {}), ref: name })}`;
+  const fold = creditsFold(project.credits);
+  const row = (c: Credit) => (
+    <React.Fragment key={`${c.role}${c.name}`}>
+      <dt>{c.role}</dt>
+      <dd>{who(c)}</dd>
+    </React.Fragment>
+  );
   return (
     <div className="v3 contents">
       <section className="v3page" id="p-project">
-        <div className={bleed ? "pj-hero bleed" : across ? "pj-hero two" : "pj-hero"}>
+        <div className={bleed ? "pj-hero bleed" : across ? "pj-hero two" : "pj-hero"} data-ds-sp={blocks ? "" : undefined}>
           <header className="pj-top">
             <BackLink className="lbl mute pj-back" />
             {/* On a phone the logo moves up to the Back row (Julian); the one on the frame hides there. */}
@@ -144,6 +175,28 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
               </p>
             </div>
             {project.intent ? <p className="sv-lead">{project.intent}</p> : null}
+            {/* ds: the meta row with the action pair, then the credits, on the first screen. */}
+            <div className="ds-pj">
+              <div className="ds-mt">
+                <p className="lbl mute">
+                  {sub ? `${sub} · ` : null}
+                  {imgs.length} frames
+                </p>
+                <div className="ds-acts">
+                  <Link className="btn fill" href={ask}>
+                    Inquire
+                  </Link>
+                  {next ? (
+                    <Link className="btn" href={next.href}>
+                      Next · {titleCase(next.name.replace(/^Next: /, ""))}
+                    </Link>
+                  ) : null}
+                </div>
+              </div>
+              {project.credits.length ? (
+                <DsCredits shown={fold.shown.map(row)} folded={fold.folded.map(row)} last={fold.last ? row(fold.last) : null} />
+              ) : null}
+            </div>
           </header>
           {/* A portrait hero is as tall as the screen under the header and its padding (measured 100vh - 80px at 768 to 1440
               tall) and as wide as its shape makes that, so `sizes` says so: 40vw undersold it on a 2x laptop (656px drawn,
@@ -207,6 +260,13 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
             real, and it marks them before the first paint rather than after hydration, which on a slow phone left the
             first lead frame empty for seconds under the hero. `data-open` drops the transition (motion-plan.css). */}
         <script dangerouslySetInnerHTML={{ __html: OPEN_NOW }} />
+        {blocks ? (
+          <DsSpreads
+            frames={imgs.map((f) => ({ src: f.src, width: f.width, height: f.height, color: f.color, alt: alt(f.alt) }))}
+            blocks={blocks}
+            ask={ask}
+          />
+        ) : null}
         <div className="sv-info">
           {/* m2p: behind the scenes after the frames and before the credits, smaller than the work.
               Credits that sit in the sheet's hole get a second copy here, swapped in by v4pages.css. */}
@@ -226,16 +286,32 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
               <h2>Want something like this?</h2>
               <p className="mute">Tell me what you have in mind and I&apos;ll reply with an approach and a quote.</p>
             </div>
-            <Link
-              className="btn fill"
-              href={`/contact/form?${new URLSearchParams({ ...(kindOf(project) ? { type: kindOf(project)! } : {}), ref: name })}`}
-            >
+            <Link className="btn fill" href={ask}>
               Inquire
             </Link>
           </div>
           {next ? (
-            <Link className="pj-next" href={next.href} data-sink>
+            <Link
+              className="pj-next"
+              href={next.href}
+              data-sink
+              style={
+                next.cover
+                  ? ({
+                      "--nar": (next.cover.width / next.cover.height).toFixed(4),
+                      "--nl": lineChars(next.name.replace(/^Next: /, "")),
+                    } as React.CSSProperties)
+                  : undefined
+              }
+            >
               <span className="lbl mute">Next</span>
+              {/* ds: the Next band's top line, "Next project" and what it is. */}
+              {next.meta ? (
+                <span className="ds-nx-top lbl">
+                  <span>Next project</span>
+                  <span>{next.meta}</span>
+                </span>
+              ) : null}
               {/* The next set's cover, so it can grow into that page's hero (page-fly.tsx). */}
               {next.cover ? (
                 <span className="pj-nx">
@@ -270,6 +346,9 @@ export function ProjectView({ project, next }: { project: Project; next?: { href
       </section>
       {/* The page's frames in the order they are laid out, for the viewer (`?v4pages=view`). */}
       <ProjectViewer
+        dsFrames={
+          blocks ? imgs.map((f) => ({ s: project.slug, src: f.src, alt: alt(f.alt), wide: wide(f), sq: f.width === f.height })) : undefined
+        }
         frames={[...(big ? [big] : []), ...lead, ...rest].map((f) => ({
           s: project.slug,
           src: f.src,

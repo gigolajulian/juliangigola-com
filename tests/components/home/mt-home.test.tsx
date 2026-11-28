@@ -28,4 +28,19 @@ describe("v4 home", () => {
     for (const r of BOOK_ROWS) expect(screen.getAllByText(r.name).length).toBeGreaterThan(0);
     for (const o of QUOTE_OPTS.slice(0, 3)) expect(screen.getAllByText(o.name).length).toBeGreaterThan(0);
   });
+
+  it("ds: the new order, the gallery after Commissions, Weddings off the list", () => {
+    document.documentElement.dataset.ds = "";
+    try {
+      render(<Home data={HOME_DATA} />);
+      const names = [...document.querySelectorAll("[data-mt]")].map((s) => s.getAttribute("data-mt"));
+      expect(names).toEqual(["hero", "about", "comm", "book", "motion", "covers", "quote", "foot"]);
+      expect(document.querySelector("[data-mt=comm]")!.nextElementSibling!.className).toBe("ds-gal");
+      expect(HOME_DATA.gallery.length).toBe(11);
+      expect(HOME_DATA.heroDark.length).toBe(HOME_DATA.hero.length);
+      expect([...document.querySelectorAll(".mt-ask-row b")].map((b) => b.textContent)).toEqual(["Commercial", "Music", "Fashion"]);
+    } finally {
+      delete document.documentElement.dataset.ds;
+    }
+  });
 });
