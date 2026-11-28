@@ -671,6 +671,12 @@ html[data-ds] .v3 .ds-sb[data-st="2"] path {
   html[data-ds] .v3 .tbtn svg {
     transition-duration: var(--ds-small);
   }
+  /* the icon keeps its turn while the colors fade (the rule above would replace it) */
+  html[data-ds-fade] .v3 .tbtn svg {
+    transition:
+      transform var(--ds-small) cubic-bezier(0.65, 0, 0.35, 1),
+      color var(--ds-small) var(--ds-out) !important;
+  }
 }
 
 /* ── Rules across the site ────────────────────────────────────────────────
