@@ -97,6 +97,8 @@ const letters = (t: string) =>
     </React.Fragment>
   ));
 
+const TURN_AFTER = 1000; // ds: a theme change, then the wall turns this much later
+const TURN_GAP = 60; // one card after the other
 const STILL = 4000; // idle wall: still this long before the first swap
 const EVERY = 2500; // then one frame at this pace
 
@@ -114,16 +116,42 @@ function useIdleWall(light: HomeFrame[], extras: HomeFrame[], dark?: HomeFrame[]
   const ds = useDs(),
     theme = useSiteThemeRead();
   const frames = ds && dark?.length && theme === "dark" ? dark : light;
-  const [set, setSet] = React.useState(light);
   const [onWall, setOnWall] = React.useState(light);
   const [was, setWas] = React.useState<Record<number, HomeFrame>>({});
-  if (set !== frames) {
-    setSet(frames);
-    setOnWall(frames);
-    setWas({});
-  }
-  const live = React.useRef({ onWall, was, pool: extras.slice(16) }); // the first 16 extras are on the wall (side columns); the rest come in by the idle swap
+  const live = React.useRef({ onWall, was, set: light, seen: false, pool: extras.slice(16) }); // the first 16 extras are on the wall (side columns); the rest come in by the idle swap
   React.useEffect(() => void Object.assign(live.current, { onWall, was }));
+  /* ds: the wall takes the theme's set. The first read is a cut (the splash is still up). A change after that
+     waits TURN_AFTER, then each card turns over to its new photo (the idle wall's own card turn), TURN_GAP apart. */
+  React.useEffect(() => {
+    const L = live.current;
+    if (theme === null) return;
+    const first = !L.seen;
+    L.seen = true;
+    if (L.set === frames) return;
+    L.set = frames;
+    if (first || matches("calm") || !flipMs()) {
+      setOnWall(frames);
+      setWas({});
+      return;
+    }
+    const ts = [
+      setTimeout(
+        () =>
+          frames.forEach((f, i) =>
+            ts.push(
+              setTimeout(() => {
+                const old = live.current.onWall[i];
+                if (!old || old.src === f.src) return;
+                setWas((w) => ({ ...w, [i]: old }));
+                setOnWall((n) => n.map((x, k) => (k === i ? f : x)));
+              }, i * TURN_GAP),
+            ),
+          ),
+        TURN_AFTER,
+      ),
+    ];
+    return () => ts.forEach(clearTimeout);
+  }, [frames, theme]);
   React.useEffect(() => {
     if (matches("calm")) return;
     let last = performance.now(),

@@ -652,3 +652,23 @@ html[data-ds] .v3 .ds-sb[data-st="2"] path {
     animation: none;
   }
 }
+
+/* ── Motion: the theme change ─────────────────────────────────────────────
+   The page fades to the other theme in 300ms (chrome.tsx sets `data-ds-fade` for that long); the icon's turn ends
+   with it. The hero wall turns its cards a second later (components/home/hero.tsx). */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ds-fade],
+  html[data-ds-fade] *,
+  html[data-ds-fade] *::before,
+  html[data-ds-fade] *::after {
+    transition:
+      background-color var(--ds-small) var(--ds-out),
+      color var(--ds-small) var(--ds-out),
+      border-color var(--ds-small) var(--ds-out),
+      fill var(--ds-small) var(--ds-out),
+      stroke var(--ds-small) var(--ds-out) !important;
+  }
+  html[data-ds] .v3 .tbtn svg {
+    transition-duration: var(--ds-small);
+  }
+}
