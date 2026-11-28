@@ -15,6 +15,8 @@ import { HomeIntro } from "./intro";
 import { MotionLayer } from "./motion";
 import { glideTo, jumpTo } from "@/components/site/smooth-scroll";
 import { useBackHome } from "./back";
+import { HomeGallery } from "./gallery";
+import { useDs } from "@/lib/flags/ds";
 
 /* The inquiry card (its dialog and form) is not in the home page's first load (audit): fetched once By quote
    or the footer nears the screen, or after the page has loaded and gone idle, so opening it never waits; mounted the
@@ -109,23 +111,24 @@ export function Home({ data }: { data: HomeData }) {
       document.removeEventListener("click", go, true)
     );
   }, []);
+  const ds = useDs();
+  // the scroll code measured the screens in today's order
+  React.useEffect(() => void (ds && dispatchEvent(new Event("resize"))), [ds]);
+  const quote = <ByQuote key="quote" />;
+  const films = <HomeFilms key="films" films={data.films} />;
+  const sessions = <BookOnline key="book" open={book} opener={bookOpener} onClose={() => setBook(null)} samples={data.samples} />;
+  const covers = <HomeCovers key="covers" />;
+  const gallery = <HomeGallery key="gallery" frames={data.gallery} />;
   return (
     <CardsCtx.Provider value={cards}>
       <HomeIntro extras={data.extras} />
       <section className="v3 v3home mt" data-cards={inq ? "open" : undefined}>
-        <HomeHero frames={data.hero} extras={data.extras} />
-        {/* order: About, Commissions, By quote, Motion, Sessions, then Cover art */}
+        <HomeHero frames={data.hero} extras={data.extras} dark={data.heroDark} />
+        {/* order: About, Commissions, By quote, Motion, Sessions, then Cover art.
+            ds: About, Commissions, Gallery, Sessions, Motion, Cover art, then By quote. Keyed, so the screens move and never remount. */}
         <HomeAbout />
         <HomeCommissions frames={data.commissions} />
-        <ByQuote />
-        <HomeFilms films={data.films} />
-        <BookOnline
-          open={book}
-          opener={bookOpener}
-          onClose={() => setBook(null)}
-          samples={data.samples}
-        />
-        <HomeCovers />
+        {ds ? [gallery, sessions, films, covers, quote] : [quote, films, sessions, covers]}
         <HomeFoot />
       </section>
       <MotionLayer />
