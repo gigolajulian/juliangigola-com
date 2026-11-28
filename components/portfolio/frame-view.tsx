@@ -178,14 +178,25 @@ export function FrameView({
   React.useEffect(() => {
     const d = ref.current;
     if (!open || !d) return;
-    d.showModal();
-    // Into the dialog however it opened (a tap or click left focus on the page).
-    d.querySelector<HTMLButtonElement>(".fv-bar button")?.focus();
+    /* The stage goes up with its photo, not before it: the arrows and Close were on an empty black screen for a few
+       frames. It waits for the photo to decode, 400ms at most, so a slow photo still gets an answer to the click. */
+    let live = true;
+    const show = () => {
+      if (!live || d.open) return;
+      d.showModal();
+      // Into the dialog however it opened (a tap or click left focus on the page).
+      d.querySelector<HTMLButtonElement>(".fv-bar button")?.focus();
+    };
+    const img = d.querySelector<HTMLImageElement>('.fv-ph[aria-hidden="false"] img');
+    const t = setTimeout(show, 400);
+    void (img?.decode?.() ?? Promise.resolve()).catch(() => {}).then(show);
     history.pushState({ frame: 1 }, "");
     const pop = () => onClose();
     addEventListener("popstate", pop);
     void loadGsap().then((g) => (G.current = g));
     return () => {
+      live = false;
+      clearTimeout(t);
       removeEventListener("popstate", pop);
       if (d.open) d.close();
       if (history.state?.frame) history.back();

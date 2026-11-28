@@ -86,8 +86,12 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
     () => false,
   );
   const shown = React.useRef(path);
+  const pressed = React.useRef(false); // a link was pressed since the last Back
   React.useLayoutEffect(() => {
     shown.current = path;
+    // The page a link opens makes its title entrance again. Lifted here, with the new page: on the press it replayed the old title.
+    if (pressed.current) delete document.documentElement.dataset.navPop;
+    pressed.current = false;
     // The page arriving, before it is snapshotted.
     gauge();
     // Safari snapshotted the home before the restored cover decoded: an empty sleeve for 1 to 4 frames. 300ms at most.
@@ -140,6 +144,7 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
       const out = a.dataset.back !== undefined || a.textContent?.trimStart().startsWith("←") || a.pathname === "/";
       const from = a.closest("header") ? "bar" : "page";
       set(out ? "out" : "in", from);
+      pressed.current = true;
       /* A booking step (`data-step`, components/booking/packages.tsx) travels sideways (v3.css). */
       if (a.dataset.step !== undefined) root.dataset.navStep = "";
       else delete root.dataset.navStep;
@@ -164,7 +169,13 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
        page left and settles the one returned to (`back-page`). */
     let replaying = false;
     const onPop = (e: PopStateEvent) => {
-      if (replaying || location.pathname === shown.current) return;
+      if (replaying) return;
+      /* Back or Forward: a page the visitor has already seen, so its title does not make its entrance again (v3.css).
+         Kept until a link opens the next page: taking it off sooner would start the entrance then. Before the check
+         below: a Back this handler does not carry (project to portfolio) stops there. */
+      root.dataset.navPop = "";
+      pressed.current = false;
+      if (location.pathname === shown.current) return;
       /* Back from Cover art (its viewer) to the home: a clean cut (Julian's call). A copy of the viewer holds the screen until the home is in
          place under it with its covers decoded, then goes in one frame. Not a view transition: Safari snapshots the home before its covers paint. */
       const parts =

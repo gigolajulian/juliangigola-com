@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { flushSync } from "react-dom";
 
 /** The search row and its header twin: what is typed, the row taking focus, the phone view set folding, and the
     header tools pinning in as the row scrolls under the header. */
@@ -56,7 +57,13 @@ export function useHeaderSearch(canvas: boolean, at: number | null) {
       if (f?.closest(".htools")) tools.querySelector("input")?.focus({ preventScroll: true });
       setHs(false);
     };
-    const tick = () => void (raf ||= requestAnimationFrame(sync));
+    /* flushSync: the pin lands in the frame that measured it. Back from a project mounts this page while the window
+       still holds the project's scroll, so the first read pins the tools; the scroll is restored before the paint, and
+       the correction, a frame late, drew the header links one frame out of place.
+       shortcut: mouse screens only. On an iPhone the same flush rebuilt the grid inside the frame and held the
+       wrong header for 85 to 263ms after a swipe Back (QA, #1608); a phone has no header links to misplace. */
+    const now = matchMedia("(hover:hover)").matches;
+    const tick = () => void (raf ||= requestAnimationFrame(now ? () => flushSync(sync) : sync));
     sync();
     addEventListener("scroll", tick, { passive: true });
     addEventListener("resize", tick);
