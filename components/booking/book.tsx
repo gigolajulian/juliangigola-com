@@ -245,6 +245,18 @@ function stepIn(el: HTMLElement) {
       for (const a of document.getAnimations())
         if ((a.effect as KeyframeEffect | null)?.pseudoElement === "::view-transition-group(root)") a.cancel();
       slide(false);
+      /* Phone: the step's cover lands after the picture is taken (iPhone, about 185ms) and cut in on one frame.
+         It waits for its photo, then fades, as it did when the whole page faded. */
+      const ph = matchMedia("(max-width:800px)").matches ? el.querySelector<HTMLElement>(".f-photo .ph") : null;
+      const im = ph?.querySelector("img");
+      if (!ph || !im) return;
+      ph.style.opacity = "0";
+      im.decode()
+        .catch(() => {})
+        .then(() => {
+          ph.style.opacity = "";
+          ph.animate({ opacity: [0, 1] }, { duration: 400, easing: "ease-out" });
+        });
     },
     () => slide(true),
   );
