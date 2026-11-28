@@ -468,3 +468,187 @@ html[data-ds] .mt .ds-cv-cap span {
 html[data-ds] .v3 .cv-cell {
   background-color: var(--bg);
 }
+
+/* ── Motion: controls and forms ───────────────────────────────────────────
+   Press feedback: a control gives under the pointer in 120ms and lets go in 300ms. */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ds] .v3 .wt img {
+    transition:
+      transform var(--ds-small) var(--ds-out),
+      opacity 0.4s;
+  }
+  html[data-ds] .v3 .wt a:active img {
+    transform: scale(0.975);
+    transition-duration: var(--ds-press);
+  }
+  html[data-ds] .v3 .chips button {
+    transition:
+      color var(--ds-hover) var(--ds-out),
+      border-color var(--ds-hover) var(--ds-out),
+      transform var(--ds-small) var(--ds-out);
+  }
+  html[data-ds] .v3 .chips button:active {
+    transform: scale(0.96);
+    transition-duration: var(--ds-press);
+  }
+  html[data-ds] .mt .mt-ask-row,
+  html[data-ds] .mt .mt-br {
+    transition: opacity var(--ds-small) var(--ds-out);
+  }
+  html[data-ds] .mt .mt-ask-row:active,
+  html[data-ds] .mt .mt-br:active {
+    opacity: 0.6;
+    transition-duration: var(--ds-press);
+  }
+  html[data-ds] .mt .mt-ask-row:active b,
+  html[data-ds] .mt .mt-br:active b {
+    transform: translateX(4px);
+    transition-duration: var(--ds-press);
+  }
+  html[data-ds] .v3 .btn {
+    transition:
+      background 0.15s,
+      color 0.15s,
+      transform var(--ds-small) var(--ds-out);
+  }
+  html[data-ds] .v3 .btn:active:not([disabled]) {
+    transform: scale(0.985);
+    transition-duration: var(--ds-press);
+  }
+
+  /* A field's error rises into place. */
+  html[data-ds] .v3 .fld.bad .fe,
+  html[data-ds] .v3 .sv-row details[open] p {
+    animation: ds-rise var(--ds-small) var(--ds-out) both;
+  }
+  /* Questions: the row opens in 500ms, the answer follows 120ms behind. Browsers without
+     `interpolate-size` open at once. */
+  html[data-ds] .v3 .sv-row details {
+    interpolate-size: allow-keywords;
+  }
+  html[data-ds] .v3 .sv-row details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size var(--ds-page) var(--ds-out),
+      content-visibility var(--ds-page) allow-discrete;
+  }
+  html[data-ds] .v3 .sv-row details[open]::details-content {
+    block-size: auto;
+  }
+  html[data-ds] .v3 .sv-row details[open] p {
+    animation-delay: 120ms;
+  }
+  html[data-ds] .v3 .sv-row summary::after {
+    transition: rotate var(--ds-page) var(--ds-out);
+  }
+}
+@keyframes ds-rise {
+  from {
+    opacity: 0;
+    translate: 0 8px;
+  }
+}
+/* the plus that turns to a cross */
+html[data-ds] .v3 .sv-row summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+html[data-ds] .v3 .sv-row summary::after {
+  content: "+";
+  flex: none;
+  font: 400 1.25rem/1 var(--mono);
+  color: var(--mute);
+}
+html[data-ds] .v3 .sv-row details[open] summary::after {
+  rotate: 45deg;
+}
+
+/* Sending to Sent: the fill leaves and sweeps back across while the note is on its way, then the button turns
+   green with a drawn check. The box never changes shape. */
+html[data-ds] .v3 .btn.ds-sb {
+  position: relative;
+  isolation: isolate;
+  justify-content: center;
+  overflow: hidden;
+  background: none;
+  color: #fff;
+  opacity: 1;
+  transition:
+    transform var(--ds-small) var(--ds-out),
+    border-color var(--ds-page) var(--ds-out);
+}
+html[data-ds] .v3 .ds-sb > i {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--ink);
+  transition: background-color var(--ds-page) var(--ds-out);
+}
+html[data-ds] .v3 .ds-sb-lb {
+  position: relative;
+  z-index: 1;
+  height: 14px;
+  overflow: hidden;
+  mix-blend-mode: difference;
+}
+html[data-ds] .v3 .ds-sb-ll {
+  display: block;
+  transition: transform var(--ds-page) var(--ds-out);
+}
+html[data-ds] .v3 .ds-sb-ll > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 14px;
+  line-height: 14px;
+}
+html[data-ds] .v3 .ds-sb[data-st="1"] .ds-sb-ll {
+  transform: translateY(-14px);
+}
+html[data-ds] .v3 .ds-sb[data-st="2"] .ds-sb-ll {
+  transform: translateY(-28px);
+}
+html[data-ds] .v3 .ds-sb[data-st="1"] > i {
+  animation: ds-fill 1500ms linear both;
+}
+html[data-ds] .v3 .ds-sb[data-st="2"] {
+  border-color: var(--live);
+}
+html[data-ds] .v3 .ds-sb[data-st="2"] > i {
+  background: var(--live);
+}
+html[data-ds] .v3 .ds-sb[data-st="2"] .ds-sb-lb {
+  mix-blend-mode: normal;
+  color: var(--bg);
+}
+html[data-ds] .v3 .ds-sb path {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+html[data-ds] .v3 .ds-sb[data-st="2"] path {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset var(--ds-small) var(--ds-out) var(--ds-small);
+}
+@keyframes ds-fill {
+  0% {
+    clip-path: inset(0);
+  }
+  12% {
+    clip-path: inset(0 0 0 100%);
+  }
+  12.01% {
+    clip-path: inset(0 100% 0 0);
+    animation-timing-function: cubic-bezier(0.3, 0, 0.2, 1);
+  }
+  100% {
+    clip-path: inset(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-ds] .v3 .ds-sb[data-st="1"] > i {
+    animation: none;
+  }
+}
