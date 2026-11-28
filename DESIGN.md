@@ -331,5 +331,15 @@ Checks:
 - At 200% zoom on a phone (300px wide) nothing is cut off, hidden or scrolls sideways.
 - With scroll observers off, every block is visible.
 - Both themes and reduced motion pass before a surface is done.
+Design system preview (approved by Julian 2026-11-28, built behind `?ds`, lib/flags/ds.ts and app/styles/ds.css; these are standing rules for the preview and for the site once it ships):
+- The One Clock Rule. Six durations, each with one job: press 120ms, hover 200ms, small 300ms, page 500ms, photo 700ms, show 1200ms (`--ds-press` to `--ds-show`), on the three curves (out, move, drawer). No other duration in new work. The splash, the booking Confirm (450/600ms), the project open, the page changes and the home scroll keep their own timings.
+- The No Singles Rule. A project page is built from four blocks: hero, pair, row (three), full. No photo sits small and off to one side. A lone portrait is centered and large; a landscape runs full width.
+- The Nothing Cropped Rule. In a pair or a row the frames share one height and each keeps its own ratio. Frames keep the site's order and none is dropped.
+- The Face Is Never Cut Rule. No crop cuts a face. Where a crop is needed (the home gallery), only frames that keep the whole face on phone and desktop qualify.
+- The Credits Fold Rule. Credits sit on the first screen of every project. Four or fewer show in full. More: the model (or "In frame") first, the photo credit last, two more shown, the rest behind "+ N more", which opens in place.
+- The Whole City Rule. A city name never splits across lines ("San Francisco", "San Jose").
+- The Theme Change Rule. A theme change crossfades the page in 300ms with no reload, phone included. One second later each home hero card turns over to that theme's photo (450ms each, 60ms apart).
+- The Hard Cut Rule. The home gallery changes frame with a hard cut: no black frame, no blink, no fade through black. It holds still under reduced motion and pauses under the pointer.
+- Frames are square. Every photo, tile and film has a 0 corner. The chip is the only pill; dots are round. The booking card keeps its look.
 Map: components/dev/debug-overlay.tsx
 Full: .impeccable/design-full.md (read a section when you need its detail)

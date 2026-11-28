@@ -26,7 +26,7 @@ const props = {
     frames: {},
     credits: {},
     copy: {},
-    slugs: {},
+    slugs: {}, spreads: {},
     order: [],
     covers: {},
     avatars: {},

@@ -21,7 +21,7 @@ const empty = (): Draft => ({
   order: [],
   covers: {},
   avatars: {},
-  slugs: {},
+  slugs: {}, spreads: {},
   bts: {},
 });
 const b64 = (s: string) => btoa(String.fromCharCode(...new TextEncoder().encode(s)));

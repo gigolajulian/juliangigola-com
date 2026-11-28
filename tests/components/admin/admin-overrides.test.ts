@@ -4,7 +4,7 @@ import type { ListDraft, Overrides } from "@/components/admin/editor/props";
 
 /* The editor's setters for the per-project override maps and the list draft. */
 
-const none: Overrides = { categories: {}, frames: {}, credits: {}, copy: {}, slugs: {} };
+const none: Overrides = { categories: {}, frames: {}, credits: {}, copy: {}, slugs: {}, spreads: {} };
 const published: Overrides = { ...none, frames: { a: ["/work/a/02.jpg", "/work/a/01.jpg"] } };
 
 describe("withProjectOverride", () => {

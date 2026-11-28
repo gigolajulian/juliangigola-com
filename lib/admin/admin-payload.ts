@@ -28,6 +28,7 @@ export type ProjectsFile = {
   copy?: Record<string, unknown>;
   order?: string[];
   covers?: Record<string, string>;
+  spreads?: Record<string, string>;
   avatars?: Record<string, string>;
   slugs?: Record<string, string>;
   bts?: Record<string, unknown>;
@@ -76,6 +77,8 @@ export type Manifest = {
   copy: Record<string, unknown>;
   order: string[];
   covers: Record<string, string>;
+  /** A project's spread blocks, slug to a code (`lib/work/spreads.ts`). Only projects arranged by hand in the admin. */
+  spreads: Record<string, string>;
   /** A collaborator's face, Instagram handle to a path under `public/`. */
   avatars: Record<string, string>;
   /** Renamed addresses, original slug to current. */
@@ -132,6 +135,10 @@ export function projectsFile(existing: ProjectsFile | null, edit: Manifest): Pro
 
   if (Object.keys(edit.covers).length) next.covers = edit.covers;
   else delete next.covers;
+
+  // The arranged spreads, by the same rule.
+  if (Object.keys(edit.spreads).length) next.spreads = edit.spreads;
+  else delete next.spreads;
 
   // And the faces, by the same rule: written only once there is one.
   if (Object.keys(edit.avatars).length) next.avatars = edit.avatars;
@@ -234,6 +241,7 @@ export function adoptable(file: ProjectsFile, fallback: Manifest): Manifest {
     order: file.order === undefined ? [] : (strings(file.order) ?? fallback.order),
     avatars: file.avatars === undefined ? {} : (stringMap(file.avatars) ?? fallback.avatars),
     covers: file.covers === undefined ? {} : (stringMap(file.covers) ?? fallback.covers),
+    spreads: file.spreads === undefined ? {} : (stringMap(file.spreads) ?? fallback.spreads),
     slugs: file.slugs === undefined ? {} : (stringMap(file.slugs) ?? fallback.slugs),
     bts: file.bts === undefined ? {} : isRecord(file.bts) ? file.bts : fallback.bts,
   };

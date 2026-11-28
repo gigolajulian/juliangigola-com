@@ -28,6 +28,7 @@ const edit = {
   copy: {},
   order: [],
   covers: {},
+  spreads: {},
   avatars: {},
   slugs: {},
   bts: {},
@@ -200,6 +201,7 @@ const edit = {
     copy: { a: { title: "A", intent: null } },
     order: ["a", "b"],
     covers: { editorial: "/work/a/01.jpg" },
+    spreads: {},
     avatars: {},
   };
 
@@ -214,6 +216,7 @@ const edit = {
     ...build,
     order: [],
     covers: {},
+    spreads: {},
     avatars: {},
   });
   assert.ok(!("order" in emptied), "an empty order is not written");
@@ -241,6 +244,7 @@ const edit = {
       copy: {},
       order: [],
       covers: {},
+      spreads: {},
       avatars: {},
     }),
     "a bare file reads as a bare manifest",
@@ -333,6 +337,7 @@ const edit = {
     copy: { p: { title: "T", intent: null } },
     order: ["p", "q"],
     covers: { editorial: "/work/p/01.jpg" },
+    spreads: { p: "pf" },
     avatars: { x: "/people/x.jpg" },
     slugs: { p: "pp" },
     bts: { p: { by: "x", frames: [{ src: "/work/p/bts/01.jpg" }] } },

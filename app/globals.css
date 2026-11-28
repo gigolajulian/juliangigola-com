@@ -59,6 +59,7 @@
 @import "./styles/mtscroll.css"; /* v4 homepage (html[data-mtscroll], static in app/layout.tsx) */
 @import "./styles/v4pages.css"; /* inner pages plan (lib/flags/v4pages.ts) */
 @import "./styles/navfx.css"; /* the header */
+@import "./styles/ds.css"; /* design system preview (html[data-ds], lib/flags/ds.ts) */
 
 /* The booking status (`time-picker.tsx`): orbs circle while it is sent, then
    fold into a green ring and check. */

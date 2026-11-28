@@ -14,7 +14,7 @@ const empty = (): Manifest => ({
   order: [],
   covers: {},
   avatars: {},
-  slugs: {},
+  slugs: {}, spreads: {},
   bts: {},
 });
 
