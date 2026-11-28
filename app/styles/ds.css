@@ -1,0 +1,470 @@
+/* The design system preview (lib/flags/ds.ts, `?ds`). Julian approved the mock on 2026-11-28; DESIGN.md
+   carries the rules under "Design system preview".
+
+   Two halves. The tokens below sit on :root and nothing reads them outside this file, so they change
+   nothing by themselves. Every rule that a visitor can see is written under `html[data-ds]`, so a tab
+   without the flag gets the site as it is today. When the preview ships, the tokens replace the older
+   scales in tokens.css and the selectors lose the flag. */
+
+:root {
+  /* One clock: six durations, each with one job. Their own names because the motion-plan six
+     (--dur-press to --dur-show) already time the page changes, which stay as they are. */
+  --ds-press: 120ms; /* a control giving under the pointer */
+  --ds-hover: 200ms; /* color and opacity on hover or focus */
+  --ds-small: 300ms; /* notices, errors, a press letting go, the theme crossfade */
+  --ds-page: 500ms; /* rows opening, a frame opening, the lightbox step */
+  --ds-photo: 700ms; /* a photo or a fill settling */
+  --ds-show: 1200ms; /* the slowest move on a page */
+
+  /* Three curves, the ones tokens.css already names. */
+  --ds-out: var(--ease-out-strong); /* enter, leave, answer a click */
+  --ds-move: var(--ease-in-out-strong); /* something on screen travelling */
+  --ds-drawer: var(--ease-drawer); /* sheets, a frame growing from its cell */
+
+  /* Type: eight steps, two registers. Titles are Inter Tight 900, everything else is the mono. */
+  --ds-t-name: min(13vw, 10rem);
+  --ds-t-page: clamp(3rem, 8vw, 7rem);
+  --ds-t-section: clamp(2.5rem, 6vw, 5.5rem);
+  --ds-t-row: clamp(1.125rem, 1.6vw, 1.5rem);
+  --ds-t-lead: clamp(1rem, 1.3vw, 1.125rem);
+  --ds-t-body: 0.875rem;
+  --ds-t-label: 0.6875rem;
+  --ds-t-caption: 0.625rem;
+  --ds-track-title: -0.05em;
+  --ds-track-row: -0.04em;
+  --ds-track-label: 0.14em;
+
+  /* Space. */
+  --ds-head-top: 48px; /* header to the page head on a phone */
+  --ds-rhythm: 48px; /* between sections on a phone */
+  --ds-grid-gap: 72px; /* heading to grid on desktop */
+  --ds-page-max: 100rem;
+
+  /* Corners: frames and UI are square, the chip is the only pill, dots are round. */
+  --ds-r: 0;
+  --ds-r-pill: 9999px;
+  --ds-r-dot: 50%;
+}
+@media (min-width: 701px) {
+  :root {
+    --ds-head-top: 96px;
+    --ds-rhythm: 96px;
+  }
+}
+
+/* ── Project page ─────────────────────────────────────────────────────────
+   The pieces the preview adds to the markup stay out of sight without the flag. */
+.v3 :is(.ds-pj, .ds-nx-top, .ds-bar) {
+  display: none;
+}
+
+/* The first screen: the meta row with the action pair, a hairline, then the credits. */
+html[data-ds] .v3 #p-project .ds-pj {
+  display: block;
+}
+html[data-ds] .v3 #p-project .pj-row > .lbl {
+  display: none;
+}
+html[data-ds] .v3 #p-project .pj-row .pg-t {
+  margin-bottom: 0;
+}
+html[data-ds] .v3 .ds-mt {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+html[data-ds] .v3 .ds-mt p {
+  margin: 0;
+}
+html[data-ds] .v3 .ds-acts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+html[data-ds] .v3 .ds-cr {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 6px 18px;
+  margin: 22px 0 0;
+  font: 400 var(--ds-t-label) / 1.5 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+html[data-ds] .v3 .ds-cr dt {
+  color: var(--mute);
+}
+html[data-ds] .v3 .ds-cr dd {
+  margin: 0;
+}
+html[data-ds] .v3 .ds-cr a {
+  color: inherit;
+  text-decoration: none;
+  transition: color var(--ds-hover) var(--ds-out);
+}
+@media (hover: hover) {
+  html[data-ds] .v3 .ds-cr a:hover {
+    color: var(--accent);
+  }
+}
+html[data-ds] .v3 .ds-cr :is(.cr-av, .cr-h) {
+  display: none;
+}
+html[data-ds] .v3 .ds-more {
+  position: relative;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--mute);
+  font: inherit;
+  letter-spacing: var(--ds-track-label);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--ds-hover) var(--ds-out),
+    border-color var(--ds-hover) var(--ds-out);
+}
+/* a 44px target around the 26px button */
+html[data-ds] .v3 .ds-more::after {
+  content: "";
+  position: absolute;
+  inset: -9px 0;
+}
+@media (hover: hover) {
+  html[data-ds] .v3 .ds-more:hover {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+}
+/* the folded rows open in place: the three shown pairs stay put, the count and the photo credit too */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-ds] .v3 .ds-cr.op :is(dt, dd):nth-of-type(n + 4):nth-last-of-type(n + 3) {
+    animation: ds-rise var(--ds-small) var(--ds-out) both;
+  }
+}
+@keyframes ds-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+/* the credits live in the head now, so their old places go (behind the scenes stays) */
+html[data-ds] .v3 #p-project :is(.pj-cr, .pj-cr2, .sv-info > .sv-row:not(.pj-bts)) {
+  display: none;
+}
+
+/* Edited spreads replace the frames under the title and the three-column sheet. */
+html[data-ds] .v3 #p-project .pj-hero[data-ds-sp] .pj-lead,
+html[data-ds] .v3 #p-project .pj-hero[data-ds-sp] ~ .pj-flow {
+  display: none;
+}
+@media (min-width: 901px) {
+  /* the head can grow past one screen when the credits open */
+  html[data-ds] .v3 #p-project .pj-hero[data-ds-sp]:not(.bleed) {
+    height: auto;
+    min-height: max(calc(100svh - 64px), calc(604px + var(--pj)));
+  }
+}
+html[data-ds] .v3 .ds-sp {
+  padding: 0 var(--gr) 0 var(--g);
+}
+html[data-ds] .v3 .ds-b {
+  margin-top: clamp(64px, 8.33vw, 120px);
+}
+html[data-ds] .v3 .ds-b:first-child {
+  margin-top: clamp(56px, 6.67vw, 96px);
+}
+html[data-ds] .v3 .ds-b-r {
+  display: flex;
+  justify-content: center;
+  gap: var(--pj);
+}
+/* Frames in a block share one height, each at its own ratio: width follows the ratio, nothing is cropped. */
+html[data-ds] .v3 .ds-fr {
+  position: relative;
+  flex: var(--ar) 1 0%;
+  min-width: 0;
+  margin: 0;
+  aspect-ratio: var(--ar);
+  background: var(--card);
+  overflow: clip;
+}
+/* A lone portrait is centered and large; a lone landscape runs the full width. */
+html[data-ds] .v3 .ds-full .ds-fr:not(.w) {
+  flex: none;
+  height: min(92svh, calc((100vw - var(--g) - var(--gr)) / var(--ar)));
+}
+html[data-ds] .v3 .ds-cap {
+  margin: 8px 0 0;
+}
+html[data-ds][data-v4pages~="view"] .v3 .ds-fr {
+  cursor: zoom-in;
+}
+html[data-ds] .v3 .ds-fr:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+/* frames are square */
+html[data-ds] .v3 #p-project :is(.pj-r img, .pj-bts .grid > div) {
+  border-radius: 0;
+}
+
+@media (max-width: 700px) {
+  html[data-ds] .v3 .ds-b,
+  html[data-ds] .v3 .ds-b:first-child {
+    margin-top: 40px;
+  }
+  html[data-ds] .v3 .ds-b-r {
+    flex-wrap: wrap;
+  }
+  /* a full runs edge to edge; a row is one full frame, then a pair */
+  html[data-ds] .v3 :is(.ds-full .ds-fr, .ds-full .ds-fr:not(.w), .ds-row .ds-fr:first-child) {
+    flex: none;
+    width: 100vw;
+    height: auto;
+    margin: 0 calc(-1 * var(--gr)) 0 calc(-1 * var(--g));
+  }
+  /* the action pair gives way to the bar: the counter and Inquire in reach while scrolling */
+  html[data-ds] .v3 .ds-acts {
+    display: none;
+  }
+  html[data-ds] .v3 .ds-bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px var(--gr) max(12px, env(safe-area-inset-bottom)) var(--g);
+    border-top: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 72%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+  /* it steps out once the Next band is on screen: the frames are done */
+  html[data-ds] .v3 .ds-bar {
+    transition: translate var(--ds-small) var(--ds-out);
+  }
+  html[data-ds] .v3 .ds-bar[data-end] {
+    translate: 0 100%;
+  }
+  html[data-ds] .v3 .ds-bar b {
+    color: var(--ink);
+    font-weight: 500;
+  }
+  html[data-ds] .v3 .ds-bar .btn {
+    height: 40px;
+  }
+}
+
+/* The Next band: the next set's cover uncropped, its name beside it (over it on a phone). A long name
+   breaks into two balanced lines and stays large; `--nl` is the longer line's length (project.tsx). */
+html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) {
+  /* the cover's height: the band less its top line and foot, or less so a landscape leaves the name half the width */
+  --nh: min(calc(max(94svh, 600px) - 92px), calc((100vw - var(--g) - var(--gr)) * 0.52 / var(--nar)));
+  display: block;
+  align-content: normal;
+  height: calc(var(--nh) + 92px);
+  padding: 0 var(--gr) 0 var(--g);
+  overflow: visible;
+  background: none;
+  color: var(--ink);
+  clip-path: none;
+}
+html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) > :is(.lbl.mute, span[aria-hidden]) {
+  display: none;
+}
+html[data-ds]:root .v3 .pj-next .ds-nx-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  color: var(--mute);
+}
+html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) .pj-stage {
+  inset: 56px var(--gr) auto auto;
+  width: calc(var(--nh) * var(--nar));
+  height: var(--nh);
+}
+html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) .pj-stage img {
+  scale: 1;
+}
+html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) .pj-stage::after {
+  content: none;
+}
+html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) > b {
+  position: absolute;
+  left: var(--g);
+  right: calc(var(--gr) + 32px + var(--nh) * var(--nar));
+  bottom: 36px;
+  z-index: 1;
+  font-size: min(14.7vw, calc((100vw - var(--g) - var(--gr) - 32px - var(--nh) * var(--nar)) / (var(--nl, 8) * 0.6)));
+  line-height: 0.84;
+  text-wrap: balance;
+}
+@media (max-width: 1023px), (max-height: 599px) {
+  html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) {
+    height: auto;
+    aspect-ratio: var(--nar);
+    padding: 0;
+    overflow: hidden;
+    background: var(--card);
+    color: rgb(var(--on-photo));
+  }
+  html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) .pj-stage {
+    inset: 0;
+    width: auto;
+    height: auto;
+  }
+  html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) .pj-stage::after {
+    content: "";
+    background:
+      linear-gradient(to bottom, rgb(var(--scrim) / 0.6), rgb(var(--scrim) / 0) 28%),
+      linear-gradient(to top, rgb(var(--scrim) / 0.72), rgb(var(--scrim) / 0) 50%);
+  }
+  html[data-ds]:root .v3 .pj-next .ds-nx-top {
+    position: absolute;
+    left: var(--g);
+    right: var(--gr);
+    top: 16px;
+    z-index: 1;
+    padding: 0;
+    border: 0;
+    color: inherit;
+  }
+  html[data-ds]:root .v3 .pj-next:has(.ds-nx-top) > b {
+    right: var(--gr);
+    bottom: 20px;
+    font-size: min(27vw, calc((100vw - var(--g) - var(--gr)) / (var(--nl, 8) * 0.6)));
+    line-height: 0.86;
+  }
+}
+
+/* ── Home ─────────────────────────────────────────────────────────────────
+   The order, the dark wall and the list without Weddings are in the components (components/home).
+   Here: the gallery, and Cover art at record scale. */
+.ds-cv-cap {
+  display: none;
+}
+
+/* The gallery: one frame edge to edge, one mono line, ticks for where it is. Hard cut, no fade. */
+html[data-ds] .mt .ds-gal {
+  --gg: calc(36 * var(--u));
+  position: relative;
+  height: max(100svh, 600px);
+  overflow: hidden;
+  background: var(--card);
+  color: rgb(var(--on-photo));
+}
+html[data-ds] .mt .ds-gal::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 30%;
+  background: linear-gradient(to top, rgb(10 10 9 / 0.6), transparent);
+  pointer-events: none;
+}
+html[data-ds] .mt .ds-gal-step {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  cursor: pointer;
+}
+html[data-ds] .mt .ds-gal-step:focus-visible {
+  outline-offset: -6px;
+}
+html[data-ds] .mt .ds-gal-tk {
+  position: absolute;
+  /* under the site header, which lies over the top of the screen */
+  inset: calc(60px + var(--gg) / 2) var(--gg) auto;
+  display: flex;
+  gap: 6px;
+  pointer-events: none;
+}
+html[data-ds] .mt .ds-gal-tk i {
+  flex: 1;
+  height: 2px;
+  background: currentColor;
+  opacity: 0.28;
+}
+html[data-ds] .mt .ds-gal-tk i[data-on] {
+  opacity: 1;
+}
+html[data-ds] .mt .ds-gal-cap {
+  position: absolute;
+  inset: auto var(--gg) var(--gg);
+  z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  pointer-events: none;
+}
+html[data-ds] .mt .ds-gal-cap a {
+  pointer-events: auto;
+}
+
+/* Cover art at record scale: 520px sleeves in one row that runs off the right edge and scrolls sideways. */
+html[data-ds] .mt .mt-cv-grid {
+  display: flex;
+  gap: 24px;
+  margin-right: calc(-36 * var(--u));
+  padding: 0 calc(36 * var(--u)) 56px 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+}
+html[data-ds] .mt .mt-cv-sleeve {
+  flex: none;
+  width: clamp(300px, 36.2vw, 520px);
+  scroll-snap-align: start;
+}
+html[data-ds] .mt .mt-cv-face {
+  border-radius: 0;
+}
+html[data-ds] .mt .ds-cv-cap {
+  position: absolute;
+  top: calc(100% + 12px);
+  left: 0;
+  display: grid;
+  gap: 2px;
+  white-space: nowrap;
+}
+html[data-ds] .mt .ds-cv-cap span {
+  color: var(--mute);
+}
+@media (max-width: 599px) {
+  html[data-ds] .mt .ds-gal {
+    --gg: 16px;
+  }
+  html[data-ds] .mt .ds-gal img {
+    object-position: var(--x) 50%;
+  }
+  html[data-ds] .mt .mt-cv-grid {
+    gap: 12px;
+    margin-right: -16px;
+    padding-right: 16px;
+  }
+  html[data-ds] .mt .mt-cv-all {
+    width: 100%;
+    justify-content: center;
+    margin-top: 12px;
+  }
+}
+
+/* ── Portfolio ────────────────────────────────────────────────────────────
+   The order and the canvas loading ahead are in components/portfolio (work.tsx, canvas.tsx).
+   A canvas frame still on its way shows in the page tone, never a bright block. */
+html[data-ds] .v3 .cv-cell {
+  background-color: var(--bg);
+}

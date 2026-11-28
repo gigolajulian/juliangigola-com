@@ -28,11 +28,18 @@ export function HomeCovers() {
           <p className="lbl mute">Design</p>
         </div>
         <div className="mt-cv-grid">
-          {COVERS.slice(0, SHOWN).map((c) => (
+          {COVERS.slice(0, SHOWN).map((c, i) => (
             <Link key={c.slug} href={coverHref(c.slug)} className="mt-cv-sleeve" style={{ "--press": COVER_PRESS[c.slug] } as React.CSSProperties}>
               <span className="mt-cv-disc" aria-hidden />
               <span className="mt-cv-face">
                 <Image src={c.frames[0].src} alt={`${c.title} by ${c.artist}`} fill sizes="(min-width:1024px) 18vw, 37vw" />
+              </span>
+              {/* ds: number, title and artist under each cover (hidden without the flag, ds.css) */}
+              <span className="ds-cv-cap lbl" aria-hidden>
+                <b>
+                  {pad(i + 1)} {c.title}
+                </b>
+                <span>{c.artist}</span>
               </span>
             </Link>
           ))}
