@@ -1,3 +1,5 @@
+import { DsFaq } from "@/components/booking/ds-faq";
+import { DsNextOpen } from "@/components/booking/ds-next-open";
 import Image from "next/image";
 import Link from "next/link";
 import { PageFoot } from "@/components/site/foot";
@@ -72,6 +74,7 @@ export function ServiceBook({ page, frames }: { page: BookingPage | GuidePage; f
                 See the work
               </Link>
             </div>
+            {s ? <DsNextOpen slug={s.slug} /> : null}
           </header>
           {/* The empty side of the title, filled with this session's own frames at their own shape. */}
           <div className="sv-pics" data-n={hero.length} aria-hidden="true">
@@ -165,6 +168,7 @@ export function ServiceBook({ page, frames }: { page: BookingPage | GuidePage; f
           </section>
           <section className="sv-row">
             <h2 className="lbl mute">Questions</h2>
+            <DsFaq />
             <div>
               {page.faqs.map((f) => (
                 <details key={f.q}>

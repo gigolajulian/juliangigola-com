@@ -7,7 +7,7 @@ import { ReferencePicks } from "@/components/reference-picks";
 import { PageFoot } from "@/components/site/foot";
 import { CallDialog } from "@/components/booking/book";
 import { Duo } from "@/components/site/duo";
-import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
+import { Check, Failed, Field, FlowShell, Hidden, NEED_MSG, checkYou, first, SendButton, useEnquiry } from "@/components/enquiry/flow";
 import { CALL_CARD, DOORS } from "@/lib/photos";
 
 /* JG V3 Inquire (/inquire and /inquire/form). Both forms post
@@ -16,7 +16,7 @@ import { CALL_CARD, DOORS } from "@/lib/photos";
    sending, as `?sim` does on the deposit. */
 
 function Note() {
-  const { state, pending, sent, send } = useEnquiry();
+  const { state, pending, sent, st, send } = useEnquiry();
   const [v, setV] = React.useState({ name: "", email: "", message: "" });
   const [err, setErr] = React.useState<Record<string, string>>({});
   const set = (k: keyof typeof v) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setV({ ...v, [k]: e.target.value });
@@ -114,9 +114,9 @@ function Note() {
         <ReferencePicks resync={state} v3 />
         <Failed state={state} />
         <div className="reach-send">
-          <button className="btn fill" type="submit" disabled={pending}>
+          <SendButton st={st} pending={pending}>
             Send note
-          </button>
+          </SendButton>
         </div>
       </div>
       <div className="reach-out" hidden={!sent} role="status">
@@ -219,7 +219,7 @@ const TYPE: Record<string, string> = {
 
 export function CommissionForm() {
   const router = useRouter();
-  const { state, pending, sent, send } = useEnquiry();
+  const { state, pending, sent, st, send } = useEnquiry();
   const [k, setK] = React.useState(1);
   const [kinds, setKinds] = React.useState<string[]>([]);
   const [pick, setPick] = React.useState({ when: "", budget: "" });
@@ -388,9 +388,9 @@ export function CommissionForm() {
                     Back
                   </button>
                 ) : null}
-                <button type="submit" className="btn fill" disabled={pending}>
+                <SendButton st={st} pending={pending}>
                   {cta}
-                </button>
+                </SendButton>
               </>
             }
             photo={{ d: DOORS.commissions.d, l: DOORS.commissions.d }}

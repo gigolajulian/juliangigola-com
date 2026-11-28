@@ -4,7 +4,7 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Dialog } from "radix-ui";
-import { Check, Failed, Hidden, NEED_MSG, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
+import { Check, Failed, Hidden, NEED_MSG, SendButton, checkYou, first, useEnquiry } from "@/components/enquiry/flow";
 import { CHIP_TYPE, QUOTE_OPTS, type QuoteOpt } from "@/lib/home/data";
 import { sessionJson, sessionRemove, sessionSet } from "@/lib/storage";
 import type { InquiryMode } from "./ctx";
@@ -23,7 +23,7 @@ const readDraft = (): typeof EMPTY => ({ ...EMPTY, ...sessionJson<Partial<typeof
 
 function Form({ from, opt, reply, onClose }: { from: InquiryMode; opt?: QuoteOpt; reply: string | null; onClose: () => void }) {
   const router = useRouter();
-  const { state, pending, sent, send } = useEnquiry();
+  const { state, pending, sent, st, send } = useEnquiry();
   const [chip, setChip] = React.useState(opt?.chips[0] ?? "");
   const [v, setV] = React.useState(readDraft);
   const [err, setErr] = React.useState<Record<string, string>>({});
@@ -147,9 +147,9 @@ function Form({ from, opt, reply, onClose }: { from: InquiryMode; opt?: QuoteOpt
           <Failed state={state} />
         </>
       )}
-      <button className="btn fill mt-send" type="submit" disabled={pending}>
+      <SendButton className="btn fill mt-send" st={st} pending={pending}>
         {call ? "Pick a call time" : quote ? "Send" : "Send note"}
-      </button>
+      </SendButton>
       {reply ? <p className="lbl mute mt-reply">Replies {reply}</p> : null}
       {!quote ? (
         <p className="lbl mute mt-talk">

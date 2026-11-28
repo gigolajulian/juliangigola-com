@@ -50,7 +50,7 @@ export type AdminProject = {
 };
 
 /** The per-project overrides a build applies, one map per kind. */
-export type Overrides = Pick<Draft, "categories" | "frames" | "credits" | "copy" | "slugs">;
+export type Overrides = Pick<Draft, "categories" | "frames" | "credits" | "copy" | "slugs" | "spreads">;
 
 /** The project list's other half of the draft: hidden and unlisted slugs, and BTS by slug. */
 export type ListDraft = { hidden: Set<string>; unlisted: Set<string>; bts: Record<string, Bts> };

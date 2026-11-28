@@ -5,6 +5,7 @@ import { INITIAL, submitOrKeep } from "@/components/enquiry/submit";
 import { trailContext } from "@/components/analytics/visit-trail";
 import type { ContactState } from "@/lib/leads/enquiry";
 import { looksLikeEmail, pad } from "@/lib/utils";
+import { useDs } from "@/lib/flags/ds";
 
 /* JG V3 stepper ("one stepper" for booking and inquiry): the
    step rail, the head, the body, the action bar, and the sticky photo with
@@ -282,18 +283,62 @@ export function Failed({ state }: { state: ContactState }) {
   );
 }
 
+const FILL = 1500; // the fill's one sweep (ds.css `ds-fill`)
+const SENT_HOLD = 900; // how long the green Sent stays before the Sent screen
+
+/** The form's send button. With the flag off it is the plain button; ds adds the fill and the three stacked labels. */
+export function SendButton({ st, pending, className = "btn fill", children }: { st: 0 | 1 | 2; pending: boolean; className?: string; children: React.ReactNode }) {
+  const ds = useDs();
+  if (!ds)
+    return (
+      <button type="submit" className={className} disabled={pending}>
+        {children}
+      </button>
+    );
+  return (
+    <button type="submit" className={`${className} ds-sb`} data-st={st} disabled={pending || st > 0}>
+      <i aria-hidden />
+      <span className="ds-sb-lb">
+        <span className="ds-sb-ll">
+          {[children, "Sending", <React.Fragment key="s"><Check />Sent</React.Fragment>].map((l, k) => (
+            <span key={k} aria-hidden={st !== k}>
+              {l}
+            </span>
+          ))}
+        </span>
+      </span>
+    </button>
+  );
+}
+
 /** The enquiry: the trail goes in `context`, then the form posts to the server action. */
 export function useEnquiry() {
   const [state, act, pending] = React.useActionState(submitOrKeep, INITIAL);
   const [sim, setSim] = React.useState(false);
+  /* ds: the send button fills while the note is on its way (at least FILL ms), turns green on the server's yes,
+     and only then does the form give way to its Sent screen. `st`: 0 at rest, 1 sending, 2 sent. */
+  const ds = useDs();
+  const t0 = React.useRef(0);
+  const [filled, setFilled] = React.useState(false);
+  const [held, setHeld] = React.useState(false);
+  const real = sim || state.status === "sent";
+  React.useEffect(() => {
+    if (!real || !ds) return;
+    const rest = Math.max(0, FILL - (performance.now() - t0.current));
+    const a = setTimeout(() => setFilled(true), rest),
+      b = setTimeout(() => setHeld(true), rest + SENT_HOLD);
+    return () => (clearTimeout(a), clearTimeout(b));
+  }, [real, ds]);
   const send = (form: HTMLFormElement) => {
+    t0.current = performance.now();
     if (simSent()) return setSim(true);
     const ctx = form.elements.namedItem("context");
     if (ctx instanceof HTMLInputElement) ctx.value = trailContext();
     const data = new FormData(form);
     React.startTransition(() => act(data));
   };
-  return { state, pending, sent: sim || state.status === "sent", send };
+  const st: 0 | 1 | 2 = real ? (filled ? 2 : 1) : pending ? 1 : 0;
+  return { state, pending, sent: ds ? held : real, st, send };
 }
 
 export const Hidden = ({ type, detail }: { type: string; detail?: string }) => (

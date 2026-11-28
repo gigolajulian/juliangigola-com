@@ -90,7 +90,7 @@ export function AdminEditor({
   const { listDraft, setListDraft, trash, setTrash, overrides, setOverrides, order, setOrder, covers, setCovers, avatars, setAvatars } =
     manifestDraft;
   const { hidden, unlisted, bts } = listDraft;
-  const { categories: recategorised, frames: reframed, credits: recredited, copy: recopied, slugs: reslugged } = overrides;
+  const { categories: recategorised, frames: reframed, credits: recredited, copy: recopied, slugs: reslugged, spreads: respread } = overrides;
   /** The project open in the page-shaped editor, which replaces the tabs
       and the preview while it is up. */
   const [page, setPage] = React.useState<string | null>(null);
@@ -128,11 +128,12 @@ export function AdminEditor({
           covers,
           avatars,
           slugs: reslugged,
+          spreads: respread,
           bts,
         },
         reslugged,
       ),
-    [hidden, unlisted, recategorised, reframed, recredited, recopied, reslugged, order, covers, avatars, bts],
+    [hidden, unlisted, recategorised, reframed, recredited, recopied, reslugged, respread, order, covers, avatars, bts],
   );
 
   /** One project's hidden, unlisted or BTS entry changed, from the project list. */

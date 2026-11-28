@@ -17,6 +17,7 @@ import {
   ORDER,
   AVATARS,
   DISCIPLINE_COVERS,
+  SPREADS,
   BTS,
 } from "@/lib/work/added";
 
@@ -164,6 +165,7 @@ export default function AdminPage() {
           slugs: SLUGS,
           order: [...ORDER],
           covers: { ...DISCIPLINE_COVERS },
+          spreads: { ...SPREADS },
           avatars: { ...AVATARS },
           bts: { ...BTS },
         }}

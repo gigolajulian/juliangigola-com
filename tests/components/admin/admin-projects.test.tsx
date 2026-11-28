@@ -34,7 +34,7 @@ const props = (query = "") => ({
   changed: new Set<string>(),
   disciplines: [{ slug: "editorial", name: "Editorial", group: "Work" }],
   publishedBts: {},
-  overrides: { categories: {}, frames: {}, credits: {}, copy: {}, slugs: {} },
+  overrides: { categories: {}, frames: {}, credits: {}, copy: {}, slugs: {}, spreads: {} },
   opened: null,
   onOpened: vi.fn(),
   onOpenPage: vi.fn(),
