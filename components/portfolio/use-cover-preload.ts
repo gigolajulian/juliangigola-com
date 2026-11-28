@@ -58,11 +58,20 @@ export function useCoverPreload(
        never shows as an empty card that fills later. A
        photo already there when the view mounts (cached, back from the
        strip) is shown at once, so the grid/strip flip finds it in place. */
+    /* A photo not there yet wakes this itself when it lands. The window's load listener below did not always hear it:
+       a cold visit into Cover Art on a phone left the grid empty for good, its photos loaded and never marked. */
+    const waits = new WeakSet<HTMLImageElement>();
     const reveal = () => {
       let n = 0;
       for (const f of document.querySelectorAll<HTMLElement>("#p-work :is(.wgrid .wt, .wstrip .sc):not([data-up])")) {
         const im = f.querySelector<HTMLImageElement>("img:not(.bk)");
-        if (!im?.complete) continue;
+        if (!im?.complete) {
+          if (im && im.loading !== "lazy" && !waits.has(im)) {
+            waits.add(im);
+            im.decode().then(schedule, schedule);
+          }
+          continue;
+        }
         const r = f.getBoundingClientRect();
         const shown =
           (Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0)) / r.height) *
